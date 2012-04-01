@@ -1,0 +1,44 @@
+/*********************************************************************************************//**
+ *
+ * @file
+ *
+ * ------------------------------------------------------------------------------------------------
+ *
+ * @addtogroup  core_intf
+ *
+ ****************************************************************************************//** @{ */
+/**
+ * @defgroup    epe_intf Event Processing Engine (EPE)
+ *
+ * @brief       Koncept izvrsne jedinice, tipovi izvrsne jedinice i njihovo pokretanje
+ *
+ *************************************************************************************************
+ 
+@section        doc_epe Event Processing Engine
+
+@image          html    eSolid_EPE.png
+
+    Agente za obradu dogadjaja (EPA) pokrece Event Processing Engine (EPE) modul. 
+    Jedan EPA objekat se moze poistovetiti sa procesom ili thread-om kod 
+    klasicnih RTOS sistema.
+        
+@section        epe_structure Struktura agenta za obradu dogadjaja
+
+@image          html    threads.png
+
+    Na slici su prikazana tri agenata za obradu dogadjaja. Svaki agent se 
+    izvrsava nezavisno od drugih. Agent za obradu dogadjaja se sastoji od reda 
+    cekanja za dogadjaje i jedne izvrsne jedinice. U redove cekanja dogadjaja se 
+    postavljaju svi dogadjaji koje EPA treba da obradi. Redove cekanja opsluzuje 
+    EOT i EPN modul.  Izvrsna jedinica, koju pokrece SMP modul, je deo koji 
+    korisnik definise i vrsi obradu dogadjaja. Svaki put kada se nov dogadjaj
+    postavi u red cekanja, pokrece se izvrsna jedinica, koja dobavlja dogadjaj 
+    iz reda cekanja i obradjuje ga. Kada je red cekanja prazan, izvrsna jedinica 
+    se ne pokrece. Dakle, @a jedini uslov za moguce pokretanje izvrsne jedinice 
+    je da postoji neki dogadjaj u redu cekanja.
+
+@section        epe_structs Organizacija struktura
+
+@image          html    EPAs.png
+    
+**//** @} *//*************************************************************************************/

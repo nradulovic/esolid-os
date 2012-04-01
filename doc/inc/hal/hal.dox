@@ -1,0 +1,368 @@
+/*********************************************************************************************//**
+ *
+ * @file
+ *
+ * ------------------------------------------------------------------------------------------------
+ *
+ * @addtogroup  eSolid_intf
+ *
+ ****************************************************************************************//** @{ */
+/**
+ * @defgroup    hal_intf Hardware Abstraction Layer (HAL)
+ *
+ * @brief       Ova sekcija opisuje tehnicke detalje podrzanih HAL portova.
+ *
+ *************************************************************************************************
+  
+@section        hal_doc Hardware Abstraction Layer (preliminary)
+
+    U ovom odeljku je predstavljena specifikacija Hardware Abstraction Layer
+    (HAL) modula. HAL vrši apstrakciju procesorske arhitekture i/ili platforme
+    na nivo dovoljan za eSolid jezgro da bude prebačeno (port) na tu platformu.
+
+@subsection     doc_ports Portovanje sistema
+
+    U racunarstvu, portovanje je proces prilagodjavanja softvera, tako da 
+    izvrsni program moze biti kreiran za racunarsko okruzenje koje se razlikuje
+    onog za koje je bio prvobitno projektovan (npr. razlicit procesor, 
+    operativni sistem, druge biblioteke). 
+    
+    Softver je prenosiv kada je trosak portovanja na novu platformu manji od
+    cene pisanja celokupnog softvera.
+    
+    Rec "port" potice od latinske reci @c portare, sto znaci "prenesti".
+        
+@section        hal_levels Arhitektura, Varijanta i Platforma
+
+    HAL je organizovan u tri nivoa:
+    - HAL arhitektura vrsi apstrakciju osnovne procesorske arhitekture i 
+    obuhvata objekte kao sto su opsluzivanje prekida, prebacivanje konteksta,
+    start-up sekvencu i slično.
+    - HAL varijanta pokriva specificne osobine procesora kao sto su kes memorija,
+    MMU i FPU. HAL varijanta je, takodje, zaduzen za memorijske i prekidne 
+    kontrolere na samom cipu. Obicno se za arhitekturne varijacije 
+    implementacija nalazi u HAL arhitektura, a HAL varijanta pruza samo 
+    odgovarajuce konfiguracione promenljive.
+    - HAL platforma vrsi apstrakciju i opisuje osobine platforme koja se koristi.     
+    Ovaj nivo obuhvata tajmere, I/O registre i druge module hardvera.
+    
+    Granice izmedju ova tri nivoa nisu uvek jasno definisane, sa obzirom da se
+    funkcionalnost seta izmedju ova tri nivoa od port-a do port-a. Uopsteno
+    gledano svaki port se sastoji od modula koji su definisani u sva tri nivoa.
+    
+@section        hal_principles Osnovna nacela
+
+    HAL implementacija je vodjena sledecim osnovnim nacelima:
+    - HAL je implementiran u C-u i asembleru. 
+    - Interfejs je pisan pomocu C makroa. Ovo omogucava da se interfejs 
+    implementira kao C funkcija, asembler ili poziv na eksterne C ili asembler
+    funkcije. Time se postize odabir najefikasnije implementacije bez promene
+    interfejsa. 
+    - HAL pruza jednostavan, portabilan interfejs za manipulaciju sa hardverom
+    sirokog spektra. Programeru se uvek ostavlja mogucnost da se HAL zaobidje i
+    vrsi direktan pristup hardveru. Ovakav nacin rada nije preporucljiv jer se
+    smanjuje portabilnost koda.
+    
+@section        hal_interface HAL Interfejs
+
+@subsection     hal_interface_base Osnovne definicije
+
+    Slede definicije koje karakterisu osnovne osobine arhitekture. Ove 
+    definicije se nalaze u HAL arhitektura nivou.
+    
+    <i>Uredjenje bajtova</i>
+    
+    @code
+    HAL_BYTEORDER
+    @endcode
+    
+    Ovaj parametar definise uredjenje bajtova procesorske arhitekture. Moze 
+    imati vrednost @c HAL_LSB_FIRST ili @c HAL_MSB_FIRST.
+    
+    <i>Osnovni tipovi</i>
+    
+    @code
+    uint8_t
+    uint16_t
+    uint32_t
+    int8_t
+    int16_t
+    int32_t
+    @endcode
+    
+    Ove tipove garantuje C99 standard i definisani su u "stdint.h" za svaki port.
+    Ukoliko port nema definisane ove tipove, HAL ih definise umesto platforme.
+    
+    @code
+    fastint8_T
+    fastint16_T
+    fastint32_T
+    fastuint8_T
+    fastuint16_T
+    fastuint32_T
+    unative_T
+    native_T
+    @endcode
+    
+    Ovi tipovi podataka se definisu za potrebe brze manipulacije podataka na
+    ustrb veceg koriscenja memorijskog prostora. Deo labele iza reci @c fast
+    ne oznacava kolika je velicina promenljive, nego se time garantuje da ce
+    promenljive cuvati tu vrednost, mada njena velicina je veca od potrebne.
+    @c unative_T i @c native_T su tipovi podataka koje imaju velicine jednaku
+    sirini magistrale podataka procesora. Tako, ako je procesor 8-bitni onda 
+    unative_T je podatak sirine 8 bita.  
+    
+    <i>Atomizirani tipovi</i>
+    
+    @code
+    atomic_T
+    @endcode
+    
+    Za ove tipove postoji garancija da se promenljive ovog tipa pisu i citaju u
+    jednoj instrukciji. U zavisnosti od arhitekture koja se koristi velicina 
+    ovog tipa se menja, ali je minimum velicina jedan bajt.
+
+@subsection     hal_arch Opis arhitekture
+
+    Ove definicije su povezane sa osnovnom arhitekturom procesora. One 
+    obuhvataju snimanje konteksta, operacije sa bitovima, stekom i prevodjenje
+    adrese.
+    
+    <i>Format snimanja registara</i>
+    
+@note           Ovaj objekat je u razmatranju za sledecu verziju eSolid-a.    
+    
+    @code
+    typedef struct hal_savedRegs {
+        /* lista registara koje treba snimiti */
+    } hal_savedRegs_T;
+    @endcode
+    
+    Ova struktura opisuje izgled snimljenog masinskog stanja na stek. Masinska
+    stanja se snimaju za vreme promene konteksta kao sto su sinhroni prekidi 
+    (poziv servisa ili exception) i asinhroni prekidi (spoljasni prekidi).
+    
+    <i>Inicijalizacija konteksta</i>
+    
+@note           Ovaj objekat je u razmatranju za sledecu verziju eSolid-a.
+    
+    @code
+    HAL_CTX_INIT(sp, arg, entry, id)
+    @endcode
+    
+    Ovaj makro vrsi inicijalizaciju konteksta na taj nacin da moze da se koristi
+    u makrou HAL_CTX_SWITCH. 
+    
+    <i>Promena konteksta</i>
+    
+@note           Ovaj objekat je u razmatranju za sledecu verziju eSolid-a.
+    
+    @code
+    HAL_CTX_SWITCH(from, to)
+    @endcode
+    
+    O ovim makroima je implementirana promena konteksta. HAL_CTX_SWITCH snima 
+    trenutno stanje procesora i ucitava novo stanje.
+    
+    <i>Bit operacije</i>
+    
+    @code
+    HAL_CPU_FFS(expr)
+    HAL_CPU_FLS(expr)
+    HAL_CPU_CLZ(expr)
+    @endcode
+    
+    Makro objasnjenja:
+    - <c>HAL_CPU_FFS - Find First Set Bit:</c> Nalazi prvi setovan bit u izrazu.
+    - <c>HAL_CPU_FLS - Find Last Set Bit:</c> Nalazi zadnji setovan bit u izrazu.
+    - <c>HAL_CPU_CLZ - Count Leading Zeroes:</c> Vraca broj nula u nitu u datom izrazu.
+    
+    <i>Akcije u praznom (IDLE) tasku</i>
+    
+    @code
+    HAL_IDLE_TASK_ACTION()
+    @endcode 
+    
+    U nekim implementacijama HAL moze se javiti potreba da se neka akcija 
+    preduzima u intervalima kada sistem ne obradjuje dogadjaje. Primer bi bio
+    da se u IDLE task-u procesor postavlja u SLEEP rezim rada.
+    
+    <i>Podrska za prelomne tacke (breakpoint)</i>
+
+@note           Ovaj objekat je u razmatranju za sledecu verziju eSolid-a.
+
+    @code
+    HAL_BREAKPOINT()
+    HAL_BREAK_INST
+    HAL_BREAK_INST_SIZE
+    @endcode
+    
+    Ovi makroi pruzaju podrsku za prelomne tacke.
+    
+    @c HAL_BREAKPOINT izvrsava breakpoint instrukciju.
+
+@subsection     hal_irqs Opsluzivanje prekida
+
+    <i>Kontrola prekida</i>
+
+    @code
+    HAL_DECL_INT_STATE
+    HAL_INT_DISABLE()
+    HAL_INT_ENABLE()
+    HAL_INT_RESTORE(old)
+    HAL_INT_QUERY()
+    @endcode   
+
+    - @c HAL_DECL_INT_STATE: Deklaracija promenljive koja cuva stanje prekida.
+    - @c HAL_INT_DISABLE(): Zabranjuje prekide. Nakon ovog makroa svi 
+    prekidi su zabranjeni.
+    - @c HAL_INT_ENABLE(): Omogucava prekide. Nakon ovog makroa prekidi su 
+    omoguceni.
+    - @c HAL_INT_RESTORE(old): Izvrsava vracanje stanja prekida na prethodno 
+    snimljeno stanje prekida.
+    - @c HAL_INT_QUERY(): Vraca trenutno stanje prekida.
+    
+    <i>Menadzment prekidnih rutina</i>
+    
+    @code
+    HAL_INT_IS_USED(vector)
+    HAL_INT_ATTACH(vector, isr, data)
+    HAL_INT_DETACH(vector)
+    @endcode
+    
+    - @c HAL_INT_IS_USED(vector): Vraca da li je neka prekidna rutina definisana
+    za dati vektor. Ukoliko jeste makro vraca TRUE, inace, FALSE.
+    - @c HAL_INT_ATTACH(vector, isr, data): Vrsi definisanje prekidnog vektora 
+    @c vector. Kada se desi prekid funkcija @c isr se poziva za opsluzivanje
+    prekida sa parametrima na koje pokazuje pokazivac @c data.
+    - @c HAL_INT_DETACH(vector): Otkacinje prekidnu rutinu od vektora @c vector.
+
+    <i>Menadzment prekidnog kontrolera</i>
+    
+    @code
+    HAL_INT_MASK(mask)
+    HAL_INT_UNMASK(mask)
+    HAL_INT_ACKNOWLEDGE()
+    HAL_INT_PRIO(vector, prio)
+    @endcode    
+    
+    - @c HAL_INT_MASK(mask): Onemogucava prekide koji odgovaraju datoj maski.
+    - @c HAL_INT_UNMASK(mask): Omogucava prekide koji odgovaraju datoj maski.
+    - @c HAL_INT_ACKNOWLEDGE(): Potvrdjuje da se trenutni prekid opsluzuje. Neki
+    prekidni kontroleri cekaju na ovu potvrdu pre nego sto dozvole naredne 
+    prekide. Nakon ovog makroa moze dodji do istiskivanja prekida koji se 
+    trenutno opsluzuje.
+    - @c HAL_INT_PRIO: Pruza kontrolu nad hardverskim prioritetom prekida.
+    
+@subsection     hal_clocks Upravljanje tajmerima, vremenskim kasnjenjima (delay)
+
+    Ovaj interfejs sadrzi definicije za upravljanje tajmerima koji se koriste od
+    strane eSolid-a radi generisanja vremenskih dogadjaja. 
+    
+    <i>Kontrola tajmera</i>
+    
+    @code
+    HAL_CLK_INIT(period)
+    HAL_CLK_RST(vector, period)
+    @endcode
+    
+    Ovi makroi pruzaju kontrolu nad tajmer uredjajem i koriste se da kernel-u
+    omoguce generisanje time-out i vremena zakasnjenja. Pretpostavlja se da je
+    tajmer implementiran u nekom vidu brojaca koji se inkrementira ili 
+    dekrementira iz nekog spoljasnjeg izvora i koji generise prekid kada 
+    dostigne predefinisanu vrednost.
+    
+    - @c HAL_CLK_INIT(period): Vrsi inicijalizaciju tajmera da generise prekid
+    nakon vremena @c period. Tajmer treba da generise prekide nakon svakog
+    vremenskog intervala.
+    - @c HAL_CLK_RST(vector, period): Izvrsava re-inicijalizaciju tajmera da
+    generise sledeci prekid. Ovaj makro se koristi ukoliko je potrebno 
+    inicijalizovati tajmer nakon svakog generisanog prekida.
+
+    <i>Generisanje vremenskog kasnjenja</i>
+    
+    @code
+    HAL_DELAY_US(time)
+    @endcode
+
+    Ovaj makro omogucava generisanje vremenskog intervala @c time. Vreme se 
+    iskazuje u mikrosekundama. Koristi se uglavnom za kontrolu hardvera gde je
+    potrebno sacekati nekoliko mikrosekundi. Kod koji ima potrebu za duzim 
+    vremenskim intervalima, kao sto su milisekunde, treba da koristi 
+    odgovarajuce funkcije. Implementacija makroa treba da bude reentrant tipa.
+    
+    Makro ne sme da se koristi ispod donje granice kasnjenja. 
+    
+    Postoje tri nacina da se makro implementira:
+    - brojacka petlja, koja se tipicno pise u asembleru. Sastoji se uglavnom od 
+    dve petlje, unutrasnja koja traje priblizno 1us i spoljasna se ponavlja o
+    noliko puta koliko je specificirano u argumentu. Ovakve implementacije 
+    podrazumevaju da je poznat sistemski clock za vreme kompajliranja ili se
+    lako moze odrediti za vreme izvrsavanja makroa.
+    - posmatranjem hardverskih brojaca, obicno, system tick. System tick brojac
+    obicno ima fiksnu periodu ponavljanja.
+    - kombinacija prethodna dva metoda. Sistemski clock se koristi radi 
+    odredjivanja brzine procesora i na taj nacin se vrsi kalibracija unutrasnje
+    petlje koja generise 1us.   
+
+@section        hal_structure Struktura HAL
+
+@subsection     hal_classes HAL klase
+
+    HAL se sastoji iz cetiri klasa. U sledecoj tabeli prikazani su kratki opisi
+    klasa:
+    
+    <table>
+    <tr>
+        <td><b>HAL klasa</b></td>
+        <td><b>Opis</b></td>
+        <td><b>Funkcija</b></td>
+    </tr>
+    
+    <tr>    
+        <td>Zajednicki HAL</td>
+        <td>Konfiguracione opcije i funkcionalnost koju dele svi HAL-ovi</td>
+        <td>Osnovna debug podrska, driver API</td>
+    </tr>
+    <tr>    
+        <td>Arhitektura HAL</td>
+        <td>Funkcionalnost koja je vezana za jednu arhitekturu procesora u kombinaciji sa izabranim kompajlerom. Deo funkcionalnosti moze biti redefinisana u Varijant HAL.</td>
+        <td>Debug funkcionalnost specificna za arhitekturu, definicije vektora prekida i izuzetaka i njihovih rutina, makroi konteksta, sistemska inicijalizacija</td>
+    </tr>       
+    <tr>    
+        <td>Varijanta HAL</td>
+        <td>Neke procesorske arhitekture dolaze u nekoliko varijanti, na primer MIPS dolazi u 32 i 64 bita, a neki procesori imaju i dodatne module.</td>
+        <td>Varijanta HAL prosiruje funkcionalnost Arhitektura HAL-a, konfiguracione opcije, drajveri za dodatne module.</td>
+    </tr>
+        <tr>    
+        <td>Platforma HAL</td>
+        <td>Sadrzi funkcionalnost i konfiguracione opcije vezane za platformu.</td>
+        <td>Prva inicijalizacija hardvera, specifikacija memorijske strukture, konfiguracione opcije (brzina procesora, opcije kompajlera), debug IO funkcije.</td>
+    </tr>
+    </table>
+    
+@subsection     hal_files Opisi datoteka
+
+    Sledece navedene datoteke se nalaze u razlicitim sekcijama HAL-a sa kratkim 
+    objasnjenjima. Treba imati u vidu da ne mogu svi HAL-ovi da koriste istu
+    strukturu datoteka.
+    
+    <i>Zajednicki HAL</i>
+    
+    <table>
+    <tr>
+        <td><b>Datoteka</b></td>
+        <td><b>Kratak opis</b></td>
+    </tr>
+    
+    <tr>    
+        <td><c>/hal/common/hal_compiler.h</c></td>
+        <td>Konfiguracione opcije i funkcionalnost vezana za kompajler. Klasa: zajednicki HAL.</td>
+    </tr>
+    </table>
+    
+    <i>HAL arhitektura</i>
+    <i>HAL varijanta</i>
+    <i>HAL platforma</i>
+
+**//** @} *//*************************************************************************************/

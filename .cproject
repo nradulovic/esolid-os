@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.config.gnu.lib.debug.1648249799">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.lib.debug.1648249799" moduleId="org.eclipse.cdt.core.settings" name="dbg-x86-linux-o0-gcc-4.5.2">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_TYPE" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_TRANSMITTER" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_TIME" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_EXT" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="SVN_REV" value="$(SVN_REV)"/>
+						<entry flags="RESOLVED" kind="macro" name="PORT_ARCH" value="ARM_CMX"/>
+						<entry flags="RESOLVED" kind="macro" name="PORT_ARCH" value="ARM_CM3"/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="Debug, x86, Linux, nema optimizacije, GCC v4.5.2" id="cdt.managedbuild.config.gnu.lib.debug.1648249799" name="dbg-x86-linux-o0-gcc-4.5.2" parent="cdt.managedbuild.config.gnu.lib.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.lib.debug.1648249799." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.lib.debug.147493285" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.lib.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.lib.debug.542975584" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.lib.debug"/>
+							<builder buildPath="${workspace_loc:/lcsw-eSolid/dbg-x86-linux-o0-gcc-v4.5.2}" id="cdt.managedbuild.target.gnu.builder.lib.debug.1613822549" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.lib.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.lib.debug.387376412" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.lib.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1400310029" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug">
+								<option id="gnu.cpp.compiler.lib.debug.option.optimization.level.32626421" name="Optimization Level" superClass="gnu.cpp.compiler.lib.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.lib.debug.option.debugging.level.2097750381" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.350883182" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.lib.debug.option.optimization.level.1767177889" name="Optimization Level" superClass="gnu.c.compiler.lib.debug.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.lib.debug.option.debugging.level.469740962" name="Debug Level" superClass="gnu.c.compiler.lib.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.855293396" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lcsw-eSolid/inc}&quot;"/>
+								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1690404334" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_EXT"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_TRANSMITTER"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_TIME"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_TYPE"/>
+									<listOptionValue builtIn="false" value="SVN_REV=$(SVNREV)"/>
+									<listOptionValue builtIn="false" value="OPT_PORT_VARIANT=_LINUX_X86_X64_"/>
+								</option>
+								<option id="gnu.c.compiler.option.include.files.1599897558" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1805440452" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1198092225" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.735820781" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.lib.debug.983772882" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.lib.debug">
+								<option id="gnu.both.asm.option.include.paths.35155902" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.11636421" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="usr/|doc/example/|src/port/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+		</cconfiguration>
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546" moduleId="org.eclipse.cdt.core.settings" name="dbg-STM32L1XX-o0-gcc-4.5.2">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/lcsw-eSolid/inc"/>
+						<entry flags="RESOLVED" kind="macro" name="SVN_REV" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_TYPE" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_TRANSMITTER" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_TIME" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_EVT_USE_EXT" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_SMP_STATE_DEPTH" value="10"/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_PORT_PLATFORM" value="STM32L_DISCOVERY"/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_PORT_PLATFORM" value="_STM32L_DISCOVERY_"/>
+						<entry flags="RESOLVED" kind="macro" name="OPT_SMM_TYPE" value="SMM_IS_FF"/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.errorparsers.xlc.XlcErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.linuxtools.internal.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="Debug, ARM Cortex-M3, NO OS-eabi, nema optimizacije, GCC v4.5.2" id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546" name="dbg-STM32L1XX-o0-gcc-4.5.2" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.toolchain.debug.465729516" name="ARM Linux GCC (Sourcery G++ Lite)" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.toolchain.debug">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.option.debugging.level.59826216" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.platform.debug.881016923" isAbstract="false" name="Linux Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.platform.debug"/>
+							<builder buildPath="${workspace_loc:/lcsw-eSolid/dbg-arm-cm3-none-eabi-o0-gcc-4.5.2}" id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.builder.debug.740121173" keepEnvironmentInBuildfile="false" name="ARM Sourcery Linux GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.builder.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.assembler.debug.922501382" name="ARM Sourcery Linux GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.assembler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1664650158" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lchw-STM32L1xx/inc}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.267832490" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="STM32L1XX_MD"/>
+									<listOptionValue builtIn="false" value="USE_FULL_ASSERT"/>
+									<listOptionValue builtIn="false" value="USE_STDPERIPH_DRIVER"/>
+								</option>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.302571372" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.c.compiler.debug.347047396" name="ARM Sourcery Linux GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.c.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.259420799" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1206824104" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="STM32L1XX_MD"/>
+									<listOptionValue builtIn="false" value="USE_FULL_ASSERT"/>
+									<listOptionValue builtIn="false" value="USE_STDPERIPH_DRIVER"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_EXT"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_TIME"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_TRANSMITTER"/>
+									<listOptionValue builtIn="false" value="OPT_EVT_USE_TYPE"/>
+									<listOptionValue builtIn="false" value="&quot;SVN_REV=${SVNREV}&quot;"/>
+									<listOptionValue builtIn="false" value="OPT_SMP_STATE_DEPTH=10"/>
+									<listOptionValue builtIn="false" value="OPT_PORT_PLATFORM=_STM32L_DISCOVERY_"/>
+									<listOptionValue builtIn="false" value="OPT_SMM_TYPE=SMM_IS_FF"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1010944994" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lchw-STM32L1xx/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lcsw-eSolid/inc}&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.pedantic.690262509" name="Pedantic (-pedantic)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.pedantic" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.extrawarn.772082451" name="Extra warnings (-Wextra)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.extrawarn" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.verbose.1069628957" name="Verbose (-v)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.verbose" value="false" valueType="boolean"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.247206172" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.cpp.compiler.debug.1713872539" name="ARM Sourcery Linux GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.cpp.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1568143218" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.c.linker.debug.1341127197" name="ARM Sourcery Linux GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.c.linker.debug">
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1479521224" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.cpp.linker.debug.637118721" name="ARM Sourcery Linux GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.cpp.linker.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.archiver.base.1488338479" name="ARM Sourcery Linux GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.createflash.debug.161528423" name="ARM Sourcery Linux GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.createflash.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.createlisting.debug.1209268554" name="ARM Sourcery Linux GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.createlisting.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.printsize.debug.1135030553" name="ARM Sourcery Linux GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.printsize.debug"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="src/port|doc|src/dbg/|src/ett/|src/port/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/port/variant/stm32l1xx_md"/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="lchw-STM32L1xx;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.487911138" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/lchw-STM32L1xx/inc"/>
+						<entry flags="RESOLVED" kind="macro" name="STM32L1XX_MD" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="USE_FULL_ASSERT" value=""/>
+						<entry flags="RESOLVED" kind="macro" name="USE_STDPERIPH_DRIVER" value=""/>
+					</externalSetting>
+				</externalSettings>
+			</storageModule>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="fwSolid.org.eclipse.cdt.cross.arm.gnu.linux.elf.1703285894" name="ARM Linux GCC (GNUARM) Application"/>
+	</storageModule>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/lcsw-eSolid"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.debug.217944400;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.debug.217944400.;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.c.compiler.debug.37801154;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.c.compiler.base.input.520196417">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_YG_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1546583483;cdt.managedbuild.config.gnu.lib.debug.1546583483.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1218424838;cdt.managedbuild.tool.gnu.c.compiler.input.1663733432">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.linux.elf.debug.1708259792;org.eclipse.cdt.cross.arm.gnu.linux.elf.debug.1708259792.;org.eclipse.cdt.cross.arm.gnu.linux.elf.c.compiler.debug.2039424350;org.eclipse.cdt.cross.arm.gnu.linux.c.compiler.base.input.1729542180">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.1296020833;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.1296020833.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.debug.996272491;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.1194925476">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.c.compiler.debug.347047396;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.247206172">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.661520819;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.661520819.;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.c.compiler.release.1637044528;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.c.compiler.base.input.555624448">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_YG_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.1413284151;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.1413284151.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.release.1416387551;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.603788451">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.debug.1333611546.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.elf.assembler.debug.922501382;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.302571372">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.14348883;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.14348883.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.release.2136796535;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.537852387">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.133174900;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.133174900.;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.c.compiler.release.812957245;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.c.compiler.base.input.1629479786">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_YG_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.linux.elf.debug.1708259792;org.eclipse.cdt.cross.arm.gnu.linux.elf.debug.1708259792.;org.eclipse.cdt.cross.arm.gnu.linux.elf.assembler.debug.859085637;org.eclipse.cdt.cross.arm.gnu.linux.assembler.base.input.1072660144">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.133174900;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.133174900.;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.assembler.release.1359212795;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.assembler.base.input.309866041">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_YG_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.1648249799;cdt.managedbuild.config.gnu.lib.debug.1648249799.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.350883182;cdt.managedbuild.tool.gnu.c.compiler.input.1805440452">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.debug.217944400;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.debug.217944400.;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.assembler.debug.887342317;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.assembler.base.input.1370219057">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_YG_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.661520819;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.release.661520819.;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.lib.assembler.release.1669126593;org.eclipse.cdt.cross.arm.gnu.yagarto.windows.assembler.base.input.1208963185">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_YG_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.1413284151;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.1413284151.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.release.1544524883;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.1923080307">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.14348883;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.release.14348883.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.release.1922569810;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.297307689">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.1296020833;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.1296020833.;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.debug.1477361657;org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.2134809769">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets>
+			<target name="dbg-x86-linux-o0-gcc" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>dbg-x86-linux-o0-gcc</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>all</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>clean</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="docs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>docs</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="docs_clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>docs_clean</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>false</runAllBuilders>
+			</target>
+		</buildTargets>
+	</storageModule>
+</cproject>

@@ -1,0 +1,25 @@
+/*********************************************************************************************//**
+ *
+ * @file
+ *
+ * ------------------------------------------------------------------------------------------------
+ *
+ * @addtogroup  hal_intf
+ *
+ ****************************************************************************************//** @{ */
+/**
+ * @defgroup    port_detection Autodetekcija
+ *
+ * @brief       Detekcija kompajlera, arhitekture, varijante i platforme
+ *
+ *              Ovaj modul vrsi automatsku detekciju kompajlera. Time se
+ *              definise common klasa port sistema. Zatim se vrsi ispitivanje
+ *              korisnickih definisanih preprocesorskih promenljivih kako bi se
+ *              odredile i ostale klase port sistema.
+ *
+ *              Pored autodetekcije, svaka klasa port sistema se moze definisati
+ *              i rucno od strane korisnika.
+ *
+ *************************************************************************************************
+  
+**//** @} *//*************************************************************************************/

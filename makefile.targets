@@ -1,0 +1,17 @@
+
+.PHONY: docs_clean
+
+# Generisi HTML dokumentaciju	
+docs : docs_clean
+	@echo 'Building HTML documentation'
+	@echo 'Invoking: Doxygen'
+	cd .. && $(DOXYGEN) Doxyfile
+	@echo 'Finished building HTML documentation'
+	@echo ' '
+	
+docs_clean :
+	@echo 'Cleaning up documentation'
+	rm -rfv ../doc/html/*
+	rm -rfv ../doc/latex/*
+	@echo 'Finished Cleaning up documentation'
+	@echo ' '

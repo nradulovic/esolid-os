@@ -1,0 +1,359 @@
+/*********************************************************************************************//**
+ *
+ * @file
+ *
+ * ------------------------------------------------------------------------------------------------
+ *
+ * @addtogroup  core_intf
+ *
+ ****************************************************************************************//** @{ */
+/**
+ * @defgroup    eot_intf Event Object Transportation (EOT)
+ *
+ * @brief       Transport dogadjaja izmedju agenata za obradu dogadjaja
+ *
+ *************************************************************************************************
+
+@section        doc_eot Event Object Transportation
+
+@image          html eSolid_EOT.png
+
+    Event Object Transportation (u daljem tekstu EOT) vrsi definisanje dogadjaja 
+    i njihov transport izmedju objekata.
+
+    Sa obzirom da postoji potreba za dogadjajima koji sadrze veliku kolicinu 
+    podataka, kopiranje celih dogadjaja postaje izuzetno neefikasan proces. Zbog 
+    toga se uvodi pojam "zero-copy" politika, gde se ne kopiraju podaci 
+    dogadjaja vec samo pokazivaci prema njima. Na ovaj nacin se postize vrlo 
+    velika propusnost sistema.
+    
+@note           Dogadjaj koji poseduje samo identifikator zove se @a signal.
+
+    Dogadjaji poseduju zaglavlje koje definise eSolid i telo koje definise sam 
+    korisnik. Zaglavlje nosi osnovne informacije o samom dogadjaju kao sto 
+    identifikator dogadjajaja, tip dogadjaja, velicina i slicno, a u telu 
+    dogadjaja se nalaze podaci koji se prenose u dogadjaju.
+
+    Slanje dogadjaja sa aspekta korisnika se sastoji iz tri faze:
+    - kreiranje praznog dogadjaja
+    - popunjavanje tela dogadjaja podacima
+    - prihvatanje dogadjaja od strane eSolid-a
+    
+@section        eot_evt_repr Reprezentacija dogadjaja
+
+    EOT modul podrzava sledece reprezentacije dogadjaja:
+    - prosta reprezentacija
+    - prosirena reprezentacija
+
+    U ovom sistemu se moze koristiti prosta i prosirena reprezentacija dogadjaja.
+
+@subsection     eot_evt_pln Prosta reprezentacija dogadjaja
+
+@image          html eot_evtPln.png
+
+@subsection     eot_evt_ext Prosirena reprezentacija dogadjaja
+
+    Opisani su strukturom: eot_evtExt.
+
+@image          html eot_evtExt.png
+
+    Upotreba klasa omogucava obimnije opisivanje dogadjaja i naprednije 
+    operacije nad dogadjajima. Osnovna struktura klase sadrzi sledece elemente:
+    - zauzece dogadjaja (zaglavlje + telo dogadjaja)
+    - tip dogadjaja
+    - funkcija konstruktor
+    - funkcija destruktor
+
+    Pored navedenih elemenata struktura klase se moze prosiriti i sa elementima 
+    kao sto su:
+    - znakovni niz koji opisuje tip dogadjaja
+    - dodatne funkcije za operacije nad dogadjajem (kompresija/dekompresija 
+    podataka i slicno)
+
+@section        eot_use Koriscenje EOT modula
+
+@subsection     eot_define_evt Definisanje dogadjaja i klase dogadjaja
+
+    <i><b> Prosta reprezentacija dogadjaja </b></i>
+
+    Pre upotrebe dogadjaja potrebno je definisati dogadjaje i njihove klase. Za 
+    defisanje dogadjaje se koristi poseban princip nasledjivanja u C-u. Naime, 
+    eSolid definise zaglavlje dogadjaja, a programer posredstvom nasledjivanja 
+    formira dogadjaj sa tim zaglavljem. Sadrzaj zaglavlja ne treba da interesuje
+    programera, odnosno, podacima u zaglavlju se pristupa preko interfejsa. U
+    zavisnosti od izabranih kompajlerskih opcija zaglavlje dogadjaja moze cuvati 
+    razne informacije.
+
+    U ovoj sekciji koristicemo primer dogadjaja koji se koristi u nekom sistemu. 
+    Dogadjaj ima identifikator koji je numerisan (enumerator) i to je 
+    @c SIG_GET_DATA. Ovaj dogadjaj je tipa @c PARAM_EXCHANGE i sa sobom nosi tri 
+    korisnicka podatka: ID, type i data. Navedeni podaci se nalaze u strukturi 
+    koju definise korisnik. Dogadjaj treba da se posalje agentu za obradu 
+    dogadjaja AOBJ_PARAM.
+
+    Identifikator dogadjaja (enumerator):
+    - SIG_GET_DATA
+
+    Tip dogadjaja (enumerator):
+    - PARAM_EXCHANGE
+
+    Struktura podataka dogadjaja:
+    - param.ID
+    - param.type
+    - param.data
+
+    <b>Resenje:</b>
+
+    Neka je definicija strukture podataka koji treba da se prenesu jednim 
+    dogadjajem sledeca:
+
+    @code
+    typedef struct paramData {
+        uint8_t     ID
+        uint8_t     type
+        uint16_t    data
+    } paramData_T;
+    @endcode
+
+    Za prenos gore navedene strukture treba da se definise struktura prosirenog 
+    dogadjaja koji se sastoji od zaglavlja @c super, koju definise eSolid, i 
+    korisnicke strukture podataka @c param, koju definise aplikacija:
+
+    @code
+    typedef struct paramExchange {
+        eot_evt_T       super;
+        paramData_T     param;
+    } paramExchange_T;
+    @endcode
+
+    <i><b> Prosirena reprezentacija dogadjaja </b></i>
+
+    Pored gore opisanih struktura kojima se definise dogadjaj treba se 
+    definisati struktura klase dogadjaja:
+
+    @code
+    const C_ROM eot_evtClass_T paramExchangeClass = {
+        (eot_evtSize_T)sizeof(paramExchange_T),
+        (eot_evtType_T)PARAM_EXCHANGE,
+        (eot_evtCtorPtr_T)&paramExchange_ctor,
+        (eot_evtDtorPtr_T)&paramExchange_dtor,
+    };
+    @endcode
+
+    i pokazivac na strukturu klase:
+
+    @code
+    const C_ROM eot_evtClass_T * const C_ROM_VAR pParamExchange = &paramExchange;
+    @endcode
+
+    A u datoteci zaglavlja treba napisati samo deklaraciju pokazivaca, 
+    definicija klase nije vidljiva van izvrsne datoteke:
+    
+    @code
+    extern const C_ROM eot_evtClass_T * const C_ROM_VAR pParamExchange;
+    @endcode
+
+    Naravno, potrebno je napisati vec pomenute funkcije konstruktor i destruktor. 
+    U ovom slucaju konstruktor i destruktor funkcije su jednostavne funkcije 
+    koje postavljaju parametre na podrazumevane vrednosti za datu aplikaciju. 
+    Konstruktor i destruktor funkcijama se kao parametar predaje pokazivac na
+    dogadjaj koji je tek kreiran i treba da se izvrsi njegova priprema za 
+    koriscenje (inicijalizacija i slicno), ili na dogadjaj koji treba da se 
+    izbrise.
+
+    Konstruktor funkcija:
+    @code
+    void paramExchange_ctor (
+        void * aMe) {
+
+        ((paramExchange_T *)aMe)->param.ID = (uint8_t)0;
+        ((paramExchange_T *)aMe)->param.type = (uint8_t)DEFAULT_TYPE;
+        ((paramExchange_T *)aMe)->param.data = (uint16_t)0;
+    }
+    @endcode
+
+    Destruktor funkcija:
+    @code
+    void paramExchange_dtor (
+        void * aMe) {
+
+        ((paramExchange_T *)aMe)->param.ID = (uint8_t)0;
+        ((paramExchange_T *)aMe)->param.type = (uint8_t)0;
+        ((paramExchange_T *)aMe)->param.data = (uint16_t)0;
+    }
+    @endcode
+
+    Konstruktor se poziva neposredno nakon rezervisanja memorijskog prostora za 
+    dogadjaj, a destruktor funkcija se poziva onog trenutka kada je eSolid 
+    zakljucio da dogadjaj treba da se brise iz memorije. Pored inicijalizovanja 
+    promenljivih na podrazumevane vrednosti, u konstruktor/destruktor funkcijama
+    mogu da se izvrsavaju i druge operacije, kao sto su na primer:
+    inkrementiranje brojaca za broj poslatih dogadjaja, obavestavanje nekog 
+    drugog sistema da se dogadjaj upravo kreira i pripremi za njegovo 
+    prihvatanje i slicno. Konstruktor i destruktor funkcije treba shvatiti kao 
+    @c callback funkcije koje se pozivaju prilikom kreiranja ili brisanja 
+    dogadjaja, na programeru je da definise njihovu ulogu.
+
+@subsection     eot_send_evt Kreiranje i slanje dogadjaja
+
+    <i><b> Prosta reprezentacija dogadjaja </b></i>
+
+    Kreiranje praznog dogadjaja se vrsi pozivom funkcije eS_evtPlnCreate(). Ova 
+    funkcija prihvata dva parametara:
+    - velicina dogadjaja. Ovde se podrazumeva koliko bajtova zauzimaju zaglavlje 
+    i telo dogadjaja. Sa obzirom da je ponekad tesko dati procenu zauzeca 
+    podataka u memoriji, kao i zbog vece portabilnosti koda, ovde se preporucuje 
+    upotreba unarnog operatora @c sizeof.
+    - identifikator dogadjaja. Svaki dogadjaj je jedinstven i razlikuje se barem 
+    po identifikatoru. Identifikator je jedinstven broj koji opisuje jednu vrstu 
+    dogadjaja. Programer moze eksplicitno koristiti brojeve za identifikatore, 
+    ali se preporucuje upotreba enumeratora jer pruza tu pogodnost da se po 
+    imenu enumeratora zakljuci sa kojim dogadjajem se radi.
+
+    Funkcija vraca pokazivac na memorijski prostor koji je rezervisan za ovaj 
+    dogadjaj. Zbog ovoga funkcija se ponasa vrlo slicno poznatoj funkciji 
+    @c malloc().
+
+    Sledi primer kreiranja dogadjaja tipa @c paramExchange_T sa signalom 
+    @c SIG_GET_DATA. Najpre je potrebno definisati pokazivac na dogadjaj, a 
+    zatim kreiramo nov, prazan dogadjaj velicine @c paramExchange_T, sa 
+    identifikatorom @c SIG_GET_DATA.
+
+    @code
+    paramExchange_T * pEvt;
+    pEvt = (paramExchange_T *)eS_evtCreate(
+        sizeof(paramExchange_T),
+       (eot_evtID_T)SIG_GET_DATA);
+    @endcode
+
+    Zbog kraceg pisanja uveden je pomocni makro EOT_PLN_CREATE koji prihvata tip 
+    dogadjaja i identifikator dogadjaja. Makro se koristi na sledeci nacin:
+
+    @code
+    paramExchange_T * pEvt;
+    pEvt = EOT_PLN_CREATE(paramExchange_T, SIG_GET_DATA);
+    @endcode
+
+    Nakon sto je kreiran nov dogadjaj, treba se izvrsiti njegovo popunjavanje 
+    podacima.
+
+    Zaglavlje cuva sledece informacije: tip dogadjaja, posiljalac dogadjaja, 
+    vremenski marker nastanka dogadjaja, zauzece dogadjaja i identifikator 
+    dogadjaja. Prilikom kreiranja dogadjaja identifikator i zauzece su vec 
+    upisani. Vremenski marker dogadjaja se automatski upisuje prilikom 
+    prihvatanja dogadjaja za slanje od strane eSolid-a. Ostalo je jos da se
+    izvrsi upis tipa dogadjaja i posiljalaca dogadjaja.
+
+    Upis tipa dogadjaja se vrsi na sledeci nacin:
+
+    @code
+    ((eot_evt_T *)pEvt)->type = PARAM_EXCHANGE;
+    @endcode
+
+    ili upotrebom pomocnog makroa:
+
+    @code
+    EOT_EVT_WRTYPE(pEvt, PARAM_EXCHANGE);
+    @endcode
+
+    Sa ovim smo izvrsili popunjavanje informacija u zaglavlju dogadjaja, sada se 
+    prelazi na popunjavanje dogadjaja ostalim korisnickim podacima:
+
+    @code
+    pEvt->param.ID   = AVENT_SPEED3;
+    pEvt->param.type = TYPE1;
+    pEvt->param.data = 0;
+    @endcode
+
+    Sada su zaglavlje i telo dogadjaja potpuno popunjeni podacima (osim 
+    vremenskog markera koji se popunjava u trenutku slanja). Medjutim, dogadjaj 
+    jos nije poslat, samo je definisan. Da bi se ovako definisan dogadjaj poslao 
+    potrebno je pozvati funkcuju eSeot_evtExtPost(). Funkcija prihvata sledece 
+    parametre:
+    - pokazivac na agenta za obradu dogadjaja i 
+    - pokazivac na dogadjaj sa prosirenom reprezentacijom.
+
+    @code
+    eS_evtPost(
+        pAOBJ_PARAM,
+        (eot_evt_T *)pEvt);
+    @endcode
+
+    Funkcija prihvata navedene parametre, u dogadjaj upisuje vremenski marker 
+    nastanka dogadjaja i dogadjaj prosledjuje navedenom agentu za obradu 
+    dogadjaja.
+
+    <i><b> Prosirena reprezentacija dogadjaja </b></i>
+
+    Princip slanja dogadjaja je vrlo slican onome kako je opisano u prethodnom 
+    odeljku. Potrebno je deklarisati pokazivac na dogadjaje @c pEvtExt. Za 
+    kreiranje novog dogadjaja koristi se es_evtExtCreate funkcija, a ona ocekuje 
+    sledece parametre:
+    - pokazivac na strukturu klase. Ovde se navodi unapred definisan konstantan 
+    pokazivac, kao sto je objasnjeno u odeljku za definisanje dogadjaja.
+    - identifikator dogadjaja. Svaki dogadjaj je jedinstven i razlikuje se barem 
+    po identifikatoru. Identifikator je jedinstven broj koji opisuje jednu vrstu 
+    dogadjaja. Preporucuje se upotreba enumeratora kao identifikatora dogadjaja.
+
+    @code
+    paramExchange_T * pEvtExt;
+    pEvtExt = (paramExchange_T *)eS_evtExtCreate(
+        pParamExchange,
+        (eot_evtID_T)SIG_GET_DATA);
+    @endcode
+
+    I u ovom slucaju postoji pomocni makro:
+
+    @code
+    paramExchange_T * pEvtExt;
+    pEvtExt = EOT_EXT_CREATE(paramExchange_T, pParamExchange, SIG_GET_DATA);
+    @endcode
+
+    Primetiti razliku da se sada navodi pokazivac na klasu dogadjaja, a ne 
+    struktura tipa dogadjaja. Nakon sto je kreiran nov dogadjaj, treba se 
+    izvrsiti njegovo popunjavanje podacima. Zaglavlje cuva sledece informacije: 
+    - klasa dogadjaja, 
+    - posiljalac dogadjaja, 
+    - vremenski marker nastanka dogadjaja i 
+    - identifikator dogadjaja. 
+    
+    U klasi se cuvaju sledece informacije: 
+    - tip dogadjaja, 
+    - zauzece dogadjaja, 
+    - konstruktor i destruktor funkcije. 
+    
+    Prilikom kreiranja dogadjaja identifikator se upisuje. Velicinu i tip 
+    definise klasa, tako da se ne vrsi upis ovih informacija. Vremenski marker 
+    dogadjaja se automatski upisuje prilikom prihvatanja dogadjaja za slanje od 
+    strane eSolid-a.
+
+    Sa ovim smo izvrsili popunjavanje informacija u zaglavlju dogadjaja, sada se 
+    prelazi na popunjavanje dogadjaja ostalim korisnickim podacima:
+
+    @code
+    pEvtExt->param.ID   = AVENT_SPEED3;
+    pEvtExt->param.type = TYPE1;
+    pEvtExt->param.data = 0;
+    @endcode
+
+    Sada su zaglavlje i telo dogadjaja potpuno popunjeni podacima (osim 
+    vremenskog markera koji se popunjava u trenutku slanja). Dogadjaj jos nije 
+    poslat, samo je definisan. Da bi se definisan dogadjaj poslao potrebno je 
+    pozvati funkcuju eSeot_evtExtPost(). Funkcija prihvata sledece parametre: 
+    - pokazivac na agenta za obradu dogadjaja i 
+    - pokazivac na dogadjaj sa prosirenom reprezentacijom, 
+    dakle, potpuno identicno prethodnom slucaju.
+
+    @code
+    eS_evtPost(
+        pAOBJ_PARAM,
+        (eot_evt_T *)pEvtExt);
+    @endcode
+
+    Funkcija prihvata navedene parametre, u dogadjaj upisuje vremenski marker 
+    nastanka dogadjaja i dogadjaj prosledjuje navedenom agentu za obradu 
+    dogadjaja.
+
+@subsection     eot_recv_evt Primanje dogadjaja
+     
+**//** @} *//*************************************************************************************/

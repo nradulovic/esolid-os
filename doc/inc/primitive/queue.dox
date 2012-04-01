@@ -1,0 +1,30 @@
+/*********************************************************************************************//**
+ *
+ * @file
+ *
+ * ------------------------------------------------------------------------------------------------
+ *
+ * @addtogroup  prim_intf
+ *
+ ****************************************************************************************//** @{ */
+/**
+ * @defgroup    queue_intf Redovi za cekanje (queue)
+ *
+ * @brief       Interfejs za manipulaciju sa redovima cekanja
+ *
+ *************************************************************************************************
+
+@section		prim_queue Redovi za cekanje
+
+@subsection		queue_ptr Indirektni redovi za cekanje (sadrze pokazivace na objekte)
+
+	Zero-copy delivery mechanism
+	
+	Na sledecoj slici je prikazan red cekanja sa deset elemenata. Od tih deset 
+	elemenata 4 elementa su popunjena i pokazuju na odgovarajuce objekte.
+	
+@image          html    queuePtr.png
+
+@subsection		queue_gp Redovi za cekanje opste namene (sadrze cele objekte)
+
+**//** @} *//*************************************************************************************/
