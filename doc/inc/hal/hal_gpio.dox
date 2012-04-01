@@ -8,7 +8,7 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    hal_gpio GPIO modul
+ * @defgroup    hal_gpio GPIO manipulation
  *
  * @brief       Manipulacija sa pinovima opste namene
  *

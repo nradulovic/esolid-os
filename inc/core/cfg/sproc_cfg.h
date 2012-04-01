@@ -25,17 +25,16 @@
  *
  * @author      nesa
  *
- * @brief       Konfiguracija Event Processing Engine podmodula.
+ * @brief   	Konfiguracija State Machine Processor (SMP) modula.
  *
  * ------------------------------------------------------------------------------------------------
  *
- * @addtogroup  core_cfg
+ * @addtogroup	core_cfg
  *
  ****************************************************************************************//** @{ */
 
-
-#ifndef EPE_CFG_H_
-#define EPE_CFG_H_
+#ifndef SMP_CFG_H_
+#define SMP_CFG_H_
 
 
 /*************************************************************************************************
@@ -52,13 +51,9 @@
  * SETTINGS
  *************************************************************************************************/
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Podesavanje EPE modula i EPA objekata
- * @{ *//*---------------------------------------------------------------------------------------*/
-
 /*-----------------------------------------------------------------------------------------------*/
 /**
- * @brief       Debug podrska EPE modula
+ * @brief       Debug podrska SP modula
  *
  *              Ukoliko je ova opcija:
  *              - definisana: omoguceno je debagiranje modula,
@@ -76,62 +71,8 @@
  */
 /*-----------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
-# define OPT_DBG_EPE
+# define OPT_DBG_SP
 #endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Omogucavanje/onemogucavanje registra
- *
- *              Ukoliko je ova promenljiva definisana koriste se registar
- *              funkcije i dodatni podaci u strukturi EPA objekata za njihov
- *              poboljasani opis.
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_USE_REGISTRY
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Mutex
- * @todo        Napraviti
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EPA_USE_MUTEX
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Da li se koriste dinamicki EPA objekti
- *
- *              Ukoliko je promenljiva:
- *              - definisana: za alokaciju memorije se koristi memorijska klasa
- *              koja je data u argumentu eS_epaCreate().
- *              - nedefinisana: za alokaciju memorije se koristi memStaticClass
- *              klasa memorije
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_USE_DYNAMIC
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Maksimalan prioritet EPA objekata u sistemu
- *
- *              Ova opcija omogucava da se ujedno definise maksimalan broj EPA
- *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
- *              maksimalan broj prioriteta na 8-bitnoj arhitekturi. 16-bitne i
- *              32-bitne arhitekture podrazavaju vide od 64 EPA objekata.
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
-# define OPT_KERNEL_EPA_PRIO_MAX                  64U
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
 
 
 /*************************************************************************************************
@@ -140,6 +81,6 @@
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of epe_cfg.h
+ * END of smp_cfg.h
  *************************************************************************************************/
-#endif /* EPE_CFG_H_ */
+#endif /* SMP_CFG_H_ */

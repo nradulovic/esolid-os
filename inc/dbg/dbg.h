@@ -84,7 +84,7 @@
  * 				kompajliranja.
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-#define DBG_EMPTY_DECL()														\
+#define DBG_EMPTY_DECL()       		     										\
 	extern C_UNUSED_VAR(uint8_t, ES_CONCAT(dbgVar, __LINE__))
 
 #define DBG_EMPTY_MACRO()														\
@@ -351,7 +351,7 @@ extern "C" {
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidBool(
+bool_T esDbgValidBool(
     bool_T 		aBool);
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -370,7 +370,7 @@ bool_T eS_dbgValidBool(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidUint32(
+bool_T esDbgValidUint32(
     uint32_t 	aValue,
     uint32_t 	aMin,
     uint32_t 	aMax);
@@ -391,7 +391,7 @@ bool_T eS_dbgValidUint32(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidSint32(
+bool_T esDbgValidSint32(
     int32_t 	aValue,
     int32_t 	aMin,
     int32_t 	aMax);
@@ -413,7 +413,7 @@ bool_T eS_dbgValidSint32(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidString(
+bool_T esDbgValidString(
     const uint8_t   * aString,
     size_t          aSize);
 

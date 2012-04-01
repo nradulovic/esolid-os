@@ -28,49 +28,32 @@
  *
  * @author  	Nenad Radulovic
  *
- * @brief       Privatni objekti CORE modula.
+ * @brief       Privatni interfejs State processor podmodul.
  *
  * ------------------------------------------------------------------------------------------------
  *
- * @addtogroup  core_impl
+ * @addtogroup  sproc_impl
  *
  ****************************************************************************************//** @{ */
 
 
-#ifndef CORE_PRIVATE_H_
-#define CORE_PRIVATE_H_
+#ifndef SPROC_PKG_H_
+#define SPROC_PKG_H_
 
 
 /*************************************************************************************************
  * INCLUDE FILES
  *************************************************************************************************/
 
-/*-----------------------------------------------------------------------------------------------*
- * Module dependencies
- *-----------------------------------------------------------------------------------------------*/
-
-#include "core/core.h"
-#include PORT_ARCH_HEADER(core)
-
-
-/*-----------------------------------------------------------------------------------------------*
- * Module configuration and adapter
- *-----------------------------------------------------------------------------------------------*/
-
-#include "mm_pkg.h"
-#include "evt_pkg.h"
-#include "sproc_pkg.h"
-#include "epe_pkg.h"
-
 
 /*-----------------------------------------------------------------------------------------------*
  * EXTERNS
  *-----------------------------------------------------------------------------------*//** @cond */
 
-#ifdef CORE_PRIVATE_H_VAR
-# define CORE_PRIVATE_H_EXT
+#ifdef SPROC_PKG_H_VAR
+# define SPROC_PKG_H_EXT
 #else
-# define CORE_PRIVATE_H_EXT extern
+# define SPROC_PKG_H_EXT extern
 #endif
 
 
@@ -92,10 +75,33 @@
  *************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Macro group
+ * @name        Debug podrska
  *
- * @brief       brief description
+ * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
+ *
  * @{ *//*---------------------------------------------------------------------------------------*/
+
+#if defined(OPT_DBG_SP)
+# define SP_ASSERT                      DBG_ASSERT
+# define SP_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
+# define SP_COMPILE_ASSERT              DBG_COMPILE_ASSERT
+# define SP_DBG_DECL                    DBG_DECL
+# define SP_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
+# define SP_DBG_ENTRY                   DBG_ENTRY
+# define SP_DBG_EXIT                    DBG_EXIT
+# define SP_DBG_MACRO                   DBG_MACRO
+# define SP_DBG_CHECK                   DBG_CHECK
+#else
+# define SP_ASSERT(expr)                DBG_EMPTY_MACRO()
+# define SP_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
+# define SP_COMPILE_ASSERT(expr)        DBG_EMPTY_DECL()
+# define SP_DBG_DECL(expr)              DBG_EMPTY_DECL()
+# define SP_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
+# define SP_DBG_ENTRY()                 DBG_EMPTY_MACRO()
+# define SP_DBG_EXIT()                  DBG_EMPTY_MACRO()
+# define SP_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
+# define SP_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
+#endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
@@ -119,6 +125,8 @@ extern "C" {
  * @brief       brief description
  * @{ *//*---------------------------------------------------------------------------------------*/
 
+
+
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 
@@ -140,13 +148,38 @@ extern "C" {
  *************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Function group
- *
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
+ *              cuvanje bafera stanja.
+ * @param       aStateDept              Maksimalna hijerarhijska dubina stanja
+ *                                      automata.
+ * @return      Potreban memorijski prostor u bajtovima.
+ *//*--------------------------------------------------------------------------------------------*/
+C_INLINE size_t hsmReqSize_(
+    size_t              aStateDept) {
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+    return (aStateDept * (size_t)2U * sizeof(esPtrState_T));
+}
 
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Konstruise HSM automat
+ * @param       aEpa                    Pokazivac na tek kreiran EPA objekat,
+ * @param       aInitState              inicijalno stanje automata,
+ * @param       aStateBuff              pokazivac na memorijski bafer za stanja,
+ * @param       aStateDepth             maksimalna hijerarhijska dubina stanja
+ *                                      automata.
+ *//*--------------------------------------------------------------------------------------------*/
+ void hsmInit(
+     esEpaHeader_T       * aEpa,
+     esPtrState_T        aInitState,
+     esPtrState_T        * aStateBuff,
+     size_t              aStateDepth);
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Dekonstruise HSM automat
+ * @param       aEpa                    Pokazivac na kreiran EPA objekat.
+ *//*--------------------------------------------------------------------------------------------*/
+void hsmDeInit(
+    esEpaHeader_T       * aEpa);
 
 /*-----------------------------------------------------------------------------------------------*
  * C/C++ #endif - close
@@ -163,6 +196,6 @@ extern "C" {
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of core_private.h
+ * END of sproc_pkg.h
  *************************************************************************************************/
-#endif /* CORE_PRIVATE_H_ */
+#endif /* SPROC_PKG_H_ */

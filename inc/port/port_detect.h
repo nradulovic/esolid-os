@@ -156,7 +156,7 @@
 #if defined(OPT_PORT_ARCH)
 
 # if (OPT_PORT_ARCH == _ARM_CM3_)
-#  define PORT_ARCH                     ARM_CM3
+#  define PORT_ARCH                     arm_cm3
 
 # elif (OPT_PORT_ARCH == _X86_COMPAT_)
 #  define PORT_ARCH						x86

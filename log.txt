@@ -1,0 +1,5 @@
+Verzija 1.0a02
+
+primitive/list.h
+- dodata je funkcija esDlsIsEmpty()
+- datoteka je preneta na nov format

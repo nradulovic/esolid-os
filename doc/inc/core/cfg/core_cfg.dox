@@ -8,9 +8,9 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    core_cfg eSolid Core (CORE)
+ * @defgroup    core_cfg eSolid Core
  *
- * @brief       eSolid Core (CORE) konfiguracija
+ * @brief       eSolid Core konfiguracija
  *
  *************************************************************************************************
   

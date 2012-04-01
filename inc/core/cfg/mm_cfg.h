@@ -1,7 +1,7 @@
 /*************************************************************************************************
  * This file is part of eSolid
  *
- * Copyright (C) 2011 - Nenad Radulovic
+ * Copyright (C) 2011, 2012 - Nenad Radulovic
  *
  * eSolid is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,18 @@
  * along with eSolid; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
+ *
+ * web site:    http://blueskynet.dyndns-server.com
+ * e-mail  :    blueskyniss@gmail.com
  *************************************************************************************************/
 
 
 /*********************************************************************************************//**
  * @file
  *
- * @author      nesa
+ * @author      Nenad Radulovic
  *
- * @brief       Konfiguracija Event Processing Engine podmodula.
+ * @brief       Konfiguracija Memory Management modula
  *
  * ------------------------------------------------------------------------------------------------
  *
@@ -34,8 +37,8 @@
  ****************************************************************************************//** @{ */
 
 
-#ifndef EPE_CFG_H_
-#define EPE_CFG_H_
+#ifndef MM_CFG_H_
+#define MM_CFG_H_
 
 
 /*************************************************************************************************
@@ -47,18 +50,25 @@
  * DEFINES
  *************************************************************************************//** @cond */
 
+#define MM_IS_FF                       1
+#define MM_IS_TLSF                     2
+
 
 /** @endcond *//**********************************************************************************
  * SETTINGS
  *************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Podesavanje EPE modula i EPA objekata
+ * @name        Podesavanje Memory Management modula
+ *
+ *              Ovim opcijama se specificira:
+ *              - debug podrska,
+ *              - odabir algoritma memorijskog alokatora.
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------------------------*/
 /**
- * @brief       Debug podrska EPE modula
+ * @brief       Debug podrska MM modula
  *
  *              Ukoliko je ova opcija:
  *              - definisana: omoguceno je debagiranje modula,
@@ -76,59 +86,27 @@
  */
 /*-----------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
-# define OPT_DBG_EPE
+# define OPT_DBG_MM
 #endif
 
 /*-----------------------------------------------------------------------------------------------*/
 /**
- * @brief       Omogucavanje/onemogucavanje registra
+ * @brief       Odabir algoritma alokatora koji se koristi.
  *
- *              Ukoliko je ova promenljiva definisana koriste se registar
- *              funkcije i dodatni podaci u strukturi EPA objekata za njihov
- *              poboljasani opis.
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_USE_REGISTRY
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Mutex
- * @todo        Napraviti
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EPA_USE_MUTEX
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Da li se koriste dinamicki EPA objekti
+ *              Postoje vise implementacija memorijskog alokatora. Ovom opcijom
+ *              se moze konfigurisati koja implementacija memorijskog alokatora
+ *              se koristi u zavisnosti od potrebe aplikacije. Videti
+ *              @ref doc_mem.
  *
- *              Ukoliko je promenljiva:
- *              - definisana: za alokaciju memorije se koristi memorijska klasa
- *              koja je data u argumentu eS_epaCreate().
- *              - nedefinisana: za alokaciju memorije se koristi memStaticClass
- *              klasa memorije
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_USE_DYNAMIC
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Maksimalan prioritet EPA objekata u sistemu
+ *              Postoje dve implementacije:
+ *              - MM_IS_FF             @ref mem_ff_alloc
+ *              - MM_IS_TLSF           @ref mem_tlsf_alloc
  *
- *              Ova opcija omogucava da se ujedno definise maksimalan broj EPA
- *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
- *              maksimalan broj prioriteta na 8-bitnoj arhitekturi. 16-bitne i
- *              32-bitne arhitekture podrazavaju vide od 64 EPA objekata.
+ * @note        Podrazumevano podesavanje: koristi se TLSF
  */
 /*-----------------------------------------------------------------------------------------------*/
-#if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
-# define OPT_KERNEL_EPA_PRIO_MAX                  64U
+#if !defined(OPT_MM_TYPE) || defined(__DOXYGEN__)
+# define OPT_MM_TYPE                   MM_IS_FF
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -140,6 +118,6 @@
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of epe_cfg.h
+ * END of mem_cfg.h
  *************************************************************************************************/
-#endif /* EPE_CFG_H_ */
+#endif /* MM_CFG_H_ */

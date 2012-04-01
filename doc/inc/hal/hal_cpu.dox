@@ -8,7 +8,7 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    hal_cpu CPU modul
+ * @defgroup    hal_cpu CPU control and specific operations
  *
  * @brief       Kontrola i operacije sa specificnim delovima procesora
  *

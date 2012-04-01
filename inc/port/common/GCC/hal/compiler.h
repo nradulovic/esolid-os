@@ -174,6 +174,19 @@
     C_EXT (((union {srctype src; dsttype dst;} __attribute__ ((__may_alias__)) *)var)->dst)
 #endif
 
+#if !defined(C_OFFSET_OF) || defined(__DOXYGEN__)
+# define C_OFFSET_OF(type, member)                                              \
+     offsetof(type, member)
+#endif
+
+#if !defined(C_CONTAINER_OF) || defined(__DOXYGEN__)
+# define C_CONTAINER_OF(ptr, type, member)                                      \
+    C_EXT ({                                                                    \
+        const typeof(((type *)0)->member) *__mptr = (ptr);                      \
+        (type *)((char *)__mptr - C_OFFSET_OF(type, member));                   \
+    })
+#endif
+
 /*-----------------------------------------------------------------------------------------------*/
 /**
  * @brief       Ovaj makro ima svojstva funkcije i zasticen je od bocnih efekata.
@@ -242,10 +255,15 @@ extern "C" {
 #if !defined(HAL_BOOL_TYPE) || defined(__DOXYGEN__)
 # include <stdbool.h>
 # define HAL_BOOL_TYPE
-typedef enum {
+enum {
     FALSE = false,
     TRUE = true
-} bool_T;
+};
+# if defined(OPT_OPTIMIZE_SPEED)
+typedef uint_fast8_t                    bool_T;
+# else
+typedef uint8_t                         bool_T;
+# endif
 #endif
 
 #if !defined(HAL_FAST_TYPES) || defined(__DOXYGEN__)

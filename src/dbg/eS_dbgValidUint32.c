@@ -25,7 +25,7 @@
  *
  * @author      nesa
  *
- * @brief       Implementacija eS_dbgValidUint32().
+ * @brief       Implementacija esDbgValidUint32().
  *
  * ------------------------------------------------------------------------------------------------
  *
@@ -49,7 +49,7 @@
 /*-----------------------------------------------------------------------------------------------*
  * Local debug defines
  *-----------------------------------------------------------------------------------*//** @cond */
-DBG_DEFINE_MODULE(eS_dbgValidUint32);
+DBG_DEFINE_MODULE(esDbgValidUint32);
 
 
 /** @endcond *//*--------------------------------------------------------------------------------*
@@ -96,7 +96,7 @@ DBG_DEFINE_MODULE(eS_dbgValidUint32);
  * @ingroup dbg_intf
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidUint32(
+bool_T esDbgValidUint32(
     uint32_t 	aValue,
     uint32_t 	aMin,
     uint32_t 	aMax);
@@ -116,7 +116,7 @@ bool_T eS_dbgValidUint32(
  * GLOBAL FUNCTION DEFINITIONS
  *************************************************************************************************/
 
-bool_T eS_dbgValidUint32(
+bool_T esDbgValidUint32(
     uint32_t 	aValue,
     uint32_t 	aMin,
     uint32_t 	aMax) {
@@ -145,5 +145,5 @@ bool_T eS_dbgValidUint32(
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of eS_dbgValidUint32.c
+ * END of esDbgValidUint32.c
  *************************************************************************************************/

@@ -25,7 +25,7 @@
  *
  * @author      nesa
  *
- * @brief       Implementacija eS_dbgValidBool().
+ * @brief       Implementacija esDbgValidBool().
  *
  * ------------------------------------------------------------------------------------------------
  *
@@ -48,7 +48,7 @@
 /*-----------------------------------------------------------------------------------------------*
  * Local debug defines
  *-----------------------------------------------------------------------------------*//** @cond */
-DBG_DEFINE_MODULE(eS_dbgValidBool);
+DBG_DEFINE_MODULE(esDbgValidBool);
 
 
 /** @endcond *//*--------------------------------------------------------------------------------*
@@ -95,7 +95,7 @@ DBG_DEFINE_MODULE(eS_dbgValidBool);
  * @ingroup dbg_intf
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidBool(
+bool_T esDbgValidBool(
     bool_T 		aBool);
 
 
@@ -113,7 +113,7 @@ bool_T eS_dbgValidBool(
  * GLOBAL FUNCTION DEFINITIONS
  *************************************************************************************************/
 
-bool_T eS_dbgValidBool(
+bool_T esDbgValidBool(
     bool_T 		aBool) {
 
     if ((TRUE != aBool) && (FALSE != aBool)) {
@@ -137,5 +137,5 @@ bool_T eS_dbgValidBool(
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of eS_dbgValidBool.c
+ * END of esDbgValidBool.c
  *************************************************************************************************/

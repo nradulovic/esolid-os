@@ -8,9 +8,9 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    hal_compiler C Compiler extensions
+ * @defgroup    hal_crc CRC verification
  *
- * @brief       Definisanje pomocnih makroa i usaglasavanje raznih kompajlera
+ * @brief       CRC verifikacija podataka
  *
  *************************************************************************************************
   

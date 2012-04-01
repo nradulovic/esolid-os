@@ -50,7 +50,6 @@
  *-----------------------------------------------------------------------------------------------*/
 
 #include "hal/hal.h"
-#include "core/smm.h"
 
 
 /*-----------------------------------------------------------------------------------------------*
@@ -119,7 +118,7 @@ extern "C" {
  * @brief       Struktura zaglavlja indirektnog reda za cekanje
  */
 /*-----------------------------------------------------------------------------------------------*/
-typedef struct pq_queuePtr {
+typedef struct esQueuePtr {
 /**
  * @brief       Pocetak reda za cekanje
  */
@@ -139,14 +138,14 @@ typedef struct pq_queuePtr {
  * @brief       Kraj bafera reda za cekanje + jedna pozicija
  */
     void            ** end;
-} pq_queuePtr_T;
+} esQueuePtr_T;
 
 /*-----------------------------------------------------------------------------------------------*/
 /**
  * @brief       Struktura zaglavlja direktnog reda za cekanje
  */
 /*-----------------------------------------------------------------------------------------------*/
-typedef struct pq_queue {
+typedef struct esQueue {
 /**
  * @brief       Pocetak reda za cekanje
  */
@@ -166,7 +165,7 @@ typedef struct pq_queue {
  * @brief       Kraj bafera reda za cekanje + jedna pozicija
  */
     uint8_t         * end;
-} pq_queue_T;
+} esQueue_T;
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
@@ -203,8 +202,8 @@ typedef struct pq_queue {
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void eS_qPtrInit(
-    pq_queuePtr_T   * aQueue,
+C_INLINE void esQpInit(
+    esQueuePtr_T   * aQueue,
     void            ** aMemBuffer,
     size_t          aQueueSize) {
 
@@ -224,8 +223,8 @@ C_INLINE void eS_qPtrInit(
  * @param       aQueue                  Red za cekanje koji treba da se unisti.
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void * eS_qPtrDeInit(
-    pq_queuePtr_T   * aQueue) {
+C_INLINE void * esQpDeInit(
+    esQueuePtr_T   * aQueue) {
 
     aQueue->head = (void **)0U;
     aQueue->tail = (void **)0U;
@@ -243,12 +242,12 @@ C_INLINE void * eS_qPtrDeInit(
  * @param       aItem                   element koji treba postaviti u red za
  *                                      cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void eS_qPtrPutI(
-    pq_queuePtr_T   * aQueue,
+C_INLINE void esQpPutI(
+    esQueuePtr_T   * aQueue,
     void            * aItem) {
 
     *(aQueue->tail) = aItem;
@@ -268,12 +267,12 @@ C_INLINE void eS_qPtrPutI(
  * @param       aItem                   element koji treba postaviti u red za
  *                                      cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void eS_qPtrPushI(
-    pq_queuePtr_T   * aQueue,
+C_INLINE void esQpPutAheadI(
+    esQueuePtr_T   * aQueue,
     void            * aItem) {
 
     if (aQueue->head != aQueue->begin) {
@@ -292,12 +291,12 @@ C_INLINE void eS_qPtrPushI(
  *                                      element.
  * @return      Element iz reda za cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void * eS_qPtrGetI(
-    pq_queuePtr_T   * aQueue) {
+C_INLINE void * esQpGetI(
+    esQueuePtr_T   * aQueue) {
 
     void * tmpPtr;
 
@@ -319,12 +318,12 @@ C_INLINE void * eS_qPtrGetI(
  * @param       aQueue                  Red za cekanje koji se ispituje.
  * @return      Maksimalan broj elemenata koji mogu da stanu u red za cekanje
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t eS_qPtrSize(
-    const pq_queuePtr_T * aQueue) {
+C_INLINE size_t esQpSize(
+    const esQueuePtr_T * aQueue) {
 
     return ((size_t)(aQueue->end - aQueue->begin + 1U));
 }
@@ -336,19 +335,19 @@ C_INLINE size_t eS_qPtrSize(
  * @param       aQueue                  Red za cekanje koji se ispituje.
  * @return      Trenutni broj elemenata u redu za cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t eS_qPtrOccupied(
-    const pq_queuePtr_T * aQueue) {
+C_INLINE size_t esQpOccupied(
+    const esQueuePtr_T * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
 
         return ((size_t)(aQueue->tail - aQueue->head));
     } else {
 
-        return ((size_t)(eS_qPtrSize(aQueue) - (aQueue->head - aQueue->tail)));
+        return ((size_t)(esQpSize(aQueue) - (aQueue->head - aQueue->tail)));
     }
 }
 
@@ -359,16 +358,16 @@ C_INLINE size_t eS_qPtrOccupied(
  * @param       aQueue                  Red za cekanje koji se ispituje
  * @return      Koliko slobodnog prostora je preostalo.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t eS_qPtrFreeSpace(
-    const pq_queuePtr_T * aQueue) {
+C_INLINE size_t esQpFreeSpace(
+    const esQueuePtr_T * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
 
-        return ((size_t)(eS_qPtrSize(aQueue) - (aQueue->tail - aQueue->head)));
+        return ((size_t)(esQpSize(aQueue) - (aQueue->tail - aQueue->head)));
     } else {
 
         return ((size_t)(aQueue->head - aQueue->tail));
@@ -384,12 +383,12 @@ C_INLINE size_t eS_qPtrFreeSpace(
  *  @retval     TRUE - red za cekanje je pun
  *  @retval     FALSE - red za cekanje nije pun
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T eS_qPtrIsFull (
-    const pq_queuePtr_T * aQueue) {
+C_INLINE bool_T esQpIsFull (
+    const esQueuePtr_T * aQueue) {
 
     if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
         (aQueue->tail == (aQueue->head - 1U))) {
@@ -410,12 +409,12 @@ C_INLINE bool_T eS_qPtrIsFull (
  *  @retval     TRUE - red cekanja je prazan
  *  @retval     FALSE - red cekanaj nije prazan
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T eS_qPtrIsEmpty(
-    const pq_queuePtr_T * aQueue) {
+C_INLINE bool_T esQpIsEmpty(
+    const esQueuePtr_T * aQueue) {
 
     if (aQueue->head == aQueue->tail) {
 
@@ -442,8 +441,8 @@ C_INLINE bool_T eS_qPtrIsEmpty(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void eS_qInit(
-    pq_queue_T      * aQueue,
+C_INLINE void esQInit(
+    esQueue_T      * aQueue,
     uint8_t         * aMemBuffer,
     size_t          aQueueSize) {
 
@@ -463,8 +462,8 @@ C_INLINE void eS_qInit(
  * @param       aQueue                  Red za cekanje koji treba da se unisti.
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void * eS_qDeInit(
-    pq_queue_T      * aQueue) {
+C_INLINE void * esQDeInit(
+    esQueue_T      * aQueue) {
 
     aQueue->head = (uint8_t *)0U;
     aQueue->tail = (uint8_t *)0U;
@@ -482,12 +481,12 @@ C_INLINE void * eS_qDeInit(
  * @param       aItem                   element koji treba postaviti u red za
  *                                      cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void eS_qPutI(
-    pq_queue_T      * aQueue,
+C_INLINE void esQPutI(
+    esQueue_T      * aQueue,
     uint8_t         aItem) {
 
     *(aQueue->tail) = aItem;
@@ -507,12 +506,12 @@ C_INLINE void eS_qPutI(
  * @param       aItem                   element koji treba postaviti u red za
  *                                      cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void eS_qPushI(
-    pq_queue_T   * aQueue,
+C_INLINE void esQPutAheadI(
+    esQueue_T   * aQueue,
     uint8_t      aItem) {
 
     if (aQueue->head != aQueue->begin) {
@@ -531,12 +530,12 @@ C_INLINE void eS_qPushI(
  *                                      element.
  * @return      Element iz reda za cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE uint8_t eS_qGetI(
-    pq_queue_T   * aQueue) {
+C_INLINE uint8_t esQGetI(
+    esQueue_T   * aQueue) {
 
     uint8_t tmp;
 
@@ -558,12 +557,12 @@ C_INLINE uint8_t eS_qGetI(
  * @param       aQueue                  Red za cekanje koji se ispituje.
  * @return      Maksimalan broj elemenata koji mogu da stanu u red za cekanje
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t eS_qSize(
-    const pq_queue_T    * aQueue) {
+C_INLINE size_t esQSizeI(
+    const esQueue_T    * aQueue) {
 
     return ((size_t)(aQueue->end - aQueue->begin + 1U));
 }
@@ -575,19 +574,19 @@ C_INLINE size_t eS_qSize(
  * @param       aQueue                  Red za cekanje koji se ispituje.
  * @return      Trenutni broj elemenata u redu za cekanje.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t eS_qOccupied(
-    const pq_queue_T    * aQueue) {
+C_INLINE size_t esQOccupied(
+    const esQueue_T    * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
 
         return ((size_t)(aQueue->tail - aQueue->head));
     } else {
 
-        return ((size_t)(eS_qSize(aQueue) - (aQueue->head - aQueue->tail)));
+        return ((size_t)(esQSizeI(aQueue) - (aQueue->head - aQueue->tail)));
     }
 }
 
@@ -598,16 +597,16 @@ C_INLINE size_t eS_qOccupied(
  * @param       aQueue                  Red za cekanje koji se ispituje
  * @return      Koliko slobodnog prostora je preostalo.
  * @pre         Red za cekanje je prethodno kreiran konstruktor funkcijom
- *              eS_qPtrInit().
+ *              esQpInit().
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t eS_qFreeSpace(
-    const pq_queue_T    * aQueue) {
+C_INLINE size_t esQFreeSpace(
+    const esQueue_T    * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
 
-        return ((size_t)(eS_qSize(aQueue) - (aQueue->tail - aQueue->head)));
+        return ((size_t)(esQSizeI(aQueue) - (aQueue->tail - aQueue->head)));
     } else {
 
         return ((size_t)(aQueue->head - aQueue->tail));
@@ -627,8 +626,8 @@ C_INLINE size_t eS_qFreeSpace(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T eS_qIsFull (
-    const pq_queue_T    * aQueue) {
+C_INLINE bool_T esQIsFull (
+    const esQueue_T    * aQueue) {
 
     if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
         (aQueue->tail == (aQueue->head - 1U))) {
@@ -653,8 +652,8 @@ C_INLINE bool_T eS_qIsFull (
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T eS_qIsEmpty(
-    const pq_queue_T    * aQueue) {
+C_INLINE bool_T esQIsEmpty(
+    const esQueue_T    * aQueue) {
 
     if (aQueue->head == aQueue->tail) {
 

@@ -56,14 +56,6 @@
  * Module configuration
  *-----------------------------------------------------------------------------------------------*/
 
-#include "core/smm.h"
-#include "core/eot.h"
-#include "core/smp.h"
-#include "core/epe.h"
-#include "core/epn.h"
-#include "core/tem.h"
-#include "core/str.h"
-
 
 /*-----------------------------------------------------------------------------------------------*
  * EXTERNS
@@ -98,52 +90,110 @@ extern "C" {
  * DATA TYPES
  *************************************************************************************************/
 
+/*-------------------------------------------------------------------------------------------*//**
+ * @name        Deklaracije unapred
+ * @{ *//*---------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Memorijska klasa alokatora
+ */
+typedef struct esMemClass esMemClass_T;
+
+/**
+ * @brief       Zaglavlje dogadjaja
+ */
+typedef struct esEvtHeader esEvtHeader_T;
+
+/**
+ * @brief       Red cekanja za dogadjaje
+ */
+typedef struct evtQueue evtQueue_T;
+
+/**
+ * @brief       Event Processing Agent
+ */
+typedef struct esEpaHeader esEpaHeader_T;
+
+/** @} *//*--------------------------------------------------------------------------------------*/
+
+#include "core/mm.h"
+#include "core/evt.h"
+#include "core/sproc.h"
+#include "core/epe.h"
+
 /**
  * @brief       Struktura podataka za EIR dogadjaj
  */
-typedef struct core_epaInfo {
-    uint16_t    ID;
-    uint8_t     name[8];
-    uint8_t     type;
-    uint8_t     queueMax;
-    uint8_t     queueSize;
-    void        * ptr;
-    uint8_t     status;
-    uint32_t    EPS;
-} core_epaInfo_T;
+typedef struct esEpaInfo {
+/**
+ * @brief       Identifikator EPA objekta
+ */
+    uint16_t        id;
 
 /**
- * @brief       Dogadjaj <c>Request</c>
- *
- *              Sistemski zahtevi su dogadjaji osnovnog sistemskog tipa
- *              @ref smp_evtSystem.
- *
- * @todo        Napisati ROM strukturu
+ * @brief       Ime EPA objekta
  */
-typedef struct core_evtSysReq {
+    uint8_t         name[8];
+
+/**
+ * @brief       Tip EPA objekta
+ */
+    uint8_t         type;
+
+/**
+ * @brief       Maksimalno zauzece reda za cekanje
+ */
+    uint8_t         queueMax;
+
+/**
+ * @brief       Velicina reda za cekanje
+ */
+    uint8_t         queueSize;
+
+/**
+ * @brief       Pokazivac na EPA objekat
+ */
+    esEpaHeader_T   * ptr;
+
+/**
+ * @brief       Status izvrsavanja EPA objekta
+ */
+    uint8_t         status;
+
+/**
+ * @brief       Events Per Second faktor
+ */
+    uint32_t        EPS;
+} esEpaInfo_T;
+
+/**
+ * @extends     esEvtHeader_T
+ * @brief       Dogadjaj <c>Request</c>
+ */
+typedef struct evtSysReq {
 /**
  * @brief       Super struktura sistemskog dogadjaja
  */
-    smp_evtSystem_T super;
-} core_evtSysReq_T;
+    esEvtHeader_T   super;
+} evtSysReq_T;
 
 /**
+ * @extends     esEvtHeader_T
  * @brief       Dogadjaj <c>EPA Info Report</c>
- *
- * @todo        Napisati ROM strukturu
  */
-typedef struct core_evtSysEIRep {
+typedef struct evtSysEIRep {
 /**
  * @brief       Super struktura zaglavlja dogadjaja
  */
-    eot_evt_T       super;
+    esEvtHeader_T   super;
 /**
  * @brief       Struktura podataka koju nosi ovaj dogadjaj
  */
-    core_epaInfo_T  info;
-} smp_evtSysEIRep_T;
+    esEpaInfo_T     info;
+} evtSysEIRep_T;
 
 /**
+ * @extends     esEvtHeader_T
  * @brief       Dogadjaj <c>EPA List Report</c>
  *
  *              Dogadjaj ima promenljivu velicinu i formira se kompletno u RAM
@@ -155,16 +205,25 @@ typedef struct core_evtSysEIRep {
  *              dogadjaja. Pogledati OOC i implementaciju new funkcije. Zbog
  *              toga treba promeniti typedef-ove, vec napisane ROM strukture  i
  *              funkcije koje kreiraju dogadjaj.
- *
- * @todo        Napisati ROM strukturu
  */
-typedef struct core_evtSysELRep {
+typedef struct evtSysELRep {
 /**
  * @brief       Super struktura zaglavlja dogadjaja
  */
-    eot_evt_T   super;
-} core_evtSysELRep;
+    esEvtHeader_T   super;
+} evtSysELRep_T;
 
+/**
+ * @brief       Domen korisnickih signala
+ * @todo        Pogledati gde smestiti ovaj define
+ */
+#define EVT_SIGNAL_USER                 15
+
+/**
+ * @brief       Domen tipova korisnickih signala
+ * @todo        Pogledati gde smestiti ovaj define
+ */
+#define EVT_TYPE_USER                   4
 
 /*************************************************************************************************
  * GLOBAL VARIABLES

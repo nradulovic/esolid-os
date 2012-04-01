@@ -8,7 +8,7 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    intr_intf Interrupt kontroler modul
+ * @defgroup    intr_intf Interrupt control and management
  *
  * @brief       Manipulacija sa kontrolerom prekida
  *

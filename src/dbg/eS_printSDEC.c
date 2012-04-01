@@ -108,7 +108,7 @@ void eS_printSDEC(
         i32num++;
         signedStatus = DBG_SIGNED;
     }
-    eS_printUDEC((uint32_t)i32num);
+    eS_printUdec((uint32_t)i32num);
 }
 
 

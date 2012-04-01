@@ -4,14 +4,14 @@
  *
  * ------------------------------------------------------------------------------------------------
  *
- * @addtogroup  hal_intf
+ * @addtogroup  core_intf
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    hal_compiler C Compiler extensions
+ * @defgroup    reg_intf EPA object Registry facility
  *
- * @brief       Definisanje pomocnih makroa i usaglasavanje raznih kompajlera
+ * @brief       Registar EPA objekata
  *
  *************************************************************************************************
-  
+
 **//** @} *//*************************************************************************************/

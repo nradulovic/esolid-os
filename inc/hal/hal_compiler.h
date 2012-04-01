@@ -104,7 +104,7 @@
  *************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Makroi za prosirene opcije C programskog jezika
+ * @name        Makroi za prosirene opcije C kompajlera
  *
  * @brief       Ovi makroi definisu interfejs za rad sa naprednim mogucnostima
  *              C kompajlera.
@@ -336,24 +336,24 @@
  *
  *              Primer:
  *              @code
- *              typedef struct smm_blk {
+ *              typedef struct hmemBlk {
  *                  uint8_t a;
  *                  uint8_t b;
- *              } __attribute__ ((__may_alias__)) smm_blk_T;
+ *              } __attribute__ ((__may_alias__)) hmemBlk_T;
  *
- *              typedef struct smm_blkHdr {
- *                  smm_blk_T super;
+ *              typedef struct hmemBlkHdr {
+ *                  hmemBlk_T super;
  *                  uint8_t   c;
- *              } __attribute__ ((__may_alias__)) smm_blkHdr_T;
+ *              } __attribute__ ((__may_alias__)) hmemBlkHdr_T;
  *
- *              E_PTRCAST(smm_blk_T, smm_blkHdr_T, pFreeArea).c = data;
+ *              E_PTRCAST(hmemBlk_T, hmemBlkHdr_T, pFreeArea).c = data;
  *              @endcode
  *
  *              U primeru pokazivac pFreeArea se kastuje iz tipa
- *              <c>smm_blk_T *</c> u <c>smm_blkHdr_T *</c> tip, odnosno, stari
+ *              <c>hmemBlk_T *</c> u <c>hmemBlkHdr_T *</c> tip, odnosno, stari
  *              zapis bi izgledao:
  *              @code
- *              ((smm_blkHdr_T *)pFreeArea)->c = data;
+ *              ((hmemBlkHdr_T *)pFreeArea)->c = data;
  *              @endcode
  */
 /*-----------------------------------------------------------------------------------------------*/
@@ -733,6 +733,42 @@
         HAL_CRITICAL_EXIT();                                                    \
     } while (0)
 #endif
+
+/*-----------------------------------------------------------------------------------------------*/
+/**
+ * @brief       Dobavlja offset clana @c member u strukturi tipa @c type.
+ *
+ * @param       type                    Tip strukture,
+ * @param       member                  clan u strukturi.
+ * @return      Offset clana (u bajtovima) u strukturi.
+ * @note        Dok je ovo ispravno i radi u mnogim kompajlerima, ovaj makro ima
+ *              nedefinisano ponasanje prema C standardu (@todo navesti koji
+ *              standardi), jer makro koristi dereferenciranje NULL pokazivaca
+ *              (mada se moze reci da se dereferenciranje ne odvija, jer se ceo
+ *              izraz izracunava u toku kompajliranja).
+ */
+/*-----------------------------------------------------------------------------------------------*/
+#if !defined(C_OFFSET_OF) || defined(__DOXYGEN__)
+# define C_OFFSET_OF(type, member)                                              \
+     ((size_t)((char *)&((type *)0)->member - (char *)0))
+#endif
+
+/*-----------------------------------------------------------------------------------------------*/
+/**
+ * @brief       Dobavlja pokazivac na strukturu tipa @c type na ciji clan
+ *              @c member pokazuje pokazivac @c ptr.
+ *
+ * @param       ptr                     Pokazivac koji pokazuje na @c member,
+ * @param       type                    struktura sa clanom @c member,
+ * @param       member                  clan u strukturi @c type.
+ * @return      Adresu strukture tipa @c type.
+ */
+/*-----------------------------------------------------------------------------------------------*/
+#if !defined(C_CONTAINER_OF) || defined(__DOXYGEN__)
+# define C_CONTAINER_OF(ptr, type, member)                                      \
+    (type *)((char *)(ptr) - C_OFFSET_OF(type, member))
+#endif
+
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 

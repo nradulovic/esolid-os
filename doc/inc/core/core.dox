@@ -8,7 +8,7 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    core_intf eSolid Core (CORE)
+ * @defgroup    core_intf eSolid Core
  *
  * @brief       Interfejs za jezgro eSolid Operativnog Sistema
  *

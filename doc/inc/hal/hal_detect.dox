@@ -8,7 +8,7 @@
  *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    port_detection Autodetekcija
+ * @defgroup    port_detection HAL layers autodetection
  *
  * @brief       Detekcija kompajlera, arhitekture, varijante i platforme
  *

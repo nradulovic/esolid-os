@@ -25,7 +25,7 @@
  *
  * @author      nenad
  *
- * @brief       Implementacija eS_dbgValidString().
+ * @brief       Implementacija esDbgValidString().
  *
  * ------------------------------------------------------------------------------------------------
  *
@@ -48,7 +48,7 @@
 /*-----------------------------------------------------------------------------------------------*
  * Local debug defines
  *-----------------------------------------------------------------------------------*//** @cond */
-DBG_DEFINE_MODULE(eS_dbgValidString);
+DBG_DEFINE_MODULE(esDbgValidString);
 
 
 /** @endcond *//*--------------------------------------------------------------------------------*
@@ -100,7 +100,7 @@ DBG_DEFINE_MODULE(eS_dbgValidString);
  * @ingroup     dbg_intf
  */
 /*-----------------------------------------------------------------------------------------------*/
-bool_T eS_dbgValidString(
+bool_T esDbgValidString(
     const uint8_t   * aString,
     size_t 		    aSize) {
 
@@ -132,5 +132,5 @@ bool_T eS_dbgValidString(
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of eS_dbgValidString.c
+ * END of esDbgValidString.c
  *************************************************************************************************/

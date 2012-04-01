@@ -1,7 +1,7 @@
 /*************************************************************************************************
  * This file is part of eSolid
  *
- * Copyright (C) 2011 - Nenad Radulovic
+ * Copyright (C) 2011, 2012 - Nenad Radulovic
  *
  * eSolid is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,19 +22,14 @@
 
 /*********************************************************************************************//**
  * @file
- *
- * @author      nesa
- *
- * @brief       Interfejs Event Processing Engine (EPE) modula.
- *
+ * @author      Nenad Radulovic
+ * @brief       Interfejs Event Processing Engine podmodula.
  * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  epe_intf
- *
  ****************************************************************************************//** @{ */
 
-#ifndef EPE_H_
-#define EPE_H_
+#ifndef KERNEL_H_
+#define KERNEL_H_
 
 
 /*************************************************************************************************
@@ -57,10 +52,10 @@
  * EXTERNS
  *-----------------------------------------------------------------------------------*//** @cond */
 
-#ifdef EPE_H_VAR
-#define EPE_H_EXT
+#ifdef KERNEL_H_VAR
+#define KERNEL_H_EXT
 #else
-#define EPE_H_EXT extern
+#define KERNEL_H_EXT extern
 #endif
 
 
@@ -86,43 +81,196 @@ extern "C" {
  * DATA TYPES
  *************************************************************************************************/
 
-/*-----------------------------------------------------------------------------------------------*/
+#if !defined(OPT_OPTIMIZE_SIZE) && defined(OPT_OPTIMIZE_SPEED)
+typedef uint_fast8_t                    esEpaPrio_T;
+#endif
+
+#if defined(OPT_OPTIMIZE_SIZE) && !defined(OPT_OPTIMIZE_SPEED)
+typedef uint8_t                         esEpaPrio_T;
+#endif
+
+#if !defined(OPT_OPTIMIZE_SIZE) && !defined(OPT_OPTIMIZE_SPEED) || defined(__DOXYGEN__)
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Tip podataka za prioritet EPA jedinice
+ *//*--------------------------------------------------------------------------------------------*/
+typedef uint8_t                         esEpaPrio_T;
+#endif
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Stanje kernel-a
+ *//*--------------------------------------------------------------------------------------------*/
+typedef enum esKernelStatus {
 /**
- * @brief       Struktura koja opisuje jedan EPA objekat
+ * @brief       Kernel se ne izvrsava
  */
-/*-----------------------------------------------------------------------------------------------*/
-typedef struct epe_epaDef {
+    KERNEL_STOPPED,
+
 /**
- * @brief       Deskriptivno ime automata
- *
- *              Pokazivac na znakovni niz koji cuva ime jedinice za obradu
+ * @brief       Kernel se izvrsava
+ */
+    KERNEL_RUNNING
+} esKernelStatus_T;
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Struktura koja opisuje jedan EPA objekat
+ *//*--------------------------------------------------------------------------------------------*/
+typedef struct esEpaDef {
+/**
+ * @brief       Deskriptivno ime EPA objekta
+ * @details     Pokazivac na znakovni niz koji cuva ime jedinice za obradu
  *              dogadjaja. Ime jedinice za obradu dogadjaja se moze cuvati samo
  *              u flash/ROM memoriji. Ime pruza samo deskriptivnu informaciju o
  *              EPA objektu i u druge svrhe se ne koristi. Vise EPA objekata
  *              mogu imati isto ime.
  */
-    const C_ROM char    * epaName;
+    const C_ROM char * epaName;
 
 /**
- * @brief       Prioritet automata
+ * @brief       Prioritet EPA objekta
  */
-    uint8_t             epaPrio;
+    uint8_t         epaPrio;
 
 /**
- * @brief       Velicina reda za cekanje dogadjaja
+ * @brief       Potrebna memorija radnog okruzenja za EPA objekat
  */
-    uint8_t             evtQueueSize;
+    size_t          epaMemory;
+
+/**
+ * @brief       Velicina reda za cekanje za dogadjaje
+ */
+    size_t          evtQueueSize;
 
 /**
  * @brief       Inicijalno stanje HSM automata
  */
-    smp_ptrState_T      hsmInitState;
+    esPtrState_T    hsmInitState;
 
 /**
  * @brief       Maksimalna dubina hijerarhije stanja HSM automata.
  */
-    uint8_t             hsmStateDepth;
-} epe_epaDef_T;
+    uint8_t         hsmStateDepth;
+} esEpaDef_T;
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup     kern_intf
+ * @brief       Kontrolna struktura kernel-a
+ *//*--------------------------------------------------------------------------------------------*/
+typedef struct kernelCtrl {
+#if defined(OPT_KERNEL_USE_ROUND_ROBIN) || defined(__DOXYGEN__)
+/**
+ * @brief       Lista EPA objekata sa istim prioritetom
+ */
+    esDlsList_T     list;
+#endif
+
+/**
+ * @brief       Prioritet EPA objekta.
+ * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
+ */
+    esEpaPrio_T     prio;
+
+#if defined(OPT_EPA_USE_MUTEX) || defined(__DOXYGEN__)
+/**
+ * @brief       Prioritet za vreme nasledjivanja
+ */
+    esEpaPrio_T     prioBase;
+#endif
+} kernelCtrl_T;
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup     reg_intf
+ * @brief       Registar EPA objekata.
+ *//*--------------------------------------------------------------------------------------------*/
+typedef struct regNode {
+/**
+ * @brief       Lista svih EPA jedinica u sistemu
+ */
+    esDlsList_T    epaList;
+
+/**
+ * @brief       Opis EPA objekta.
+ * @details     Pokazivac na opisnu strukturu EPA objekta koja se nalazi u
+ *              ROM tipu memorije.
+ */
+    const C_ROM esEpaDef_T * description;
+
+/**
+ * @brief       Process ID - identifikator EPA objekta.
+ * @details     Jedinstveni broj koji je vezan za jednu instancu EPA objekta.
+ *              Ovaj broj se definise u procesu kreiranja EPA objekta, a
+ *              automatski se dodeljuje od strane eSolid-a. Jednom definisan
+ *              identifikator ostaje nepromenjen do trenutka gasenja (unistenja)
+ *              EPA objekta. Ukoliko se EPA objekat ponovo instacira (kreira),
+ *              njemu se dodeljuje nov jedinstven identifikator.
+ */
+    uint8_t         pid;
+
+/**
+ * @brief       Events Per Second
+ */
+    uint32_t        eps;
+} regNode_T;
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup     epe_impl
+ * @brief       Interni podaci EPA objekta
+ *//*--------------------------------------------------------------------------------------------*/
+typedef struct epaIntr {
+#if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
+/**
+ * @brief       Memorijska klasa EPA objekta
+ */
+    const C_ROM esMemClass_T  * memClass;
+#endif
+
+/**
+ * @brief       Struktura izvrsne jedinice.
+ * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
+ *              podacima ove strukture je zabranjen drugim modulima.
+ */
+    hsmExec_T       exec;
+
+/**
+ * @brief       Red cekanja za dogadjaje.
+ */
+    evtQueue_T      evtQueue;
+
+#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
+/**
+ * @brief       Kontrolna struktura kernel-a
+ */
+    kernelCtrl_T    kernCtrl;
+
+# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
+/**
+ * @brief       Registar struktura EPA objekata
+ * @details     Registar omogucava dodatnu prezentaciju informacija o EPA
+ *              objektima koji se nalaze u sistemu.
+ */
+    regNode_T       registry;
+# endif
+#endif
+} epaIntr_T;
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @extends     epaIntr_T
+ * @brief       Zaglavlje Event Processing Agent objekta
+ * @details     EPA objekat se sastoji od internih podataka (epaIntr_T) i
+ *              podatka o trenutnom stanju automata.
+ *//*--------------------------------------------------------------------------------------------*/
+struct esEpaHeader {
+/**
+ * @brief       Interni podaci EPA objekta
+ */
+    epaIntr_T       internals;
+
+/**
+ * @brief       Pokazivac na state handler funkciju.
+ * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
+ *              dogadjaja.
+ */
+    esPtrState_T    pState;
+};
 
 
 /*************************************************************************************************
@@ -134,10 +282,8 @@ typedef struct epe_epaDef {
  * FUNCTION PROTOTYPES
  *************************************************************************************************/
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Kreira EPA objekat.
- *
  * @param       aMemClass               Klasa memorije koja se koristi za
  *                                      skladistenje:
  *  @arg        memHeapClass
@@ -145,145 +291,172 @@ typedef struct epe_epaDef {
  *  @arg        memStaticClass
  * @param       aDescription            pokazivac na opis EPA objekta.
  * @return      Pokazivac na strukturu EPA objekta.
- * @see         epe_epaDef_T
+ * @see         esEpaDef_T
+ * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
+ *              funkcija poziva esEpaInit() sa odgovarajucim parametrima.
  * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-epe_epa_T * eS_epaCreate(
-    const C_ROM smm_memClass_T  * aMemClass,
-    const C_ROM epe_epaDef_T    * aDescription);
+ *//*--------------------------------------------------------------------------------------------*/
+esEpaHeader_T * esEpaCreate(
+    const C_ROM esMemClass_T * aMemClass,
+    const C_ROM esEpaDef_T * aDescription);
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Inicijalizuje EPA objekat
+ * @param       aEpa                    Pokazivac na strukturu EPA objekta,
+ * @param       aStateBuff              memorija za cuvanje stanja HSM automata,
+ * @param       aEvtBuff                memorija za cuvanje reda za cekanje,
+ * @param       aDescription            pokazivac na opisnu strukturu EPA
+ *                                      objekta.
+ * @details     Ova funkcija se poziva od strane esEpaCreate, a ovde je
+ *              stavljena na raspolaganju naprednijim korisnicima koji zele vecu
+ *              kontrolu nad rasporedjivanjem memorijskog prostora.
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+void esEpaInit(
+    esEpaHeader_T       * aEpa,
+    esPtrState_T        * aStateBuff,
+    esEvtHeader_T       ** aEvtBuff,
+    const C_ROM esEpaDef_T * aDescription);
+
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Unistava EPA objekat.
- *
  * @param       aEpa                    Pokazivac na strukturu EPA objekta.
  * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-void eS_epaDestroy(
-    epe_epa_T       * aEpa);
+ *//*--------------------------------------------------------------------------------------------*/
+void esEpaDestroy(
+    esEpaHeader_T       * aEpa);
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/** @} *//*--------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup     kern_intf
+ * @name        Upravljanje kernelom
+ * @{ *//*---------------------------------------------------------------------------------------*/
+#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
+
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Vraca Id pokazivac EPA objekta.
- *
  * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
  * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-epe_epa_T * eS_epaGetId(
+ *//*--------------------------------------------------------------------------------------------*/
+esEpaHeader_T * esEpaGetId(
     void);
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Dobavlja prioritet EPA objekta
+ * @param       aEpa                    Pokazivac na EPA objekat
+ * @return      Trenutni prioritet EPA objekta.
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+esEpaPrio_T esEpaPrioGet(
+    const esEpaHeader_T * aEpa);
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Postavlja nov prioritet EPA objekta.
+ * @param       aEpa                    Pokazivac na EPA objekat,
+ * @param       aNewPrio                nov prioritet EPA objekta.
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+void esEpaPrioSet(
+    esEpaHeader_T       * aEpa,
+    esEpaPrio_T         aNewPrio);
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Inicijalizacija kernel-a
+ * @param       aMemory                 Pokazivac na memorijski prostor
+ *                                      rezervisan za rad eSolid kernel-a,
+ * @param       aMemorySize             velicina rezervisanog memorijskog
+ *                                      prostora,
+ * @param       aHeapSize               deo rezervisanog memorijskog prostora
+ *                                      koji treba da se odvoji za dinamicki
+ *                                      alokator.
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+void esKernelInit(
+    void                * aMemory,
+    size_t              aMemorySize,
+    size_t              aHeapSize);
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Pokrece izvrsavanje jezgra
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+void esKernelStart(
+    void);
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Vraca odgovor da li trenutno radi kernel
+ * @return      Status izvrsavanja kernel-a.
+ *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
+ *  @retval     KERNEL_RUNNING - kernel se izvrsava,
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+esKernelStatus_T esKernelStatus(
+    void);
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Vraca znakovni niz koji identifikuje eSolid kernel
+ * @return      Verzija kernel-a u obliku znakovnog niza.
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+const C_ROM char * esKernelSysVer(
+    void);
+
+#endif /* OPT_KERNEL_ENABLE */
+/** @} *//*--------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup     reg_intf
+ * @name        Upravljanje registar bazom
+ * @note        Funkcije su dostupne samo ako su kernel i registar omoguceni.
+ * @{ *//*---------------------------------------------------------------------------------------*/
+# if (defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY)) || defined(__DOXYGEN__)
+
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Pronalazi EPA objekat po @c aId broju
- *
  * @param       aPid                    Pid broj zeljenog automata
  * @return      Pokazivac na EPA objekat ciji pid odgovara trazenom @c aPid
  *              broju.
  *  @retval     NULL ako nije pronadjen EPA objekat sa trazenim @c aPid.
  * @pre         Da bi se koristila registar funkcija mora se definisati
- *              @ref OPT_EPA_USE_REGISTRY.
+ *              @ref OPT_KERNEL_USE_REGISTRY.
  * @note        Funkcija uvek vraca NULL ako NIJE definisana promenljiva
- *              @ref OPT_EPA_USE_REGISTRY.
+ *              @ref OPT_KERNEL_USE_REGISTRY.
+ * @todo        Napisati funkciju.
  * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-epe_epa_T * eS_regFindByPid(
-    uint8_t     aPid);
+ *//*--------------------------------------------------------------------------------------------*/
+esEpaHeader_T * esRegFindByPid(
+    uint8_t          aPid);
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Pronalazi EPA objekat po imenu dato u @c aName nizu.
- *
  * @param       aName                   Ime EPA objekta ciji se pokazivac trazi.
  * @return      Pokazivac na EPA objekat cije ime odgovara trazenom imenu @c
  *              aName.
  *  @retval     NULL ako nije pronadjen EPA objekat sa trazenim @c aNeme imenom.
  * @pre         Da bi se koristila registar funkcija mora se definisati
- *              @ref OPT_EPA_USE_REGISTRY.
+ *              @ref OPT_KERNEL_USE_REGISTRY.
  * @note        Funkcija uvek vraca NULL ako NIJE definisana promenljiva
- *              @ref OPT_EPA_USE_REGISTRY.
+ *              @ref OPT_KERNEL_USE_REGISTRY.
+ * @todo        Napisati funkciju.
  * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-epe_epa_T * eS_regFindByName(
-    const char      * aName);
+ *//*--------------------------------------------------------------------------------------------*/
+esEpaHeader_T * esRegFindByName(
+    const char          * aName);
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Vraca pid broj EPA objekta sa @c aEpa pokazivacem na strukturu.
- *
  * @param       aEpa                    Pokazivac na strukturu EPA objekta.
  *  @arg        NULL - vraca pid trenutnog procesa.
  * @return      Pid broj trazenog @c aEpa objekta.
  * @pre         Da bi se koristila registar funkcija mora se definisati
- *              @ref OPT_EPA_USE_REGISTRY.
+ *              @ref OPT_KERNEL_USE_REGISTRY.
+ * @todo        Napisati funkciju.
  * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-uint8_t eS_regGetPid(
-    epe_epa_T       * aEpa);
+ *//*--------------------------------------------------------------------------------------------*/
+uint8_t esRegGetPid(
+    esEpaHeader_T       * aEpa);
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Dobavlja prioritet EPA objekta
- *
- * @param       aEpa                    Pokazivac na EPA objekat
- * @return      Trenutni prioritet EPA objekta.
- * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-uint8_t eS_epaPrioGet(
-    epe_epa_T       * aEpa);
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Postavlja nov prioritet EPA objekta
- *
- * @param       aEpa                    Pokazivac na EPA objekat,
- * @param       aNewPrio                nov prioritet EPA objekta.
- * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-void eS_epaPrioSet(
-    epe_epa_T       * aEpa,
-    uint8_t         aNewPrio);
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Pokrece izvrsavanje jezgra
- * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-void eS_kernStart(
-    void);
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Vraca odgovor da li trenutno radi kernel
- *
- * @return      Status izvrsavanja kernel-a.
- *  @retval     TRUE - kernel se izvrsava
- *  @retval     FALSE - kernel se ne izvrsava
- * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-bool_T eS_kernIsRunning(
-    void);
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Vraca znakovni niz koji identifikuje eSolid kernel
- *
- * @return      Verzija kernel-a u obliku znakovnog niza.
- * @api
- */
-/*-----------------------------------------------------------------------------------------------*/
-const C_ROM char * eS_kernSysVer(
-    void);
-
+#endif /* OPT_KERNEL_ENABLE && OPT_KERNEL_USE_REGISTRY */
+/** @} *//*--------------------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------------------------*
  * C/C++ #endif - close
@@ -299,6 +472,6 @@ const C_ROM char * eS_kernSysVer(
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of epe.h
+ * END of kernel.h
  *************************************************************************************************/
-#endif /* EPE_H_ */
+#endif /* KERNEL_H_ */
