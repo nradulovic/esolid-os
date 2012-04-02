@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>lcsw-eSolid</name>
+	<name>esolid-kernel</name>
 	<comment></comment>
 	<projects>
 		<project>lchw-STM32L1xx</project>
