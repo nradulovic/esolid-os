@@ -45,7 +45,7 @@
  * Konfiguracija i adaptacija modula
  *-----------------------------------------------------------------------------------------------*/
 
-#include "core/cfg/epe_cfg.h"
+#include "core/cfg/kernel_cfg.h"
 
 
 /*-----------------------------------------------------------------------------------------------*
@@ -168,13 +168,6 @@ typedef struct kernelCtrl {
  * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
  */
     esEpaPrio_T     prio;
-
-#if defined(OPT_EPA_USE_MUTEX) || defined(__DOXYGEN__)
-/**
- * @brief       Prioritet za vreme nasledjivanja
- */
-    esEpaPrio_T     prioBase;
-#endif
 } kernelCtrl_T;
 
 /*-------------------------------------------------------------------------------------------*//**
@@ -326,6 +319,9 @@ void esEpaInit(
 void esEpaDestroy(
     esEpaHeader_T       * aEpa);
 
+void esEpaDeInit(
+    esEpaHeader_T       * aEpa);
+
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup     kern_intf
@@ -336,6 +332,8 @@ void esEpaDestroy(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Vraca Id pokazivac EPA objekta.
  * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 esEpaHeader_T * esEpaGetId(
@@ -345,6 +343,8 @@ esEpaHeader_T * esEpaGetId(
  * @brief       Dobavlja prioritet EPA objekta
  * @param       aEpa                    Pokazivac na EPA objekat
  * @return      Trenutni prioritet EPA objekta.
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 esEpaPrio_T esEpaPrioGet(
@@ -354,6 +354,10 @@ esEpaPrio_T esEpaPrioGet(
  * @brief       Postavlja nov prioritet EPA objekta.
  * @param       aEpa                    Pokazivac na EPA objekat,
  * @param       aNewPrio                nov prioritet EPA objekta.
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
+ * @warning     Ukoliko se ne koristi @ref OPT_KERNEL_USE_ROUND_ROBIN, a
+ *              zahtevani prioritet je vec zauzet javice se assert obavestenje.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 void esEpaPrioSet(
@@ -369,6 +373,8 @@ void esEpaPrioSet(
  * @param       aHeapSize               deo rezervisanog memorijskog prostora
  *                                      koji treba da se odvoji za dinamicki
  *                                      alokator.
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 void esKernelInit(
@@ -378,6 +384,8 @@ void esKernelInit(
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Pokrece izvrsavanje jezgra
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 void esKernelStart(
@@ -388,6 +396,8 @@ void esKernelStart(
  * @return      Status izvrsavanja kernel-a.
  *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
  *  @retval     KERNEL_RUNNING - kernel se izvrsava,
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 esKernelStatus_T esKernelStatus(
@@ -396,6 +406,8 @@ esKernelStatus_T esKernelStatus(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Vraca znakovni niz koji identifikuje eSolid kernel
  * @return      Verzija kernel-a u obliku znakovnog niza.
+ * @pre         Da bi se koristila kernel funkcija mora se definisati
+ *              @ref OPT_KERNEL_ENABLE.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
 const C_ROM char * esKernelSysVer(
@@ -417,9 +429,7 @@ const C_ROM char * esKernelSysVer(
  *              broju.
  *  @retval     NULL ako nije pronadjen EPA objekat sa trazenim @c aPid.
  * @pre         Da bi se koristila registar funkcija mora se definisati
- *              @ref OPT_KERNEL_USE_REGISTRY.
- * @note        Funkcija uvek vraca NULL ako NIJE definisana promenljiva
- *              @ref OPT_KERNEL_USE_REGISTRY.
+ *              @ref OPT_KERNEL_ENABLE i @ref OPT_KERNEL_USE_REGISTRY.
  * @todo        Napisati funkciju.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
@@ -433,9 +443,7 @@ esEpaHeader_T * esRegFindByPid(
  *              aName.
  *  @retval     NULL ako nije pronadjen EPA objekat sa trazenim @c aNeme imenom.
  * @pre         Da bi se koristila registar funkcija mora se definisati
- *              @ref OPT_KERNEL_USE_REGISTRY.
- * @note        Funkcija uvek vraca NULL ako NIJE definisana promenljiva
- *              @ref OPT_KERNEL_USE_REGISTRY.
+ *              @ref OPT_KERNEL_ENABLE i @ref OPT_KERNEL_USE_REGISTRY.
  * @todo        Napisati funkciju.
  * @api
  *//*--------------------------------------------------------------------------------------------*/
@@ -448,7 +456,7 @@ esEpaHeader_T * esRegFindByName(
  *  @arg        NULL - vraca pid trenutnog procesa.
  * @return      Pid broj trazenog @c aEpa objekta.
  * @pre         Da bi se koristila registar funkcija mora se definisati
- *              @ref OPT_KERNEL_USE_REGISTRY.
+ *              @ref OPT_KERNEL_ENABLE i @ref OPT_KERNEL_USE_REGISTRY.
  * @todo        Napisati funkciju.
  * @api
  *//*--------------------------------------------------------------------------------------------*/

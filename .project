@@ -3,7 +3,8 @@
 	<name>esolid-kernel</name>
 	<comment></comment>
 	<projects>
-		<project>lchw-STM32L1xx</project>
+		<project>esolid-config</project>
+		<project>esolid-haldsm</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -32,7 +33,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/lcsw-eSolid/dbg-x86-linux-o0-gcc-v4.5.2}</value>
+					<value>${workspace_loc:/lcsw-eSolid/dbg-arm-cm3-none-eabi-o0-gcc-4.5.2}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>

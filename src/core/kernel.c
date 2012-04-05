@@ -1,8 +1,6 @@
 /*************************************************************************************************
  * This file is part of eSolid
  *
- * Template version: 1.1.10 (24.03.2012)
- *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
  *
  * eSolid is free software; you can redistribute it and/or modify
@@ -28,20 +26,20 @@
 /*********************************************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Implementacija Event Processing Engine modula.
+ * @brief       Implementacija kernel-a i registra.
  * ------------------------------------------------------------------------------------------------
- * @addtogroup  epe_impl
+ * @addtogroup  kernel_impl
  ****************************************************************************************//** @{ */
 
 /*============================================================================  INCLUDE FILES  ==*/
-#define EPE_PKG_H_VAR
+#define KERNEL_PKG_H_VAR
 #include "core_private.h"
 
 /*============================================================================  LOCAL DEFINES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Local debug define macro.
  *//*--------------------------------------------------------------------------------------------*/
-EPE_DBG_DEFINE_MODULE(Event Processing Engine);
+KERNEL_DBG_DEFINE_MODULE(Kernel);
 
 /*============================================================================  LOCAL MACRO's  ==*/
 /*=========================================================================  LOCAL DATA TYPES  ==*/
@@ -425,11 +423,11 @@ void esEpaInit(
     schedRdyInsertI_(
         aEpa);
     HAL_CRITICAL_EXIT();
-#endif
 
     if (KERNEL_RUNNING == esKernelStatus()) {
         EPE_SCHED_NOTIFY_RDY();
     }
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -505,11 +503,12 @@ void esEpaDeInit(
 void esEpaDestroy(
     esEpaHeader_T       * aEpa) {
 
-    const esMemClass_T * tmpMemClass;
-
 #if !defined(OPT_KERNEL_USE_DYNAMIC)
+    (void)aEpa;                                                                 /* Skloni upozorenje o neiskoriscenom parametru.            */
     EPE_ASSERT_ALWAYS("Trying to delete static EPA object!");
 #else
+    const esMemClass_T * tmpMemClass;
+
     EPE_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                 /* Provera par: da li je aEpa inicijalizovan?               */
     tmpMemClass = aEpa->internals.memClass;
     EPE_DBG_CHECK(&memStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
@@ -623,5 +622,5 @@ const C_ROM char * esKernelSysVer(
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
- * END of epe.c
+ * END of kernel.c
  *************************************************************************************************/

@@ -1,7 +1,7 @@
 /*************************************************************************************************
  * This file is part of eSolid
  *
- * Copyright (C) 2011 - Nenad Radulovic
+ * Copyright (C) 2011, 2012 - Nenad Radulovic
  *
  * eSolid is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,23 @@
  * along with eSolid; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
+ *
+ * web site:    http://blueskynet.dyndns-server.com
+ * e-mail  :    blueskyniss@gmail.com
  *************************************************************************************************/
 
 
 /*********************************************************************************************//**
  * @file
- *
- * @author      nesa
- *
- * @brief       Konfiguracija Event Processing Engine podmodula.
- *
+ * @author      Nenad Radulovic
+ * @brief       Konfiguracija Kernel podmodula.
  * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  core_cfg
- *
  ****************************************************************************************//** @{ */
 
 
-#ifndef EPE_CFG_H_
-#define EPE_CFG_H_
+#ifndef KERNEL_CFG_H_
+#define KERNEL_CFG_H_
 
 
 /*************************************************************************************************
@@ -53,12 +51,12 @@
  *************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Podesavanje EPE modula i EPA objekata
+ * @name        Podesavanje KERNEL modula i EPA objekata
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------------------------*/
 /**
- * @brief       Debug podrska EPE modula
+ * @brief       Debug podrska KERNEL modula
  *
  *              Ukoliko je ova opcija:
  *              - definisana: omoguceno je debagiranje modula,
@@ -76,7 +74,7 @@
  */
 /*-----------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
-# define OPT_DBG_EPE
+# define OPT_DBG_KERNEL
 #endif
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -90,16 +88,6 @@
 /*-----------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_USE_REGISTRY
-#endif
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Mutex
- * @todo        Napraviti
- */
-/*-----------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EPA_USE_MUTEX
 #endif
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -140,6 +128,6 @@
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of epe_cfg.h
+ * END of kernel_cfg.h
  *************************************************************************************************/
-#endif /* EPE_CFG_H_ */
+#endif /* KERNEL_CFG_H_ */

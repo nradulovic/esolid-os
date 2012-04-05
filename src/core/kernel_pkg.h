@@ -25,23 +25,23 @@
 
 /*********************************************************************************************//**
  * @file
- * @author  	nenad
- * @brief       Privatni interfejs Event Processing Engine podmodula.
+ * @author  	Nenad Radulovic
+ * @brief       Privatni interfejs kernel-a.
  * ------------------------------------------------------------------------------------------------
- * @addtogroup  epe_impl
+ * @addtogroup  kernel_impl
  ****************************************************************************************//** @{ */
 
 
-#ifndef EPE_PKG_H_
-#define EPE_PKG_H_
+#ifndef KERNEL_PKG_H_
+#define KERNEL_PKG_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
 /*----------------------------------------------------------------------------------  EXTERNS  --*/
 /** @cond */
-#ifdef EPE_PKG_H_VAR
-# define EPE_PKG_H_EXT
+#ifdef KERNEL_PKG_H_VAR
+# define KERNEL_PKG_H_EXT
 #else
-# define EPE_PKG_H_EXT extern
+# define KERNEL_PKG_H_EXT extern
 #endif
 /** @endcond*/
 
@@ -52,26 +52,26 @@
  * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-#if defined(OPT_DBG_EPE) || defined(__DOXYGEN__)
-# define EPE_ASSERT                     DBG_ASSERT
-# define EPE_ASSERT_ALWAYS              DBG_ASSERT_ALWAYS
-# define EPE_COMPILE_ASSERT             DBG_COMPILE_ASSERT
-# define EPE_DBG_DECL                   DBG_DECL
-# define EPE_DBG_DEFINE_MODULE          DBG_DEFINE_MODULE
-# define EPE_DBG_ENTRY                  DBG_ENTRY
-# define EPE_DBG_EXIT                   DBG_EXIT
-# define EPE_DBG_MACRO                  DBG_MACRO
-# define EPE_DBG_CHECK                  DBG_CHECK
+#if defined(OPT_DBG_KERNEL) || defined(__DOXYGEN__)
+# define KERNEL_ASSERT                  DBG_ASSERT
+# define KERNEL_ASSERT_ALWAYS           DBG_ASSERT_ALWAYS
+# define KERNEL_COMPILE_ASSERT          DBG_COMPILE_ASSERT
+# define KERNEL_DBG_DECL                DBG_DECL
+# define KERNEL_DBG_DEFINE_MODULE       DBG_DEFINE_MODULE
+# define KERNEL_DBG_ENTRY               DBG_ENTRY
+# define KERNEL_DBG_EXIT                DBG_EXIT
+# define KERNEL_DBG_MACRO               DBG_MACRO
+# define KERNEL_DBG_CHECK               DBG_CHECK
 #else
-# define EPE_ASSERT(expr)               DBG_EMPTY_MACRO()
-# define EPE_ASSERT_ALWAYS(expr)        DBG_EMPTY_MACRO()
-# define EPE_COMPILE_ASSERT(expr)       DBG_EMPTY_DECL()
-# define EPE_DBG_DECL(expr)             DBG_EMPTY_DECL()
-# define EPE_DBG_DEFINE_MODULE(expr)    DBG_EMPTY_DECL()
-# define EPE_DBG_ENTRY()                DBG_EMPTY_MACRO()
-# define EPE_DBG_EXIT()                 DBG_EMPTY_MACRO()
-# define EPE_DBG_MACRO(expr)            DBG_EMPTY_MACRO()
-# define EPE_DBG_CHECK(expr)            DBG_EMPTY_MACRO()
+# define KERNEL_ASSERT(expr)            DBG_EMPTY_MACRO()
+# define KERNEL_ASSERT_ALWAYS(expr)     DBG_EMPTY_MACRO()
+# define KERNEL_COMPILE_ASSERT(expr)    DBG_EMPTY_DECL()
+# define KERNEL_DBG_DECL(expr)          DBG_EMPTY_DECL()
+# define KERNEL_DBG_DEFINE_MODULE(expr) DBG_EMPTY_DECL()
+# define KERNEL_DBG_ENTRY()             DBG_EMPTY_MACRO()
+# define KERNEL_DBG_EXIT()              DBG_EMPTY_MACRO()
+# define KERNEL_DBG_MACRO(expr)         DBG_EMPTY_MACRO()
+# define KERNEL_DBG_CHECK(expr)         DBG_EMPTY_MACRO()
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -125,7 +125,7 @@ typedef struct rdyBitmap {
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Bitmape spremnih EPA objekata
  *//*--------------------------------------------------------------------------------------------*/
-EPE_PKG_H_EXT rdyBitmap_T rdyBitmap;
+KERNEL_PKG_H_EXT rdyBitmap_T rdyBitmap;
 
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -168,6 +168,6 @@ void portSchedInit(
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
- * END of epe_pkg.h
+ * END of kernel_pkg.h
  *************************************************************************************************/
-#endif /* EPE_PKG_H_ */
+#endif /* KERNEL_PKG_H_ */

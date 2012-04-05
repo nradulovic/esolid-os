@@ -60,7 +60,7 @@
 #include "mm_pkg.h"
 #include "evt_pkg.h"
 #include "sproc_pkg.h"
-#include "epe_pkg.h"
+#include "kernel_pkg.h"
 
 
 /*-----------------------------------------------------------------------------------------------*

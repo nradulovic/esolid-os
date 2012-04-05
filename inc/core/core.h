@@ -119,7 +119,7 @@ typedef struct esEpaHeader esEpaHeader_T;
 #include "core/mm.h"
 #include "core/evt.h"
 #include "core/sproc.h"
-#include "core/epe.h"
+#include "core/kernel.h"
 
 /**
  * @brief       Struktura podataka za EIR dogadjaj
