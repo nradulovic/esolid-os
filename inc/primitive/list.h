@@ -207,7 +207,7 @@ typedef struct esDlsList {
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsNodeInitI(
+C_INLINE_ALWAYS void esSlsNodeInitI(
     esSlsList_T    * aNode) {
 
     aNode->next = aNode;
@@ -220,7 +220,7 @@ C_INLINE void esSlsNodeInitI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsSentinelInit(
+C_INLINE_ALWAYS void esSlsSentinelInit(
     esSlsList_T    * aSentinel) {
 
     esSlsNodeInitI(
@@ -238,7 +238,7 @@ C_INLINE void esSlsSentinelInit(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsNodeAddI(
+C_INLINE_ALWAYS void esSlsNodeAddI(
     esSlsList_T    * aNewNode,
     esSlsList_T    * aPrevNode,
     esSlsList_T    * aNextNode) {
@@ -254,7 +254,7 @@ C_INLINE void esSlsNodeAddI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsNodeAddAfterI(
+C_INLINE_ALWAYS void esSlsNodeAddAfterI(
     esSlsList_T    * aCurrNode,
     esSlsList_T    * aNewNode) {
 
@@ -271,7 +271,7 @@ C_INLINE void esSlsNodeAddAfterI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsNodeAddHeadI(
+C_INLINE_ALWAYS void esSlsNodeAddHeadI(
     esSlsList_T    * aSentinel,
     esSlsList_T    * aNewNode) {
 
@@ -292,7 +292,7 @@ C_INLINE void esSlsNodeAddHeadI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsNodeRemoveI(
+C_INLINE_ALWAYS void esSlsNodeRemoveI(
     esSlsList_T    * aOldNode,
     esSlsList_T    * aPrevNode,
     esSlsList_T    * aNextNode) {
@@ -308,7 +308,7 @@ C_INLINE void esSlsNodeRemoveI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esSlsNodeRemoveAfterI(
+C_INLINE_ALWAYS void esSlsNodeRemoveAfterI(
     esSlsList_T    * aCurrNode) {
 
     esSlsNodeRemoveI(
@@ -328,7 +328,7 @@ C_INLINE void esSlsNodeRemoveAfterI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeInitI(
+C_INLINE_ALWAYS void esDlsNodeInitI(
     esDlsList_T    * aNode) {
 
     aNode->next = aNode;
@@ -342,7 +342,7 @@ C_INLINE void esDlsNodeInitI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsSentinelInit(
+C_INLINE_ALWAYS void esDlsSentinelInit(
     esDlsList_T    * aSentinel) {
 
     esDlsNodeInitI(
@@ -360,7 +360,7 @@ C_INLINE void esDlsSentinelInit(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeAddI(
+C_INLINE_ALWAYS void esDlsNodeAddI(
     esDlsList_T    * aNew,
     esDlsList_T    * aPrev,
     esDlsList_T    * aNext) {
@@ -378,7 +378,7 @@ C_INLINE void esDlsNodeAddI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeAddHeadI(
+C_INLINE_ALWAYS void esDlsNodeAddHeadI(
     esDlsList_T    * aSentinel,
     esDlsList_T    * aNewNode) {
 
@@ -395,7 +395,7 @@ C_INLINE void esDlsNodeAddHeadI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeAddTailI(
+C_INLINE_ALWAYS void esDlsNodeAddTailI(
     esDlsList_T    * aSentinel,
     esDlsList_T    * aNewNode) {
 
@@ -412,7 +412,7 @@ C_INLINE void esDlsNodeAddTailI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeAddBeforeI(
+C_INLINE_ALWAYS void esDlsNodeAddBeforeI(
     esDlsList_T    * aCurrNode,
     esDlsList_T    * aNewNode) {
 
@@ -429,7 +429,7 @@ C_INLINE void esDlsNodeAddBeforeI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeAddAfterI(
+C_INLINE_ALWAYS void esDlsNodeAddAfterI(
     esDlsList_T    * aCurrNode,
     esDlsList_T    * aNewNode) {
 
@@ -445,7 +445,7 @@ C_INLINE void esDlsNodeAddAfterI(
  * @iclass
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void esDlsNodeRemoveI(
+C_INLINE_ALWAYS void esDlsNodeRemoveI(
     esDlsList_T    * aOldNode) {
 
     aOldNode->next->prev = aOldNode->prev;
@@ -461,7 +461,7 @@ C_INLINE void esDlsNodeRemoveI(
  * @api
  * @inline
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE bool_T esDlsIsEmpty(
+C_INLINE_ALWAYS bool_T esDlsIsEmpty(
     esDlsList_T     * aSentinel) {
 
     if (aSentinel->next != aSentinel) {

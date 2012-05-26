@@ -337,7 +337,7 @@ bool_T esHsmIsInState (
     esEpaHeader_T       * aEpa,
     esPtrState_T        aState) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
     esPtrState_T tmpState;
     esPtrState_T savedState;
     bool_T       ans;
@@ -349,7 +349,7 @@ bool_T esHsmIsInState (
 #endif
     SP_ASSERT((esPtrState_T)0 != aState);
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     savedState = aEpa->pState;                                                  /* sacuvaj trenutno stanje automata                         */
     (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
     tmpState = aEpa->pState;
@@ -370,7 +370,7 @@ bool_T esHsmIsInState (
         tmpState = aEpa->pState;
     }
     aEpa->pState = savedState;                                                  /* vrati prethodno stanje automata */
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 
     return (ans);
 }

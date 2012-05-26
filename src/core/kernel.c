@@ -141,7 +141,7 @@ void schedRdyInsertI(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Inicijalizije ready listu
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void schedRdyInit_(
+C_INLINE_ALWAYS void schedRdyInit_(
     void) {
 
     rdyBitmap.bit[0] = (unative_T)1U;
@@ -151,7 +151,7 @@ C_INLINE void schedRdyInit_(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Izbacuje EPA objekat iz reda za cekanje
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void schedRdyRemoveI_(
+C_INLINE_ALWAYS void schedRdyRemoveI_(
     esEpaHeader_T       * aEpa) {
 
     unative_T indxGroup;
@@ -175,7 +175,7 @@ C_INLINE void schedRdyRemoveI_(
  * @brief       Dobavlja prioritet EPA objekta sa najvecim prioritetom u redu
  *              cekanja.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE unative_T schedRdyQueryI_(
+C_INLINE_ALWAYS unative_T schedRdyQueryI_(
     void) {
 
     unative_T indxGroup;
@@ -184,9 +184,9 @@ C_INLINE unative_T schedRdyQueryI_(
 #if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
-    indxGroup = HAL_CPU_FLS(rdyBitmap.bitGroup);
+    indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
 #endif
-    indx = HAL_CPU_FLS(rdyBitmap.bit[indxGroup]);
+    indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
 
     return (indx | (indxGroup << PRIO_INDX_PWR));
 }
@@ -194,7 +194,7 @@ C_INLINE unative_T schedRdyQueryI_(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Prijavljuje EPA objekat u red za cekanje.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void schedRegisterI_(
+C_INLINE_ALWAYS void schedRegisterI_(
     const esEpaHeader_T * aEpa) {
 
     EPE_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
@@ -204,7 +204,7 @@ C_INLINE void schedRegisterI_(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Odjavljuje EPA objekat iz reda za cekanje.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void schedUnRegisterI_(
+C_INLINE_ALWAYS void schedUnRegisterI_(
     const esEpaHeader_T * aEpa) {
 
     schedRdyRemoveI_(
@@ -215,7 +215,7 @@ C_INLINE void schedUnRegisterI_(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Ispituje da li je EPA objekat u listi reda za cekanje.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE bool_T schedEpaIsRdy_(
+C_INLINE_ALWAYS bool_T schedEpaIsRdy_(
     const esEpaHeader_T * aEpa) {
 
     unative_T indxGroup;
@@ -278,11 +278,11 @@ void scheduleI(
             currCtx.epa = newEpa;
             newEvt = evtQGetI(
                 newEpa);
-            HAL_CRITICAL_EXIT();
+            ES_CRITICAL_EXIT();
             hsmDispatch(
                 newEpa,
                 newEvt);
-            HAL_CRITICAL_ENTER();
+            ES_CRITICAL_ENTER();
             evtDestroyI_(
                 newEvt);
 
@@ -367,13 +367,13 @@ static void regRegisterI(
 static void regUnRegisterI(
     esEpaHeader_T       * aEpa) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     esDlsNodeRemoveI(
         &(aEpa->internals.registry.epaList));
     --regSentinel.activeCnt;
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
     esDlsNodeInitI(
         &(aEpa->internals.registry.epaList));
 }
@@ -391,7 +391,7 @@ void esEpaInit(
     const C_ROM esEpaDef_T * aDescription) {
 
 #if defined(OPT_KERNEL_ENABLE)
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 #endif
     EPE_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);           /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
                                                                                 /* te granice OPT_KERNEL_EPA_PRIO_MAX.                             */
@@ -408,7 +408,7 @@ void esEpaInit(
 
 #if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
     aEpa->internals.kernCtrl.prio = aDescription->epaPrio;
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     schedRegisterI_(
         aEpa);
 
@@ -422,7 +422,7 @@ void esEpaInit(
         (esEvtHeader_T *)&evtSignal[SIG_INIT]);
     schedRdyInsertI_(
         aEpa);
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 
     if (KERNEL_RUNNING == esKernelStatus()) {
         EPE_SCHED_NOTIFY_RDY();
@@ -481,9 +481,9 @@ void esEpaDeInit(
     esEpaHeader_T       * aEpa) {
 
 #if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     schedUnRegisterI_(
         aEpa);
 
@@ -491,7 +491,7 @@ void esEpaDeInit(
     regUnRegisterI(
         aEpa);
 # endif
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 #endif
     evtQDeInit(
         aEpa);
@@ -546,10 +546,10 @@ void esEpaPrioSet(
     esEpaHeader_T       * aEpa,
     esEpaPrio_T         aNewPrio) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
     bool_T state;
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     state = schedEpaIsRdy_(
         aEpa);
     schedUnRegisterI_(
@@ -562,7 +562,7 @@ void esEpaPrioSet(
         schedRdyInsertI_(
             aEpa);
     }
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/

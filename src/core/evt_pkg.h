@@ -127,7 +127,7 @@ extern const C_ROM evtIntr_T evtSignal[];
  *  @retval     TRUE - red za cekanje je prazan.
  *  @retval     FALSE - red za cekanje nije prazan.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE bool_T evtQIsEmpty_(
+C_INLINE_ALWAYS bool_T evtQIsEmpty_(
     esEpaHeader_T       * aEpa) {
 
     return (esQpIsEmpty(&(aEpa->internals.evtQueue.queue)));
@@ -138,7 +138,7 @@ C_INLINE bool_T evtQIsEmpty_(
  * @param       aEvt                    Pokazivac na dogadjaj koji treba da se
  *                                      unisti.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void evtDestroyI_(
+C_INLINE_ALWAYS void evtDestroyI_(
     esEvtHeader_T       * aEvt) {
 
     if ((evtDynamic_T)0U == aEvt->internals.dynamic) {
@@ -156,7 +156,7 @@ C_INLINE void evtDestroyI_(
  * @param       aQueueSize              Maksimalna dogadjaja u baferu.
  * @return      Potreban memorijski prostor u bajtovima.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE size_t evtQReqSize_(
+C_INLINE_ALWAYS size_t evtQReqSize_(
     size_t              aQueueSize) {
 
     return (aQueueSize * sizeof(void *));

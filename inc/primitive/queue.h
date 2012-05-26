@@ -202,7 +202,7 @@ typedef struct esQueue {
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void esQpInit(
+C_INLINE_ALWAYS void esQpInit(
     esQueuePtr_T   * aQueue,
     void            ** aMemBuffer,
     size_t          aQueueSize) {
@@ -223,7 +223,7 @@ C_INLINE void esQpInit(
  * @param       aQueue                  Red za cekanje koji treba da se unisti.
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void * esQpDeInit(
+C_INLINE_ALWAYS void * esQpDeInit(
     esQueuePtr_T   * aQueue) {
 
     aQueue->head = (void **)0U;
@@ -246,7 +246,7 @@ C_INLINE void * esQpDeInit(
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void esQpPutI(
+C_INLINE_ALWAYS void esQpPutI(
     esQueuePtr_T   * aQueue,
     void            * aItem) {
 
@@ -271,7 +271,7 @@ C_INLINE void esQpPutI(
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void esQpPutAheadI(
+C_INLINE_ALWAYS void esQpPutAheadI(
     esQueuePtr_T   * aQueue,
     void            * aItem) {
 
@@ -295,7 +295,7 @@ C_INLINE void esQpPutAheadI(
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void * esQpGetI(
+C_INLINE_ALWAYS void * esQpGetI(
     esQueuePtr_T   * aQueue) {
 
     void * tmpPtr;
@@ -322,7 +322,7 @@ C_INLINE void * esQpGetI(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t esQpSize(
+C_INLINE_ALWAYS size_t esQpSize(
     const esQueuePtr_T * aQueue) {
 
     return ((size_t)(aQueue->end - aQueue->begin + 1U));
@@ -339,7 +339,7 @@ C_INLINE size_t esQpSize(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t esQpOccupied(
+C_INLINE_ALWAYS size_t esQpOccupied(
     const esQueuePtr_T * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -362,7 +362,7 @@ C_INLINE size_t esQpOccupied(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t esQpFreeSpace(
+C_INLINE_ALWAYS size_t esQpFreeSpace(
     const esQueuePtr_T * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -387,7 +387,7 @@ C_INLINE size_t esQpFreeSpace(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T esQpIsFull (
+C_INLINE_ALWAYS bool_T esQpIsFull (
     const esQueuePtr_T * aQueue) {
 
     if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
@@ -413,7 +413,7 @@ C_INLINE bool_T esQpIsFull (
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T esQpIsEmpty(
+C_INLINE_ALWAYS bool_T esQpIsEmpty(
     const esQueuePtr_T * aQueue) {
 
     if (aQueue->head == aQueue->tail) {
@@ -441,7 +441,7 @@ C_INLINE bool_T esQpIsEmpty(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void esQInit(
+C_INLINE_ALWAYS void esQInit(
     esQueue_T      * aQueue,
     uint8_t         * aMemBuffer,
     size_t          aQueueSize) {
@@ -462,7 +462,7 @@ C_INLINE void esQInit(
  * @param       aQueue                  Red za cekanje koji treba da se unisti.
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void * esQDeInit(
+C_INLINE_ALWAYS void * esQDeInit(
     esQueue_T      * aQueue) {
 
     aQueue->head = (uint8_t *)0U;
@@ -485,7 +485,7 @@ C_INLINE void * esQDeInit(
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void esQPutI(
+C_INLINE_ALWAYS void esQPutI(
     esQueue_T      * aQueue,
     uint8_t         aItem) {
 
@@ -510,7 +510,7 @@ C_INLINE void esQPutI(
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE void esQPutAheadI(
+C_INLINE_ALWAYS void esQPutAheadI(
     esQueue_T   * aQueue,
     uint8_t      aItem) {
 
@@ -534,7 +534,7 @@ C_INLINE void esQPutAheadI(
  * @iclass
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE uint8_t esQGetI(
+C_INLINE_ALWAYS uint8_t esQGetI(
     esQueue_T   * aQueue) {
 
     uint8_t tmp;
@@ -561,7 +561,7 @@ C_INLINE uint8_t esQGetI(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t esQSizeI(
+C_INLINE_ALWAYS size_t esQSizeI(
     const esQueue_T    * aQueue) {
 
     return ((size_t)(aQueue->end - aQueue->begin + 1U));
@@ -578,7 +578,7 @@ C_INLINE size_t esQSizeI(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t esQOccupied(
+C_INLINE_ALWAYS size_t esQOccupied(
     const esQueue_T    * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -601,7 +601,7 @@ C_INLINE size_t esQOccupied(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE size_t esQFreeSpace(
+C_INLINE_ALWAYS size_t esQFreeSpace(
     const esQueue_T    * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -626,7 +626,7 @@ C_INLINE size_t esQFreeSpace(
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T esQIsFull (
+C_INLINE_ALWAYS bool_T esQIsFull (
     const esQueue_T    * aQueue) {
 
     if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
@@ -652,7 +652,7 @@ C_INLINE bool_T esQIsFull (
  * @api
  */
 /*-----------------------------------------------------------------------------------------------*/
-C_INLINE bool_T esQIsEmpty(
+C_INLINE_ALWAYS bool_T esQIsEmpty(
     const esQueue_T    * aQueue) {
 
     if (aQueue->head == aQueue->tail) {

@@ -131,7 +131,7 @@ KERNEL_PKG_H_EXT rdyBitmap_T rdyBitmap;
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Ubacuje EPA objekat u red za cekanje
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void schedRdyInsertI_(
+C_INLINE_ALWAYS void schedRdyInsertI_(
     const esEpaHeader_T * aEpa) {
 
     unative_T indxGroup;

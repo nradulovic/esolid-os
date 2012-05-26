@@ -49,21 +49,21 @@ EO_DBG_DEFINE_MODULE(Event Object);
 /*=========================================================================  LOCAL DATA TYPES  ==*/
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE void evtQStatEvtRemoved_(
+C_INLINE_ALWAYS void evtQStatEvtRemoved_(
     evtQueue_T    * aEvtQueue);
 
-C_INLINE void evtQStatEvtAdded_(
+C_INLINE_ALWAYS void evtQStatEvtAdded_(
     evtQueue_T    * aEvtQueue);
 
-C_INLINE void evtQPutAheadI_(
+C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt);
 
-C_INLINE void evtQPutI_(
+C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt);
 
-C_INLINE void evtInit_(
+C_INLINE_ALWAYS void evtInit_(
     esEvtHeader_T       * aNewEvt,
     size_t              aDataSize,
     esEvtId_T           aEvtId);
@@ -121,7 +121,7 @@ const C_ROM evtIntr_T evtSignal[] = {
  * @param       aEvtId                  identifikator dogadjaja.
  * @notapi
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void evtInit_(
+C_INLINE_ALWAYS void evtInit_(
     esEvtHeader_T       * aNewEvt,
     size_t              aDataSize,
     esEvtId_T           aEvtId) {
@@ -158,7 +158,7 @@ C_INLINE void evtInit_(
  * @param       aEvtQueue               Pokazivac na red za cekanje.
  * @return      Dogadjaj sa pocetka reda za cekanje.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE esEvtHeader_T * evtQGetI_(
+C_INLINE_ALWAYS esEvtHeader_T * evtQGetI_(
     evtQueue_T          * aEvtQueue) {
 
     esEvtHeader_T * tmpEvt;
@@ -192,7 +192,7 @@ C_INLINE esEvtHeader_T * evtQGetI_(
  * @param       aEvtQueue               Pokazivac na red za cekanje
  * @param       aEvt                    dogadjaj koji se postavlja u red.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void evtQPutI_(
+C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt) {
 
@@ -227,7 +227,7 @@ C_INLINE void evtQPutI_(
  * @param       aEvtQueue               Pokazivac na red za cekanje
  * @param       aEvt                    dogadjaj koji se postavlja u red.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void evtQPutAheadI_(
+C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt) {
 
@@ -263,7 +263,7 @@ C_INLINE void evtQPutAheadI_(
  * @param       aEvtQueue               Pokazivac na strukturu reda za cekanje.
  * @notapi
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void evtQStatEvtAdded_(
+C_INLINE_ALWAYS void evtQStatEvtAdded_(
     evtQueue_T    * aEvtQueue) {
 
     --aEvtQueue->freeCurr;
@@ -278,7 +278,7 @@ C_INLINE void evtQStatEvtAdded_(
  * @param       aEvtQueue               Pokazivac na strukturu reda za cekanje.
  * @notapi
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE void evtQStatEvtRemoved_(
+C_INLINE_ALWAYS void evtQStatEvtRemoved_(
     evtQueue_T    * aEvtQueue) {
 
     ++aEvtQueue->freeCurr;
@@ -313,9 +313,9 @@ void evtQPutAhead(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutAheadI(
@@ -326,7 +326,7 @@ void evtQPutAhead(
         &(aEpa->internals.evtQueue),
         aEvt);
 #endif
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -344,9 +344,9 @@ void evtQPut(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutI(
@@ -357,7 +357,7 @@ void evtQPut(
         &(aEpa->internals.evtQueue),
         aEvt);
 #endif
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -385,10 +385,10 @@ void evtQInit(
 void evtQDeInit(
     esEpaHeader_T       * aEpa) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
     esEvtHeader_T * tmpEvt;
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
 
     while (FALSE == esQpIsEmpty(&(aEpa->internals.evtQueue.queue))) {
 
@@ -401,7 +401,7 @@ void evtQDeInit(
         evtDestroyI_(
             tmpEvt);
     }
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
     esQpDeInit(
         &(aEpa->internals.evtQueue.queue));
 }
@@ -474,10 +474,10 @@ void esEvtPost(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
     EO_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutI(
@@ -498,7 +498,7 @@ void esEvtPost(
     schedRdyInsertI_(
         aEpa);
 #endif
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
     EPE_SCHED_NOTIFY_RDY();
 }
 
@@ -507,10 +507,10 @@ void esEvtPostAhead(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
     EO_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutAheadI(
@@ -531,7 +531,7 @@ void esEvtPostAhead(
     schedRdyInsertI_(
         aEpa);
 #endif
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
     EPE_SCHED_NOTIFY_RDY();
 }
 

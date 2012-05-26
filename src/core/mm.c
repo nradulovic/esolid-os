@@ -332,12 +332,12 @@ void * esHmemAlloc(
     size_t  aSize) {
 
     void * tmpMem;
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     tmpMem = esHmemAllocI(
         aSize);
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 
     return (tmpMem);
 }
@@ -420,12 +420,12 @@ size_t esHmemBlockSize(
 void esHmemDeAlloc(
     void        * aMemory) {
 
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     esHmemDeAllocI(
         aMemory);
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -487,11 +487,11 @@ size_t esHmemFreeSpace(
 #if (MM_IS_FF == OPT_MM_TYPE)
 
     size_t tmpSize;
-    HAL_CRITICAL_DECL();
+    ES_CRITICAL_DECL();
 
-    HAL_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER();
     tmpSize = esHmemFreeSpaceI();
-    HAL_CRITICAL_EXIT();
+    ES_CRITICAL_EXIT();
 
     return (tmpSize);
 

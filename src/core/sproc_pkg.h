@@ -154,7 +154,7 @@ extern "C" {
  *                                      automata.
  * @return      Potreban memorijski prostor u bajtovima.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE size_t hsmReqSize_(
+C_INLINE_ALWAYS size_t hsmReqSize_(
     size_t              aStateDept) {
 
     return (aStateDept * (size_t)2U * sizeof(esPtrState_T));
