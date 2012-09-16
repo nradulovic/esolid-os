@@ -131,6 +131,7 @@ KERNEL_PKG_H_EXT rdyBitmap_T rdyBitmap;
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Ubacuje EPA objekat u red za cekanje
  *//*--------------------------------------------------------------------------------------------*/
+#if defined(OPT_KERNEL_ENABLE)
 C_INLINE_ALWAYS void schedRdyInsertI_(
     const esEpaHeader_T * aEpa) {
 
@@ -148,9 +149,10 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
     rdyBitmap.bit[indxGroup] |= (unative_T)1U << indx;
 }
 
-#if defined(OPT_OPTIMIZE_SIZE) || defined(__DOXYGEN__)
+# if defined(OPT_OPTIMIZE_SIZE) || defined(__DOXYGEN__)
 void schedRdyInsertI(
     const esEpaHeader_T * aEpa);
+# endif
 #endif
 
 /*-------------------------------------------------------------------------------------------*//**

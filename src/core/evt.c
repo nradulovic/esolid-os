@@ -483,20 +483,26 @@ void esEvtPost(
     evtQPutI(
         aEpa,
         aEvt);
+# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI(
         aEpa);
+# endif
 #elif defined(OPT_OPTIMIZE_SPEED)
     evtQPutI_(
         &(aEpa->internals.evtQueue),
         aEvt);
+# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI_(
         aEpa);
+# endif
 #else
     evtQPutI(
         aEpa,
         aEvt);
+# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI_(
         aEpa);
+# endif
 #endif
     ES_CRITICAL_EXIT();
     EPE_SCHED_NOTIFY_RDY();
@@ -516,20 +522,26 @@ void esEvtPostAhead(
     evtQPutAheadI(
         aEpa,
         aEvt);
+# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI(
         aEpa);
+# endif
 #elif defined(OPT_OPTIMIZE_SPEED)
     evtQPutAheadI_(
         &(aEpa->internals.evtQueue),
         aEvt);
+# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI_(
         aEpa);
+# endif
 #else
     evtQPutAheadI(
         aEpa,
         aEvt);
+# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI_(
         aEpa);
+# endif
 #endif
     ES_CRITICAL_EXIT();
     EPE_SCHED_NOTIFY_RDY();
