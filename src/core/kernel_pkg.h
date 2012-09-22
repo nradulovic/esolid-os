@@ -153,7 +153,7 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
 void schedRdyInsertI(
     const esEpaHeader_T * aEpa);
 # endif
-#endif
+#endif /* OPT_KERNEL_ENABLE */
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Vrsi inicijalizaciju hardvera za rad sa schedulerom
