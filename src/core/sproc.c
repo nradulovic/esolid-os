@@ -349,7 +349,7 @@ bool_T esHsmIsInState (
 #endif
     SP_ASSERT((esPtrState_T)0 != aState);
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
     savedState = aEpa->pState;                                                  /* sacuvaj trenutno stanje automata                         */
     (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
     tmpState = aEpa->pState;

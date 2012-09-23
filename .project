@@ -5,6 +5,7 @@
 	<projects>
 		<project>esolid-config</project>
 		<project>esolid-haldsm</project>
+		<project>lib-stm32f10x</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -33,7 +34,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/lcsw-eSolid/dbg-arm-cm3-none-eabi-o0-gcc-4.5.2}</value>
+					<value>${workspace_loc:/esolid-kernel/dbg-STM32F10x-o0-scgcc-v4.5.2}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>

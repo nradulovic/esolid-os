@@ -89,22 +89,6 @@ typedef struct currCtx {
 } currCtx_T;
 
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
-static uint8_t regPidAllocI(
-    void);
-
-static void regInit(
-    void);
-
-static void regRegisterI(
-    esEpaHeader_T       * aEpa,
-    const C_ROM esEpaDef_T * aDescription);
-
-static void regUnRegisterI(
-    esEpaHeader_T       * aEpa);
-
-static void schedInit(
-    void);
-
 /*==========================================================================  LOCAL VARIABLES  ==*/
 
 #if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
@@ -393,9 +377,9 @@ void esEpaInit(
 #if defined(OPT_KERNEL_ENABLE)
     ES_CRITICAL_DECL();
 #endif
-    EPE_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);           /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
+    KERNEL_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);           /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
                                                                                 /* te granice OPT_KERNEL_EPA_PRIO_MAX.                             */
-    EPE_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                        /* Prioritet 0 je rezervisan.                               */
+    KERNEL_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                        /* Prioritet 0 je rezervisan.                               */
     hsmInit(
         aEpa,
         aDescription->hsmInitState,
@@ -440,8 +424,8 @@ esEpaHeader_T * esEpaCreate(
     size_t stateBuff;
     size_t evtBuff;
 
-    EPE_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);                /* Provera par: da li je aDescription inicijalizovan?       */
-    EPE_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaMemory);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
+    KERNEL_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);                /* Provera par: da li je aDescription inicijalizovan?       */
+    KERNEL_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaMemory);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
                                                                                 /* strukture.                                               */
     epaSize = aDescription->epaMemory;
     stateBuff = epaSize + 1U;
@@ -452,10 +436,10 @@ esEpaHeader_T * esEpaCreate(
         aDescription->evtQueueSize);
 
 #if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
-    EPE_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
+    KERNEL_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
     newEpa = (esEpaHeader_T *)(* aMemClass->pAlloc)(epaSize);
 #else
-    EPE_DBG_CHECK(&memStaticClass != aMemClass);                                /* Provera par: da li je aMemClass ispravno inicijalizovan? */
+    KERNEL_DBG_CHECK(&memStaticClass != aMemClass);                                /* Provera par: da li je aMemClass ispravno inicijalizovan? */
     (void)aMemClass;
     newEpa = (esEpaHeader_T *)esHmemAlloc(epaSize);
 #endif
@@ -505,13 +489,13 @@ void esEpaDestroy(
 
 #if !defined(OPT_KERNEL_USE_DYNAMIC)
     (void)aEpa;                                                                 /* Skloni upozorenje o neiskoriscenom parametru.            */
-    EPE_ASSERT_ALWAYS("Trying to delete static EPA object!");
+    KERNEL_ASSERT_ALWAYS("Trying to delete static EPA object!");
 #else
     const esMemClass_T * tmpMemClass;
 
-    EPE_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                 /* Provera par: da li je aEpa inicijalizovan?               */
+    KERNEL_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                 /* Provera par: da li je aEpa inicijalizovan?               */
     tmpMemClass = aEpa->internals.memClass;
-    EPE_DBG_CHECK(&memStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
+    KERNEL_DBG_CHECK(&memStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
     esEpaDeInit(
         aEpa);
     (*tmpMemClass->pDeAlloc)((void *)aEpa);
@@ -536,7 +520,7 @@ esEpaHeader_T * esEpaGetId(
 esEpaPrio_T esEpaPrioGet(
     const esEpaHeader_T * aEpa) {
 
-    EPE_DBG_CHECK((const esEpaHeader_T *)0U != aEpa);                           /* Provera par: da li je aEpa inicijalizovan?               */
+    KERNEL_DBG_CHECK((const esEpaHeader_T *)0U != aEpa);                           /* Provera par: da li je aEpa inicijalizovan?               */
 
     return (aEpa->internals.kernCtrl.prio);
 }
@@ -571,9 +555,9 @@ void esKernelInit(
     size_t              aMemorySize,
     size_t              aHeapSize) {
 
-    EPE_DBG_CHECK((void *)0U != aMemory);                                       /* Provera par: da li je aMemory inicijalizovan?            */
-    EPE_DBG_CHECK(aHeapSize < aMemorySize);                                     /* Provara par: heap mora da bude manji od ukupne memorije. */
-    EPE_DBG_CHECK(sizeof(esEpaHeader_T) + sizeof(esEvtHeader_T) <= aMemorySize);    /* Provera par: mora da se preda neka minimalna kolician*/
+    KERNEL_DBG_CHECK((void *)0U != aMemory);                                       /* Provera par: da li je aMemory inicijalizovan?            */
+    KERNEL_DBG_CHECK(aHeapSize < aMemorySize);                                     /* Provara par: heap mora da bude manji od ukupne memorije. */
+    KERNEL_DBG_CHECK(sizeof(esEpaHeader_T) + sizeof(esEvtHeader_T) <= aMemorySize);    /* Provera par: mora da se preda neka minimalna kolician*/
                                                                                 /* memorije. Za sada je to samo velicina strukture EPA      */
                                                                                 /* objekta i velicina jednog dogadjaja.                     */
     /**
