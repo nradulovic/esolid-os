@@ -62,6 +62,14 @@ C_INLINE_ALWAYS void evtInit_(
     size_t              aDataSize,
     esEvtId_T           aEvtId);
 
+#if defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
+C_INLINE_ALWAYS void evtQStatEvtAdded_(
+    evtQueue_T    * aEvtQueue);
+
+C_INLINE_ALWAYS void evtQStatEvtRemoved_(
+    evtQueue_T    * aEvtQueue);
+#endif
+
 /*==========================================================================  LOCAL VARIABLES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -311,7 +319,7 @@ void evtQPutAhead(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutAheadI(
@@ -342,7 +350,7 @@ void evtQPut(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutI(
@@ -384,7 +392,7 @@ void evtQDeInit(
     ES_CRITICAL_DECL();
     esEvtHeader_T * tmpEvt;
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
     while (FALSE == esQpIsEmpty(&(aEpa->internals.evtQueue.queue))) {
 
@@ -473,7 +481,7 @@ void esEvtPost(
     ES_CRITICAL_DECL();
 
     EO_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutI(
@@ -512,7 +520,7 @@ void esEvtPostAhead(
     ES_CRITICAL_DECL();
 
     EO_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
 #if defined(OPT_OPTIMIZE_SIZE)
     evtQPutAheadI(

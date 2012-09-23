@@ -25,15 +25,10 @@
 
 /*********************************************************************************************//**
  * @file
- *
  * @author      Nenad Radulovic
- *
  * @brief       Implementacija State Processor modula.
- *
  * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  sproc_impl
- *
  ****************************************************************************************//** @{ */
 
 
@@ -94,17 +89,6 @@ SP_DBG_DEFINE_MODULE(State Processor);
     (RETN_HANDLED == (expr)) ||                                                 \
     (RETN_NOEX == (expr)) ||                                                    \
     (RETN_DEFERRED == (expr))||                                                 \
-    (RETN_IGNORED == (expr))
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Izvrsi validaciju odgovora stanja funkcije stanja FSM automata.
- */
-/*-----------------------------------------------------------------------------------------------*/
-#define FSM_VALID_STATE(expr)                                                   \
-    (RETN_TRAN == (expr))    ||                                                 \
-    (RETN_HANDLED == (expr)) ||                                                 \
-    (RETN_NOEX == (expr)) ||                                                    \
     (RETN_IGNORED == (expr))
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -349,7 +333,7 @@ bool_T esHsmIsInState (
 #endif
     SP_ASSERT((esPtrState_T)0 != aState);
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     savedState = aEpa->pState;                                                  /* sacuvaj trenutno stanje automata                         */
     (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
     tmpState = aEpa->pState;

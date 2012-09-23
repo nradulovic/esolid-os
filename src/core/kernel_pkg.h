@@ -78,20 +78,20 @@
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup     Pomocni makroi za rad sa bitmapom
  * @{ *//*---------------------------------------------------------------------------------------*/
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
 # define PRIO_INDX                      OPT_KERNEL_EPA_PRIO_MAX
 # define PRIO_INDX_GROUP                1
 #else
-# define PRIO_INDX                      HAL_UNATIVE_BITS
+# define PRIO_INDX                      ES_CPU_UNATIVE_BITS
 # define PRIO_INDX_GROUP                (ES_DIV_ROUNDUP(OPT_KERNEL_EPA_PRIO_MAX, PRIO_INDX))
 #endif
 #define PRIO_INDX_PWR                   ES_UINT8_LOG2(PRIO_INDX)
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
- * @ingroup     Kontrola jezgra
+ * @ingroup     Kontrola jezgra - generisanje prekida
  * @{ *//*---------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_ENABLE)
+#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
 #else
 # define EPE_SCHED_NOTIFY_RDY()                                                 \
     (void)0
@@ -147,9 +147,9 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
     unative_T indxGroup;
     unative_T indx;
 
-    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (HAL_UNATIVE_BITS - PRIO_INDX_PWR));
+    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
     indxGroup = aEpa->internals.kernCtrl.prio >> PRIO_INDX_PWR;

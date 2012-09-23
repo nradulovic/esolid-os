@@ -336,7 +336,7 @@ void * esHmemAlloc(
     void * tmpMem;
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpMem = esHmemAllocI(
         aSize);
     ES_CRITICAL_EXIT();
@@ -424,7 +424,7 @@ void esHmemDeAlloc(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     esHmemDeAllocI(
         aMemory);
     ES_CRITICAL_EXIT();
@@ -491,7 +491,7 @@ size_t esHmemFreeSpace(
     size_t tmpSize;
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_EPA_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpSize = esHmemFreeSpaceI();
     ES_CRITICAL_EXIT();
 

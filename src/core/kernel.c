@@ -141,9 +141,9 @@ C_INLINE_ALWAYS void schedRdyRemoveI_(
     unative_T indxGroup;
     unative_T indx;
 
-    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (HAL_UNATIVE_BITS - PRIO_INDX_PWR));
+    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
     indxGroup = aEpa->internals.kernCtrl.prio >> PRIO_INDX_PWR;
@@ -165,12 +165,33 @@ C_INLINE_ALWAYS unative_T schedRdyQueryI_(
     unative_T indxGroup;
     unative_T indx;
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+# if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
-#else
+# else
+
+    if (0U != rdyBitmap.bitGroup) {
+        indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
+    } else {
+
+        return ((unative_T)0U);
+    }
+# endif
+
+    if (0U != rdyBitmap.bit[indxGroup]) {
+        indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
+    } else {
+
+        return ((untative_T)0U);
+    }
+#else /* OPT_KERNEL_SCHEDULER_FIXEDPRIO */
+# if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    indxGroup = (unative_T)0U;
+# else
     indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
-#endif
+# endif
     indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
+#endif /* !OPT_KERNEL_SCHEDULER_FIXEDPRIO */
 
     return (indx | (indxGroup << PRIO_INDX_PWR));
 }
@@ -181,7 +202,7 @@ C_INLINE_ALWAYS unative_T schedRdyQueryI_(
 C_INLINE_ALWAYS void schedRegisterI_(
     const esEpaHeader_T * aEpa) {
 
-    EPE_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
+    KERNEL_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
     rdyBitmap.epaList[aEpa->internals.kernCtrl.prio] = (esEpaHeader_T *)aEpa;
 }
 
@@ -205,10 +226,10 @@ C_INLINE_ALWAYS bool_T schedEpaIsRdy_(
     unative_T indxGroup;
     unative_T indx;
 
-    EPE_ASSERT((esEpaHeader_T *)0U != rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);          /* Provera: da li je dati EPA prijavljen u sistem?          */
-    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (HAL_UNATIVE_BITS - PRIO_INDX_PWR));
+    KERNEL_ASSERT((esEpaHeader_T *)0U != rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);          /* Provera: da li je dati EPA prijavljen u sistem?          */
+    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
     indxGroup = aEpa->internals.kernCtrl.prio >> PRIO_INDX_PWR;
@@ -233,7 +254,10 @@ static void schedInit(
     currCtx.prio = (esEpaPrio_T)0U;
     currCtx.status = KERNEL_STOPPED;
     schedRdyInit_();
+
+#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
     portSchedInit();
+#endif
 }
 
 /*-------------------------------------------------------------------------------------------*//**
@@ -241,6 +265,18 @@ static void schedInit(
  *//*--------------------------------------------------------------------------------------------*/
 void scheduleI(
     uint32_t irqLock_) {
+
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+    (void)irqLock_;
+
+    esEpaPrio_T newPrio;
+
+    newPrio = schedRdyQueryI_();
+
+    while (0U != newPrio) {
+
+    }
+#else
 
     esEpaPrio_T newPrio;
 
@@ -278,6 +314,7 @@ void scheduleI(
         currCtx.prio = savedPrio;
         currCtx.epa = savedEpa;
     }
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*
@@ -374,25 +411,27 @@ void esEpaInit(
     esEvtHeader_T       ** aEvtBuff,
     const C_ROM esEpaDef_T * aDescription) {
 
-#if defined(OPT_KERNEL_ENABLE)
     ES_CRITICAL_DECL();
-#endif
-    KERNEL_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);           /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
-                                                                                /* te granice OPT_KERNEL_EPA_PRIO_MAX.                             */
-    KERNEL_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                        /* Prioritet 0 je rezervisan.                               */
-    hsmInit(
+    KERNEL_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);     /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
+                                                                                /* te granice OPT_KERNEL_INTERRUPT_PRIO_MAX.                          */
+    KERNEL_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                     /* Prioritet 0 je rezervisan.                               */
+    hsmInit(                                                                    /* Popuni strukturu za HSM automat.                         */
         aEpa,
         aDescription->hsmInitState,
         aStateBuff,
         aDescription->hsmStateDepth);
-    evtQInit(
+    evtQInit(                                                                   /* Popuni strukturu za redove cekanja za dogadjaje.         */
         aEpa,
         aEvtBuff,
         aDescription->evtQueueSize);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    evtQPutAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
+        aEpa,
+        (esEvtHeader_T *)&evtSignal[SIG_INIT]);
 
 #if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
     aEpa->internals.kernCtrl.prio = aDescription->epaPrio;
-    ES_CRITICAL_ENTER();
+
     schedRegisterI_(
         aEpa);
 
@@ -401,17 +440,16 @@ void esEpaInit(
         aEpa,
         aDescription);
 # endif
-    evtQPutAheadI(
-        aEpa,
-        (esEvtHeader_T *)&evtSignal[SIG_INIT]);
     schedRdyInsertI_(
         aEpa);
-    ES_CRITICAL_EXIT();
 
+#  if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
     if (KERNEL_RUNNING == esKernelStatus()) {
         EPE_SCHED_NOTIFY_RDY();
     }
+#  endif
 #endif
+    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -467,7 +505,7 @@ void esEpaDeInit(
 #if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedUnRegisterI_(
         aEpa);
 
@@ -533,7 +571,7 @@ void esEpaPrioSet(
     ES_CRITICAL_DECL();
     bool_T state;
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     state = schedEpaIsRdy_(
         aEpa);
     schedUnRegisterI_(
@@ -578,9 +616,15 @@ void esKernelInit(
 void esKernelStart(void) {
     currCtx.status = KERNEL_RUNNING;
 
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+    do {
+
+    } while (0U);
+#else
     if (0U != schedRdyQueryI_()) {
         EPE_SCHED_NOTIFY_RDY();
     }
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/

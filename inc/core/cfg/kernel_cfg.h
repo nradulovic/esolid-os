@@ -105,20 +105,37 @@
 # define OPT_KERNEL_USE_DYNAMIC
 #endif
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Maksimalan prioritet EPA objekata u sistemu
- *
- *              Ova opcija omogucava da se ujedno definise maksimalan broj EPA
+ * @details     Ova opcija omogucava da se ujedno definise maksimalan broj EPA
  *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
  *              maksimalan broj prioriteta na 8-bitnoj arhitekturi. 16-bitne i
- *              32-bitne arhitekture podrazavaju vide od 64 EPA objekata.
- */
-/*-----------------------------------------------------------------------------------------------*/
+ *              32-bitne arhitekture podrazavaju vise od 64 EPA objekata.
+ *//*--------------------------------------------------------------------------------------------*/
 #if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
 # define OPT_KERNEL_EPA_PRIO_MAX                  64U
 #endif
 
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Maksimalan prioritet prekida u jezgru
+ *//*--------------------------------------------------------------------------------------------*/
+#if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX)
+# define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_NORMAL
+#endif
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Planiranje zadataka bez istiskivanja sa fiksiranim prioritetom.
+ *//*--------------------------------------------------------------------------------------------*/
+#if !defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO) && !defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN) || defined(__DOXYGEN__)
+# define OPT_KERNEL_SCHEDULER_FIXEDPRIO
+#endif
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Planiranje zadataka sa istiskivanjem sa Round-Robin tehnikom.
+ *//*--------------------------------------------------------------------------------------------*/
+#if defined(__DOXYGEN__)
+# define OPT_KERNEL_SCHEDULER_ROUNDROBIN
+#endif
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 
