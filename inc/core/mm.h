@@ -80,7 +80,7 @@
  */
 /*-----------------------------------------------------------------------------------------------*/
 #define ES_MEMORY_DEFINE(name, size)		    								\
-    static C_ALIGNED(C_DATA_ALIGNMENT) uint8_t name[ES_ALIGN(size, C_DATA_ALIGNMENT)]
+    static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t name[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
 
 
 /*-----------------------------------------------------------------------------------------------*

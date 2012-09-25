@@ -133,12 +133,7 @@ typedef struct esEpaDef {
 /**
  * @brief       Potrebna memorija radnog okruzenja za EPA objekat
  */
-    size_t          epaMemory;
-
-/**
- * @brief       Velicina reda za cekanje za dogadjaje
- */
-    size_t          evtQueueSize;
+    size_t          epaWorkspaceSize;
 
 /**
  * @brief       Inicijalno stanje HSM automata
@@ -149,6 +144,11 @@ typedef struct esEpaDef {
  * @brief       Maksimalna dubina hijerarhije stanja HSM automata.
  */
     uint8_t         hsmStateDepth;
+
+/**
+ * @brief       Velicina reda za cekanje za dogadjaje
+ */
+    size_t          evtQueueDepth;
 } esEpaDef_T;
 
 /*-------------------------------------------------------------------------------------------*//**

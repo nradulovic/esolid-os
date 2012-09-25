@@ -182,7 +182,7 @@ C_INLINE_ALWAYS unative_T schedRdyQueryI_(
         indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
     } else {
 
-        return ((untative_T)0U);
+        return ((unative_T)0U);
     }
 #else /* OPT_KERNEL_SCHEDULER_FIXEDPRIO */
 # if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
@@ -267,15 +267,35 @@ void scheduleI(
     uint32_t irqLock_) {
 
 #if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
-    (void)irqLock_;
 
     esEpaPrio_T newPrio;
 
     newPrio = schedRdyQueryI_();
 
     while (0U != newPrio) {
+        esEpaHeader_T * newEpa;
+        esEvtHeader_T * newEvt;
 
+        newEpa = rdyBitmap.epaList[newPrio];
+        currCtx.prio = newPrio;
+        currCtx.epa = newEpa;
+        newEvt = evtQGetI(
+            newEpa);
+        ES_CRITICAL_EXIT();
+        hsmDispatch(
+            newEpa,
+            newEvt);
+        ES_CRITICAL_ENTER(irqLock_);
+        evtDestroyI_(
+            newEvt);
+
+        if (TRUE == evtQIsEmpty_(newEpa)) {
+            schedRdyRemoveI_(newEpa);
+        }
+        newPrio = schedRdyQueryI_();
     }
+    currCtx.prio = 0U;
+    currCtx.epa = (void *)0U;
 #else
 
     esEpaPrio_T newPrio;
@@ -423,7 +443,7 @@ void esEpaInit(
     evtQInit(                                                                   /* Popuni strukturu za redove cekanja za dogadjaje.         */
         aEpa,
         aEvtBuff,
-        aDescription->evtQueueSize);
+        aDescription->evtQueueDepth);
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         aEpa,
@@ -463,15 +483,15 @@ esEpaHeader_T * esEpaCreate(
     size_t evtBuff;
 
     KERNEL_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);                /* Provera par: da li je aDescription inicijalizovan?       */
-    KERNEL_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaMemory);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
+    KERNEL_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaWorkspaceSize);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
                                                                                 /* strukture.                                               */
-    epaSize = aDescription->epaMemory;
+    epaSize = aDescription->epaWorkspaceSize;
     stateBuff = epaSize + 1U;
     epaSize += hsmReqSize_(
         aDescription->hsmStateDepth);
     evtBuff = epaSize + 1U;
     epaSize += evtQReqSize_(
-        aDescription->evtQueueSize);
+        aDescription->evtQueueDepth);
 
 #if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
     KERNEL_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
@@ -613,14 +633,23 @@ void esKernelInit(
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-void esKernelStart(void) {
-    currCtx.status = KERNEL_RUNNING;
+void esKernelStart(
+    void) {
 
 #if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
-    do {
+    ES_CRITICAL_DECL();
 
+    currCtx.status = KERNEL_RUNNING;
+
+    do {
+        ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        scheduleI(irqLock_);
+        ES_CRITICAL_EXIT();
+        /* Treba jos nesto da radi? */
     } while (0U);
 #else
+    currCtx.status = KERNEL_RUNNING;
+
     if (0U != schedRdyQueryI_()) {
         EPE_SCHED_NOTIFY_RDY();
     }
