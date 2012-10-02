@@ -3,7 +3,6 @@
 	<name>esolid-kernel</name>
 	<comment></comment>
 	<projects>
-		<project>esolid-config</project>
 		<project>esolid-haldsm</project>
 	</projects>
 	<buildSpec>
