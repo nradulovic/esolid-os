@@ -199,11 +199,11 @@ ALIASES = "iclass=@par Klasa funkcije:\n <b>I klasa</b> API funkcija,			\
 			samo iz kriticnih sekcija koda sa zakljucanim prekidima."			\
           "sclass=@par Klasa funkcije:\n <b>S klasa</b> API funkcija,			\
             ova funkcija se moze pozvati samo od strane aplikacije samo iz 		\
-            kriticnih sekcija koda gde je zakljucan scheduler ."						\ 
-          "api=@par Klasa funkcije:\n Normalna <b>API</b> funkcija, ova funkcija\
+            kriticnih sekcija koda gde je zakljucan scheduler ."			    \ 
+          "api=@par Klasa objekta:\n Normalan <b>API</b> objekat, ovaj objekat  \
             se moze pozvati samo iz aplikacije."								\ 
-          "notapi=@par Klasa funkcije:\n Nije <b>API</b> funkcija, ova funkcija \
-            je namenjena iskljucivo za internu upotrebu."						\ 
+          "notapi=@par Klasa objekta:\n Nije <b>API</b> objekat, ovaj objekat   \
+            je namenjen iskljucivo za internu upotrebu."						\ 
           "mseffect=@attention Makro nema zastitu od bocnih efekata."			\
           "inline=@note Ovo je @c inline funkcija."
 

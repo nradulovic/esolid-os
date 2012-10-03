@@ -68,29 +68,24 @@
 
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Debug podrska
- * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
+ * @brief       Makroi za debug podrsku.
  * @{ *//*---------------------------------------------------------------------------------------*/
-
-#if defined(OPT_DBG_EO) || defined(__DOXYGEN__)
-# define EO_ASSERT                      DBG_ASSERT
-# define EO_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define EO_COMPILE_ASSERT              DBG_COMPILE_ASSERT
-# define EO_DBG_DECL                    DBG_DECL
-# define EO_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define EO_DBG_ENTRY                   DBG_ENTRY
-# define EO_DBG_EXIT                    DBG_EXIT
-# define EO_DBG_MACRO                   DBG_MACRO
-# define EO_DBG_CHECK                   DBG_CHECK
+#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
+# define EVT_ASSERT                      DBG_ASSERT
+# define EVT_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
+# define EVT_ASSERT_COMPILE              DBG_ASSERT_COMPILE
+# define EVT_DBG_DECL                    DBG_DECL
+# define EVT_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
+# define EVT_DBG_MACRO                   DBG_MACRO
+# define EVT_DBG_CHECK                   DBG_CHECK
 #else
-# define EO_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define EO_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define EO_COMPILE_ASSERT(expr)        DBG_EMPTY_DECL()
-# define EO_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define EO_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define EO_DBG_ENTRY()                 DBG_EMPTY_MACRO()
-# define EO_DBG_EXIT()                  DBG_EMPTY_MACRO()
-# define EO_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define EO_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
+# define EVT_ASSERT(expr)                DBG_EMPTY_MACRO()
+# define EVT_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
+# define EVT_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
+# define EVT_DBG_DECL(expr)              DBG_EMPTY_DECL()
+# define EVT_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
+# define EVT_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
+# define EVT_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -134,16 +129,20 @@ C_INLINE_ALWAYS bool_T evtQIsEmpty_(
 }
 
 /*-------------------------------------------------------------------------------------------*//**
- * @brief       Vraca da li je red cekanja za dogadjaje prazan
+ * @brief       Unistava dogadjaj.
  * @param       aEvt                    Pokazivac na dogadjaj koji treba da se
  *                                      unisti.
+ * @details     Ukoliko dati @c aEvt dogadjaj nema vise ni jednog korisnika,
+ *              onda ce memorijski prostor koji on zauzima biti recikliran, u
+ *              suprotnom, dogadjaj nastavlja da postoji.
+ * @iclass
  *//*--------------------------------------------------------------------------------------------*/
 C_INLINE_ALWAYS void evtDestroyI_(
     esEvtHeader_T       * aEvt) {
 
     if ((evtDynamic_T)0U == aEvt->internals.dynamic) {
 
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
         aEvt->internals.signature = 0xDEAD;
 #endif
         esHmemDeAllocI((void *)aEvt);
@@ -161,18 +160,6 @@ C_INLINE_ALWAYS size_t evtQReqSize_(
 
     return (aQueueSize * sizeof(void *));
 }
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Unistava dogadjaj.
- * @param       aEvt                    Pokazivac na dogadjaj koji treba da se
- *                                      unisti.
- * @details     Ukoliko dati @c aEvt dogadjaj nema vise ni jednog korisnika,
- *              onda ce memorijski prostor koji on zauzima biti recikliran, u
- *              suprotnom, dogadjaj nastavlja da postoji.
- * @iclass
- *//*--------------------------------------------------------------------------------------------*/
-void evtDestroyI_(
-    esEvtHeader_T       * aEvt);
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Konstruise red cekanja za dogadjaje.

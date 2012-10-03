@@ -33,8 +33,8 @@
 #define KERNEL_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
-#include "../config/kernel_config.h"
 #include "hal/hal.h"
+#include "../config/kernel_config.h"
 #include "port/kernel_profiles.h"
 #include "primitive/list.h"
 #include "primitive/queue.h"
@@ -76,7 +76,6 @@ typedef struct esEpaHeader esEpaHeader_T;
 #include "kernel/evt.h"
 #include "kernel/sproc.h"
 #include "kernel/core.h"
-#include "kernel/epa.h"
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Struktura podataka za EIR dogadjaj

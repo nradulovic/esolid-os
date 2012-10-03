@@ -44,7 +44,7 @@
  * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
  *              rezervisan i sistem ga nece razmatrati kao kandidata za brisanje.
  *              Brojac korisnika dogadjaja se i dalje azurira, tako da kada se
- *              dogadjaj oslobi rezervacije on moze da bude obrisan ako ima 0
+ *              dogadjaj oslobodii rezervacije on moze da bude obrisan ako ima 0
  *              korisnika.
  *//*--------------------------------------------------------------------------------------------*/
 #define EVT_RESERVED_MASK               ((evtDynamic_T)(1U << 6))

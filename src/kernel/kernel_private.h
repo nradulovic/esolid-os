@@ -20,25 +20,17 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
- *
  * @author  	Nenad Radulovic
- *
- * @brief       Privatni objekti CORE modula.
- *
+ * @brief       Privatni objekti kernel-a.
  * ------------------------------------------------------------------------------------------------
- *
- * @addtogroup  core_impl
- *
+ * @addtogroup  kernel_impl
  ****************************************************************************************//** @{ */
 
 
-#ifndef CORE_PRIVATE_H_
-#define CORE_PRIVATE_H_
+#ifndef KERNEL_PRIVATE_H_
+#define KERNEL_PRIVATE_H_
 
 
 /*************************************************************************************************
@@ -49,8 +41,7 @@
  * Module dependencies
  *-----------------------------------------------------------------------------------------------*/
 
-#include "core/core.h"
-#include PORT_ARCH_HEADER(core)
+#include "kernel/kernel.h"
 
 
 /*-----------------------------------------------------------------------------------------------*
@@ -60,17 +51,17 @@
 #include "mm_pkg.h"
 #include "evt_pkg.h"
 #include "sproc_pkg.h"
-#include "kernel_pkg.h"
+#include "core_pkg.h"
 
 
 /*-----------------------------------------------------------------------------------------------*
  * EXTERNS
  *-----------------------------------------------------------------------------------*//** @cond */
 
-#ifdef CORE_PRIVATE_H_VAR
-# define CORE_PRIVATE_H_EXT
+#ifdef KERNEL_PRIVATE_H_VAR
+# define KERNEL_PRIVATE_H_EXT
 #else
-# define CORE_PRIVATE_H_EXT extern
+# define KERNEL_PRIVATE_H_EXT extern
 #endif
 
 
@@ -163,6 +154,6 @@ extern "C" {
 
 
 /** @endcond *//** @} *//*************************************************************************
- * END of core_private.h
+ * END of kernel_private.h
  *************************************************************************************************/
-#endif /* CORE_PRIVATE_H_ */
+#endif /* KERNEL_PRIVATE_H_ */

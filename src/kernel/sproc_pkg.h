@@ -25,15 +25,10 @@
 
 /*********************************************************************************************//**
  * @file
- *
  * @author  	Nenad Radulovic
- *
  * @brief       Privatni interfejs State processor podmodul.
- *
  * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  sproc_impl
- *
  ****************************************************************************************//** @{ */
 
 
@@ -76,29 +71,21 @@
 
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Debug podrska
- *
- * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
- *
  * @{ *//*---------------------------------------------------------------------------------------*/
-
-#if defined(OPT_DBG_SP)
+#if defined(OPT_KERNEL_DBG_SPROC)
 # define SP_ASSERT                      DBG_ASSERT
 # define SP_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define SP_COMPILE_ASSERT              DBG_COMPILE_ASSERT
+# define SP_ASSERT_COMPILE              DBG_COMPILE_ASSERT
 # define SP_DBG_DECL                    DBG_DECL
 # define SP_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define SP_DBG_ENTRY                   DBG_ENTRY
-# define SP_DBG_EXIT                    DBG_EXIT
 # define SP_DBG_MACRO                   DBG_MACRO
 # define SP_DBG_CHECK                   DBG_CHECK
 #else
 # define SP_ASSERT(expr)                DBG_EMPTY_MACRO()
 # define SP_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define SP_COMPILE_ASSERT(expr)        DBG_EMPTY_DECL()
+# define SP_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
 # define SP_DBG_DECL(expr)              DBG_EMPTY_DECL()
 # define SP_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define SP_DBG_ENTRY()                 DBG_EMPTY_MACRO()
-# define SP_DBG_EXIT()                  DBG_EMPTY_MACRO()
 # define SP_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
 # define SP_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
 #endif
@@ -168,11 +155,11 @@ C_INLINE_ALWAYS size_t hsmReqSize_(
  * @param       aStateDepth             maksimalna hijerarhijska dubina stanja
  *                                      automata.
  *//*--------------------------------------------------------------------------------------------*/
- void hsmInit(
-     esEpaHeader_T       * aEpa,
-     esPtrState_T        aInitState,
-     esPtrState_T        * aStateBuff,
-     size_t              aStateDepth);
+void hsmInit(
+    esEpaHeader_T       * aEpa,
+    esPtrState_T        aInitState,
+    esPtrState_T        * aStateBuff,
+    size_t              aStateDepth);
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Dekonstruise HSM automat

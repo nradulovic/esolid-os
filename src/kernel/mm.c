@@ -1,8 +1,6 @@
 /*************************************************************************************************
  * This file is part of eSolid
  *
- * Template version: 1.1.10 (8.03.2012)
- *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
  *
  * eSolid is free software; you can redistribute it and/or modify
@@ -22,20 +20,12 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
- *
  * @author      Nenad Radulovic
- *
  * @brief       Implementacija Memory Management modula.
- *
  * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  mm_impl
- *
  ****************************************************************************************//** @{ */
 
 
@@ -44,7 +34,7 @@
  *************************************************************************************************/
 
 #define MM_PKG_H_VAR
-#include "core_private.h"
+#include "kernel_private.h"
 
 
 /*************************************************************************************************
@@ -334,7 +324,7 @@ void * esHmemAlloc(
     void * tmpMem;
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpMem = esHmemAllocI(
         aSize);
     ES_CRITICAL_EXIT();
@@ -422,7 +412,7 @@ void esHmemDeAlloc(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     esHmemDeAllocI(
         aMemory);
     ES_CRITICAL_EXIT();
@@ -489,7 +479,7 @@ size_t esHmemFreeSpace(
     size_t tmpSize;
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpSize = esHmemFreeSpaceI();
     ES_CRITICAL_EXIT();
 

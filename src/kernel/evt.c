@@ -37,23 +37,17 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 #define EVT_PKG_H_VAR
-#include "core_private.h"
+#include "kernel_private.h"
 
 /*============================================================================  LOCAL DEFINES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Local debug define macro.
  *//*--------------------------------------------------------------------------------------------*/
-EO_DBG_DEFINE_MODULE(Event Object);
+EVT_DBG_DEFINE_MODULE(Event Object);
 
 /*============================================================================  LOCAL MACRO's  ==*/
 /*=========================================================================  LOCAL DATA TYPES  ==*/
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
-
-C_INLINE_ALWAYS void evtQStatEvtRemoved_(
-    evtQueue_T    * aEvtQueue);
-
-C_INLINE_ALWAYS void evtQStatEvtAdded_(
-    evtQueue_T    * aEvtQueue);
 
 C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T          * aEvtQueue,
@@ -76,37 +70,37 @@ C_INLINE_ALWAYS void evtInit_(
 const C_ROM evtIntr_T evtSignal[] = {
     {(esEvtId_T)SIG_EMPTY,
     EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_ENTRY,
     EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_EXIT,
     EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_INIT,
     EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_SUPER,
     EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_NOEX,
      EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
      EVT_SIGNATURE
 #endif
     },
@@ -128,7 +122,7 @@ C_INLINE_ALWAYS void evtInit_(
 
     aNewEvt->internals.dynamic = (evtDynamic_T)0U;                              /* Dogadjaj je dinamican, sa 0 korisnika.                   */
 
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK)
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
     aNewEvt->internals.signature = EVT_SIGNATURE;
 #endif
     aNewEvt->internals.id = aEvtId;
@@ -143,6 +137,8 @@ C_INLINE_ALWAYS void evtInit_(
 
 #if defined(OPT_EVT_USE_SIZE)
     aNewEvt->size = (esEvtSize_T)aDataSize;
+#else
+    (void)aDataSize;
 #endif
 
 #if defined(OPT_EVT_USE_TYPE)
@@ -163,27 +159,23 @@ C_INLINE_ALWAYS esEvtHeader_T * evtQGetI_(
 
     esEvtHeader_T * tmpEvt;
 
-    EO_ASSERT((evtQueue_T *)0U != aEvtQueue);                                   /* Provera par: da li je aEvtQueue inicijalizovan?          */
-    EO_ASSERT(FALSE == esQpIsEmpty(&(aEvtQueue->queue)));                       /* Provera: da li red sadrzi barem jedan element?           */
+    EVT_ASSERT((evtQueue_T *)0U != aEvtQueue);                                   /* Provera par: da li je aEvtQueue inicijalizovan?          */
+    EVT_ASSERT(FALSE == esQpIsEmpty(&(aEvtQueue->queue)));                       /* Provera: da li red sadrzi barem jedan element?           */
     tmpEvt = (esEvtHeader_T *)esQpGetI(
         &(aEvtQueue->queue));
 
-#if defined(OPT_KERNEL_ENABLE)
-
-    if (!(EVT_STATIC_MASK & tmpEvt->internals.dynamic)) {
+    if ((evtDynamic_T)0U == (EVT_STATIC_MASK & tmpEvt->internals.dynamic)) {
         evtDynamic_T tmpR;
         evtDynamic_T tmpU;
 
+        /*
+         * TODO: Mora da se postavi granicnih = 0, jer moze da dodje do overflow-a dok je dogadjaj rezervisan, a ovo se dekrementira
+         */
         tmpR = tmpEvt->internals.dynamic & ~EVT_USERS_MASK;
         tmpU = (tmpEvt->internals.dynamic - 1U) & EVT_USERS_MASK;
         tmpEvt->internals.dynamic = tmpR | tmpU;
     }
 
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-    evtQStatEvtRemoved_(
-        aEvtQueue);
-# endif
-#endif
     return (tmpEvt);
 }
 
@@ -196,17 +188,15 @@ C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt) {
 
-    EO_DBG_CHECK((evtQueue_T *)0U != aEvtQueue);                                /* Provera par: da li je aEvtQueue inicijalizovan?          */
-    EO_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
-    EO_ASSERT(FALSE == esQpIsFull(&(aEvtQueue->queue)));                        /* Provera: da li red moze da primi nov element?            */
-    EO_DBG_CHECK(EVT_SIGNATURE == aEvt->internals.signature);                   /* Provera par: da li je dogadjaj validan?                  */
+    EVT_DBG_CHECK((evtQueue_T *)0U != aEvtQueue);                               /* Provera par: da li je aEvtQueue inicijalizovan?          */
+    EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                 /* Provera par: da li je aEvt inicijalizovan?               */
+    EVT_ASSERT(FALSE == esQpIsFull(&(aEvtQueue->queue)));                       /* Provera: da li red moze da primi nov element?            */
+    EVT_DBG_CHECK(EVT_SIGNATURE == aEvt->internals.signature);                  /* Provera par: da li je dogadjaj validan?                  */
     esQpPutI(
         &(aEvtQueue->queue),
         (void *)aEvt);
 
-#if defined(OPT_KERNEL_ENABLE)
-
-    if ((evtDynamic_T)0U != (EVT_STATIC_MASK & aEvt->internals.dynamic)) {
+    if ((evtDynamic_T)0U == (EVT_STATIC_MASK & aEvt->internals.dynamic)) {
         evtDynamic_T tmpR;
         evtDynamic_T tmpU;
 
@@ -214,12 +204,6 @@ C_INLINE_ALWAYS void evtQPutI_(
         tmpU = (aEvt->internals.dynamic - 1U) & EVT_USERS_MASK;
         aEvt->internals.dynamic = tmpR | tmpU;
     }
-                                                                                /* Povecaj info o zauzecu reda cekanja.                     */
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-    evtQStatEvtAdded_(
-        aEvtQueue);
-# endif
-#endif
 }
 
 /*-------------------------------------------------------------------------------------------*//**
@@ -231,17 +215,15 @@ C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt) {
 
-    EO_DBG_CHECK((evtQueue_T *)0U != aEvtQueue);                                /* Provera par: da li je aEvtQueue inicijalizovan?          */
-    EO_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
-    EO_ASSERT(FALSE == esQpIsFull(&(aEvtQueue->queue)));                        /* Provera: da li red moze da primi nov element?            */
-    EO_DBG_CHECK(EVT_SIGNATURE == aEvt->internals.signature);                   /* Provera par: da li je dogadjaj validan?                  */
+    EVT_DBG_CHECK((evtQueue_T *)0U != aEvtQueue);                               /* Provera par: da li je aEvtQueue inicijalizovan?          */
+    EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                 /* Provera par: da li je aEvt inicijalizovan?               */
+    EVT_ASSERT(FALSE == esQpIsFull(&(aEvtQueue->queue)));                       /* Provera: da li red moze da primi nov element?            */
+    EVT_DBG_CHECK(EVT_SIGNATURE == aEvt->internals.signature);                  /* Provera par: da li je dogadjaj validan?                  */
     esQpPutAheadI(
         &(aEvtQueue->queue),
         (void *)aEvt);
 
-#if defined(OPT_KERNEL_ENABLE)
-
-    if ((evtDynamic_T)0U != (EVT_STATIC_MASK & aEvt->internals.dynamic)) {
+    if ((evtDynamic_T)0U == (EVT_STATIC_MASK & aEvt->internals.dynamic)) {
         evtDynamic_T tmpR;
         evtDynamic_T tmpU;
 
@@ -249,43 +231,9 @@ C_INLINE_ALWAYS void evtQPutAheadI_(
         tmpU = (aEvt->internals.dynamic - 1U) & EVT_USERS_MASK;
         aEvt->internals.dynamic = tmpR | tmpU;
     }
-                                                                                /* Povecaj info o zauzecu reda cekanja.                     */
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-    evtQStatEvtAdded_(
-        aEvtQueue);
-# endif
-#endif
 }
 
-#if defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Statistika reda za cekanje - dodavanje dogadjaja
- * @param       aEvtQueue               Pokazivac na strukturu reda za cekanje.
- * @notapi
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void evtQStatEvtAdded_(
-    evtQueue_T    * aEvtQueue) {
-
-    --aEvtQueue->freeCurr;
-
-    if (aEvtQueue->freeCurr < aEvtQueue->freeMin) {
-        aEvtQueue->freeMin = aEvtQueue->freeCurr;
-    }
-}
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Statistika reda za cekanje - uklanjanje dogadjaja
- * @param       aEvtQueue               Pokazivac na strukturu reda za cekanje.
- * @notapi
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void evtQStatEvtRemoved_(
-    evtQueue_T    * aEvtQueue) {
-
-    ++aEvtQueue->freeCurr;
-}
-#endif
 /** @} *//*--------------------------------------------------------------------------------------*/
-
 /*-----------------------------------------------------------------------------------------------*/
 esEvtHeader_T * evtQGetI(
     esEpaHeader_T       * aEpa) {
@@ -315,17 +263,10 @@ void evtQPutAhead(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
-
-#if defined(OPT_OPTIMIZE_SIZE)
-    evtQPutAheadI(
-        aEpa,
-        aEvt);
-#else
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutAheadI_(
         &(aEpa->internals.evtQueue),
         aEvt);
-#endif
     ES_CRITICAL_EXIT();
 }
 
@@ -346,17 +287,10 @@ void evtQPut(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
-
-#if defined(OPT_OPTIMIZE_SIZE)
-    evtQPutI(
-        aEpa,
-        aEvt);
-#else
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutI_(
         &(aEpa->internals.evtQueue),
         aEvt);
-#endif
     ES_CRITICAL_EXIT();
 }
 
@@ -366,15 +300,15 @@ void evtQInit(
     esEvtHeader_T       ** aEvtBuff,
     size_t              aQueueSize) {
 
-    EO_DBG_CHECK((size_t)1U <= aQueueSize);                                     /* Provera par: da li je zahtevana velicina barem za 1      */
+    EVT_DBG_CHECK((size_t)1U <= aQueueSize);                                    /* Provera par: da li je zahtevana velicina barem za 1      */
                                                                                 /* element?                                                 */
-    EO_DBG_CHECK((esEvtHeader_T **)0U != aEvtBuff);                             /* Provera: da li je rezervisana memorija?                  */
+    EVT_DBG_CHECK((esEvtHeader_T **)0U != aEvtBuff);                            /* Provera: da li je rezervisana memorija?                  */
     esQpInit(
         &(aEpa->internals.evtQueue.queue),
         (void **)aEvtBuff,
         aQueueSize);
 
-#if defined(OPT_DBG_EO) || (defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY)) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
     aEpa->internals.evtQueue.freeCurr = esQpFreeSpace(
         &(aEpa->internals.evtQueue.queue));
     aEpa->internals.evtQueue.freeMin = aEpa->internals.evtQueue.freeCurr;
@@ -388,16 +322,11 @@ void evtQDeInit(
     ES_CRITICAL_DECL();
     esEvtHeader_T * tmpEvt;
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
     while (FALSE == esQpIsEmpty(&(aEpa->internals.evtQueue.queue))) {
-
-#if defined(OPT_OPTIMIZE_SPEED) || defined(__DOXYGEN__)
         tmpEvt = evtQGetI_(
             &(aEpa->internals.evtQueue));
-#else
-        tmpEvt = evtQGetI(aEpa);
-#endif
         evtDestroyI_(
             tmpEvt);
     }
@@ -414,11 +343,14 @@ esEvtHeader_T * esEvtCreate(
     size_t              dataSize,
     esEvtId_T           id) {
 
+    ES_CRITICAL_DECL();
     esEvtHeader_T * newEvt;
 
-    EO_DBG_CHECK(sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
-    ES_ATOMIC(newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize));                /* Dobavi potreban memorijski prostor za dogadjaj           */
-    DBG_ASSERT((esEvtHeader_T *)0U != newEvt);                                  /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
+    EVT_DBG_CHECK(sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
+    ES_CRITICAL_EXIT();
+    EVT_ASSERT((esEvtHeader_T *)0U != newEvt);                                  /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
     evtInit_(
         newEvt,
         dataSize,
@@ -434,9 +366,9 @@ esEvtHeader_T * esEvtCreateI(
 
     esEvtHeader_T * newEvt;
 
-    EO_DBG_CHECK(sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
+    EVT_DBG_CHECK(sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
     newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
-    DBG_ASSERT((esEvtHeader_T *)0 != newEvt);                                   /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
+    EVT_ASSERT((esEvtHeader_T *)0 != newEvt);                                   /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
     evtInit_(
         newEvt,
         dataSize,
@@ -449,7 +381,7 @@ esEvtHeader_T * esEvtCreateI(
 void esEvtReserve(
     esEvtHeader_T       * aEvt) {
 
-    EO_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
+    EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
     aEvt->internals.dynamic |= EVT_RESERVED_MASK;
 }
 
@@ -457,12 +389,12 @@ void esEvtReserve(
 void esEvtUnReserve(
     esEvtHeader_T       * aEvt) {
 
-    EO_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
+    EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
     aEvt->internals.dynamic &= ~EVT_RESERVED_MASK;
 
     if ((evtDynamic_T)0U == aEvt->internals.dynamic) {
 
-#if defined(OPT_DBG_EO) && defined(OPT_DBG_USE_CHECK)
+#if defined(OPT_KERNEL_DBG_EVT)
         aEvt->internals.signature = 0xDEAD;
 #endif
         esHmemDeAlloc((void *)aEvt);
@@ -476,36 +408,18 @@ void esEvtPost(
 
     ES_CRITICAL_DECL();
 
-    EO_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
-    ES_CRITICAL_ENTER();
-
-#if defined(OPT_OPTIMIZE_SIZE)
-    evtQPutI(
-        aEpa,
-        aEvt);
-# if defined(OPT_KERNEL_ENABLE)
-    schedRdyInsertI(
-        aEpa);
-# endif
-#elif defined(OPT_OPTIMIZE_SPEED)
+    EVT_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutI_(
         &(aEpa->internals.evtQueue),
         aEvt);
-# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI_(
         aEpa);
-# endif
-#else
-    evtQPutI(
-        aEpa,
-        aEvt);
-# if defined(OPT_KERNEL_ENABLE)
-    schedRdyInsertI_(
-        aEpa);
-# endif
-#endif
     ES_CRITICAL_EXIT();
+
+#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
     EPE_SCHED_NOTIFY_RDY();
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -515,36 +429,18 @@ void esEvtPostAhead(
 
     ES_CRITICAL_DECL();
 
-    EO_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
-    ES_CRITICAL_ENTER();
-
-#if defined(OPT_OPTIMIZE_SIZE)
-    evtQPutAheadI(
-        aEpa,
-        aEvt);
-# if defined(OPT_KERNEL_ENABLE)
-    schedRdyInsertI(
-        aEpa);
-# endif
-#elif defined(OPT_OPTIMIZE_SPEED)
+    EVT_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutAheadI_(
         &(aEpa->internals.evtQueue),
         aEvt);
-# if defined(OPT_KERNEL_ENABLE)
     schedRdyInsertI_(
         aEpa);
-# endif
-#else
-    evtQPutAheadI(
-        aEpa,
-        aEvt);
-# if defined(OPT_KERNEL_ENABLE)
-    schedRdyInsertI_(
-        aEpa);
-# endif
-#endif
     ES_CRITICAL_EXIT();
+
+#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
     EPE_SCHED_NOTIFY_RDY();
+#endif
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/

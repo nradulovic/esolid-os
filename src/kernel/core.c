@@ -20,53 +20,26 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Implementacija kernel-a i registra.
+ * @brief       Implementacija osnove kernel-a
  * ------------------------------------------------------------------------------------------------
- * @addtogroup  kernel_impl
+ * @addtogroup  core_impl
  ****************************************************************************************//** @{ */
 
 /*============================================================================  INCLUDE FILES  ==*/
-#define KERNEL_PKG_H_VAR
-#include "core_private.h"
+#define CORE_PKG_H_VAR
+#include "kernel_private.h"
 
 /*============================================================================  LOCAL DEFINES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Local debug define macro.
  *//*--------------------------------------------------------------------------------------------*/
-KERNEL_DBG_DEFINE_MODULE(Kernel);
+CORE_DBG_DEFINE_MODULE(Kernel Core);
 
 /*============================================================================  LOCAL MACRO's  ==*/
 /*=========================================================================  LOCAL DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Cuvara registra
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct regSentinel {
-/**
- * @brief       Lista svih aktivnih EPA jedinica u sistemu
- */
-    esDlsList_T     activeList;
-
-/**
- * @brief       Broj aktivnih jedinica u EPA sistemu
- */
-    uint8_t         activeCnt;
-
-/**
- * @brief       Zadnja vrednost dodeljenog PID broja
- */
-    uint8_t         lastPid;
-
-/**
- * @brief       Events Per Second
- */
-    uint32_t        eps;
-} regSentinel_T;
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Trenutno izvrsavana EPA jedinica
@@ -80,7 +53,7 @@ typedef struct currCtx {
 /**
  * @brief       Prioritet trenutnog EPA objekata koji se izvrsava
  */
-    esEpaPrio_T     prio;
+    uint_fast8_t    prio;
 
 /**
  * @brief       Trenutno stanje schedulera
@@ -89,55 +62,18 @@ typedef struct currCtx {
 } currCtx_T;
 
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
-static uint8_t regPidAllocI(
-    void);
-
-static void regInit(
-    void);
-
-static void regRegisterI(
-    esEpaHeader_T       * aEpa,
-    const C_ROM esEpaDef_T * aDescription);
-
-static void regUnRegisterI(
-    esEpaHeader_T       * aEpa);
-
 static void schedInit(
     void);
 
 /*==========================================================================  LOCAL VARIABLES  ==*/
 
-#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
-
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Cuvar registra
- *//*--------------------------------------------------------------------------------------------*/
-static regSentinel_T regSentinel;
-# endif
-
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Interni podaci schedulera
  *//*--------------------------------------------------------------------------------------------*/
 static currCtx_T currCtx;
-#endif /* OPT_KERNEL_ENABLE */
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
-/*-----------------------------------------------------------------------------------------------*
- *              Funkcije koje su dostupne samo ako je kernel omogucen.
- *-----------------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
-
-#if defined(OPT_OPTIMIZE_SIZE) || defined(__DOXYGEN__)
-void schedRdyInsertI(
-    const esEpaHeader_T * aEpa) {
-
-    schedRdyInsertI_(
-        aEpa);
-}
-#endif
-
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Inicijalizije ready listu
  *//*--------------------------------------------------------------------------------------------*/
@@ -157,9 +93,9 @@ C_INLINE_ALWAYS void schedRdyRemoveI_(
     unative_T indxGroup;
     unative_T indx;
 
-    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (HAL_UNATIVE_BITS - PRIO_INDX_PWR));
+    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
     indxGroup = aEpa->internals.kernCtrl.prio >> PRIO_INDX_PWR;
@@ -181,12 +117,33 @@ C_INLINE_ALWAYS unative_T schedRdyQueryI_(
     unative_T indxGroup;
     unative_T indx;
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+# if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
-#else
+# else
+
+    if (0U != rdyBitmap.bitGroup) {
+        indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
+    } else {
+
+        return ((unative_T)0U);
+    }
+# endif
+
+    if (0U != rdyBitmap.bit[indxGroup]) {
+        indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
+    } else {
+
+        return ((unative_T)0U);
+    }
+#else /* OPT_KERNEL_SCHEDULER_FIXEDPRIO */
+# if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    indxGroup = (unative_T)0U;
+# else
     indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
-#endif
+# endif
     indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
+#endif /* !OPT_KERNEL_SCHEDULER_FIXEDPRIO */
 
     return (indx | (indxGroup << PRIO_INDX_PWR));
 }
@@ -197,7 +154,7 @@ C_INLINE_ALWAYS unative_T schedRdyQueryI_(
 C_INLINE_ALWAYS void schedRegisterI_(
     const esEpaHeader_T * aEpa) {
 
-    EPE_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
+    CORE_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
     rdyBitmap.epaList[aEpa->internals.kernCtrl.prio] = (esEpaHeader_T *)aEpa;
 }
 
@@ -221,10 +178,10 @@ C_INLINE_ALWAYS bool_T schedEpaIsRdy_(
     unative_T indxGroup;
     unative_T indx;
 
-    EPE_ASSERT((esEpaHeader_T *)0U != rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);          /* Provera: da li je dati EPA prijavljen u sistem?          */
-    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (HAL_UNATIVE_BITS - PRIO_INDX_PWR));
+    CORE_ASSERT((esEpaHeader_T *)0U != rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);          /* Provera: da li je dati EPA prijavljen u sistem?          */
+    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < HAL_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
     indxGroup = aEpa->internals.kernCtrl.prio >> PRIO_INDX_PWR;
@@ -246,10 +203,13 @@ static void schedInit(
     void) {
 
     currCtx.epa = (esEpaHeader_T *)0U;
-    currCtx.prio = (esEpaPrio_T)0U;
+    currCtx.prio = (uint_fast8_t)0U;
     currCtx.status = KERNEL_STOPPED;
     schedRdyInit_();
+
+#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
     portSchedInit();
+#endif
 }
 
 /*-------------------------------------------------------------------------------------------*//**
@@ -257,6 +217,38 @@ static void schedInit(
  *//*--------------------------------------------------------------------------------------------*/
 void scheduleI(
     uint32_t irqLock_) {
+
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+
+    uint_fast8_t newPrio;
+
+    newPrio = schedRdyQueryI_();
+
+    while (0U != newPrio) {
+        esEpaHeader_T * newEpa;
+        esEvtHeader_T * newEvt;
+
+        newEpa = rdyBitmap.epaList[newPrio];
+        currCtx.prio = newPrio;
+        currCtx.epa = newEpa;
+        newEvt = evtQGetI(
+            newEpa);
+        ES_CRITICAL_EXIT();
+        hsmDispatch(
+            newEpa,
+            newEvt);
+        ES_CRITICAL_ENTER(irqLock_);
+        evtDestroyI_(
+            newEvt);
+
+        if (TRUE == evtQIsEmpty_(newEpa)) {
+            schedRdyRemoveI_(newEpa);
+        }
+        newPrio = schedRdyQueryI_();
+    }
+    currCtx.prio = 0U;
+    currCtx.epa = (void *)0U;
+#else
 
     esEpaPrio_T newPrio;
 
@@ -294,91 +286,8 @@ void scheduleI(
         currCtx.prio = savedPrio;
         currCtx.epa = savedEpa;
     }
+#endif
 }
-
-/*-----------------------------------------------------------------------------------------------*
- *              Funkcije koje su dostupne samo ako su kernel i registar omoguceni.
- *-----------------------------------------------------------------------------------------------*/
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Dodeljuje pid broj
- * @return      Pid broj koji nije zauzet.
- *//*--------------------------------------------------------------------------------------------*/
-static uint8_t regPidAllocI(
-    void) {
-
-    esDlsList_T * currNode;
-    uint8_t tmpPid;
-    bool_T pidFound;
-
-    tmpPid = regSentinel.lastPid;
-    pidFound = FALSE;
-
-    do {
-        ++tmpPid;
-
-        DLS_FOR_EACH(
-            &(regSentinel.activeList),
-            currNode) {
-
-            if (((regNode_T *)currNode)->pid == tmpPid) {
-                pidFound = TRUE;
-
-                break;
-            }
-        }
-    } while (TRUE == pidFound);
-    regSentinel.lastPid = tmpPid;
-
-    return (tmpPid);
-}
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Vrsi inicijalizaciju cuvara za registar bazu
- *//*--------------------------------------------------------------------------------------------*/
-static void regInit(
-    void) {
-
-    esDlsSentinelInit(
-        &(regSentinel.activeList));
-    regSentinel.activeCnt = (uint8_t)0U;
-    regSentinel.lastPid = (uint8_t)0U;
-}
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Registruje dati EPA objekat u registar bazu.
- *//*--------------------------------------------------------------------------------------------*/
-static void regRegisterI(
-    esEpaHeader_T       * aEpa,
-    const C_ROM esEpaDef_T * aDescription) {
-
-    aEpa->internals.registry.description = aDescription;
-    aEpa->internals.registry.pid = regPidAllocI();
-    esDlsNodeAddHeadI(
-        &regSentinel.activeList,
-        &(aEpa->internals.registry.epaList));
-    ++regSentinel.activeCnt;
-}
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Uklanja registrovani EPA objekat iz registar baze.
- *//*--------------------------------------------------------------------------------------------*/
-static void regUnRegisterI(
-    esEpaHeader_T       * aEpa) {
-
-    ES_CRITICAL_DECL();
-
-    ES_CRITICAL_ENTER();
-    esDlsNodeRemoveI(
-        &(aEpa->internals.registry.epaList));
-    --regSentinel.activeCnt;
-    ES_CRITICAL_EXIT();
-    esDlsNodeInitI(
-        &(aEpa->internals.registry.epaList));
-}
-# endif /* OPT_KERNEL_USE_REGISTRY */
-#endif /* OPT_KERNEL_ENABLE */
 
 /*==============================================================  GLOBAL FUNCTION DEFINITIONS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -390,12 +299,10 @@ void esEpaInit(
     esEvtHeader_T       ** aEvtBuff,
     const C_ROM esEpaDef_T * aDescription) {
 
-#if defined(OPT_KERNEL_ENABLE)
     ES_CRITICAL_DECL();
-#endif
-    EPE_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);           /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
+    CORE_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);   /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
                                                                                 /* te granice OPT_KERNEL_EPA_PRIO_MAX.                             */
-    EPE_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                        /* Prioritet 0 je rezervisan.                               */
+    CORE_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                       /* Prioritet 0 je rezervisan.                               */
     hsmInit(
         aEpa,
         aDescription->hsmInitState,
@@ -404,30 +311,23 @@ void esEpaInit(
     evtQInit(
         aEpa,
         aEvtBuff,
-        aDescription->evtQueueSize);
-
-#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
-    aEpa->internals.kernCtrl.prio = aDescription->epaPrio;
-    ES_CRITICAL_ENTER();
-    schedRegisterI_(
-        aEpa);
-
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-    regRegisterI(
-        aEpa,
-        aDescription);
-# endif
-    evtQPutAheadI(
+        aDescription->evtQueueDepth);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    evtQPutAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         aEpa,
         (esEvtHeader_T *)&evtSignal[SIG_INIT]);
+    aEpa->internals.kernCtrl.prio = aDescription->epaPrio;
+    schedRegisterI_(
+        aEpa);
     schedRdyInsertI_(
         aEpa);
-    ES_CRITICAL_EXIT();
 
+#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
     if (KERNEL_RUNNING == esKernelStatus()) {
         EPE_SCHED_NOTIFY_RDY();
     }
 #endif
+    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -440,26 +340,26 @@ esEpaHeader_T * esEpaCreate(
     size_t stateBuff;
     size_t evtBuff;
 
-    EPE_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);                /* Provera par: da li je aDescription inicijalizovan?       */
-    EPE_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaMemory);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
+    CORE_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);                /* Provera par: da li je aDescription inicijalizovan?       */
+    CORE_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaWorkspaceSize);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
                                                                                 /* strukture.                                               */
-    epaSize = aDescription->epaMemory;
+    epaSize = aDescription->epaWorkspaceSize;
     stateBuff = epaSize + 1U;
     epaSize += hsmReqSize_(
         aDescription->hsmStateDepth);
     evtBuff = epaSize + 1U;
     epaSize += evtQReqSize_(
-        aDescription->evtQueueSize);
+        aDescription->evtQueueDepth);
 
 #if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
-    EPE_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
+    CORE_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
     newEpa = (esEpaHeader_T *)(* aMemClass->pAlloc)(epaSize);
 #else
-    EPE_DBG_CHECK(&memStaticClass != aMemClass);                                /* Provera par: da li je aMemClass ispravno inicijalizovan? */
+    CORE_DBG_CHECK(&memStaticClass != aMemClass);                                /* Provera par: da li je aMemClass ispravno inicijalizovan? */
     (void)aMemClass;
     newEpa = (esEpaHeader_T *)esHmemAlloc(epaSize);
 #endif
-    DBG_ASSERT((esEpaHeader_T *)0U != newEpa);
+    CORE_ASSERT((esEpaHeader_T *)0U != newEpa);
     esEpaInit(
         newEpa,
         (esPtrState_T *)((uint8_t *)newEpa + stateBuff),
@@ -480,19 +380,12 @@ esEpaHeader_T * esEpaCreate(
 void esEpaDeInit(
     esEpaHeader_T       * aEpa) {
 
-#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedUnRegisterI_(
         aEpa);
-
-# if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-    regUnRegisterI(
-        aEpa);
-# endif
     ES_CRITICAL_EXIT();
-#endif
     evtQDeInit(
         aEpa);
     hsmDeInit(
@@ -505,13 +398,13 @@ void esEpaDestroy(
 
 #if !defined(OPT_KERNEL_USE_DYNAMIC)
     (void)aEpa;                                                                 /* Skloni upozorenje o neiskoriscenom parametru.            */
-    EPE_ASSERT_ALWAYS("Trying to delete static EPA object!");
+    CORE_ASSERT_ALWAYS("Trying to delete static EPA object!");
 #else
     const esMemClass_T * tmpMemClass;
 
-    EPE_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                 /* Provera par: da li je aEpa inicijalizovan?               */
+    CORE_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                 /* Provera par: da li je aEpa inicijalizovan?               */
     tmpMemClass = aEpa->internals.memClass;
-    EPE_DBG_CHECK(&memStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
+    CORE_DBG_CHECK(&memStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
     esEpaDeInit(
         aEpa);
     (*tmpMemClass->pDeAlloc)((void *)aEpa);
@@ -521,10 +414,7 @@ void esEpaDestroy(
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup     kern_intf
- * @note        Funkcije su dostupne samo ako je kernel omogucen.
  * @{ *//*---------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_ENABLE) || defined(__DOXYGEN__)
-
 /*-----------------------------------------------------------------------------------------------*/
 esEpaHeader_T * esEpaGetId(
     void) {
@@ -533,10 +423,10 @@ esEpaHeader_T * esEpaGetId(
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-esEpaPrio_T esEpaPrioGet(
+uint8_t esEpaPrioGet(
     const esEpaHeader_T * aEpa) {
 
-    EPE_DBG_CHECK((const esEpaHeader_T *)0U != aEpa);                           /* Provera par: da li je aEpa inicijalizovan?               */
+    CORE_DBG_CHECK((const esEpaHeader_T *)0U != aEpa);                           /* Provera par: da li je aEpa inicijalizovan?               */
 
     return (aEpa->internals.kernCtrl.prio);
 }
@@ -544,17 +434,17 @@ esEpaPrio_T esEpaPrioGet(
 /*-----------------------------------------------------------------------------------------------*/
 void esEpaPrioSet(
     esEpaHeader_T       * aEpa,
-    esEpaPrio_T         aNewPrio) {
+    uint8_t             aNewPrio) {
 
     ES_CRITICAL_DECL();
     bool_T state;
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     state = schedEpaIsRdy_(
         aEpa);
     schedUnRegisterI_(
         aEpa);
-    aEpa->internals.kernCtrl.prio = (esEpaPrio_T)aNewPrio;
+    aEpa->internals.kernCtrl.prio = (uint_fast8_t)aNewPrio;
     schedRegisterI_(
         aEpa);
 
@@ -571,9 +461,9 @@ void esKernelInit(
     size_t              aMemorySize,
     size_t              aHeapSize) {
 
-    EPE_DBG_CHECK((void *)0U != aMemory);                                       /* Provera par: da li je aMemory inicijalizovan?            */
-    EPE_DBG_CHECK(aHeapSize < aMemorySize);                                     /* Provara par: heap mora da bude manji od ukupne memorije. */
-    EPE_DBG_CHECK(sizeof(esEpaHeader_T) + sizeof(esEvtHeader_T) <= aMemorySize);    /* Provera par: mora da se preda neka minimalna kolician*/
+    CORE_DBG_CHECK((void *)0U != aMemory);                                       /* Provera par: da li je aMemory inicijalizovan?            */
+    CORE_DBG_CHECK(aHeapSize < aMemorySize);                                     /* Provara par: heap mora da bude manji od ukupne memorije. */
+    CORE_DBG_CHECK(sizeof(esEpaHeader_T) + sizeof(esEvtHeader_T) <= aMemorySize);    /* Provera par: mora da se preda neka minimalna kolician*/
                                                                                 /* memorije. Za sada je to samo velicina strukture EPA      */
                                                                                 /* objekta i velicina jednog dogadjaja.                     */
     /**
@@ -584,19 +474,29 @@ void esKernelInit(
         aMemory,
         aMemorySize);
     schedInit();
-
-#if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-    regInit();
-#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/
 void esKernelStart(void) {
+
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+    ES_CRITICAL_DECL();
+
+    currCtx.status = KERNEL_RUNNING;
+
+    do {
+        ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        scheduleI(irqLock_);
+        ES_CRITICAL_EXIT();
+        /* Treba jos nesto da radi? */
+    } while (TRUE);
+#else
     currCtx.status = KERNEL_RUNNING;
 
     if (0U != schedRdyQueryI_()) {
         EPE_SCHED_NOTIFY_RDY();
     }
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -616,11 +516,8 @@ const C_ROM char * esKernelSysVer(
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/
-
-#endif /* OPT_KERNEL_ENABLE */
-
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
- * END of kernel.c
+ * END of core.c
  *************************************************************************************************/

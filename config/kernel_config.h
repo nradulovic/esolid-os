@@ -20,10 +20,7 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
  * @author  	Nenad Radulovic
  * @brief       Konfiguracija eSolid Kernel-a
@@ -39,7 +36,8 @@
 /*==================================================================================  DEFINES  ==*/
 
 #define OPT_KERNEL_ENABLE
-#define OPT_KERNEL_EPA_PRIO_MAX         8
+#define OPT_KERNEL_EPA_PRIO_MAX         8U
+#define OPT_KERNEL_INTERRUPT_PRIO_MAX   ES_PRIO_NORMAL
 
 /*=================================================================================  SETTINGS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -88,6 +86,16 @@
 # define OPT_KERNEL_DBG_EVT
 #endif
 
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Debug podrska Memory Management (MM) podmodula
+ * @details     Ukoliko je ova opcija:
+ *              - definisana: omoguceno je debagiranje modula,
+ *              - nedefinisana: nije omoguceno debagiranje modula.
+ *//*--------------------------------------------------------------------------------------------*/
+#if defined(__DOXYGEN__)
+# define OPT_KERNEL_DBG_MM
+#endif
+
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Podesavanje Kernel-a
@@ -115,6 +123,32 @@
  *//*--------------------------------------------------------------------------------------------*/
 #if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
 # define OPT_KERNEL_EPA_PRIO_MAX                  64U
+#endif
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Maksimalan prioritet prekidnih rutina kernela
+ * @details     Ovim se ogranicava prioritet prekidnih rutina koje jezgro
+ *              koristi. Ovo podesavanje je izuzetno korisno kada postoji
+ *              potreba da se pojedini hardverski prekidi ne prekidaju od strane
+ *              jezgra.
+ *//*--------------------------------------------------------------------------------------------*/
+#if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX)
+# define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_NORMAL
+#endif
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Planiranje zadataka bez istiskivanja sa fiksiranim prioritetom.
+ * @note        Ovo je podrazumevano podesavanje
+ *//*--------------------------------------------------------------------------------------------*/
+#if !defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO) && !defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN) || defined(__DOXYGEN__)
+# define OPT_KERNEL_SCHEDULER_FIXEDPRIO
+#endif
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Planiranje zadataka sa istiskivanjem sa Round-Robin tehnikom.
+ *//*--------------------------------------------------------------------------------------------*/
+#if defined(__DOXYGEN__)
+# define OPT_KERNEL_SCHEDULER_ROUNDROBIN
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

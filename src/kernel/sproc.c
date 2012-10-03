@@ -42,7 +42,7 @@
  *************************************************************************************************/
 
 #define SPROC_PKG_H_VAR
-#include "core_private.h"
+#include "kernel_private.h"
 
 
 /*************************************************************************************************
@@ -180,10 +180,6 @@ void hsmDispatch (
         }
         srcState[srcEnd] = tmpState;
         ++srcEnd;
-
-#if defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
-        SP_ASSERT(srcEnd <= aEpa->internals.registry.description->hsmStateDepth);
-#endif
     };
 
     if (RETN_TRAN == state) {                                                   /* Da li treba izvrsiti tranziciju?                         */
@@ -225,10 +221,6 @@ void hsmDispatch (
                             }
                             dstState[dstEnd] = tmpState;
                             ++dstEnd;
-
-#if (defined(OPT_DBG_SP) && defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY)) || defined(__DOXYGEN__)
-                            SP_ASSERT(dstEnd <= aEpa->internals.registry.description->hsmStateDepth);
-#endif
                         }
                         ++srcEnd;
                         stateCnt = (uint_fast8_t)2U;
@@ -274,7 +266,7 @@ void hsmDispatch (
 
         while (stateCnt != srcEnd) {                                            /* Izadji iz hijerarhije.                                   */
 
-#if defined(OPT_DBG_SP)
+#if defined(OPT_KERNEL_DBG_SPROC)
             state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
             SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
 #else
@@ -342,14 +334,9 @@ bool_T esHsmIsInState (
     esPtrState_T savedState;
     bool_T       ans;
 
-#if (defined(OPT_DBG_SP) && defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY)) || defined(__DOXYGEN__)
-    uint8_t dbgCnt;
-
-    dbgCnt = aEpa->internals.registry.description->hsmStateDepth;
-#endif
     SP_ASSERT((esPtrState_T)0 != aState);
 
-    ES_CRITICAL_ENTER();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     savedState = aEpa->pState;                                                  /* sacuvaj trenutno stanje automata                         */
     (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
     tmpState = aEpa->pState;
@@ -361,11 +348,6 @@ bool_T esHsmIsInState (
             ans = TRUE;
             break;
         }
-
-#if (defined(OPT_DBG_SP) && defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY)) || defined(__DOXYGEN__)
-        --dbgCnt;
-        SP_ASSERT((uint8_t)0 != dbgCnt);
-#endif
         (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
         tmpState = aEpa->pState;
     }
