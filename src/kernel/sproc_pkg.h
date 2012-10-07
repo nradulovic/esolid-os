@@ -133,7 +133,6 @@ extern "C" {
 /*************************************************************************************************
  * FUNCTION PROTOTYPES
  *************************************************************************************************/
-
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
  *              cuvanje bafera stanja.
@@ -146,6 +145,31 @@ C_INLINE_ALWAYS size_t hsmReqSize_(
 
     return (aStateDept * (size_t)2U * sizeof(esPtrState_T));
 }
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Pokrece dati HSM automat.
+ * @param       aEpa                    Pokazivac na strukturu HSM automata,
+ * @param       aEvt                    podatak/pokazivac na podatak dogadjaja.
+ * @details     Ovu funkcija se pokrece nakon zakljucivanja da je dati
+ *              automat spreman za rad. Dispecer pokrece stateHandler funkcije i
+ *              ispituje njihovu povratnu vrednost. U zavisnosti od povratne
+ *              vrednosti funkcije stanja on preduzima dodatne akcije. Kada je
+ *              zavrsena obrada dogadjaja, dispecer postavlja prazan signal
+ *              (SIG_EMPTY) u pokazivac dogadjaja cime se govori da je zavrsena
+ *              obrada prethodnog dogadjaja i da je automat spreman da prihvati
+ *              nov dogadjaj.
+ * @note        Ukoliko funkcija stanja, u koju se najskorije uslo prilikom
+ *              obrade tranzicije, umesto @ref RETN_HANDLED vrati
+ *              @ref RETN_NOEX onda se ne izvrsava inicijalizacija vec se vrsi
+ *              kreiranje @ref SIG_NOEX dogadjaja. Drugim recima, obrada
+ *              flowchart-a ima prioritet u odnosu na inicijalizaciju.
+ * @todo        Prvu petlju prebaciti u do...while() i izbaciti iz nje poredjenje.
+ * @todo        Iz svih while() petlja izbaci poredjenje.
+ * @api
+ *//*--------------------------------------------------------------------------------------------*/
+void hsmDispatch(
+    esEpaHeader_T       * aEpa,
+    const esEvtHeader_T * aEvt);
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Konstruise HSM automat
