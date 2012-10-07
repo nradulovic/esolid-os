@@ -96,19 +96,6 @@ SP_DBG_DEFINE_MODULE(State Processor);
     (RETN_DEFERRED == (expr))||                                                 \
     (RETN_IGNORED == (expr))
 
-/*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Izvrsi validaciju odgovora stanja funkcije stanja FSM automata.
- */
-/*-----------------------------------------------------------------------------------------------*/
-#define FSM_VALID_STATE(expr)                                                   \
-    (RETN_TRAN == (expr))    ||                                                 \
-    (RETN_HANDLED == (expr)) ||                                                 \
-    (RETN_NOEX == (expr)) ||                                                    \
-    (RETN_IGNORED == (expr))
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
 
 /*************************************************************************************************
  * LOCAL CONSTANTS
@@ -152,7 +139,180 @@ SP_DBG_DEFINE_MODULE(State Processor);
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup         sproc_intf
  * @{ *//*---------------------------------------------------------------------------------------*/
+void hsmDispatch(
+    esEpaHeader_T       * aEpa,
+    const esEvtHeader_T * aEvt) {
 
+    esPtrState_T        * srcState;
+    esPtrState_T        * dstState;
+    esState_T           state;
+    uint_fast8_t        srcEnd;
+    uint_fast8_t        dstEnd;
+
+    srcState = aEpa->internals.exec.pSrcStates;
+    srcEnd = (uint_fast8_t)0U;
+
+    do {
+        srcState[srcEnd] = aEpa->pState;
+        state = (esState_T)(* srcState[srcEnd])(aEpa, (esEvtHeader_T *)aEvt);
+        ++srcEnd;
+    } while (state == RETN_SUPER);
+
+    switch (state) {
+
+        case RETN_TRAN : {                                                      /* Da li treba izvrsiti tranziciju?                         */
+            dstState = aEpa->internals.exec.pDstStates;
+            dstState[0] = aEpa->pState;                                         /* sacuvaj destinaciju                                      */
+            dstEnd = (uint_fast8_t)1U;
+
+            if (srcState[srcEnd - 1U] != dstState[0]) {                         /* tran: a) src ?!= dst                                     */
+                (void)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_SUPER);
+                dstState[1] = aEpa->pState;
+
+                if (srcState[srcEnd - 1U] != dstState[1]) {                     /* tran: b) src ?!= super(dst)                              */
+                    (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd - 1U], SIG_SUPER);
+                    srcState[srcEnd] = aEpa->pState;
+
+                    if (srcState[srcEnd] != dstState[1]) {                      /* tran: c) super(src) ?!= super(dst)                       */
+
+                        if (srcState[srcEnd] == dstState[0]) {                  /* tran: d) super(src) ?== dst                              */
+                            dstEnd = (uint_fast8_t)0U;                          /* Ne treba ni da se udje u novu hijerarhiju.               */
+                        } else {                                                /* tran: e) src ?== ...super(super(dst))                    */
+                            --srcEnd;
+
+                            while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))                    */
+                                (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
+
+                                if (srcState[srcEnd] == aEpa->pState) {
+                                    goto TRANSITION_EXECUTION;
+                                }
+                                ++dstEnd;
+                                dstState[dstEnd] = aEpa->pState;
+                            }
+                            ++srcEnd;
+                            dstEnd = (uint_fast8_t)1U;
+
+                            while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
+
+                                if (srcState[srcEnd] == dstState[dstEnd]) {
+                                    goto TRANSITION_EXECUTION;
+                                }
+                                ++dstEnd;
+                            }
+
+                            while (TRUE) {
+                                (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
+                                dstEnd = (uint_fast8_t)0U;
+                                ++srcEnd;
+                                srcState[srcEnd] = aEpa->pState;
+
+                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
+
+                                    if (srcState[srcEnd] == dstState[dstEnd]) {
+                                        goto TRANSITION_EXECUTION;
+                                    }
+                                    ++dstEnd;
+                                }
+                            }
+                        }
+                    }
+                }
+            } /* tran: a) */
+
+TRANSITION_EXECUTION:
+            {
+                uint_fast8_t        stateCnt;
+
+                stateCnt = (uint_fast8_t)0U;
+
+                while (stateCnt != srcEnd) {
+#if defined(OPT_KERNEL_DBG_SPROC)
+                    state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+                    SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
+#else
+                    (void)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+#endif
+                    ++stateCnt;
+                }
+            }
+
+            while (TRUE) {
+
+                while ((uint_fast8_t)0U != dstEnd) {                                  /* Udji u novu hijerarhiju.                                 */
+                    --dstEnd;
+                    state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_ENTRY);
+                    SP_ASSERT(((RETN_SUPER == state) || (RETN_NOEX == state) || (RETN_HANDLED == state)));
+                }
+
+                if (RETN_NOEX == state) {
+                    evtQPutAhead(
+                        aEpa,
+                        (esEvtHeader_T *)&evtSignal[SIG_NOEX]);
+
+                    break;
+                }
+                state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_INIT);
+                SP_ASSERT((RETN_TRAN == state) || (RETN_SUPER == state));
+
+                if (RETN_TRAN != state) {
+
+                    break;
+                }
+                {
+                    esPtrState_T tmpState;
+
+                    dstEnd = (uint_fast8_t)0U;
+                    tmpState = dstState[0];
+                    dstState[0] = aEpa->pState;
+
+                    while (dstState[dstEnd] != tmpState) {
+                        (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
+                        ++dstEnd;
+                        dstState[dstEnd] = aEpa->pState;
+                    }
+                }
+            }
+            aEpa->pState = dstState[0];
+
+            return;
+        }
+
+        case RETN_HANDLED : {
+            aEpa->pState = srcState[0];
+
+            return;
+        }
+
+        case RETN_NOEX : {
+            aEpa->pState = srcState[0];
+            evtQPutAhead(
+                aEpa,
+                (esEvtHeader_T *)&evtSignal[SIG_NOEX]);
+
+            return;
+        }
+
+        case RETN_DEFERRED : {
+            aEpa->pState = srcState[0];
+            evtQPut(
+                aEpa,
+                (esEvtHeader_T *)aEvt);
+
+            return;
+        }
+
+        case RETN_IGNORED : {
+            aEpa->pState = srcState[0];
+        }
+
+        default : {
+
+            return;
+        }
+    }
+}
+
+# if 0 /* Pisem novi dispecer */
 void hsmDispatch (
     esEpaHeader_T       * aEpa,
     const esEvtHeader_T * aEvt) {
@@ -324,6 +484,7 @@ void hsmDispatch (
     }
     aEpa->pState = srcState[0];                                                 /* Vrati izvorno stanje.                                    */
 }
+#endif /* Pisem novi dispecer */
 
 bool_T esHsmIsInState (
     esEpaHeader_T       * aEpa,
