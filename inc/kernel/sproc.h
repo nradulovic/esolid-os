@@ -116,15 +116,6 @@ extern "C" {
  *//*--------------------------------------------------------------------------------------------*/
 typedef enum smp_state {
 /**
- * @brief       Vraca se koje je super stanje date state handler funkcije.
- *
- *              Ova vrednost se vraca kada state handler funkcija ne zna da
- *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
- *              njeno super stanje.
- */
-    RETN_SUPER,
-
-/**
  * @brief       Treba izvrsiti tranziciju ka drugom stanju.
  *
  *              Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
@@ -162,7 +153,17 @@ typedef enum smp_state {
  *              Obicno se ovakav odgovor u top state-u automata i koristi se u
  *              svrhe debagiranja sistema.
  */
-    RETN_IGNORED
+    RETN_IGNORED,
+
+/**
+ * @brief       Vraca se koje je super stanje date state handler funkcije.
+ *
+ *              Ova vrednost se vraca kada state handler funkcija ne zna da
+ *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
+ *              njeno super stanje.
+ */
+    RETN_SUPER
+
 } esState_T;
 
 /*-------------------------------------------------------------------------------------------*//**
@@ -194,32 +195,6 @@ typedef struct hsmExec {
 /*-------------------------------------------------------------------------------------------*//**
  * @name Funkcije za rad sa HSM izvrsnom jedinicom
  * @{ *//*---------------------------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Pokrece dati HSM automat.
- * @param       aEpa                    Pokazivac na strukturu HSM automata,
- * @param       aEvt                    podatak/pokazivac na podatak dogadjaja.
- * @details     Ovu funkcija se pokrece nakon zakljucivanja da je dati
- *              automat spreman za rad. Dispecer pokrece stateHandler funkcije i
- *              ispituje njihovu povratnu vrednost. U zavisnosti od povratne
- *              vrednosti funkcije stanja on preduzima dodatne akcije. Kada je
- *              zavrsena obrada dogadjaja, dispecer postavlja prazan signal
- *              (SIG_EMPTY) u pokazivac dogadjaja cime se govori da je zavrsena
- *              obrada prethodnog dogadjaja i da je automat spreman da prihvati
- *              nov dogadjaj.
- * @note        Ukoliko funkcija stanja, u koju se najskorije uslo prilikom
- *              obrade tranzicije, umesto @ref RETN_HANDLED vrati
- *              @ref RETN_NOEX onda se ne izvrsava inicijalizacija vec se vrsi
- *              kreiranje @ref SIG_NOEX dogadjaja. Drugim recima, obrada
- *              flowchart-a ima prioritet u odnosu na inicijalizaciju.
- * @todo        Prvu petlju prebaciti u do...while() i izbaciti iz nje poredjenje.
- * @todo        Iz svih while() petlja izbaci poredjenje.
- * @api
- *//*--------------------------------------------------------------------------------------------*/
-void hsmDispatch(
-    esEpaHeader_T       * aEpa,
-    const esEvtHeader_T * aEvt);
-
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Da li je automat aEpa u datom aState stanju?
  * @param       aEpa                    Pokazivac na strukturu HSM automata,
