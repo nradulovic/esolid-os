@@ -201,7 +201,7 @@ C_INLINE_ALWAYS void evtQPutI_(
         evtDynamic_T tmpU;
 
         tmpR = aEvt->internals.dynamic & ~EVT_USERS_MASK;
-        tmpU = (aEvt->internals.dynamic - 1U) & EVT_USERS_MASK;
+        tmpU = (aEvt->internals.dynamic + 1U) & EVT_USERS_MASK;
         aEvt->internals.dynamic = tmpR | tmpU;
     }
 }
