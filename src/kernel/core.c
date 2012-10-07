@@ -75,19 +75,22 @@ static currCtx_T currCtx;
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
+ * @name        Funkcije za rad sa redom za cekanje na izvrsavanje
+ * @{ *//*---------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Inicijalizije ready listu
  *//*--------------------------------------------------------------------------------------------*/
 C_INLINE_ALWAYS void schedRdyInit_(
     void) {
 
-    rdyBitmap.bit[0] = (unative_T)1U;
-    rdyBitmap.bitGroup = (unative_T)1U;
+    rdyBitmap.bit[0] = (unative_T)0U;
+    rdyBitmap.bitGroup = (unative_T)0U;
 }
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Izbacuje EPA objekat iz reda za cekanje
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void schedRdyRemoveI_(
+C_INLINE_ALWAYS void schedRdyRmEpaI_(
     esEpaHeader_T       * aEpa) {
 
     unative_T indxGroup;
@@ -108,10 +111,29 @@ C_INLINE_ALWAYS void schedRdyRemoveI_(
 }
 
 /*-------------------------------------------------------------------------------------------*//**
+ * @brief       Vraca stanje reda za cekanje.
+ * @return      Boolean vrednost koja karakterise stanje reda za cekanje
+ *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
+ *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
+ *//*--------------------------------------------------------------------------------------------*/
+C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
+    void) {
+    bool_T answer;
+
+    if ((unative_T)0U == rdyBitmap.bitGroup) {
+        answer = TRUE;
+    } else {
+        answer = FALSE;
+    }
+
+    return (answer);
+}
+
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Dobavlja prioritet EPA objekta sa najvecim prioritetom u redu
  *              cekanja.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS unative_T schedRdyQueryI_(
+C_INLINE_ALWAYS uint_fast8_t schedRdyGetPrioI_(
     void) {
 
     unative_T indxGroup;
@@ -149,30 +171,25 @@ C_INLINE_ALWAYS unative_T schedRdyQueryI_(
 }
 
 /*-------------------------------------------------------------------------------------------*//**
- * @brief       Prijavljuje EPA objekat u red za cekanje.
+ * @brief       Vraca pokazivac na sledeci EPA objekat sa datim @c prio prioritetom.
+ * @details     Kod RoundRobin tehnike, ova funkcija vrsi recirkulaciju svih
+ *              EPA objekata sa datim prioritetom i vraca pokazivac na sledeci u
+ *              nizu.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void schedRegisterI_(
-    const esEpaHeader_T * aEpa) {
+C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
+    uint_fast8_t prio) {
 
-    CORE_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
-    rdyBitmap.epaList[aEpa->internals.kernCtrl.prio] = (esEpaHeader_T *)aEpa;
-}
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Odjavljuje EPA objekat iz reda za cekanje.
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void schedUnRegisterI_(
-    const esEpaHeader_T * aEpa) {
-
-    schedRdyRemoveI_(
-        (esEpaHeader_T *)aEpa);
-    rdyBitmap.epaList[aEpa->internals.kernCtrl.prio] = (esEpaHeader_T *)0U;
+#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+    return (rdyBitmap.epaList[prio]);
+#else
+    return (rdyBitmap.epaList[prio]);
+#endif
 }
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Ispituje da li je EPA objekat u listi reda za cekanje.
  *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS bool_T schedEpaIsRdy_(
+C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
     const esEpaHeader_T * aEpa) {
 
     unative_T indxGroup;
@@ -197,6 +214,28 @@ C_INLINE_ALWAYS bool_T schedEpaIsRdy_(
 }
 
 /*-------------------------------------------------------------------------------------------*//**
+ * @brief       Prijavljuje EPA objekat u red za cekanje.
+ *//*--------------------------------------------------------------------------------------------*/
+C_INLINE_ALWAYS void schedRdyRegI_(
+    const esEpaHeader_T * aEpa) {
+
+    CORE_ASSERT((esEpaHeader_T *)0U == rdyBitmap.epaList[aEpa->internals.kernCtrl.prio]);  /* Provera: da nije ovaj prioritet vec zauzet?              */
+    rdyBitmap.epaList[aEpa->internals.kernCtrl.prio] = (esEpaHeader_T *)aEpa;
+}
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Odjavljuje EPA objekat iz reda za cekanje.
+ *//*--------------------------------------------------------------------------------------------*/
+C_INLINE_ALWAYS void schedRdyUnRegI_(
+    const esEpaHeader_T * aEpa) {
+
+    schedRdyRmEpaI_(
+        (esEpaHeader_T *)aEpa);
+    rdyBitmap.epaList[aEpa->internals.kernCtrl.prio] = (esEpaHeader_T *)0U;
+}
+
+/** @} *//*--------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Inicijalizacija scheduler-a
  *//*--------------------------------------------------------------------------------------------*/
 static void schedInit(
@@ -215,44 +254,54 @@ static void schedInit(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Scheduler kernel-a
  *//*--------------------------------------------------------------------------------------------*/
-void scheduleI(
-    uint32_t irqLock_) {
-
 #if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+C_NORETURN void schedule(
+    void) {
 
-    uint_fast8_t newPrio;
+    ES_CRITICAL_DECL();
 
-    newPrio = schedRdyQueryI_();
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
-    while (0U != newPrio) {
-        esEpaHeader_T * newEpa;
-        esEvtHeader_T * newEvt;
+    while (TRUE) {
 
-        newEpa = rdyBitmap.epaList[newPrio];
-        currCtx.prio = newPrio;
-        currCtx.epa = newEpa;
-        newEvt = evtQGetI(
-            newEpa);
-        ES_CRITICAL_EXIT();
-        hsmDispatch(
-            newEpa,
-            newEvt);
-        ES_CRITICAL_ENTER(irqLock_);
-        evtDestroyI_(
-            newEvt);
+        if (FALSE == schedRdyIsEmptyI_()) {
+            uint_fast8_t  newPrio;
+            esEpaHeader_T * newEpa;
+            esEvtHeader_T * newEvt;
 
-        if (TRUE == evtQIsEmpty_(newEpa)) {
-            schedRdyRemoveI_(newEpa);
+            newPrio = schedRdyGetPrioI_();
+            currCtx.prio = newPrio;
+            newEpa = schedRdyGetEpaI_(newPrio);
+            currCtx.epa = newEpa;
+            newEvt = evtQGetI(
+                newEpa);
+            ES_CRITICAL_EXIT();
+            hsmDispatch(
+                newEpa,
+                newEvt);
+            ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            evtDestroyI_(
+                newEvt);
+
+            if (TRUE == evtQIsEmpty_(newEpa)) {
+                schedRdyRmEpaI_(newEpa);
+            }
+        } else {
+            currCtx.prio = 0U;
+            currCtx.epa = (void *)0U;
+            /* ES_CPU_SLEEP(); */
+            ES_CRITICAL_EXIT();
+            ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
         }
-        newPrio = schedRdyQueryI_();
     }
-    currCtx.prio = 0U;
-    currCtx.epa = (void *)0U;
+}
 #else
+void scheduleI(
+    unative_T irqLock_) {
 
     esEpaPrio_T newPrio;
 
-    newPrio = schedRdyQueryI_();
+    newPrio = schedRdyGetPrioI_();
 
     if (newPrio > currCtx.prio) {
         esEpaPrio_T savedPrio;
@@ -279,15 +328,16 @@ void scheduleI(
                 newEvt);
 
             if (TRUE == evtQIsEmpty_(newEpa)) {
-                schedRdyRemoveI_(newEpa);
+                schedRdyRmEpaI_(newEpa);
             }
-            newPrio = schedRdyQueryI_();
+            newPrio = schedRdyGetPrioI_();
         } while (newPrio > savedPrio);
         currCtx.prio = savedPrio;
         currCtx.epa = savedEpa;
     }
-#endif
 }
+#endif
+
 
 /*==============================================================  GLOBAL FUNCTION DEFINITIONS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -317,7 +367,7 @@ void esEpaInit(
         aEpa,
         (esEvtHeader_T *)&evtSignal[SIG_INIT]);
     aEpa->internals.kernCtrl.prio = aDescription->epaPrio;
-    schedRegisterI_(
+    schedRdyRegI_(
         aEpa);
     schedRdyInsertI_(
         aEpa);
@@ -383,7 +433,7 @@ void esEpaDeInit(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    schedUnRegisterI_(
+    schedRdyUnRegI_(
         aEpa);
     ES_CRITICAL_EXIT();
     evtQDeInit(
@@ -440,12 +490,12 @@ void esEpaPrioSet(
     bool_T state;
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    state = schedEpaIsRdy_(
+    state = schedRdyIsEpaRdy_(
         aEpa);
-    schedUnRegisterI_(
+    schedRdyUnRegI_(
         aEpa);
     aEpa->internals.kernCtrl.prio = (uint_fast8_t)aNewPrio;
-    schedRegisterI_(
+    schedRdyRegI_(
         aEpa);
 
     if (TRUE == state) {
@@ -478,22 +528,12 @@ void esKernelInit(
 
 /*-----------------------------------------------------------------------------------------------*/
 void esKernelStart(void) {
+    currCtx.status = KERNEL_RUNNING;
 
 #if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
-    ES_CRITICAL_DECL();
-
-    currCtx.status = KERNEL_RUNNING;
-
-    do {
-        ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        scheduleI(irqLock_);
-        ES_CRITICAL_EXIT();
-        /* Treba jos nesto da radi? */
-    } while (TRUE);
+    schedule();
 #else
-    currCtx.status = KERNEL_RUNNING;
-
-    if (0U != schedRdyQueryI_()) {
+    if (FALSE == schedRdyIsEmptyI_()) {
         EPE_SCHED_NOTIFY_RDY();
     }
 #endif
