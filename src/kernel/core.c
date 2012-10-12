@@ -365,7 +365,7 @@ void esEpaInit(
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         aEpa,
-        (esEvtHeader_T *)&evtSignal[SIG_ENTRY]);
+        (esEvtHeader_T *)&evtSignal[SIG_INIT]);
     aEpa->internals.kernCtrl.prio = aDescription->epaPrio;
     schedRdyRegI_(
         aEpa);

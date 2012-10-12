@@ -116,14 +116,6 @@ extern "C" {
  *//*--------------------------------------------------------------------------------------------*/
 typedef enum smp_state {
 /**
- * @brief       Treba izvrsiti tranziciju ka drugom stanju.
- *
- *              Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
- *              drugom stanju.
- */
-    RETN_TRAN,
-
-/**
  * @brief       Ne treba izvrsiti nikakve dalje akcije.
  *
  *              Ovo je odgovor state handler funkcije da je potpuno opsluzila
@@ -132,18 +124,10 @@ typedef enum smp_state {
     RETN_HANDLED,
 
 /**
- * @brief       (NO Events Execution) Treba izvrsiti tranziciju bez dogadjaja.
- *
- *              Odgovor koji se vraca kada izvrsna jedinica zahteva od dispecera
- *              da nastavi sa izvrsavanjem i bez novih dogadjaja.
- */
-    RETN_NOEX,
-
-/**
  * @brief       Treba odloziti pristigli dogadjaj.
  *
  *              Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
- *              dogadjaje.
+ *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
  */
     RETN_DEFERRED,
 
@@ -151,9 +135,18 @@ typedef enum smp_state {
  * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
  *
  *              Obicno se ovakav odgovor u top state-u automata i koristi se u
- *              svrhe debagiranja sistema.
+ *              svrhe debagiranja sistema. Dogadjaj se brise iz sistema ako nema
+ *              jos korisnika.
  */
     RETN_IGNORED,
+
+/**
+ * @brief       Treba izvrsiti tranziciju ka drugom stanju.
+ *
+ *              Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
+ *              drugom stanju.
+ */
+    RETN_TRAN,
 
 /**
  * @brief       Vraca se koje je super stanje date state handler funkcije.

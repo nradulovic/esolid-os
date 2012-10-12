@@ -20,125 +20,188 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
- *
  * @author      Nenad Radulovic
- *
  * @brief       Implementacija State Processor modula.
- *
  * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  sproc_impl
- *
  ****************************************************************************************//** @{ */
 
-
-/*************************************************************************************************
- * INCLUDE FILES
- *************************************************************************************************/
-
+/*============================================================================  INCLUDE FILES  ==*/
 #define SPROC_PKG_H_VAR
 #include "kernel_private.h"
 
-
-/*************************************************************************************************
- * LOCAL DEFINES
- *************************************************************************************************/
-
-/*-----------------------------------------------------------------------------------------------*
- * Local debug defines
- *-----------------------------------------------------------------------------------*//** @cond */
-
+/*============================================================================  LOCAL DEFINES  ==*/
 SP_DBG_DEFINE_MODULE(State Processor);
 
-
-/** @endcond *//*--------------------------------------------------------------------------------*
- * Local user defines
- *-----------------------------------------------------------------------------------------------*/
-
-
-/*************************************************************************************************
- * LOCAL MACRO's
- *************************************************************************************************/
-
-/*-----------------------------------------------------------------------------------------------*/
-/**
+/*============================================================================  LOCAL MACRO's  ==*/
+/*-------------------------------------------------------------------------------------------*//**
  * @brief       Posalji predefinisan dogadjaj @c evt automatu @c hsm.
  * @param       epa                     Pokazivac na strukturu EPA objekta,
  * @param       state                   pokazivac na funkciju stanja,
  * @param       evt                     redni broj (enumerator) rezervisanog
  *                                      dogadjaj.
- */
-/*-----------------------------------------------------------------------------------------------*/
+ *//*--------------------------------------------------------------------------------------------*/
 #define EVT_SIGNAL_SEND(epa, state, evt)                                        \
     (* state)((epa), (esEvtHeader_T *)&evtSignal[evt])
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- *
- * @brief       Makroi za proveru validnosti internih podataka
- * @{ *//*---------------------------------------------------------------------------------------*/
-
+/*=========================================================================  LOCAL DATA TYPES  ==*/
+/*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
+/*==========================================================================  LOCAL VARIABLES  ==*/
+/*=========================================================================  GLOBAL VARIABLES  ==*/
+/*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
+/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*-----------------------------------------------------------------------------------------------*/
-/**
- * @brief       Izvrsi validaciju odgovora stanja funkcije stanja HSM automata.
- */
-/*-----------------------------------------------------------------------------------------------*/
-#define HSM_VALID_STATE(expr)                                                   \
-    (RETN_SUPER == (expr))   ||                                                 \
-    (RETN_TRAN == (expr))    ||                                                 \
-    (RETN_HANDLED == (expr)) ||                                                 \
-    (RETN_NOEX == (expr)) ||                                                    \
-    (RETN_DEFERRED == (expr))||                                                 \
-    (RETN_IGNORED == (expr))
+void hsmDispatch(
+    esEpaHeader_T       * aEpa,
+    const esEvtHeader_T * aEvt) {
 
+    esPtrState_T        * srcState;
+    esPtrState_T        * dstState;
+    esState_T           state;
+    uint_fast8_t        srcEnd;
+    uint_fast8_t        dstEnd;
 
-/*************************************************************************************************
- * LOCAL CONSTANTS
- *************************************************************************************************/
+    srcState = aEpa->internals.exec.pSrcStates;
+    srcEnd = (uint_fast8_t)0U;
 
+    do {
+        srcState[srcEnd] = aEpa->pState;
+        state = (esState_T)(* srcState[srcEnd])(aEpa, (esEvtHeader_T *)aEvt);
+        ++srcEnd;
+    } while (state == RETN_SUPER);
 
-/*************************************************************************************************
- * LOCAL DATA TYPES
- *************************************************************************************************/
+    switch (state) {
 
+        case RETN_TRAN : {
+            dstState = aEpa->internals.exec.pDstStates;
 
-/*************************************************************************************************
- * LOCAL TABLES
- *************************************************************************************************/
+            do {
+                dstState[0] = aEpa->pState;                                     /* sacuvaj destinaciju                                      */
+                dstEnd = (uint_fast8_t)1U;
 
+                if (srcState[srcEnd - 1U] != dstState[0]) {                     /* tran: a) src ?!= dst                                     */
+                    (void)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_SUPER);
+                    dstState[1] = aEpa->pState;
+                    --srcEnd;
 
-/*************************************************************************************************
- * SHARED GLOBAL VARIABLES
- *************************************************************************************************/
+                    if (srcState[srcEnd] != dstState[1]) {                 /* tran: b) src ?!= super(dst)                              */
+                        (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
+                        ++srcEnd;
+                        srcState[srcEnd] = aEpa->pState;
 
+                        if (srcState[srcEnd] != dstState[1]) {                  /* tran: c) super(src) ?!= super(dst)                       */
 
-/*************************************************************************************************
- * LOCAL GLOBAL VARIABLES
- *************************************************************************************************/
+                            if (srcState[srcEnd] == dstState[0]) {              /* tran: d) super(src) ?== dst                              */
+                                dstEnd = (uint_fast8_t)0U;                      /* Ne treba ni da se udje u novu hijerarhiju.               */
+                            } else {                                            /* tran: e) src ?== ...super(super(dst))                    */
+                                --srcEnd;
 
+                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))         */
+                                    (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
 
-/*************************************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- *************************************************************************************************/
+                                    if (srcState[srcEnd] == aEpa->pState) {
+                                        goto TRANSITION_EXECUTION;
+                                    }
+                                    ++dstEnd;
+                                    dstState[dstEnd] = aEpa->pState;
+                                }
+                                ++srcEnd;
+                                dstEnd = (uint_fast8_t)1U;
 
+                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))  */
 
-/*************************************************************************************************
- ***                                I M P L E M E N T A T I O N                                ***
- *************************************************************************************************/
+                                    if (srcState[srcEnd] == dstState[dstEnd]) {
+                                        goto TRANSITION_EXECUTION;
+                                    }
+                                    ++dstEnd;
+                                }
 
+                                while (TRUE) {
+                                    (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
+                                    dstEnd = (uint_fast8_t)0U;
+                                    ++srcEnd;
+                                    srcState[srcEnd] = aEpa->pState;
 
-/*************************************************************************************************
- * GLOBAL FUNCTION DEFINITIONS
- *************************************************************************************************/
+                                    while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))*/
 
-/*-------------------------------------------------------------------------------------------*//**
- * @ingroup         sproc_intf
- * @{ *//*---------------------------------------------------------------------------------------*/
+                                        if (srcState[srcEnd] == dstState[dstEnd]) {
+                                            goto TRANSITION_EXECUTION;
+                                        }
+                                        ++dstEnd;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+TRANSITION_EXECUTION:
+                {
+                    uint_fast8_t        stateCnt;
+
+                    stateCnt = (uint_fast8_t)0U;
+
+                    while (stateCnt != srcEnd) {
+#if defined(OPT_KERNEL_DBG_SPROC)
+                        state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+                        SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
+#else
+                        (void)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+#endif
+                        ++stateCnt;
+                    }
+                }
+
+                while ((uint_fast8_t)0U != dstEnd) {                            /* Udji u novu hijerarhiju.                                 */
+                    --dstEnd;
+#if defined(OPT_KERNEL_DBG_SPROC)
+                    state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+                    SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
+#else
+                    (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_ENTRY);
+#endif
+                }
+                state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_INIT);
+                SP_ASSERT((RETN_TRAN == state) || (RETN_SUPER == state));
+                srcState[0] = dstState[0];
+                srcEnd = (uint_fast8_t)1U;
+            } while (RETN_TRAN == state);
+            aEpa->pState = dstState[0];
+
+            return;
+        }
+
+        case RETN_HANDLED : {
+            aEpa->pState = srcState[0];
+
+            return;
+        }
+
+        case RETN_DEFERRED : {
+            aEpa->pState = srcState[0];
+            evtQPut(
+                aEpa,
+                (esEvtHeader_T *)aEvt);
+
+            return;
+        }
+
+        case RETN_IGNORED : {
+            aEpa->pState = srcState[0];
+
+            return;
+        }
+
+        default : {
+
+            return;
+        }
+    }
+}
+
+#if 0 /* Druga verzija dispecera */
 void hsmDispatch(
     esEpaHeader_T       * aEpa,
     const esEvtHeader_T * aEvt) {
@@ -311,6 +374,7 @@ TRANSITION_EXECUTION:
         }
     }
 }
+#endif /* Druga verzija dispecera */
 
 # if 0 /* Pisem novi dispecer */
 void hsmDispatch (
@@ -486,6 +550,43 @@ void hsmDispatch (
 }
 #endif /* Pisem novi dispecer */
 
+/*-----------------------------------------------------------------------------------------------*/
+void hsmInit (
+    esEpaHeader_T       * aEpa,
+    esPtrState_T        aInitState,
+    esPtrState_T        * aStateBuff,
+    size_t              aStateDepth) {
+
+    SP_DBG_CHECK((size_t)1U < aStateDepth);                                     /* Provera par: da li je aStateDepth minimalne dubine?      */
+    SP_DBG_CHECK((esPtrState_T)0U != aInitState);                               /* Provera par: da li je aInitState  minimalne dubine?      */
+    aEpa->pState = aInitState;
+    aEpa->internals.exec.pSrcStates = aStateBuff;
+    aEpa->internals.exec.pDstStates = aStateBuff + aStateDepth;
+}
+
+/*-----------------------------------------------------------------------------------------------*/
+void hsmDeInit(
+    esEpaHeader_T       * aEpa) {
+
+    aEpa->internals.exec.pSrcStates = (esPtrState_T *)0U;
+    aEpa->internals.exec.pDstStates = (esPtrState_T *)0U;
+}
+
+/*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup         sproc_intf
+ * @{ *//*---------------------------------------------------------------------------------------*/
+esState_T esHsmTopState (
+    esEpaHeader_T       * aEpa,
+    esEvtHeader_T       * aEvt) {
+
+    (void)aEpa;                                                                 /* Ukloni upozorenje o nekoriscenom parametru               */
+    (void)aEvt;
+
+    return SMP_STATE_IGNORED();
+}
+
+/*-----------------------------------------------------------------------------------------------*/
 bool_T esHsmIsInState (
     esEpaHeader_T       * aEpa,
     esPtrState_T        aState) {
@@ -517,55 +618,8 @@ bool_T esHsmIsInState (
 
     return (ans);
 }
-
-esState_T esHsmTopState (
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt) {
-
-#if defined(OPT_TRACE_ENABLE)
-    /* trace struktura */
-#else
-    (void)aEpa;                                                                 /* Ukloni upozorenje o nekoriscenom parametru               */
-    (void)aEvt;
-#endif
-
-    return SMP_STATE_IGNORED();
-}
-
 /** @} *//*--------------------------------------------------------------------------------------*/
-
-void hsmInit (
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        aInitState,
-    esPtrState_T        * aStateBuff,
-    size_t              aStateDepth) {
-
-    SP_DBG_CHECK((size_t)1U < aStateDepth);                                     /* Provera par: da li je aStateDepth minimalne dubine?      */
-    SP_DBG_CHECK((esPtrState_T)0U != aInitState);                               /* Provera par: da li je aInitState  minimalne dubine?      */
-    aEpa->pState = aInitState;
-    aEpa->internals.exec.pSrcStates = aStateBuff;
-    aEpa->internals.exec.pDstStates = aStateBuff + aStateDepth;
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-
-void hsmDeInit(
-    esEpaHeader_T       * aEpa) {
-
-    aEpa->internals.exec.pSrcStates = (esPtrState_T *)0U;
-    aEpa->internals.exec.pDstStates = (esPtrState_T *)0U;
-}
-
-
-/*************************************************************************************************
- * LOCAL FUNCTION DEFINITIONS
- *************************************************************************************************/
-
-
-/*************************************************************************************************
- * CONFIGURATION ERRORS
- *************************************************************************************//** @cond */
-
+/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
  * END of sproc.c
