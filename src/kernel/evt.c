@@ -97,13 +97,7 @@ const C_ROM evtIntr_T evtSignal[] = {
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
-    },
-    {(esEvtId_T)SIG_NOEX,
-     EVT_RESERVED_MASK | EVT_STATIC_MASK,
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
-     EVT_SIGNATURE
-#endif
-    },
+    }
 };
 
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/

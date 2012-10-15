@@ -142,12 +142,6 @@ enum esEvtID {
     SIG_SUPER,
 
 /**
- * @brief       Signalni dogadjaj - zahteva se obrada flowchart-a.
- * @details     Ovaj signal se salje nakon povratne vrednosti @ref RETN_NOEX.
- */
-    SIG_NOEX,
-
-/**
  * @brief       Sistemski dogadjaj - zahteva se lista identifikatora aktivnih
  *              EPA objekata u sistemu.
  */
