@@ -247,7 +247,7 @@ struct evtQueue {
  */
     esQueuePtr_T    queue;
 
-#if (defined(OPT_KERNEL_ENABLE) && defined(OPT_KERNEL_USE_REGISTRY)) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_USE_REGISTRY) || defined(__DOXYGEN__)
 /**
  * @brief       Trenutni broj slobodnih mesta za dogadjaje u redu za cekanje.
  */
