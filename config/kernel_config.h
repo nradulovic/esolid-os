@@ -36,8 +36,6 @@
 /*==================================================================================  DEFINES  ==*/
 
 #define OPT_KERNEL_ENABLE
-#define OPT_KERNEL_EPA_PRIO_MAX         8U
-#define OPT_KERNEL_INTERRUPT_PRIO_MAX   ES_PRIO_NORMAL
 
 /*=================================================================================  SETTINGS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -119,10 +117,10 @@
  *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
  *              maksimalan broj prioriteta na 8-bitnoj arhitekturi. 16-bitne i
  *              32-bitne arhitekture podrazavaju vide od 64 EPA objekata.
- * @note        Podrazumevano podesavanje: 64 nivoa
+ * @note        Podrazumevano podesavanje: 8 nivoa
  *//*--------------------------------------------------------------------------------------------*/
 #if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
-# define OPT_KERNEL_EPA_PRIO_MAX                  64U
+# define OPT_KERNEL_EPA_PRIO_MAX                  8U
 #endif
 
 /*-------------------------------------------------------------------------------------------*//**
@@ -133,22 +131,31 @@
  *              jezgra.
  *//*--------------------------------------------------------------------------------------------*/
 #if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX)
-# define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_NORMAL
+# define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
 #endif
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Planiranje zadataka bez istiskivanja sa fiksiranim prioritetom.
  * @note        Ovo je podrazumevano podesavanje
  *//*--------------------------------------------------------------------------------------------*/
-#if !defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO) && !defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN) || defined(__DOXYGEN__)
-# define OPT_KERNEL_SCHEDULER_FIXEDPRIO
+#if !defined(OPT_KERNEL_SCHEDULER_COOPERATIVE) && !defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE) || defined(__DOXYGEN__)
+# define OPT_KERNEL_SCHEDULER_COOPERATIVE
 #endif
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Planiranje zadataka sa istiskivanjem sa Round-Robin tehnikom.
+ * @details     Ukoliko je ova opcija:
+ *              - definisana: omoguceno je istiskivanje zadataka
+ *              - nedefinisana: nije omoguceno istiskivanje zadataka
+ *              (koristi se neki drugi rezim scheduler-a).
+ *              Ukoliko je omoguceno istiskivanje zadataka, onda mogu da postoje
+ *              vise EPA objekata sa istim nivoom prioriteta. Tada se vrsi
+ *              planiranje zadataka po Round-Robin algoritmu.
+ * @note        Ostale opcije za rezim rada OPT_KERNEL_SCHEDULER_xxx ne smeju
+ *              biti istovremeno definisane.
  *//*--------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
-# define OPT_KERNEL_SCHEDULER_ROUNDROBIN
+# define OPT_KERNEL_SCHEDULER_PREEMPTIVE
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -261,8 +268,8 @@
  * @brief       Atribut za strukture dogadaja
  * @details     Prilikom slanja dogadjaja drugim sistemima javlja se problem
  *              pakovanja podataka unutar strukture dogadjaja.
- *              Ovom promenljivom se moze definisati koja direktiva ce koristi
- *              za strukture dogadjaja (poravnjanje, pakovanje).
+ *              Ovom promenljivom se moze definisati koja direktiva ce se
+ *              koristiti za strukture dogadjaja (poravnjanje, pakovanje).
  *//*--------------------------------------------------------------------------------------------*/
 #if !defined(OPT_EVT_STRUCT_ATTRIB) || defined(__DOXYGEN__)
 # define OPT_EVT_STRUCT_ATTRIB
@@ -270,6 +277,11 @@
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Dobavlja vremenski marker za dogadjaje
+ * @details     Ovo je makro koji poziva callback funkciju za tacno vreme.
+ *              Zadatak te funkcije je da pruzi informaciju o tacnom vremenu
+ *              koje se utiskuje u tek kreirani dogadjaj. Korisnik ima za
+ *              zadatak da u ovom makrou napise ime funkcije koja dobavlja
+ *              trenutno vreme i sistem ce je pozivati u odgovarajucim trenucima.
  *//*--------------------------------------------------------------------------------------------*/
 #if !defined(EVT_TIMESTAMP_GET) || defined(__DOXYGEN__)
 # define EVT_TIMESTAMP_GET()            0U
