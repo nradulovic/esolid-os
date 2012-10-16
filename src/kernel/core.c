@@ -50,10 +50,12 @@ typedef struct currCtx {
  */
     esEpaHeader_T   * epa;
 
+#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
 /**
  * @brief       Prioritet trenutnog EPA objekata koji se izvrsava
  */
     uint_fast8_t    prio;
+#endif
 
 /**
  * @brief       Trenutno stanje schedulera
@@ -139,7 +141,7 @@ C_INLINE_ALWAYS uint_fast8_t schedRdyGetPrioI_(
     unative_T indxGroup;
     unative_T indx;
 
-#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+#if defined(OPT_KERNEL_SCHEDULER_COOPERATIVE)
 # if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 # else
@@ -158,14 +160,14 @@ C_INLINE_ALWAYS uint_fast8_t schedRdyGetPrioI_(
 
         return ((unative_T)0U);
     }
-#else /* OPT_KERNEL_SCHEDULER_FIXEDPRIO */
+#elif defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
 # if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 # else
     indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
 # endif
     indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
-#endif /* !OPT_KERNEL_SCHEDULER_FIXEDPRIO */
+#endif /* !OPT_KERNEL_SCHEDULER_COOPERATIVE */
 
     return (indx | (indxGroup << PRIO_INDX_PWR));
 }
@@ -179,7 +181,7 @@ C_INLINE_ALWAYS uint_fast8_t schedRdyGetPrioI_(
 C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
     uint_fast8_t prio) {
 
-#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+#if defined(OPT_KERNEL_SCHEDULER_COOPERATIVE)
     return (rdyBitmap.epaList[prio]);
 #else
     return (rdyBitmap.epaList[prio]);
@@ -242,11 +244,14 @@ static void schedInit(
     void) {
 
     currCtx.epa = (esEpaHeader_T *)0U;
+
+#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
     currCtx.prio = (uint_fast8_t)0U;
+#endif
     currCtx.status = KERNEL_STOPPED;
     schedRdyInit_();
 
-#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
+#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
     portSchedInit();
 #endif
 }
@@ -254,7 +259,7 @@ static void schedInit(
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Scheduler kernel-a
  *//*--------------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+#if defined(OPT_KERNEL_SCHEDULER_COOPERATIVE)
 C_NORETURN void schedule(
     void) {
 
@@ -270,7 +275,6 @@ C_NORETURN void schedule(
             esEvtHeader_T * newEvt;
 
             newPrio = schedRdyGetPrioI_();
-            currCtx.prio = newPrio;
             newEpa = schedRdyGetEpaI_(newPrio);
             currCtx.epa = newEpa;
             newEvt = evtQGetI(
@@ -287,7 +291,6 @@ C_NORETURN void schedule(
                 schedRdyRmEpaI_(newEpa);
             }
         } else {
-            currCtx.prio = 0U;
             currCtx.epa = (void *)0U;
             /* ES_CPU_SLEEP(); */
             ES_CRITICAL_EXIT();
@@ -295,7 +298,7 @@ C_NORETURN void schedule(
         }
     }
 }
-#else
+#elif defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
 void scheduleI(
     unative_T irqLock_) {
 
@@ -372,7 +375,7 @@ void esEpaInit(
     schedRdyInsertI_(
         aEpa);
 
-#if defined(OPT_KERNEL_SCHEDULER_ROUNDROBIN)
+#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
     if (KERNEL_RUNNING == esKernelStatus()) {
         EPE_SCHED_NOTIFY_RDY();
     }
@@ -516,6 +519,7 @@ void esKernelInit(
     CORE_DBG_CHECK(sizeof(esEpaHeader_T) + sizeof(esEvtHeader_T) <= aMemorySize);    /* Provera par: mora da se preda neka minimalna kolician*/
                                                                                 /* memorije. Za sada je to samo velicina strukture EPA      */
                                                                                 /* objekta i velicina jednog dogadjaja.                     */
+    esHalInit();
     /**
      * @todo Kada se napravi statican alokator treba da se prepravi i ova funkcija
      */
@@ -524,15 +528,19 @@ void esKernelInit(
         aMemory,
         aMemorySize);
     schedInit();
+
+#if defined(OPT_STP_ENABLE)
+    esStpInit();
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/
 void esKernelStart(void) {
     currCtx.status = KERNEL_RUNNING;
 
-#if defined(OPT_KERNEL_SCHEDULER_FIXEDPRIO)
+#if defined(OPT_KERNEL_SCHEDULER_COOPERATIVE)
     schedule();
-#else
+#elif defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
     if (FALSE == schedRdyIsEmptyI_()) {
         EPE_SCHED_NOTIFY_RDY();
     }
