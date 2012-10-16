@@ -59,6 +59,7 @@ typedef enum esKernelStatus {
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Definiciona struktura koja opisuje jedan EPA objekat
+ * @api
  *//*--------------------------------------------------------------------------------------------*/
 typedef struct esEpaDef {
 /**
@@ -102,7 +103,7 @@ typedef struct esEpaDef {
  * @notapi
  *//*--------------------------------------------------------------------------------------------*/
 struct kernelCtrl {
-#if defined(OPT_KERNEL_USE_ROUND_ROBIN) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE) || defined(__DOXYGEN__)
 /**
  * @brief       Lista EPA objekata sa istim prioritetom
  */
