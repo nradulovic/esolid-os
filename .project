@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>esolid-haldsm</project>
+		<project>esolid-ett</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

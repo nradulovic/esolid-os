@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.1637679360">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.debug.1637679360" moduleId="org.eclipse.cdt.core.settings" name="dbg-o0-gcc">
@@ -2328,6 +2330,7 @@
 							<builder buildPath="${workspace_loc:/esolid-kernel/dbg-o0-gcc}" id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.builder.debug.1170473350" keepEnvironmentInBuildfile="false" name="ARM Sourcery Linux GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.builder.debug"/>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.debug.2001543877" name="ARM Sourcery Linux GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1510161691" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-ett/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-haldsm/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-haldsm/inc/port/family/stm32l1xx/cmsis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-haldsm/inc/port/arch/arm_cm3/cmsis}&quot;"/>
@@ -2340,6 +2343,7 @@
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.debug.295651622" name="ARM Sourcery Linux GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.658707077" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.694785778" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-ett/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-haldsm/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-haldsm/inc/port/family/stm32l1xx/cmsis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-haldsm/inc/port/arch/arm_cm3/cmsis}&quot;"/>
@@ -2377,8 +2381,25 @@
 						<entry flags="" kind="libraryFile" name="esolid-haldsm"/>
 					</externalSetting>
 				</externalSettings>
+				<externalSettings containerId="esolid-ett;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/esolid-ett/inc"/>
+					</externalSetting>
+				</externalSettings>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+				<buildTargets>
+					<target name="docs_clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments/>
+						<buildTarget>docs_clean</buildTarget>
+						<stopOnError>true</stopOnError>
+						<useDefaultCommand>true</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+				</buildTargets>
+			</storageModule>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

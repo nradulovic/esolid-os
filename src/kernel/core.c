@@ -356,6 +356,7 @@ void esEpaInit(
     CORE_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);   /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
                                                                                 /* te granice OPT_KERNEL_EPA_PRIO_MAX.                             */
     CORE_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                       /* Prioritet 0 je rezervisan.                               */
+    ES_TRACE(STP_FILT_EPA_STATUS, txtEpaInit, aDescription->epaName, aEpa, aDescription->epaWorkspaceSize, aDescription->epaPrio, aDescription->hsmInitState);
     hsmInit(
         aEpa,
         aDescription->hsmInitState,
@@ -536,6 +537,7 @@ void esKernelInit(
 
 /*-----------------------------------------------------------------------------------------------*/
 void esKernelStart(void) {
+    ES_TRACE(STP_FILT_KERN_STATUS, txtKernStart);
     currCtx.status = KERNEL_RUNNING;
 
 #if defined(OPT_KERNEL_SCHEDULER_COOPERATIVE)
