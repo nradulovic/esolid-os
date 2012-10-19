@@ -1,10 +1,7 @@
-Verzija 1.0a02
+Verzija 1.0a04
+- Kernel koristi hal Debug modul za sve debug aktivnosti (assert, check, log, trace)
 
-primitive/list.h
-- dodata je funkcija esDlsIsEmpty()
-- datoteka je preneta na nov format
-
-Verzija 1.0.a03
+Verzija 1.0a03
 - Podrazumevane vrednosti su praktičnije
 - Neke opcije su dodatno dokumentovane
 - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto OPT_KERNEL_SCHEDULER_ROUNDROBIN, 
@@ -13,7 +10,7 @@ Verzija 1.0.a03
     jezgra, odnosno, izbačena je opcija ES_KERNEL_ENABLE
 - Izbačen je suvišni dogadjaj i status NOEX, tranzicije bez dogadjaja se obavljaju
     preko init signala
-- Prilikom inicijalizaciji se ipak salje dogadjaj SIG_INIT
+- Prilikom inicijalizacije se ipak salje dogadjaj SIG_INIT
 - Dispecer je napisan po treci put, znatno su mu prosirene mogucnosti
 - Funkcija hsmDispatch je sada deo internog interfejsa
 - Inicijalizacija rdy bitmape je ispravljena, sada Epa objekat može da ima prioritet 0.
@@ -22,3 +19,9 @@ Verzija 1.0.a03
 - Kernel port sada ima profile
 - Konfiguracija je prebacena u sam projekat
 - Kernel se kompajlira po ISO-C99 standardu.
+
+Verzija 1.0a02
+
+primitive/list.h
+- dodata je funkcija esDlsIsEmpty()
+- datoteka je preneta na nov format

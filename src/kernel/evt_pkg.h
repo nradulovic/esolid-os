@@ -71,21 +71,21 @@
  * @brief       Makroi za debug podrsku.
  * @{ *//*---------------------------------------------------------------------------------------*/
 #if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
-# define EVT_ASSERT                      DBG_ASSERT
-# define EVT_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define EVT_ASSERT_COMPILE              DBG_ASSERT_COMPILE
-# define EVT_DBG_DECL                    DBG_DECL
-# define EVT_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define EVT_DBG_MACRO                   DBG_MACRO
-# define EVT_DBG_CHECK                   DBG_CHECK
+# define EVT_ASSERT                      ES_DBG_ASSERT
+# define EVT_ASSERT_ALWAYS               ES_DBG_ASSERT_ALWAYS
+# define EVT_ASSERT_COMPILE              ES_DBG_ASSERT_COMPILE
+# define EVT_DBG_DECL                    ES_DBG_DECL
+# define EVT_DBG_DEFINE_MODULE           ES_DBG_DEFINE_MODULE
+# define EVT_DBG_MACRO                   ES_DBG_MACRO
+# define EVT_DBG_CHECK                   ES_DBG_CHECK
 #else
-# define EVT_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define EVT_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define EVT_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
-# define EVT_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define EVT_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define EVT_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define EVT_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
+# define EVT_ASSERT(expr)                ES_DBG_EMPTY_MACRO()
+# define EVT_ASSERT_ALWAYS(expr)         ES_DBG_EMPTY_MACRO()
+# define EVT_ASSERT_COMPILE(expr)        ES_DBG_EMPTY_DECL()
+# define EVT_DBG_DECL(expr)              ES_DBG_EMPTY_DECL()
+# define EVT_DBG_DEFINE_MODULE(expr)     ES_DBG_EMPTY_DECL()
+# define EVT_DBG_MACRO(expr)             ES_DBG_EMPTY_MACRO()
+# define EVT_DBG_CHECK(expr)             ES_DBG_EMPTY_MACRO()
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

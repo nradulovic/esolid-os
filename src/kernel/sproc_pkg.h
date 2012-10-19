@@ -73,21 +73,21 @@
  * @name        Debug podrska
  * @{ *//*---------------------------------------------------------------------------------------*/
 #if defined(OPT_KERNEL_DBG_SPROC)
-# define SP_ASSERT                      DBG_ASSERT
-# define SP_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define SP_ASSERT_COMPILE              DBG_COMPILE_ASSERT
-# define SP_DBG_DECL                    DBG_DECL
-# define SP_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define SP_DBG_MACRO                   DBG_MACRO
-# define SP_DBG_CHECK                   DBG_CHECK
+# define SP_ASSERT                      ES_DBG_ASSERT
+# define SP_ASSERT_ALWAYS               ES_DBG_ASSERT_ALWAYS
+# define SP_ASSERT_COMPILE              ES_DBG_COMPILE_ASSERT
+# define SP_DBG_DECL                    ES_DBG_DECL
+# define SP_DBG_DEFINE_MODULE           ES_DBG_DEFINE_MODULE
+# define SP_DBG_MACRO                   ES_DBG_MACRO
+# define SP_DBG_CHECK                   ES_DBG_CHECK
 #else
-# define SP_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define SP_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define SP_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
-# define SP_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define SP_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define SP_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define SP_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
+# define SP_ASSERT(expr)                ES_DBG_EMPTY_MACRO()
+# define SP_ASSERT_ALWAYS(expr)         ES_DBG_EMPTY_MACRO()
+# define SP_ASSERT_COMPILE(expr)        ES_DBG_EMPTY_DECL()
+# define SP_DBG_DECL(expr)              ES_DBG_EMPTY_DECL()
+# define SP_DBG_DEFINE_MODULE(expr)     ES_DBG_EMPTY_DECL()
+# define SP_DBG_MACRO(expr)             ES_DBG_EMPTY_MACRO()
+# define SP_DBG_CHECK(expr)             ES_DBG_EMPTY_MACRO()
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

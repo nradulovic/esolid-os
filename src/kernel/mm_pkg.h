@@ -41,21 +41,21 @@
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 #if defined(OPT_KERNEL_DBG_MM) || defined(__DOXYGEN__)
-# define MM_ASSERT                      DBG_ASSERT
-# define MM_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define MM_ASSERT_COMPILE              DBG_ASSERT_COMPILE
-# define MM_DBG_DECL                    DBG_DECL
-# define MM_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define MM_DBG_MACRO                   DBG_MACRO
-# define MM_DBG_CHECK                   DBG_CHECK
+# define MM_ASSERT                      ES_DBG_ASSERT
+# define MM_ASSERT_ALWAYS               ES_DBG_ASSERT_ALWAYS
+# define MM_ASSERT_COMPILE              ES_DBG_ASSERT_COMPILE
+# define MM_DBG_DECL                    ES_DBG_DECL
+# define MM_DBG_DEFINE_MODULE           ES_DBG_DEFINE_MODULE
+# define MM_DBG_MACRO                   ES_DBG_MACRO
+# define MM_DBG_CHECK                   ES_DBG_CHECK
 #else
-# define MM_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define MM_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define MM_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
-# define MM_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define MM_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define MM_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define MM_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
+# define MM_ASSERT(expr)                ES_DBG_EMPTY_MACRO()
+# define MM_ASSERT_ALWAYS(expr)         ES_DBG_EMPTY_MACRO()
+# define MM_ASSERT_COMPILE(expr)        ES_DBG_EMPTY_DECL()
+# define MM_DBG_DECL(expr)              ES_DBG_EMPTY_DECL()
+# define MM_DBG_DEFINE_MODULE(expr)     ES_DBG_EMPTY_DECL()
+# define MM_DBG_MACRO(expr)             ES_DBG_EMPTY_MACRO()
+# define MM_DBG_CHECK(expr)             ES_DBG_EMPTY_MACRO()
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

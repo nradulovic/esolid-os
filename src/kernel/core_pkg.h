@@ -50,25 +50,21 @@
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 #if defined(OPT_KERNEL_DBG_CORE) || defined(__DOXYGEN__)
-# define CORE_ASSERT                  DBG_ASSERT
-# define CORE_ASSERT_ALWAYS           DBG_ASSERT_ALWAYS
-# define CORE_COMPILE_ASSERT          DBG_COMPILE_ASSERT
-# define CORE_DBG_DECL                DBG_DECL
-# define CORE_DBG_DEFINE_MODULE       DBG_DEFINE_MODULE
-# define CORE_DBG_ENTRY               DBG_ENTRY
-# define CORE_DBG_EXIT                DBG_EXIT
-# define CORE_DBG_MACRO               DBG_MACRO
-# define CORE_DBG_CHECK               DBG_CHECK
+# define CORE_ASSERT                  ES_DBG_ASSERT
+# define CORE_ASSERT_ALWAYS           ES_DBG_ASSERT_ALWAYS
+# define CORE_COMPILE_ASSERT          ES_DBG_COMPILE_ASSERT
+# define CORE_DBG_DECL                ES_DBG_DECL
+# define CORE_DBG_DEFINE_MODULE       ES_DBG_DEFINE_MODULE
+# define CORE_DBG_MACRO               ES_DBG_MACRO
+# define CORE_DBG_CHECK               ES_DBG_CHECK
 #else
-# define CORE_ASSERT(expr)            DBG_EMPTY_MACRO()
-# define CORE_ASSERT_ALWAYS(expr)     DBG_EMPTY_MACRO()
-# define CORE_COMPILE_ASSERT(expr)    DBG_EMPTY_DECL()
-# define CORE_DBG_DECL(expr)          DBG_EMPTY_DECL()
-# define CORE_DBG_DEFINE_MODULE(expr) DBG_EMPTY_DECL()
-# define CORE_DBG_ENTRY()             DBG_EMPTY_MACRO()
-# define CORE_DBG_EXIT()              DBG_EMPTY_MACRO()
-# define CORE_DBG_MACRO(expr)         DBG_EMPTY_MACRO()
-# define CORE_DBG_CHECK(expr)         DBG_EMPTY_MACRO()
+# define CORE_ASSERT(expr)            ES_DBG_EMPTY_MACRO()
+# define CORE_ASSERT_ALWAYS(expr)     ES_DBG_EMPTY_MACRO()
+# define CORE_COMPILE_ASSERT(expr)    ES_DBG_EMPTY_DECL()
+# define CORE_DBG_DECL(expr)          ES_DBG_EMPTY_DECL()
+# define CORE_DBG_DEFINE_MODULE(expr) ES_DBG_EMPTY_DECL()
+# define CORE_DBG_MACRO(expr)         ES_DBG_EMPTY_MACRO()
+# define CORE_DBG_CHECK(expr)         ES_DBG_EMPTY_MACRO()
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
