@@ -268,8 +268,11 @@ C_NORETURN void schedule(
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
     while (TRUE) {
+        ES_TRACE(
+            STP_FILT_KERN_STATUS_0,
+            txtKernSearch);
 
-        if (FALSE == schedRdyIsEmptyI_()) {
+        while (FALSE == schedRdyIsEmptyI_()) {
             uint_fast8_t  newPrio;
             esEpaHeader_T * newEpa;
             esEvtHeader_T * newEvt;
@@ -280,6 +283,11 @@ C_NORETURN void schedule(
             newEvt = evtQGetI(
                 newEpa);
             ES_CRITICAL_EXIT();
+            ES_TRACE(
+                STP_FILT_KERN_STATUS_0,
+                txtKernEpaDispatch,
+                newEpa,
+                newEpa->internals.kernCtrl.prio);
             hsmDispatch(
                 newEpa,
                 newEvt);
@@ -290,12 +298,17 @@ C_NORETURN void schedule(
             if (TRUE == evtQIsEmpty_(newEpa)) {
                 schedRdyRmEpaI_(newEpa);
             }
-        } else {
-            currCtx.epa = (void *)0U;
-            /* ES_CPU_SLEEP(); */
-            ES_CRITICAL_EXIT();
-            ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
         }
+        currCtx.epa = (void *)0U;
+        ES_TRACE(
+            STP_FILT_KERN_STATUS_0,
+            txtKernEnterIdle);
+        /* ES_CPU_SLEEP(); */
+        ES_TRACE(
+            STP_FILT_KERN_STATUS_0,
+            txtKernExitIdle);
+        ES_CRITICAL_EXIT();
+        ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     }
 }
 #elif defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
@@ -356,7 +369,14 @@ void esEpaInit(
     CORE_DBG_CHECK((uint8_t)OPT_KERNEL_EPA_PRIO_MAX > aDescription->epaPrio);   /* Provera par: prioritet EPA ne sme da bude veci od zada-  */
                                                                                 /* te granice OPT_KERNEL_EPA_PRIO_MAX.                             */
     CORE_DBG_CHECK((uint8_t)0U != aDescription->epaPrio);                       /* Prioritet 0 je rezervisan.                               */
-    ES_TRACE(STP_FILT_EPA_STATUS, txtEpaInit, aDescription->epaName, aEpa, aDescription->epaWorkspaceSize, aDescription->epaPrio, aDescription->hsmInitState);
+    ES_TRACE(
+        STP_FILT_EPA_STATUS_0,
+        txtEpaInit,
+        aDescription->epaName,
+        aEpa,
+        aDescription->epaWorkspaceSize,
+        aDescription->epaPrio,
+        aDescription->hsmInitState);
     hsmInit(
         aEpa,
         aDescription->hsmInitState,
@@ -394,9 +414,16 @@ esEpaHeader_T * esEpaCreate(
     size_t stateBuff;
     size_t evtBuff;
 
-    CORE_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);                /* Provera par: da li je aDescription inicijalizovan?       */
-    CORE_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaWorkspaceSize);            /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
+    CORE_DBG_CHECK((const C_ROM esEpaDef_T *)0U != aDescription);               /* Provera par: da li je aDescription inicijalizovan?       */
+    CORE_DBG_CHECK(sizeof(esEpaHeader_T) <= aDescription->epaWorkspaceSize);    /* Provera par: zahtevana memorija se koristi za cuvanje ove*/
                                                                                 /* strukture.                                               */
+    ES_TRACE(
+        STP_FILT_EPA_STATUS_0,
+        txtEpaCreate,
+        aDescription->epaName,
+        aDescription->epaWorkspaceSize,
+        aDescription->epaPrio,
+        aDescription->hsmInitState);
     epaSize = aDescription->epaWorkspaceSize;
     stateBuff = epaSize + 1U;
     epaSize += hsmReqSize_(
@@ -404,6 +431,10 @@ esEpaHeader_T * esEpaCreate(
     evtBuff = epaSize + 1U;
     epaSize += evtQReqSize_(
         aDescription->evtQueueDepth);
+    ES_TRACE(
+        STP_FILT_EPA_STATUS_0,
+        txtEpaCreateMemNeeded,
+        epaSize);
 
 #if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
     CORE_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
@@ -413,6 +444,10 @@ esEpaHeader_T * esEpaCreate(
     (void)aMemClass;
     newEpa = (esEpaHeader_T *)esHmemAlloc(epaSize);
 #endif
+    ES_TRACE(
+        STP_FILT_EPA_STATUS_0,
+        txtEpaCreateMemAddr,
+        newEpa);
     CORE_ASSERT((esEpaHeader_T *)0U != newEpa);
     esEpaInit(
         newEpa,
@@ -537,7 +572,9 @@ void esKernelInit(
 
 /*-----------------------------------------------------------------------------------------------*/
 void esKernelStart(void) {
-    ES_TRACE(STP_FILT_KERN_STATUS, txtKernStart);
+    ES_TRACE(
+        STP_FILT_KERN_STATUS_0,
+        txtKernStart);
     currCtx.status = KERNEL_RUNNING;
 
 #if defined(OPT_KERNEL_SCHEDULER_COOPERATIVE)
