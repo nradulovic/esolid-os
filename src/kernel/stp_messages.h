@@ -41,94 +41,126 @@
  * @{ *//*---------------------------------------------------------------------------------------*/
 #define STP_FILT_EPA_STATUS_0           (1UL << 0)
 #define STP_FILT_EPA_EXECUTION_0        (1UL << 1)
-#define STP_FILT_EVT_0                  (1UL << 2)
-#define STP_FILT_KERN_STATUS_0          (1UL << 3)
+#define STP_FILT_EPA_EXECUTION_1        (1UL << 2)
+#define STP_FILT_EVT_0                  (1UL << 3)
+#define STP_FILT_EVT_Q_0                (1UL << 4)
+#define STP_FILT_KERN_STATUS_0          (1UL << 5)
+#define STP_FILT_MEM_0                  (1UL << 6)
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 /*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Macro group
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
-/** @} *//*--------------------------------------------------------------------------------------*/
-
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Data types group
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
-/** @} *//*--------------------------------------------------------------------------------------*/
-
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Variables group
  * @brief       brief description
  * @{ *//*---------------------------------------------------------------------------------------*/
 /* STP_FILT_EPA_STATUS 0 */
-const char * const txtEpaCreate =
-    "\nEPA: create name: %s (size: %uB, prio: %u, init addr: %p)";              /* ime, velicina, prio, adresa f-je.                        */
-const char * const txtEpaCreateMemNeeded =
-    "\n - mem required: %uB";                                                   /* velicina memorije                                        */
-const char * const txtEpaCreateMemAddr =
-    "\n - mem addr: %p";                                                        /* adresa EPA header-a                                      */
-const char * const txtEpaDestroy =
-    "\nEPA: destroy addr: %p";                                                  /* adresa                                                   */
-const char * const txtEpaInit =
-    "\nEPA: init name: %s, addr: %p, (size: %u, prio: %u, init: %p) buffers: state addr: %p, evt addr: %p";
-                                                                                /* ime, adresa, velicina, prio, adresa f-je, adresa state   */
-                                                                                /* bufera, adresa reda za cekanje                           */
+const char C_ROM * C_ROM_VAR const txtEpaCreate =
+    "EPA: create name: %s (size: %uB, prio: %u)";                               /* ime, velicina, prio                                      */
+const char C_ROM * C_ROM_VAR const txtEpaCreateMemNeeded =
+    " - mem required: %uB";                                                     /* velicina memorije                                        */
+const char C_ROM * C_ROM_VAR const txtEpaCreateMemAddr =
+    " - mem addr: %p";                                                          /* adresa EPA header-a                                      */
+const char C_ROM * C_ROM_VAR const txtEpaDestroy =
+    "EPA: destroy addr: %p";                                                    /* adresa                                                   */
+const char C_ROM * C_ROM_VAR const txtEpaInit =
+    "EPA: init name: %s, addr: %p, (size: %u, prio: %u)";                       /* ime, adresa, velicina, prio                              */
 
 /* STP_FILT_EVT 0 */
-const char * const txtEvtCreate =
-    "\nevt: create id: %u (size %uB)";                                          /* identifikator, adresa, velicina                          */
-const char * const txtEvtPost =
-    "\nevt: post id: %u to EPA addr: %p";                                       /* identifikator, adresa                                    */
-const char * const txtEvtPostAhead =
-    "\nevt: post ahead id: %u to EPA addr: %p";                                 /* identifikator, adresa                                    */
-const char * const txtEvtDestroy =
-    "\nevt: destroy id: %u";                                                    /* identifikator                                            */
+const char C_ROM * C_ROM_VAR const txtEvtCreate =
+    "evt: create id: %u (size %uB)";                                            /* identifikator, adresa, velicina                          */
+const char C_ROM * C_ROM_VAR const txtEvtPost =
+    "evt: post id: %u to EPA addr: %p";                                         /* identifikator, adresa                                    */
+const char C_ROM * C_ROM_VAR const txtEvtPostAhead =
+    "evt: post ahead id: %u to EPA addr: %p";                                   /* identifikator, adresa                                    */
+const char C_ROM * C_ROM_VAR const txtEvtDestroy =
+    "evt: destroy id: %u";                                                      /* identifikator                                            */
+const char C_ROM * C_ROM_VAR const txtEvtReserve =
+    "evt: reserve id: %u";
+const char C_ROM * C_ROM_VAR const txtEvtUnReserve =
+    "evt: unReserve id: %u";
 
 /* STP_FILT_EVT 1 */
-const char * const txtEvtCreateMemNeeded =
-    "\n - mem required: %uB";                                                   /* velicina memorije                                        */
-const char * const txtEvtCreateMemAddr =
-    "\n - mem addr: %p";                                                        /* adrea EVT header-a                                       */
+const char C_ROM * C_ROM_VAR const txtEvtCreateMemNeeded =
+    " - mem required: %uB";                                                     /* velicina memorije                                        */
+const char C_ROM * C_ROM_VAR const txtEvtCreateMemAddr =
+    " - mem addr: %p";                                                          /* adrea EVT header-a                                       */
+
+/* STP_FILT_EVT_Q_0 */
+const char C_ROM * C_ROM_VAR const txtEvtQinit =
+    "evtQ: initializing evtQ addr: %p, buff addr: %p, buff size: %u units";
+const char C_ROM * C_ROM_VAR const txtEvtQput =
+    "evtQ: put evt id: %u into queue addr: %p";                                 /* adresa reda za dogadjaje, identifikator                  */
+const char C_ROM * C_ROM_VAR const txtEvtQputAhead =
+    "evtQ: put ahead evt id: %u into queue addr: %p";                           /* adresa reda za dogadjaje, identifikator                  */
+const char C_ROM * C_ROM_VAR const txtEvtQget =
+    "evtQ: get evt addr: %p";                                                   /* adresa reda za dogadjaje                                 */
+const char C_ROM * C_ROM_VAR const txtEvtQFree =
+    " - queue free: %u";                                                        /* broj slobodnih pozicija                                  */
 
 /* STP_FILT_EPA_EXECUTION 0 */
-const char * const txtEpaSMexec =
-    "\nSM: exec addr %p, start state addr: %p, evt id: %u";                     /* adresa EPA header-a, adresa f-je stanja, id dogadjaja    */
-const char * const txtEpaSMtran =
-    "\nSM: transition addr: %p -> addr: %p:";                                   /* adresa stanja izvora, adresa stanja odredista            */
-const char * const txtEpaSMtranFinished =
-    "\nSM: transition finished";
+const char C_ROM * C_ROM_VAR const txtEpaSMinitialization =
+    "SM: initializing SM %p, state addr: %p, state buff addr: %p, state depth: %u"; /* adresa automata i stanja, velicina bafera stanja     */
+const char C_ROM * C_ROM_VAR const txtEpaSMexec =
+    "SM: exec SM addr %p, start state addr: %p, evt id: %u";                    /* adresa EPA header-a, adresa f-je stanja, id dogadjaja    */
+const char C_ROM * C_ROM_VAR const txtEpaSMtran =
+    "SM: transition addr: %p -> addr: %p:";                                     /* adresa stanja izvora, adresa stanja odredista            */
+const char C_ROM * C_ROM_VAR const txtEpaSMHandled =
+    "SM: handled evt id: %u";                                                   /* identifikator dogadjaja                                  */
+const char C_ROM * C_ROM_VAR const txtEpaSMDeffered =
+    "SM: deffered evt id: %u";                                                  /* identifikator dogadjaja                                  */
+const char C_ROM * C_ROM_VAR const txtEpaSMignored =
+    "SM: ignored evt id: %u";                                                   /* identifikator dogadjaja                                  */
 
 /* STP_FILT_EPA_EXECUTION 1 */
-const char * const txtEpaSMsuper = " super(%p)";                                /* adresa                                                   */
-const char * const txtEpaSMentry = " entry(%p)";                                /* adresa                                                   */
-const char * const txtEpaSMexit = " exit(%p)";                                  /* adresa                                                   */
-const char * const txtEpaSMinit = " init(%p)";                                  /* adresa                                                   */
+const char C_ROM * C_ROM_VAR const txtEpaSMtranStart =
+    "SM: transition start";
+const char C_ROM * C_ROM_VAR const txtEpaSMtranFinished =
+    "SM: transition finish";
+const char C_ROM * C_ROM_VAR const txtEpaSMgenTree =
+    "SM: generating hierarchy tree:";
+const char C_ROM * C_ROM_VAR const txtEpaSMsuper =
+    " - super(%p)=%p";                                                          /* adresa stanja, adresa superstanja                        */
+const char C_ROM * C_ROM_VAR const txtEpaSMentry =
+    " - entry(%p)";                                                             /* adresa                                                   */
+const char C_ROM * C_ROM_VAR const txtEpaSMexit =
+    " - exit(%p)";                                                              /* adresa                                                   */
+const char C_ROM * C_ROM_VAR const txtEpaSMinit =
+    " - init(%p)";                                                              /* adresa                                                   */
 
 /* STP_FILT_KERN_STATUS 0 */
-const char * const txtKernStart = "\n ** Kernel start **\n";
-const char * const txtKernSearch = "\nkern: search EPA to dispatch";
-const char * const txtKernEnterIdle = "\nkern: enter IDLE loop";
-const char * const txtKernExitIdle = "\nkern: exit IDLE loop";
-const char * const txtKernEpaDispatch = "\nkern: dispatch EPA addr: %p (prio: %u)";   /* adresa, adresa                                     */
+const char C_ROM * C_ROM_VAR const txtKernStart =
+    " ** Kernel start **";
+const char C_ROM * C_ROM_VAR const txtKernSearch =
+    "kern: search EPA to dispatch";
+const char C_ROM * C_ROM_VAR const txtKernEnterIdle =
+    "kern: enter IDLE loop";
+const char C_ROM * C_ROM_VAR const txtKernExitIdle =
+    "kern: exit IDLE loop";
+const char C_ROM * C_ROM_VAR const txtKernEpaDispatch =
+    "kern: dispatch EPA addr: %p (prio: %u)";                                   /* adresa, adresa                                           */
+
+/* STP_FILE_MEM_0 */
+const char C_ROM * C_ROM_VAR const txtMemHeapInit =
+    "mem heap: initializing heap mem: addr: %p, size: %uB";                     /* pocetak heap memorije, velicina                          */
+const char C_ROM * C_ROM_VAR const txtMemHeapFree =
+    " - heap free: %u";
+const char C_ROM * C_ROM_VAR const txtMemHeapAlloc =
+    "mem heap: allocate %uB";
+const char C_ROM * C_ROM_VAR const txtMemHeapAllocated =
+    "mem heap: allocated addr: %p";
+const char C_ROM * C_ROM_VAR const txtMemHeapDeAlloc =
+    "mem heap: deallocate %p";
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Function group
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
-/** @} *//*--------------------------------------------------------------------------------------*/
-
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }

@@ -49,18 +49,24 @@ EVT_DBG_DEFINE_MODULE(Event Object);
 /*=========================================================================  LOCAL DATA TYPES  ==*/
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE_ALWAYS void evtQPutAheadI_(
-    evtQueue_T          * aEvtQueue,
-    esEvtHeader_T       * aEvt);
+C_INLINE_ALWAYS void evtInit_(
+    esEvtHeader_T       * aNewEvt,
+    size_t              aDataSize,
+    esEvtId_T           aEvtId);
+
+C_INLINE_ALWAYS esEvtHeader_T * evtQGetI_(
+    evtQueue_T          * aEvtQueue);
 
 C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T          * aEvtQueue,
     esEvtHeader_T       * aEvt);
 
-C_INLINE_ALWAYS void evtInit_(
-    esEvtHeader_T       * aNewEvt,
-    size_t              aDataSize,
-    esEvtId_T           aEvtId);
+C_INLINE_ALWAYS void evtQPutAheadI_(
+    evtQueue_T          * aEvtQueue,
+    esEvtHeader_T       * aEvt);
+
+static uint32_t evtQQueryEmptyI(
+    evtQueue_T          * aEvtQueue);
 
 /*==========================================================================  LOCAL VARIABLES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
@@ -155,8 +161,16 @@ C_INLINE_ALWAYS esEvtHeader_T * evtQGetI_(
 
     EVT_ASSERT((evtQueue_T *)0U != aEvtQueue);                                   /* Provera par: da li je aEvtQueue inicijalizovan?          */
     EVT_ASSERT(FALSE == esQpIsEmpty(&(aEvtQueue->queue)));                       /* Provera: da li red sadrzi barem jedan element?           */
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQget,
+        aEvtQueue);
     tmpEvt = (esEvtHeader_T *)esQpGetI(
         &(aEvtQueue->queue));
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQFree,
+        evtQQueryEmptyI(aEvtQueue));
 
     if ((evtDynamic_T)0U == (EVT_STATIC_MASK & tmpEvt->internals.dynamic)) {
         evtDynamic_T tmpR;
@@ -186,9 +200,18 @@ C_INLINE_ALWAYS void evtQPutI_(
     EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                 /* Provera par: da li je aEvt inicijalizovan?               */
     EVT_ASSERT(FALSE == esQpIsFull(&(aEvtQueue->queue)));                       /* Provera: da li red moze da primi nov element?            */
     EVT_DBG_CHECK(EVT_SIGNATURE == aEvt->internals.signature);                  /* Provera par: da li je dogadjaj validan?                  */
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQput,
+        aEvtQueue,
+        aEvt->internals.id);
     esQpPutI(
         &(aEvtQueue->queue),
         (void *)aEvt);
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQFree,
+        evtQQueryEmptyI(aEvtQueue));
 
     if ((evtDynamic_T)0U == (EVT_STATIC_MASK & aEvt->internals.dynamic)) {
         evtDynamic_T tmpR;
@@ -213,9 +236,18 @@ C_INLINE_ALWAYS void evtQPutAheadI_(
     EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                 /* Provera par: da li je aEvt inicijalizovan?               */
     EVT_ASSERT(FALSE == esQpIsFull(&(aEvtQueue->queue)));                       /* Provera: da li red moze da primi nov element?            */
     EVT_DBG_CHECK(EVT_SIGNATURE == aEvt->internals.signature);                  /* Provera par: da li je dogadjaj validan?                  */
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQputAhead,
+        aEvtQueue,
+        aEvt->internals.id);
     esQpPutAheadI(
         &(aEvtQueue->queue),
         (void *)aEvt);
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQFree,
+        evtQQueryEmptyI(aEvtQueue));
 
     if ((evtDynamic_T)0U == (EVT_STATIC_MASK & aEvt->internals.dynamic)) {
         evtDynamic_T tmpR;
@@ -225,6 +257,18 @@ C_INLINE_ALWAYS void evtQPutAheadI_(
         tmpU = (aEvt->internals.dynamic - 1U) & EVT_USERS_MASK;
         aEvt->internals.dynamic = tmpR | tmpU;
     }
+}
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @brief       Vraca informaciju o slobodnim mestima u redu za cekanje
+ * @param       aEvtQueue               Pokazivac na red za cekanje
+ * @param       aEvt                    dogadjaj koji se postavlja u red.
+ * @return      Broj slobodnih mesta
+ *//*--------------------------------------------------------------------------------------------*/
+static uint32_t evtQQueryEmptyI(
+    evtQueue_T          * aEvtQueue) {
+
+    return (esQpFreeSpace(&(aEvtQueue->queue)));
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -297,10 +341,19 @@ void evtQInit(
     EVT_DBG_CHECK((size_t)1U <= aQueueSize);                                    /* Provera par: da li je zahtevana velicina barem za 1      */
                                                                                 /* element?                                                 */
     EVT_DBG_CHECK((esEvtHeader_T **)0U != aEvtBuff);                            /* Provera: da li je rezervisana memorija?                  */
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,txtEvtQinit,
+        &(aEpa->internals.evtQueue.queue),
+        aEvtBuff,
+        aQueueSize);
     esQpInit(
         &(aEpa->internals.evtQueue.queue),
         (void **)aEvtBuff,
         aQueueSize);
+    ES_TRACE(
+        STP_FILT_EVT_Q_0,
+        txtEvtQFree,
+        evtQQueryEmptyI(&(aEpa->internals.evtQueue)));
 
 #if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
     aEpa->internals.evtQueue.freeCurr = esQpFreeSpace(
@@ -340,11 +393,19 @@ esEvtHeader_T * esEvtCreate(
     ES_CRITICAL_DECL();
     esEvtHeader_T * newEvt;
 
-    EVT_DBG_CHECK(sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    EVT_DBG_CHECK(
+        sizeof(esEvtHeader_T) <= dataSize);                           /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
+    ES_TRACE(
+        STP_FILT_EVT_0,
+        txtEvtCreate,
+        id,
+        dataSize);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
-    EVT_ASSERT((esEvtHeader_T *)0U != newEvt);                                  /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
+    EVT_ASSERT(
+        (esEvtHeader_T *)0U != newEvt);                                  /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
     evtInit_(
         newEvt,
         dataSize,
@@ -360,7 +421,13 @@ esEvtHeader_T * esEvtCreateI(
 
     esEvtHeader_T * newEvt;
 
-    EVT_DBG_CHECK(sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
+    EVT_DBG_CHECK(
+        sizeof(esEvtHeader_T) <= dataSize);                            /* Provera par: da li dataSize moze da sadrzi zaglavlje?    */
+    ES_TRACE(
+        STP_FILT_EVT_0,
+        txtEvtCreate,
+        id,
+        dataSize);
     newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
     EVT_ASSERT((esEvtHeader_T *)0 != newEvt);                                   /* Provera: da li je mem. prostor rezervisan za dogadjaj?   */
     evtInit_(
@@ -376,6 +443,10 @@ void esEvtReserve(
     esEvtHeader_T       * aEvt) {
 
     EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
+    ES_TRACE(
+        STP_FILT_EVT_0,
+        txtEvtReserve,
+        aEvt->internals.id);
     aEvt->internals.dynamic |= EVT_RESERVED_MASK;
 }
 
@@ -384,6 +455,10 @@ void esEvtUnReserve(
     esEvtHeader_T       * aEvt) {
 
     EVT_DBG_CHECK((esEvtHeader_T *)0U != aEvt);                                  /* Provera par: da li je aEvt inicijalizovan?               */
+    ES_TRACE(
+        STP_FILT_EVT_0,
+        txtEvtUnReserve,
+        aEvt->internals.id);
     aEvt->internals.dynamic &= ~EVT_RESERVED_MASK;
 
     if ((evtDynamic_T)0U == aEvt->internals.dynamic) {
@@ -403,6 +478,11 @@ void esEvtPost(
     ES_CRITICAL_DECL();
 
     EVT_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
+    ES_TRACE(
+        STP_FILT_EVT_0,
+        txtEvtPost,
+        aEvt->internals.id,
+        aEpa);
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutI_(
         &(aEpa->internals.evtQueue),
@@ -424,6 +504,11 @@ void esEvtPostAhead(
     ES_CRITICAL_DECL();
 
     EVT_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                  /* Provera par: da li je aEpa inicijalizovan?               */
+    ES_TRACE(
+        STP_FILT_EVT_0,
+        txtEvtPostAhead,
+        aEvt->internals.id,
+        aEpa);
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutAheadI_(
         &(aEpa->internals.evtQueue),

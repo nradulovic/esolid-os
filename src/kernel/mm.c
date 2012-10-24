@@ -290,6 +290,11 @@ void esHmemInit(
     MM_DBG_CHECK(aSize < (size_t)BLOCK_STATUS_MASK);
     MM_DBG_CHECK((size_t)0U == (aSize & (C_DATA_ALIGNMENT - 1U)));
     MM_DBG_CHECK((size_t)0U == ((size_t)aHeap & (C_DATA_ALIGNMENT - 1U)));
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapInit,
+        aHeap,
+        aSize);
     freeMemory = (hmemBlkHdr_T *)aHeap;
     freeMemory->blk.size = aSize - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T);
     heapSentinel = (hmemBlkHdr_T *)((uint8_t *)freeMemory + freeMemory->blk.size + sizeof(hmemBlk_T));
@@ -306,6 +311,10 @@ void esHmemInit(
         &(freeMemory->freeList));
     BLK_STAT_BUSY(heapSentinel);
     BLK_STAT_FREE(freeMemory);
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapFree,
+        esHmemFreeSpace());
 
 #if defined(OPT_DBG_MM)
     dbgHeapBegin = aHeap;
@@ -343,6 +352,14 @@ void * esHmemAllocI(
 
     MM_DBG_CHECK(aSize < (size_t)BLOCK_STATUS_MASK);
     MM_ASSERT((hmemBlkHdr_T *)0 != heapSentinel);
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapAlloc,
+        aSize);
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapFree,
+        esHmemFreeSpace());
 
     if (aSize < (sizeof(hmemBlkHdr_T) - sizeof(hmemBlk_T))) {
         aSize = sizeof(hmemBlkHdr_T) - sizeof(hmemBlk_T);
@@ -372,6 +389,14 @@ void * esHmemAllocI(
                     &(freeBlk->freeList));
             }
             BLK_STAT_BUSY(freeBlk);
+            ES_TRACE(
+                STP_FILT_MEM_0,
+                txtMemHeapAllocated,
+                &(freeBlk->freeList));
+            ES_TRACE(
+                STP_FILT_MEM_0,
+                txtMemHeapFree,
+                esHmemFreeSpace());
 
             return ((void *)&(freeBlk->freeList));
         }
@@ -434,6 +459,10 @@ void esHmemDeAllocI(
     /* freeBlk = (hmemBlkHdr_T *)((hmemBlk_T *)aMemory - 1U); */
     freeBlk = C_CONTAINER_OF((esDlsList_T *)aMemory, hmemBlkHdr_T, freeList);
     MM_DBG_CHECK(BLOCK_IS_BUSY == BLK_STAT_QUERY(freeBlk));
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapDeAlloc,
+        aMemory);
     currPhy = esSlsNodeEntry(
         hmemBlkHdr_T,
         blk.phyList,
@@ -464,6 +493,10 @@ void esHmemDeAllocI(
     esDlsNodeAddHeadI(
         &(heapSentinel->freeList),
         &(freeBlk->freeList));
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapFree,
+        esHmemFreeSpace());
 
 #elif (MM_IS_TLSF == OPT_MM_TYPE)
 

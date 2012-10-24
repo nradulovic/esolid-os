@@ -63,6 +63,11 @@ void hsmDispatch(
     uint_fast8_t        srcEnd;
     uint_fast8_t        dstEnd;
 
+    ES_TRACE(STP_FILT_EPA_EXECUTION_0,
+        txtEpaSMexec,
+        aEpa,
+        aEpa->pState,
+        aEvt->internals.id);
     srcState = aEpa->internals.exec.pSrcStates;
     srcEnd = (uint_fast8_t)0U;
 
@@ -78,6 +83,14 @@ void hsmDispatch(
             dstState = aEpa->internals.exec.pDstStates;
 
             do {
+                ES_TRACE(
+                    STP_FILT_EPA_EXECUTION_0,
+                    txtEpaSMtran,
+                    srcState[srcEnd - 1U],
+                    aEpa->pState);
+                ES_TRACE(
+                    STP_FILT_EPA_EXECUTION_1,
+                    txtEpaSMgenTree);
                 dstState[0] = aEpa->pState;                                     /* sacuvaj destinaciju                                      */
                 dstEnd = (uint_fast8_t)1U;
 
@@ -85,11 +98,22 @@ void hsmDispatch(
                     (void)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_SUPER);
                     dstState[1] = aEpa->pState;
                     --srcEnd;
+                    ES_TRACE(
+                        STP_FILT_EPA_EXECUTION_1,
+                        txtEpaSMsuper,
+                        dstState[0],
+                        dstState[1]);
 
-                    if (srcState[srcEnd] != dstState[1]) {                 /* tran: b) src ?!= super(dst)                              */
+
+                    if (srcState[srcEnd] != dstState[1]) {                      /* tran: b) src ?!= super(dst)                              */
                         (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
                         ++srcEnd;
                         srcState[srcEnd] = aEpa->pState;
+                        ES_TRACE(
+                            STP_FILT_EPA_EXECUTION_1,
+                            txtEpaSMsuper,
+                            srcState[srcEnd - 1U],
+                            srcState[srcEnd]);
 
                         if (srcState[srcEnd] != dstState[1]) {                  /* tran: c) super(src) ?!= super(dst)                       */
 
@@ -100,6 +124,11 @@ void hsmDispatch(
 
                                 while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))         */
                                     (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
+                                    ES_TRACE(
+                                        STP_FILT_EPA_EXECUTION_1,
+                                        txtEpaSMsuper,
+                                        dstState[dstEnd],
+                                        aEpa->pState);
 
                                     if (srcState[srcEnd] == aEpa->pState) {
                                         goto TRANSITION_EXECUTION;
@@ -123,6 +152,11 @@ void hsmDispatch(
                                     dstEnd = (uint_fast8_t)0U;
                                     ++srcEnd;
                                     srcState[srcEnd] = aEpa->pState;
+                                    ES_TRACE(
+                                        STP_FILT_EPA_EXECUTION_1,
+                                        txtEpaSMsuper,
+                                        srcState[srcEnd - 1U],
+                                        aEpa->pState);
 
                                     while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))*/
 
@@ -138,12 +172,19 @@ void hsmDispatch(
                 }
 
 TRANSITION_EXECUTION:
+                ES_TRACE(
+                    STP_FILT_EPA_EXECUTION_1,
+                    txtEpaSMtranStart);
                 {
                     uint_fast8_t        stateCnt;
 
                     stateCnt = (uint_fast8_t)0U;
 
                     while (stateCnt != srcEnd) {
+                        ES_TRACE(
+                            STP_FILT_EPA_EXECUTION_1,
+                            txtEpaSMexit,
+                            srcState[stateCnt]);
 #if defined(OPT_KERNEL_DBG_SPROC)
                         state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
                         SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
@@ -160,26 +201,45 @@ TRANSITION_EXECUTION:
                     state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
                     SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
 #else
+                    ES_TRACE(
+                        STP_FILT_EPA_EXECUTION_1,
+                        txtEpaSMentry,
+                        dstState[dstEnd]);
                     (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_ENTRY);
 #endif
                 }
+                ES_TRACE(
+                    STP_FILT_EPA_EXECUTION_1,
+                    txtEpaSMinit,
+                    dstState[0]);
                 state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_INIT);
                 SP_ASSERT((RETN_TRAN == state) || (RETN_SUPER == state));
                 srcState[0] = dstState[0];
                 srcEnd = (uint_fast8_t)1U;
             } while (RETN_TRAN == state);
             aEpa->pState = dstState[0];
+            ES_TRACE(
+                STP_FILT_EPA_EXECUTION_1,
+                txtEpaSMtranFinished);
 
             return;
         }
 
         case RETN_HANDLED : {
+            ES_TRACE(
+                STP_FILT_EPA_EXECUTION_0,
+                txtEpaSMHandled,
+                aEvt->internals.id);
             aEpa->pState = srcState[0];
 
             return;
         }
 
         case RETN_DEFERRED : {
+            ES_TRACE(
+                STP_FILT_EPA_EXECUTION_0,
+                txtEpaSMDeffered,
+                aEvt->internals.id);
             aEpa->pState = srcState[0];
             evtQPut(
                 aEpa,
@@ -189,6 +249,10 @@ TRANSITION_EXECUTION:
         }
 
         case RETN_IGNORED : {
+            ES_TRACE(
+                STP_FILT_EPA_EXECUTION_0,
+                txtEpaSMignored,
+                aEvt->internals.id);
             aEpa->pState = srcState[0];
 
             return;
@@ -559,6 +623,13 @@ void hsmInit (
 
     SP_DBG_CHECK((size_t)1U < aStateDepth);                                     /* Provera par: da li je aStateDepth minimalne dubine?      */
     SP_DBG_CHECK((esPtrState_T)0U != aInitState);                               /* Provera par: da li je aInitState  minimalne dubine?      */
+    ES_TRACE(
+        STP_FILT_EPA_EXECUTION_0,
+        txtEpaSMinitialization,
+        aEpa,
+        aEpa->pState,
+        aStateBuff,
+        aStateDepth);
     aEpa->pState = aInitState;
     aEpa->internals.exec.pSrcStates = aStateBuff;
     aEpa->internals.exec.pDstStates = aStateBuff + aStateDepth;

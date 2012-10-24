@@ -375,8 +375,7 @@ void esEpaInit(
         aDescription->epaName,
         aEpa,
         aDescription->epaWorkspaceSize,
-        aDescription->epaPrio,
-        aDescription->hsmInitState);
+        aDescription->epaPrio);
     hsmInit(
         aEpa,
         aDescription->hsmInitState,
@@ -422,8 +421,7 @@ esEpaHeader_T * esEpaCreate(
         txtEpaCreate,
         aDescription->epaName,
         aDescription->epaWorkspaceSize,
-        aDescription->epaPrio,
-        aDescription->hsmInitState);
+        aDescription->epaPrio);
     epaSize = aDescription->epaWorkspaceSize;
     stateBuff = epaSize + 1U;
     epaSize += hsmReqSize_(
