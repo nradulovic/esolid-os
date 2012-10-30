@@ -3,8 +3,8 @@
 	<name>esolid-kernel</name>
 	<comment></comment>
 	<projects>
-		<project>esolid-haldsm</project>
 		<project>esolid-ett</project>
+		<project>esolid-hal</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
