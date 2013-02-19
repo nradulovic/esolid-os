@@ -199,7 +199,7 @@ typedef struct hmemBlkHdr {
  * @brief       Dinamicki memorijski alokator (heap memory)
  */
 /*-----------------------------------------------------------------------------------------------*/
-const C_ROM esMemClass_T memHeapClass = {
+const C_ROM esMemClass_T esMemHeapClass = {
     &esHmemAlloc,
     &esHmemDeAlloc,
     &esHmemBlockSize,
@@ -210,7 +210,7 @@ const C_ROM esMemClass_T memHeapClass = {
  * @brief       Skladiste memorije (memory pool)
  */
 /*-----------------------------------------------------------------------------------------------*/
-const C_ROM esMemClass_T memPoolClass = {
+const C_ROM esMemClass_T esMemPoolClass = {
     &esHmemAlloc,
     &esHmemDeAlloc,
     &esHmemBlockSize,
@@ -221,7 +221,7 @@ const C_ROM esMemClass_T memPoolClass = {
  * @brief       Staticki memorijski alokator (static memory)
  */
 /*-----------------------------------------------------------------------------------------------*/
-const C_ROM esMemClass_T memStaticClass = {
+const C_ROM esMemClass_T esMemStaticClass = {
     &esHmemAlloc,
     &esHmemDeAlloc,
     &esHmemBlockSize,

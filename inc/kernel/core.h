@@ -224,9 +224,9 @@ const C_ROM char * esKernelSysVer(
  * @brief       Kreira EPA objekat.
  * @param       aMemClass               Klasa memorije koja se koristi za
  *                                      skladistenje:
- *  @arg        memHeapClass
- *  @arg        memPoolClass
- *  @arg        memStaticClass
+ *  @arg        esMemHeapClass
+ *  @arg        esMemPoolClass
+ *  @arg        esMemStaticClass
  * @param       aDescription            pokazivac na opis EPA objekta.
  * @return      Pokazivac na strukturu EPA objekta.
  * @see         esEpaDef_T

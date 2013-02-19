@@ -32,12 +32,12 @@
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.debug.2001543877" name="ARM Sourcery Linux GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.assembler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.1510161691" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/family/stm32l1xx/cmsis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/arch/arm_cm3/cmsis}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/family/stm32f10x/cmsis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-ett/inc}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.1638783141" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="STM32F10X_LD_VL"/>
+									<listOptionValue builtIn="false" value="STM32L1XX_MD"/>
 								</option>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.1882893960" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input"/>
 							</tool>
@@ -45,13 +45,13 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.658707077" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.694785778" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/family/stm32l1xx/cmsis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/arch/arm_cm3/cmsis}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/family/stm32f10x/cmsis}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-ett/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-kernel/inc}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.1645077518" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="STM32F10X_LD_VL"/>
+									<listOptionValue builtIn="false" value="STM32L1XX_MD"/>
 								</option>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.633800905" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input"/>
 							</tool>
@@ -82,10 +82,10 @@
 				<externalSettings containerId="esolid-hal;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc/port/family/stm32l1xx/cmsis"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc/port/arch/arm_cm3/cmsis"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc/port/family/stm32f10x/cmsis"/>
-						<entry flags="RESOLVED" kind="macro" name="STM32F10X_LD_VL" value=""/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/dbg-STM32F10x_ld_vl-o0-csgcc"/>
+						<entry flags="RESOLVED" kind="macro" name="STM32L1XX_MD" value=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/dbg-STM32L1xx_md-o0-csgcc"/>
 						<entry flags="" kind="libraryFile" name="esolid-hal" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>

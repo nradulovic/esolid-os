@@ -438,7 +438,7 @@ esEpaHeader_T * esEpaCreate(
     CORE_DBG_CHECK((const C_ROM esMemClass_T *)0U != aMemClass);                 /* Provera par: da li je aMemClass inicijalizovan?          */
     newEpa = (esEpaHeader_T *)(* aMemClass->pAlloc)(epaSize);
 #else
-    CORE_DBG_CHECK(&memStaticClass != aMemClass);                                /* Provera par: da li je aMemClass ispravno inicijalizovan? */
+    CORE_DBG_CHECK(&esMemStaticClass != aMemClass);                                /* Provera par: da li je aMemClass ispravno inicijalizovan? */
     (void)aMemClass;
     newEpa = (esEpaHeader_T *)esHmemAlloc(epaSize);
 #endif
@@ -491,7 +491,7 @@ void esEpaDestroy(
 
     CORE_DBG_CHECK((esEpaHeader_T *)0U != aEpa);                                 /* Provera par: da li je aEpa inicijalizovan?               */
     tmpMemClass = aEpa->internals.memClass;
-    CORE_DBG_CHECK(&memStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
+    CORE_DBG_CHECK(&esMemStaticClass != tmpMemClass);                              /* Provera par: osiguraj da ne brisemo "staticne" objekte.  */
     esEpaDeInit(
         aEpa);
     (*tmpMemClass->pDeAlloc)((void *)aEpa);

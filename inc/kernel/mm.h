@@ -61,17 +61,17 @@ extern "C" {
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Dinamicki memorijski alokator (heap memory)
  *//*--------------------------------------------------------------------------------------------*/
-extern const C_ROM esMemClass_T memHeapClass;
+extern const C_ROM esMemClass_T esMemHeapClass;
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Skladiste memorije (memory pool)
  *//*--------------------------------------------------------------------------------------------*/
-extern const C_ROM esMemClass_T memPoolClass;
+extern const C_ROM esMemClass_T esMemPoolClass;
 
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Staticki memorijski alokator (static memory)
  *//*--------------------------------------------------------------------------------------------*/
-extern const C_ROM esMemClass_T memStaticClass;
+extern const C_ROM esMemClass_T esMemStaticClass;
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 /*======================================================================  FUNCTION PROTOTYPES  ==*/

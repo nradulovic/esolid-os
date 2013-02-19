@@ -105,7 +105,7 @@
  * @details     Ukoliko je promenljiva:
  *              - definisana: za alokaciju memorije se koristi memorijska klasa
  *              koja je data u argumentu esEpaCreate().
- *              - nedefinisana: za alokaciju memorije se koristi memStaticClass
+ *              - nedefinisana: za alokaciju memorije se koristi esMemStaticClass
  *              klasa memorije
  *//*--------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
