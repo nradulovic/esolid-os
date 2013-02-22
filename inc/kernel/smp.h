@@ -40,18 +40,18 @@
  * @name        Makroi za tranziciju stanja
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca dispeceru informaciju da treba da se izvrsi tranzicija.
  * @param       epa                     Pokazivac na strukturu HSM automata,
  * @param       state                   naredno stanje automata.
  * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
  *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
  *              tip desnog izraza.
- *//*--------------------------------------------------------------------------------------------*/
-#define SMP_STATE_TRAN(epa, state)                                              \
+ */
+#define ES_STATE_TRAN(epa, state)                                              \
     (((esEpaHeader_T *)(epa))->pState = (esPtrState_T)(state), RETN_TRAN)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca dispeceru informaciju o super stanju trenutnog stanja.
  * @param       epa                     Pokazivac na strukturu HSM automata,
  * @param       state                   super stanje trenutnog stanja.
@@ -59,20 +59,20 @@
  *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
  *              tip desnog izraza.
  * @note        Koristi se samo kod HSM automata.
- *//*--------------------------------------------------------------------------------------------*/
-#define SMP_STATE_SUPER(epa, state)                                             \
+ */
+#define ES_STATE_SUPER(epa, state)                                             \
     (((esEpaHeader_T *)(epa))->pState = (esPtrState_T)(state), RETN_SUPER)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca dispeceru informaciju da treba da se izvrsi inicijalna
  *              tranzicija.
  * @param       epa                     Pokazivac na strukturu HSM automata,
  * @param       state                   naredno stanje automata.
- *//*--------------------------------------------------------------------------------------------*/
-#define SMP_STATE_INIT(epa, state)                                              \
+ */
+#define ES_STATE_INIT(epa, state)                                              \
     (((esEpaHeader_T *)(epa))->pState = (esPtrState_T)(state), RETN_INIT)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca dispeceru informaciju da automat ulazi u flowchart deo
  *              dijagrama stanja.
  * @details     Ovaj makro se koristi kada se zeli tranzicija u sledece stanje
@@ -81,23 +81,23 @@
  *              flowchart bez spoljasnih dogadjaja. Flowchart se pise u odeljku
  *              koji obradjuje SIG_NOEX, dok se u SIG_ENTRY odeljku samo
  *              koristi ovaj makro.
- *//*--------------------------------------------------------------------------------------------*/
-#define SMP_STATE_NOEX()                                                        \
+ */
+#define ES_STATE_NOEX()                                                        \
     (RETN_NOEX)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca dispeceru informaciju da je dogadjaj opsluzen.
  * @details     Ovaj makro samo obavestava dispecer da je dogadjaj opsluzen i ne
  *              treba da se izvrsi promena stanja.
- *//*--------------------------------------------------------------------------------------------*/
-#define SMP_STATE_HANDLED()                                                     \
+ */
+#define ES_STATE_HANDLED()                                                     \
     (RETN_HANDLED)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca dispeceru informaciju da je dogadjaj ignorisan.
  * @details     Dogadjaj se ignorise i ne dolazi do promene stanja automata.
- *//*--------------------------------------------------------------------------------------------*/
-#define SMP_STATE_IGNORED()                                                     \
+ */
+#define ES_STATE_IGNORED()                                                     \
     (RETN_IGNORED)
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -107,34 +107,32 @@ extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
  * @brief       Nabrajanje odgovora state handler funkcije.
  *
  *              State handler funkcija preko ovih nabrajanja govori SMP
  *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
  *              dogadjaj.
- *//*--------------------------------------------------------------------------------------------*/
-typedef enum smp_state {
+ */
+typedef enum smpState {
 /**
  * @brief       Ne treba izvrsiti nikakve dalje akcije.
- *
- *              Ovo je odgovor state handler funkcije da je potpuno opsluzila
+ * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
  *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
  */
     RETN_HANDLED,
 
 /**
  * @brief       Treba odloziti pristigli dogadjaj.
- *
- *              Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
+ * @details     Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
  *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
  */
     RETN_DEFERRED,
 
 /**
  * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
- *
- *              Obicno se ovakav odgovor u top state-u automata i koristi se u
+ * @details     Obicno se ovakav odgovor u top state-u automata i koristi se u
  *              svrhe debagiranja sistema. Dogadjaj se brise iz sistema ako nema
  *              jos korisnika.
  */
@@ -142,16 +140,14 @@ typedef enum smp_state {
 
 /**
  * @brief       Treba izvrsiti tranziciju ka drugom stanju.
- *
- *              Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
+ * @details     Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
  *              drugom stanju.
  */
     RETN_TRAN,
 
 /**
  * @brief       Vraca se koje je super stanje date state handler funkcije.
- *
- *              Ova vrednost se vraca kada state handler funkcija ne zna da
+ * @details     Ova vrednost se vraca kada state handler funkcija ne zna da
  *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
  *              njeno super stanje.
  */
@@ -159,19 +155,18 @@ typedef enum smp_state {
 
 } esState_T;
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Tip pokazivaca na state handler funkcije.
- *
- *              Funkcije vracaju esState_T , a kao parametar prihvataju
+ * @details     Funkcije vracaju esState_T , a kao parametar prihvataju
  *              void pokazivac na strukturu izvrsne jedinice i pokazivac na
  *              dogadjaje ili sam dogadjaj.
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef esState_T (* esPtrState_T) (esEpaHeader_T *, esEvtHeader_T *);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Struktura HSM izvrsne jedinice
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct hsmExec {
+ */
+struct smExec {
 /**
  * @brief       Niz za cuvanje izvornih stanja HSM automata
  */
@@ -181,14 +176,16 @@ typedef struct hsmExec {
  * @brief       Niz za cuvanje odredisnih stanja HSM automata
  */
     esPtrState_T        * pDstStates;
-} hsmExec_T;
+};
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
- * @name Funkcije za rad sa HSM izvrsnom jedinicom
+ * @name Funkcije za rad sa konacnim automatom (State Machine)
  * @{ *//*---------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
  * @brief       Da li je automat aEpa u datom aState stanju?
  * @param       aEpa                    Pokazivac na strukturu HSM automata,
  * @param       aState                  stanje automata koje se ispituje.
@@ -203,12 +200,12 @@ typedef struct hsmExec {
  *              funkcija vraca automat u stanje koje je zatekla, istovremeno,
  *              omogucavajuci prekide.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
-bool_T esHsmIsInState(
+ */
+bool_T esSMIsInState(
     esEpaHeader_T       * aEpa,
     esPtrState_T        aState);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Najvisi nivo u hijerarhiji HSM automata.
  * @param       aEpa                    Pokazivac na strukturu HSM automata,
  * @param       aEvt                    pokazivac/podatak na strukturu dogadjaja.
@@ -216,8 +213,8 @@ bool_T esHsmIsInState(
  * @note        Uvek vraca odgovor IGNORED, jer ona ne prihvata nikakav
  *              dogadjaj.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
-esState_T esHsmTopState(
+ */
+esState_T esSMTopState(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt);
 

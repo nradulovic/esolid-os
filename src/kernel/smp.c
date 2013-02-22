@@ -122,7 +122,7 @@ void hsmDispatch(
                             } else {                                            /* tran: e) src ?== ...super(super(dst))                    */
                                 --srcEnd;
 
-                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))         */
+                                while ((esPtrState_T)&esSMTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))         */
                                     (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
                                     ES_TRACE(
                                         STP_FILT_EPA_EXECUTION_1,
@@ -139,7 +139,7 @@ void hsmDispatch(
                                 ++srcEnd;
                                 dstEnd = (uint_fast8_t)1U;
 
-                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))  */
+                                while ((esPtrState_T)&esSMTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))  */
 
                                     if (srcState[srcEnd] == dstState[dstEnd]) {
                                         goto TRANSITION_EXECUTION;
@@ -158,7 +158,7 @@ void hsmDispatch(
                                         srcState[srcEnd - 1U],
                                         aEpa->pState);
 
-                                    while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))*/
+                                    while ((esPtrState_T)&esSMTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))*/
 
                                         if (srcState[srcEnd] == dstState[dstEnd]) {
                                             goto TRANSITION_EXECUTION;
@@ -307,7 +307,7 @@ void hsmDispatch(
                         } else {                                                /* tran: e) src ?== ...super(super(dst))                    */
                             --srcEnd;
 
-                            while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))                    */
+                            while ((esPtrState_T)&esSMTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))                    */
                                 (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
 
                                 if (srcState[srcEnd] == aEpa->pState) {
@@ -319,7 +319,7 @@ void hsmDispatch(
                             ++srcEnd;
                             dstEnd = (uint_fast8_t)1U;
 
-                            while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
+                            while ((esPtrState_T)&esSMTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
 
                                 if (srcState[srcEnd] == dstState[dstEnd]) {
                                     goto TRANSITION_EXECUTION;
@@ -333,7 +333,7 @@ void hsmDispatch(
                                 ++srcEnd;
                                 srcState[srcEnd] = aEpa->pState;
 
-                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
+                                while ((esPtrState_T)&esSMTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
 
                                     if (srcState[srcEnd] == dstState[dstEnd]) {
                                         goto TRANSITION_EXECUTION;
@@ -498,7 +498,7 @@ void hsmDispatch (
                         dstEnd = (uint_fast8_t)2U;
                         tmpState = dstState[1];
 
-                        while ((esPtrState_T)&esHsmTopState != tmpState) {      /* dobavi super(dst) i sacuvaj u niz                  */
+                        while ((esPtrState_T)&esSMTopState != tmpState) {      /* dobavi super(dst) i sacuvaj u niz                  */
                             (void)EVT_SIGNAL_SEND(aEpa, tmpState, SIG_SUPER);
                             tmpState = aEpa->pState;
 
@@ -647,18 +647,18 @@ void hsmDeInit(
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup         sproc_intf
  * @{ *//*---------------------------------------------------------------------------------------*/
-esState_T esHsmTopState (
+esState_T esSMTopState (
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
     (void)aEpa;                                                                 /* Ukloni upozorenje o nekoriscenom parametru               */
     (void)aEvt;
 
-    return SMP_STATE_IGNORED();
+    return ES_STATE_IGNORED();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-bool_T esHsmIsInState (
+bool_T esSMIsInState (
     esEpaHeader_T       * aEpa,
     esPtrState_T        aState) {
 
@@ -675,7 +675,7 @@ bool_T esHsmIsInState (
     tmpState = aEpa->pState;
     ans = FALSE;
 
-    while (&esHsmTopState != tmpState) {
+    while (&esSMTopState != tmpState) {
 
         if (aState == tmpState) {
             ans = TRUE;
