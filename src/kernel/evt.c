@@ -128,7 +128,7 @@ C_INLINE_ALWAYS void evtInit_(
     aNewEvt->internals.id = aEvtId;
 
 #if defined(OPT_EVT_USE_TRANSMITTER)
-    aNewEvt->transmitter = esEpaGetId();
+    aNewEvt->transmitter = esEpaGetHeader();
 #endif
 
 #if defined(OPT_EVT_USE_TIME)
