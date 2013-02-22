@@ -105,8 +105,8 @@
  * @details     Ukoliko je promenljiva:
  *              - definisana: za alokaciju memorije se koristi memorijska klasa
  *              koja je data u argumentu esEpaCreate().
- *              - nedefinisana: za alokaciju memorije se koristi esMemStaticClass
- *              klasa memorije
+ *              - nedefinisana: za alokaciju memorije se koristi
+ *              esMemStaticClass klasa memorije
  *//*--------------------------------------------------------------------------------------------*/
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_USE_DYNAMIC
@@ -164,19 +164,18 @@
  * @name        Podesavanje Memory Management (MM) modula
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Odabir algoritma alokatora koji se koristi.
- * @details     Postoje vise implementacija memorijskog alokatora. Ovom opcijom
- *              se moze konfigurisati koja implementacija memorijskog alokatora
- *              se koristi u zavisnosti od potrebe aplikacije. Videti
- *              @ref doc_mem.
- *              Postoje dve implementacije:
- *              - MM_IS_FF             @ref mem_ff_alloc
- *              - MM_IS_TLSF           @ref mem_tlsf_alloc
- * @note        Podrazumevano podesavanje: koristi se FF
- *//*--------------------------------------------------------------------------------------------*/
-#if !defined(OPT_MM_TYPE) || defined(__DOXYGEN__)
-# define OPT_MM_TYPE                   MM_IS_FF
+/**
+ * @brief       Managed RAM size.
+ * @details     Size of the RAM area to be managed by the eSolid. If set to zero
+ *              then the whole available RAM is used. The core memory is made
+ *              available to the heap allocator and/or can be used directly
+ *              through the simplified core memory allocator.
+ * @note        In order to let the OS manage the whole RAM the linker script
+ *              must provide the @p __heap_base__ and @p __heap_end__ symbols.
+ * @note        DEFAULT: 0 (All memory)
+ */
+#if !defined(OPT_MM_MANAGED) || defined(__DOXYGEN__)
+# define OPT_MM_MANAGED_SIZE            0U
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
