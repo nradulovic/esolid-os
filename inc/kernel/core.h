@@ -98,11 +98,34 @@ typedef struct esEpaDef {
     uint8_t         hsmStateDepth;
 } esEpaDef_T;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Kontrolna struktura kernel-a
+/**
+ * @brief       Interni podaci EPA objekta
  * @notapi
- *//*--------------------------------------------------------------------------------------------*/
-struct kernelCtrl {
+ */
+struct epaIntr {
+#if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
+/**
+ * @brief       Memorijska klasa EPA objekta
+ */
+    const C_ROM esMemClass_T  * memClass;
+#endif
+
+/**
+ * @brief       Struktura izvrsne jedinice.
+ * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
+ *              podacima ove strukture je zabranjen drugim modulima.
+ */
+    struct smExec     exec;
+
+/**
+ * @brief       Red cekanja za dogadjaje.
+ */
+    struct evtQueue   evtQueue;
+
+/**
+ * @brief       Kontrolna struktura kernel-a
+ */
+
 #if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE) || defined(__DOXYGEN__)
 /**
  * @brief       Lista EPA objekata sa istim prioritetom
@@ -117,43 +140,13 @@ struct kernelCtrl {
     uint_fast8_t    prio;
 };
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Interni podaci EPA objekta
- * @notapi
- *//*--------------------------------------------------------------------------------------------*/
-struct epaIntr {
-#if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
 /**
- * @brief       Memorijska klasa EPA objekta
- */
-    const C_ROM esMemClass_T  * memClass;
-#endif
-
-/**
- * @brief       Struktura izvrsne jedinice.
- * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
- *              podacima ove strukture je zabranjen drugim modulima.
- */
-    hsmExec_T       exec;
-
-/**
- * @brief       Red cekanja za dogadjaje.
- */
-    evtQueue_T      evtQueue;
-
-/**
- * @brief       Kontrolna struktura kernel-a
- */
-    struct kernelCtrl kernCtrl;
-};
-
-/*-------------------------------------------------------------------------------------------*//**
  * @extends     epaIntr
  * @brief       Zaglavlje Event Processing Agent objekta
  * @details     EPA objekat se sastoji od internih podataka (epaIntr) i
  *              podataka o trenutnom stanju automata.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 struct esEpaHeader {
 /**
  * @brief       Interni podaci EPA objekta
@@ -174,123 +167,116 @@ struct esEpaHeader {
  * @name        Osnovne funkcije kernal-a
  * @brief       Ove funkcije se koriste za upravljanjem kernel-om
  * @{ *//*---------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Inicijalizacija kernel-a
- * @param       aMemory                 Pokazivac na memorijski prostor
- *                                      rezervisan za rad eSolid kernel-a,
- * @param       aMemorySize             velicina rezervisanog memorijskog
- *                                      prostora,
- * @param       aHeapSize               deo rezervisanog memorijskog prostora
- *                                      koji treba da se odvoji za dinamicki
- *                                      alokator.
- * @api
- *//*--------------------------------------------------------------------------------------------*/
-void esKernelInit(
-    void                * aMemory,
-    size_t              aMemorySize,
-    size_t              aHeapSize);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
+ * @brief       Inicijalizacija kernel-a
+ * @details     Ova funkcija vrsi najpre inicijalizaciju HAL-a, zatim
+ *              memorijskog menadzera i
+ * @api
+ */
+void esKernelInit(
+    void);
+
+/**
  * @brief       Pokrece izvrsavanje jezgra
  * @pre         Da bi se koristila kernel funkcija mora se definisati
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 void esKernelStart(
     void);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca odgovor da li trenutno radi kernel
  * @return      Status izvrsavanja kernel-a.
  *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
  *  @retval     KERNEL_RUNNING - kernel se izvrsava,
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 esKernelStatus_T esKernelStatus(
-    void);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Vraca znakovni niz koji identifikuje eSolid kernel
- * @return      Verzija kernel-a u obliku znakovnog niza.
- * @api
- *//*--------------------------------------------------------------------------------------------*/
-const C_ROM char * esKernelSysVer(
     void);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Osnovne funkcije za menadzment EPA objekata
  * @{ *//*---------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
  * @brief       Kreira EPA objekat.
- * @param       aMemClass               Klasa memorije koja se koristi za
+ * @param       [in]aMemClass           Klasa memorije koja se koristi za
  *                                      skladistenje:
  *  @arg        esMemHeapClass
  *  @arg        esMemPoolClass
  *  @arg        esMemStaticClass
- * @param       aDescription            pokazivac na opis EPA objekta.
- * @return      Pokazivac na strukturu EPA objekta.
+ * @param       [in]aDescription        pokazivac na opisnu strukturu EPA objekta.
+ * @return      Pokazivac na strukturu zaglavlja EPA objekta.
  * @see         esEpaDef_T
  * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
  *              funkcija poziva esEpaInit() sa odgovarajucim parametrima.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 esEpaHeader_T * esEpaCreate(
     const C_ROM esMemClass_T * aMemClass,
     const C_ROM esEpaDef_T * aDescription);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Inicijalizuje EPA objekat
- * @param       aEpa                    Pokazivac na strukturu EPA objekta,
- * @param       aStateBuff              memorija za cuvanje stanja HSM automata,
- * @param       aEvtBuff                memorija za cuvanje reda za cekanje,
- * @param       aDescription            pokazivac na opisnu strukturu EPA
+ * @param       [out]aEpa               Pokazivac na strukturu EPA objekta,
+ * @param       [in]aStateBuff          memorija za cuvanje stanja HSM automata,
+ * @param       [in]aEvtBuff            memorija za cuvanje reda za cekanje,
+ * @param       [in]aDescription        pokazivac na opisnu strukturu EPA
  *                                      objekta.
  * @details     Ova funkcija se poziva od strane esEpaCreate, a ovde je
  *              stavljena na raspolaganju naprednijim korisnicima koji zele vecu
  *              kontrolu nad rasporedjivanjem memorijskog prostora.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 void esEpaInit(
     esEpaHeader_T       * aEpa,
     esPtrState_T        * aStateBuff,
     esEvtHeader_T       ** aEvtBuff,
     const C_ROM esEpaDef_T * aDescription);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Unistava EPA objekat.
- * @param       aEpa                    Pokazivac na strukturu EPA objekta.
+ * @param       [in]aEpa                Pokazivac na strukturu EPA objekta.
+ * @details     Vrsi se oslobadjanje memorije ukoliko je EPA objekat koristio
+ *              dinamicki memorijski alokator.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 void esEpaDestroy(
     esEpaHeader_T       * aEpa);
 
+/**
+ * @brief       Vrsi deinicijalizaciju koriscenih struktura
+ * @param       [out]aEpa               Pokazivac na strukturu EPA objekta.
+ */
 void esEpaDeInit(
     esEpaHeader_T       * aEpa);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vraca Id pokazivac EPA objekta.
  * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
  * @pre         Da bi se koristila kernel funkcija mora se definisati
  *              @ref OPT_KERNEL_ENABLE.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
-esEpaHeader_T * esEpaGetId(
+ */
+esEpaHeader_T * esEpaGetHeader(
     void);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dobavlja prioritet EPA objekta
  * @param       aEpa                    Pokazivac na EPA objekat
  * @return      Trenutni prioritet EPA objekta.
  * @pre         Da bi se koristila kernel funkcija mora se definisati
  *              @ref OPT_KERNEL_ENABLE.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 uint8_t esEpaPrioGet(
     const esEpaHeader_T * aEpa);
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Postavlja nov prioritet EPA objekta.
  * @param       aEpa                    Pokazivac na EPA objekat,
  * @param       aNewPrio                nov prioritet EPA objekta.
@@ -299,7 +285,7 @@ uint8_t esEpaPrioGet(
  * @warning     Ukoliko se ne koristi @ref OPT_KERNEL_USE_ROUND_ROBIN, a
  *              zahtevani prioritet je vec zauzet javice se assert obavestenje.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
+ */
 void esEpaPrioSet(
     esEpaHeader_T       * aEpa,
     uint8_t             aNewPrio);
