@@ -40,6 +40,16 @@
 #include "primitive/queue.h"
 
 /*==================================================================================  DEFINES  ==*/
+/**
+ * @todo        Komentarisati ovaj define
+ */
+#define ES_KERNEL_ID                    "eSolid v1.0"
+
+/**
+ * @todo        Komentarisati ovaj define
+ */
+#define ES_KERNEL_VERSION               1U
+
 /*==================================================================================  MACRO's  ==*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
@@ -51,30 +61,29 @@ extern "C" {
  * @name        Deklaracije unapred
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Memorijska klasa alokatora
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef struct esMemClass esMemClass_T;
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Zaglavlje dogadjaja
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef struct esEvtHeader esEvtHeader_T;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Red cekanja za dogadjaje
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtQueue evtQueue_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Event Processing Agent
- *//*--------------------------------------------------------------------------------------------*/
+/**
+ * @brief       Zaglavlje Event Processing Agent objekta
+ * @details     Ova struktura se koristi prilikom kreiranja strukture Workspace
+ *              EPA objekta. Struktura se koristi i za referenciranje EPA
+ *              objekata.
+ */
 typedef struct esEpaHeader esEpaHeader_T;
+
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 #include "kernel/mm.h"
 #include "kernel/evt.h"
-#include "kernel/sproc.h"
+#include "kernel/smp.h"
 #include "kernel/core.h"
 
 /*-------------------------------------------------------------------------------------------*//**
