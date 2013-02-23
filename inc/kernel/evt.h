@@ -144,12 +144,16 @@ enum esEvtID {
 /**
  * @brief       Sistemski dogadjaj - zahteva se lista identifikatora aktivnih
  *              EPA objekata u sistemu.
+ * @todo        Ovaj identifikator ne treba da se nalazi ovde, staviti ga u
+ *              okviru sistemskog automata
  */
     EPA_GET_LIST,
 
 /**
  * @brief       Sistemski dogadjaj - zahtevaju se informacije o aktivnom EPA
  *              objektu.
+ * @todo        Ovaj identifikator ne treba da se nalazi ovde, staviti ga u
+ *              okviru sistemskog automata
  */
     EPA_GET_INFO,
 
@@ -157,6 +161,8 @@ enum esEvtID {
  * @brief       Sistemski dogadjaj - lista aktivnih EPA objekata.
  * @details     Dogadjaj sadrzi listu aktivnih EPA objekata u sistemu. Najcesce
  *              se generise kao odgovor na @ref EPA_GET_LIST dogadjaj.
+ * @todo        Ovaj identifikator ne treba da se nalazi ovde, staviti ga u
+ *              okviru sistemskog automata
  */
     EPA_LIST,
 
@@ -164,6 +170,8 @@ enum esEvtID {
  * @brief       Sistemski dogadjaj - informacije o EPA objektu.
  * @details     Dogadjaj sadrzi informacije o trazenom aktivnom EPA objektu u
  *              @ref EPA_GET_INFO dogadjaju.
+ * @todo        Ovaj identifikator ne treba da se nalazi ovde, staviti ga u
+ *              okviru sistemskog automata
  */
     EPA_INFO,
 
@@ -171,9 +179,10 @@ enum esEvtID {
  * @brief       Domen korisnickih identifikatora dogadjaja.
  * @details     Nakon ovog identifikatora korisnik definise svoje, aplikacione
  *              identifikatore dogadjaj.
- * @todo Videti koji broj ovaj enumerator treba da bude
+ * @todo        Ovaj identifikator ne treba da se nalazi ovde, staviti ga u
+ *              okviru sistemskog automata
  */
-    SIG_ID_USR
+    EVT_ID_USR = 15
 };
 
 /*==================================================================================  MACRO's  ==*/
