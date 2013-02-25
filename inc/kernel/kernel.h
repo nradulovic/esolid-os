@@ -35,9 +35,6 @@
 /*============================================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
 #include "../config/kernel_config.h"
-#include "port/kernel_profiles.h"
-#include "primitive/list.h"
-#include "primitive/queue.h"
 
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
@@ -51,135 +48,50 @@ extern "C" {
  * @name        Deklaracije unapred
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
+ * @brief		Moguca stanja kernela
+ */
+typedef enum esKernelStatus esKernelStatus_T;
+
+/**
+ * @brief		Povratni tip funkcija stanja
+ */
+typedef enum state esState_T;
+
+/**
  * @brief       Memorijska klasa alokatora
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef struct esMemClass esMemClass_T;
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Zaglavlje dogadjaja
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct esEvtHeader esEvtHeader_T;
+ */
+typedef struct esEvtHdr esEvtHdr_T;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Red cekanja za dogadjaje
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtQueue evtQueue_T;
+/**
+ * @brief       Zaglavlje Event Processing Agent objekta
+ */
+typedef struct esEpaHdr esEpaHdr_T;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Event Processing Agent
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct esEpaHeader esEpaHeader_T;
+/**
+ * @brief		Definiciona struktura EPA objekta
+ */
+typedef struct esEpaDef esEpaDef_T;
+
+/**
+ * @brief       Tip pokazivaca na state handler funkcije.
+ * @details		Funkcije vracaju esState_T , a kao parametar prihvataju
+ *              pokazivac na strukturu izvrsne jedinice i pokazivac na
+ *              dogadjaj.
+ */
+typedef esState_T (* esPtrState_T) (esEpaHdr_T *, esEvtHdr_T *);
+
 /** @} *//*--------------------------------------------------------------------------------------*/
 
-#include "kernel/mm.h"
-#include "kernel/evt.h"
-#include "kernel/sproc.h"
 #include "kernel/core.h"
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Struktura podataka za EIR dogadjaj
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct esEpaInfo {
-/**
- * @brief       Identifikator EPA objekta
- */
-    uint16_t        id;
-
-/**
- * @brief       Ime EPA objekta
- */
-    uint8_t         name[8];
-
-/**
- * @brief       Tip EPA objekta
- */
-    uint8_t         type;
-
-/**
- * @brief       Maksimalno zauzece reda za cekanje
- */
-    uint8_t         queueMax;
-
-/**
- * @brief       Velicina reda za cekanje
- */
-    uint8_t         queueSize;
-
-/**
- * @brief       Pokazivac na EPA objekat
- */
-    esEpaHeader_T   * ptr;
-
-/**
- * @brief       Status izvrsavanja EPA objekta
- */
-    uint8_t         status;
-
-/**
- * @brief       Events Per Second faktor
- */
-    uint32_t        EPS;
-} esEpaInfo_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @extends     esEvtHeader_T
- * @brief       Dogadjaj <c>Request</c>
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtSysReq {
-/**
- * @brief       Super struktura sistemskog dogadjaja
- */
-    esEvtHeader_T   super;
-} evtSysReq_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @extends     esEvtHeader_T
- * @brief       Dogadjaj <c>EPA Info Report</c>
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtSysEIRep {
-/**
- * @brief       Super struktura zaglavlja dogadjaja
- */
-    esEvtHeader_T   super;
-/**
- * @brief       Struktura podataka koju nosi ovaj dogadjaj
- */
-    esEpaInfo_T     info;
-} evtSysEIRep_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @extends     esEvtHeader_T
- * @brief       Dogadjaj <c>EPA List Report</c>
- *
- *              Dogadjaj ima promenljivu velicinu i formira se kompletno u RAM
- *              memoriji, za ove dogadjaje se ne koriste podaci iz ROM strukture
- *              osim konstruktora i destruktora.
- *
- * @todo        Da bi ovaj dogadjaj bio moguc potrebno je da konstruktor
- *              funkcija ima mogucnost da izmeni predati pokazivac tek kreiranog
- *              dogadjaja. Pogledati OOC i implementaciju new funkcije. Zbog
- *              toga treba promeniti typedef-ove, vec napisane ROM strukture  i
- *              funkcije koje kreiraju dogadjaj.
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtSysELRep {
-/**
- * @brief       Super struktura zaglavlja dogadjaja
- */
-    esEvtHeader_T   super;
-} evtSysELRep_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Domen korisnickih signala
- * @todo        Pogledati gde smestiti ovaj define
- *//*--------------------------------------------------------------------------------------------*/
-#define EVT_SIGNAL_USER                 15
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Domen tipova korisnickih signala
- * @todo        Pogledati gde smestiti ovaj define
- *//*--------------------------------------------------------------------------------------------*/
-#define EVT_TYPE_USER                   4
+#include "kernel/smp.h"
+#include "kernel/evt.h"
+#include "kernel/mm.h"
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
