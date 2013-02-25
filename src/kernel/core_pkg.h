@@ -43,9 +43,25 @@
 /** @endcond*/
 
 /*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
+ * @ingroup     Konstante za definisanje bitmape spremnih automata
+ * @{ *//*---------------------------------------------------------------------------------------*/
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+# define PRIO_INDX                      OPT_KERNEL_EPA_PRIO_MAX
+# define PRIO_INDX_GROUP                1
+#else
+# define PRIO_INDX                      HAL_UNATIVE_BITS
+# define PRIO_INDX_GROUP                (ES_DIV_ROUNDUP(OPT_KERNEL_EPA_PRIO_MAX, PRIO_INDX))
+#endif
+#define PRIO_INDX_PWR                   ES_UINT8_LOG2(PRIO_INDX)
+
+/** @} *//*--------------------------------------------------------------------------------------*/
+
+/*==================================================================================  MACRO's  ==*/
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @name        Debug podrska Core podsistema.
  * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
  * @{ *//*---------------------------------------------------------------------------------------*/
 
@@ -68,19 +84,6 @@
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @ingroup     Pomocni makroi za rad sa bitmapom
- * @{ *//*---------------------------------------------------------------------------------------*/
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-# define PRIO_INDX                      OPT_KERNEL_EPA_PRIO_MAX
-# define PRIO_INDX_GROUP                1
-#else
-# define PRIO_INDX                      HAL_UNATIVE_BITS
-# define PRIO_INDX_GROUP                (ES_DIV_ROUNDUP(OPT_KERNEL_EPA_PRIO_MAX, PRIO_INDX))
-#endif
-#define PRIO_INDX_PWR                   ES_UINT8_LOG2(PRIO_INDX)
-
-/** @} *//*--------------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
@@ -88,22 +91,59 @@ extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
+ * @brief       Interni podaci EPA objekta
+ */
+struct esEpaHdr {
+#if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
+/**
+ * @brief       Memorijska klasa EPA objekta
+ */
+    const C_ROM esMemClass_T  * memClass;
+#endif
+
+/**
+ * @brief		Ime automata
+ */
+    const C_ROM char  	* name;
+/**
+ * @brief       Struktura izvrsne jedinice.
+ * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
+ *              podacima ove strukture je zabranjen drugim modulima.
+ */
+	struct smExec     exec;
+
+/**
+ * @brief       Red cekanja za dogadjaje.
+ */
+	struct evtQueue   evtQueue;
+
+/**
+ * @brief       Kontrolna struktura kernel-a
+ */
+
+/**
+ * @brief       Prioritet EPA objekta.
+ * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
+ */
+	uint_fast8_t    prio;
+};
+
+/**
  * @brief       Bitmap spremnih EPA objekata
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef struct rdyBitmap {
 /**
  * @brief       Grupa prioriteta EPA objekata
- *
- *              Prilikom trazenja sledeceg aktivnog EPA objekta prvo se
+ * @details		Prilikom trazenja sledeceg aktivnog EPA objekta prvo se
  *              pretrazuje ovaj clan.
  */
     unative_T       bitGroup;
 
 /**
  * @brief       Prioriteti EPA objekata
- *
- *              Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
+ * @details		Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
  *              EPA objekat, onda se pretraga nastavlja ovde.
  */
     unative_T       bit[PRIO_INDX_GROUP];
@@ -111,16 +151,18 @@ typedef struct rdyBitmap {
 /**
  * @brief       Lista aktivnih EPA objekata;
  */
-    esEpaHeader_T   * epaList[OPT_KERNEL_EPA_PRIO_MAX];
+    esEpaHdr_T   	* epaList[OPT_KERNEL_EPA_PRIO_MAX];
 } rdyBitmap_T;
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Bitmape spremnih EPA objekata
  *//*--------------------------------------------------------------------------------------------*/
 CORE_PKG_H_EXT rdyBitmap_T rdyBitmap;
 
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @brief       Ubacuje EPA objekat u red za cekanje
  *//*--------------------------------------------------------------------------------------------*/
