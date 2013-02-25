@@ -469,7 +469,7 @@ void esEpaDestroy(
  * @ingroup     kern_intf
  * @{ *//*---------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------------*/
-esEpaHeader_T * esEpaGetId(
+esEpaHeader_T * esEpaGetHeader(
     void) {
 
     return (currCtx.epa);
