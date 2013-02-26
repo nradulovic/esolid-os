@@ -64,17 +64,17 @@ MM_DBG_DEFINE_MODULE(Memory Management);
  *              Ukoliko je bit setovan na MSB poziciji onda je blok zauzet, u
  *              suprotnom nije zauzet.
  */
-#define BLOCK_STATUS_MASK               (hmemBlkSize_T)ES_MASK_MSB(hmemBlkSize_T)
+#define BLOCK_STATUS_MASK               (size_t)ES_MASK_MSB(size_t)
 
 /**
  * @brief       Marker koji pokazuje da je blok zauzet
  */
-#define BLOCK_IS_BUSY                   (hmemBlkSize_T)ES_MASK_MSB(hmemBlkSize_T)
+#define BLOCK_IS_BUSY                   (size_t)ES_MASK_MSB(size_t)
 
 /**
  * @brief       Marker koji pokazuje da blok nije zauzet
  */
-#define BLOCK_IS_FREE                   (hmemBlkSize_T)0U
+#define BLOCK_IS_FREE                   (size_t)0U
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
@@ -138,12 +138,12 @@ typedef struct hmemBlk {
 /**
  * @brief       Velicina ovog bloka memorije u bajtovima.
  */
-    hmemBlkSize_T  size;
+    size_t          size;
 
 /**
  * @brief       Lista fizickih blokova memorije.
  */
-    esSlsList_T    phyList;
+    esSlsList_T     phyList;
 } hmemBlk_T;
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -162,7 +162,7 @@ typedef struct hmemBlkHdr {
 /**
  * @brief       Lista slobodnih blokova
  */
-    esDlsList_T    freeList;
+    esDlsList_T     freeList;
 } hmemBlkHdr_T;
 
 
@@ -206,7 +206,7 @@ const C_ROM esMemClass_T esMemStaticClass = {
  * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
  * moze predstaviti jednim blokom.
  */
-# if (OPT_MM_MANAGED_SIZE > (sizeof(hmemBlkHdr_T) * 2))) && (OPT_MM_MANAGED_SIZE < ES_MASK_MSB(hmemBlkSize_T))
+# if (OPT_MM_MANAGED_SIZE > (sizeof(hmemBlkHdr_T) * 2))) && (OPT_MM_MANAGED_SIZE < ES_MASK_MSB(size_t))
 static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
 # else
 #  error "KERNEL=>MM: OPT_MM_MANAGED_SIZE has invalid value."
@@ -277,7 +277,7 @@ void hmemInit(
     freeMemory = (hmemBlkHdr_T *)aHeap;
     freeMemory->blk.size = aSize - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T);
     heapSentinel = (hmemBlkHdr_T *)((uint8_t *)freeMemory + freeMemory->blk.size + sizeof(hmemBlk_T));
-    heapSentinel->blk.size = (hmemBlkSize_T)0;
+    heapSentinel->blk.size = (size_t)0;
     esSlsSentinelInit(
         &(heapSentinel->blk.phyList));
     esSlsNodeAddHeadI(
@@ -301,9 +301,9 @@ void hmemInit(
         &_sheap,
         OPT_MM_MANAGED_SIZE);
     freeMemory = (hmemBlkHdr_T *)&_sheap;
-    freeMemory->blk.size = (hmemBlkSize_T)((uint8_t *)&_eheap - (uint8_t *)&_sheap - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T));
+    freeMemory->blk.size = (size_t)((uint8_t *)&_eheap - (uint8_t *)&_sheap - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T));
     heapSentinel = (hmemBlkHdr_T *)((uint8_t *)&_eheap - sizeof(hmemBlkHdr_T));
-    heapSentinel->blk.size = (hmemBlkSize_T)0;
+    heapSentinel->blk.size = (size_t)0;
     esSlsSentinelInit(
         &(heapSentinel->blk.phyList));
     esSlsNodeAddHeadI(
@@ -438,7 +438,7 @@ void esHmemDeAlloc(
 void esHmemDeAllocI(
     void        * aMemory) {
 
-    hmemBlkSize_T blkStat;
+    size_t blkStat;
     hmemBlkHdr_T * freeBlk;
     hmemBlkHdr_T * currPhy;
     hmemBlkHdr_T * tmpPhy;
@@ -506,11 +506,11 @@ size_t esHmemFreeSpace(
 size_t esHmemFreeSpaceI(
     void) {
 
-    hmemBlkSize_T  free;
+    size_t  free;
     hmemBlkHdr_T   * currBlk;
 
     MM_ASSERT((hmemBlkHdr_T *)0 != heapSentinel);
-    free = (hmemBlkSize_T)0;
+    free = (size_t)0;
 
     DLS_FOR_EACH_ENTRY(
         hmemBlkHdr_T,

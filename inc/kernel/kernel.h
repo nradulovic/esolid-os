@@ -35,7 +35,6 @@
 /*============================================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
 #include "../config/kernel_config.h"
-#include "port/kernel_profiles.h"
 #include "primitive/list.h"
 #include "primitive/queue.h"
 
