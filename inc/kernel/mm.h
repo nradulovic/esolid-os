@@ -196,45 +196,7 @@ size_t esHmemBlockSize(
 	void 		* aMemory);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Ostale operacije sa memorijom
- * @{ *//*---------------------------------------------------------------------------------------*/
 
-/**
- * @brief       Vrsi kopiranje @c aLength bajtova sa izvorne adrese @c aSrc na
- *              odredisnu adresu @c aDst.
- * @param       aDst                    Pokazivac na odredisnu adresu,
- * @param       aSrc                    pokazivac na izvorisnu adresu,
- * @param       aLength                 broj bajtova koje treba kopirati.
- * @warning     Zbog primena optimizacionih tehnika ova funkcija moze da radi
- *              samo sa blokovima koji se ne preklapaju, odnosno, adrese blokova
- *              izvorista i odredista ne smeju da se preklapaju jer je u tom
- *              slucaju ponasanje funkcije nedefinisano. Ukoliko je potrebno
- *              kopirati blokove cije se adrese preklapaju treba koristiti
- *              funkciju esMemMove().
- * @api
- */
-void * esMemCopy(
-    void        * C_RESTRICT aDst,
-    const void  * C_RESTRICT aSrc,
-    size_t      aLength);
-
-/**
- * @brief       Vrsi kopiranje @c aLength bajtova sa izvorne adrese @c aSrc na
- *              odredisnu adresu @c aDst.
- * @param       aDst                    Pokazivac na odredisnu adresu,
- * @param       aSrc                    pokazivac na izvorisnu adresu,
- * @param       aLength                 broj bajtova koje treba kopirati.
- * @note        Za razliku od esMemMove() ova funkcija moze se koristiti u svim
- *              slucajevima, jer se ne primenjuju optimizacione tehnike.
- * @api
- */
-void * esMemMove(
-    void        * aDst,
-    const void  * aSrc,
-    size_t      aLength);
-
-/** @} *//*--------------------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
