@@ -24,7 +24,6 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Interfejs eSolid operativnog sistema.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  kernel_intf
  ****************************************************************************************//** @{ */
 
@@ -35,19 +34,23 @@
 /*============================================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
 #include "../config/kernel_config.h"
-#include "primitive/list.h"
-#include "primitive/queue.h"
 
 /*==================================================================================  DEFINES  ==*/
+
 /**
- * @todo        Komentarisati ovaj define
+ * @brief       Znakovna konstanta koja pokazuje puno ime i verziju eSolid-a.
  */
 #define ES_KERNEL_ID                    "eSolid v1.0"
 
 /**
- * @todo        Komentarisati ovaj define
+ * @brief       Numericka vrednost major verzije eSolid-a.
  */
-#define ES_KERNEL_VERSION               1U
+#define ES_KERNEL_VERSION_MAJOR         1U
+
+/**
+ * @brief       Numericka vrednost minor verzije eSolid-a.
+ */
+#define ES_KERNEL_VERSION_MINOR         0U
 
 /*==================================================================================  MACRO's  ==*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
@@ -57,7 +60,7 @@ extern "C" {
 
 /*===============================================================================  DATA TYPES  ==*/
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Deklaracije unapred
+ * @name        Karakteristicni tipovi podataka
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /**
@@ -71,12 +74,35 @@ typedef struct esMemClass esMemClass_T;
 typedef struct esEvtHeader esEvtHeader_T;
 
 /**
+ * @brief       Definiciona struktura koja opisuje jedan EPA objekat
+ */
+typedef struct esEpaDef esEpaDef_T;
+
+/**
  * @brief       Zaglavlje Event Processing Agent objekta
  * @details     Ova struktura se koristi prilikom kreiranja strukture Workspace
  *              EPA objekta. Struktura se koristi i za referenciranje EPA
  *              objekata.
  */
 typedef struct esEpaHeader esEpaHeader_T;
+
+/**
+ * @brief       Nabrajanje odgovora state handler funkcije.
+ */
+typedef enum esState esState_T;
+
+/**
+ * @brief       Tip pokazivaca na state handler funkcije.
+ * @details     Funkcije vracaju esState_T , a kao parametar prihvataju
+ *              void pokazivac na strukturu izvrsne jedinice i pokazivac na
+ *              dogadjaje ili sam dogadjaj.
+ */
+typedef esState_T (* esPtrState_T) (esEpaHeader_T *, esEvtHeader_T *);
+
+/**
+ * @brief       Stanje kernel-a
+ */
+typedef enum esKernelStatus esKernelStatus_T;
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
@@ -85,112 +111,58 @@ typedef struct esEpaHeader esEpaHeader_T;
 #include "kernel/smp.h"
 #include "kernel/core.h"
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Struktura podataka za EIR dogadjaj
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct esEpaInfo {
 /**
- * @brief       Identifikator EPA objekta
+ * @brief       Stanje kernel-a
  */
-    uint16_t        id;
+enum esKernelStatus {
+/**
+ * @brief       Kernel se ne izvrsava
+ */
+    KERNEL_STOPPED,
 
 /**
- * @brief       Ime EPA objekta
+ * @brief       Kernel se izvrsava
  */
-    uint8_t         name[8];
-
-/**
- * @brief       Tip EPA objekta
- */
-    uint8_t         type;
-
-/**
- * @brief       Maksimalno zauzece reda za cekanje
- */
-    uint8_t         queueMax;
-
-/**
- * @brief       Velicina reda za cekanje
- */
-    uint8_t         queueSize;
-
-/**
- * @brief       Pokazivac na EPA objekat
- */
-    esEpaHeader_T   * ptr;
-
-/**
- * @brief       Status izvrsavanja EPA objekta
- */
-    uint8_t         status;
-
-/**
- * @brief       Events Per Second faktor
- */
-    uint32_t        EPS;
-} esEpaInfo_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @extends     esEvtHeader_T
- * @brief       Dogadjaj <c>Request</c>
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtSysReq {
-/**
- * @brief       Super struktura sistemskog dogadjaja
- */
-    esEvtHeader_T   super;
-} evtSysReq_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @extends     esEvtHeader_T
- * @brief       Dogadjaj <c>EPA Info Report</c>
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtSysEIRep {
-/**
- * @brief       Super struktura zaglavlja dogadjaja
- */
-    esEvtHeader_T   super;
-/**
- * @brief       Struktura podataka koju nosi ovaj dogadjaj
- */
-    esEpaInfo_T     info;
-} evtSysEIRep_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @extends     esEvtHeader_T
- * @brief       Dogadjaj <c>EPA List Report</c>
- *
- *              Dogadjaj ima promenljivu velicinu i formira se kompletno u RAM
- *              memoriji, za ove dogadjaje se ne koriste podaci iz ROM strukture
- *              osim konstruktora i destruktora.
- *
- * @todo        Da bi ovaj dogadjaj bio moguc potrebno je da konstruktor
- *              funkcija ima mogucnost da izmeni predati pokazivac tek kreiranog
- *              dogadjaja. Pogledati OOC i implementaciju new funkcije. Zbog
- *              toga treba promeniti typedef-ove, vec napisane ROM strukture  i
- *              funkcije koje kreiraju dogadjaj.
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct evtSysELRep {
-/**
- * @brief       Super struktura zaglavlja dogadjaja
- */
-    esEvtHeader_T   super;
-} evtSysELRep_T;
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Domen korisnickih signala
- * @todo        Pogledati gde smestiti ovaj define
- *//*--------------------------------------------------------------------------------------------*/
-#define EVT_SIGNAL_USER                 15
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Domen tipova korisnickih signala
- * @todo        Pogledati gde smestiti ovaj define
- *//*--------------------------------------------------------------------------------------------*/
-#define EVT_TYPE_USER                   4
+    KERNEL_RUNNING
+};
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
+
+/*-------------------------------------------------------------------------------------------*//**
+ * @name        Osnovne funkcije kernel-a
+ * @brief       Ove funkcije se koriste za upravljanjem kernel-om
+ * @{ *//*---------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Inicijalizacija kernel-a
+ * @details     Ova funkcija vrsi najpre inicijalizaciju HAL-a, zatim
+ *              memorijskog menadzera i prelazi na inicijalizaciju samog kernela.
+ * @api
+ */
+void esKernelInit(
+    void);
+
+/**
+ * @brief       Pokrece izvrsavanje jezgra
+ * @details     Pokrecu se svi prethodno kreirani EPA objekti.
+ * @api
+ */
+void esKernelStart(
+    void);
+
+/**
+ * @brief       Vraca odgovor da li trenutno radi kernel
+ * @return      Status izvrsavanja kernel-a.
+ *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
+ *  @retval     KERNEL_RUNNING - kernel se izvrsava,
+ * @api
+ */
+esKernelStatus_T esKernelStatus(
+    void);
+
+/** @} *//*--------------------------------------------------------------------------------------*/
+
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
