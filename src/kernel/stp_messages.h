@@ -24,9 +24,7 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Skup STP poruka
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  stp_messages
- * @brief		Skup STP poruka
  ****************************************************************************************//** @{ */
 
 
@@ -86,6 +84,7 @@ extern const char C_ROM * C_ROM_VAR const txtEvtQput;
 extern const char C_ROM * C_ROM_VAR const txtEvtQputAhead;
 extern const char C_ROM * C_ROM_VAR const txtEvtQget;
 extern const char C_ROM * C_ROM_VAR const txtEvtQFree;
+extern const char C_ROM * C_ROM_VAR const txtEvtQFull;
 
 /* STP_FILT_EPA_EXECUTION 0 */
 extern const char C_ROM * C_ROM_VAR const txtEpaSMinitialization;

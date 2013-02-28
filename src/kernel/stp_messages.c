@@ -26,9 +26,7 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Skup STP poruka
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  stp_messages
- * @brief       Skup STP poruka
  ****************************************************************************************//** @{ */
                                                                                                   
 /*============================================================================  INCLUDE FILES  ==*/
@@ -83,6 +81,8 @@ const char C_ROM * C_ROM_VAR const txtEvtQget =
     "evtQ: get evt addr: %p";                                                   /* adresa reda za dogadjaje                                 */
 const char C_ROM * C_ROM_VAR const txtEvtQFree =
     " - queue free: %u";                                                        /* broj slobodnih pozicija                                  */
+const char C_ROM * C_ROM_VAR const txtEvtQFull =
+    " ** WARNING: QUEUE is FULL!";                                              /* red cekanja za dogadjaje je pun                          */
 
 /* STP_FILT_EPA_EXECUTION 0 */
 const char C_ROM * C_ROM_VAR const txtEpaSMinitialization =
