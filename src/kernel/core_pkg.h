@@ -24,7 +24,6 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Privatni interfejs osnove kernel-a.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  kernel_impl
  ****************************************************************************************//** @{ */
 
@@ -44,12 +43,13 @@
 
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Debug podrska
  * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-#if defined(OPT_KERNEL_DBG_CORE) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_CORE)
 # define CORE_ASSERT                  DBG_ASSERT
 # define CORE_ASSERT_ALWAYS           DBG_ASSERT_ALWAYS
 # define CORE_COMPILE_ASSERT          DBG_COMPILE_ASSERT
@@ -92,22 +92,21 @@ extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
  * @brief       Bitmap spremnih EPA objekata
- *//*--------------------------------------------------------------------------------------------*/
-typedef struct rdyBitmap {
+ */
+struct rdyBitmap {
 /**
  * @brief       Grupa prioriteta EPA objekata
- *
- *              Prilikom trazenja sledeceg aktivnog EPA objekta prvo se
+ * @details     Prilikom trazenja sledeceg aktivnog EPA objekta prvo se
  *              pretrazuje ovaj clan.
  */
     unative_T       bitGroup;
 
 /**
  * @brief       Prioriteti EPA objekata
- *
- *              Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
+ * @details     Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
  *              EPA objekat, onda se pretraga nastavlja ovde.
  */
     unative_T       bit[PRIO_INDX_GROUP];
@@ -115,31 +114,37 @@ typedef struct rdyBitmap {
 /**
  * @brief       Lista aktivnih EPA objekata;
  */
-    esEpaHeader_T   * epaList[OPT_KERNEL_EPA_PRIO_MAX];
-} rdyBitmap_T;
+    esEpaHeader_T   * list[OPT_KERNEL_EPA_PRIO_MAX];
+};
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
  * @brief       Bitmape spremnih EPA objekata
- *//*--------------------------------------------------------------------------------------------*/
-CORE_PKG_H_EXT rdyBitmap_T rdyBitmap;
+ */
+CORE_PKG_H_EXT struct rdyBitmap rdyBitmap;
 
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Ubacuje EPA objekat u red za cekanje
- *//*--------------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Ubacuje EPA objekat u red za cekanje.
+ * @param       [in] aEpa               Pokazivac na EPA objekat koji je spreman
+ *                                      za izvrsenje.
+ * @details     EPA objekat na koji pokazuej pokazivac se ubacuje u listu
+ *              spremnih EPA objekata na izvrsenje.
+ */
 C_INLINE_ALWAYS void schedRdyInsertI_(
     const esEpaHeader_T * aEpa) {
 
     unative_T indxGroup;
     unative_T indx;
 
-    indx = aEpa->internals.kernCtrl.prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
 
 #if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     indxGroup = (unative_T)0U;
 #else
-    indxGroup = aEpa->internals.kernCtrl.prio >> PRIO_INDX_PWR;
+    indxGroup = aEpa->prio >> PRIO_INDX_PWR;
 #endif
     rdyBitmap.bitGroup |= (unative_T)1U << indxGroup;
     rdyBitmap.bit[indxGroup] |= (unative_T)1U << indx;
