@@ -1,0 +1,387 @@
+2013-02-28  nenad
+
+	* [r95] .cproject:
+	  - dodata je opcija -save-temps
+	  - koristi se dodatna HAL putanja za linker skripte
+	* [r94] inc/kernel/smp.h, src/kernel/smp.c,
+	  src/kernel/smp_pkg.h[CPY], src/kernel/sproc_pkg.h[DEL]:
+	  - doxygen komentari
+	  - Promene zbog izmena esEpaHeader strukture
+	* [r93] inc/kernel/kernel.h:
+	  - doxygen komentari
+	  - Ovde se nalaze svi potrebni typedef-ovi
+	  - Prebačene su kernel funkcije iz core.h
+	* [r92] inc/primitive/list.h, inc/primitive/queue.h:
+	  - doxygen komentari
+	  - Refaktor svih funkcija: uklonjene su I sufiksi i dodat je "_"
+	  sufiks koji označava inline funkcije
+	* [r91] src/kernel/stp_messages.c, src/kernel/stp_messages.h:
+	  - Dodat je još jedan niz za obaveštenje da je red čekanja pun i
+	  ne može da primi nov dogadjaj.
+	* [r90] inc/kernel/mm.h, src/kernel/mm.c, src/kernel/mm_pkg.h:
+	  - doxygen komentari
+	  - Izbačene su funkcije esMemMove() i esMemCopy()
+	  - ostale izmene zbog refaktora funkcija iz primitive
+	* [r89] src/kernel/kernel_private.h:
+	  - doxygen komentari
+	  - dodati su makroi za debagovanje
+	* [r88] src/kernel/evt_pkg.h:
+	  - doxygen komentari
+	  - dynamic član evtHeader strukture je sada uvek tipa
+	  uint_fast8_t, više ne postoji konfiguracija njegovog tipa
+	  - izbačeni su svi typedef-ovi
+	  - izbačena je struktura evtIntr, podaci su direktno ugrađeni u
+	  esEvtHeader
+	  - Dodat je veći broj internih funkcija koje direktno pristupaju
+	  redu za cekanje
+	* [r87] src/kernel/core.c, src/kernel/core_pkg.h:
+	  - doxygen komentari
+	  - izbačeni su svi typedef-ovi iz API-ja
+	  - izbačena je struktura epaIntr. Ugrađena je u esEpaHeader
+	  - esEpaHeader struktura sada čuva i ime EPA objekta
+	  - Refaktor: esEpaGetHeader() -> esEpaHeaderGet()
+	  - Napisani su odgovarajući prototipovi
+	  - izbačeni su svi typedef-ovi iz implementacije
+	  - izbačena je funkcija schedRdyInit_() - nepotrebno
+	  - izbačena je funkcija schedRdyGetPrioI_() - spojena je u
+	  funkciju schedRdyGetEpaI_()
+	  - Funkcije koje pripadaju Kernel-u koriste KERN_ makroe
+	  - izbačena je funkcija scheduler() - spojena je u funkciju
+	  esKernelStart()
+	  - funkcija esKernelStart ima atribut C_NORETURN
+	* [r86] inc/kernel/evt.h, src/kernel/evt.c:
+	  - doxygen komentari
+	  - dynamic član evtHeader strukture je sada uvek tipa
+	  uint_fast8_t, više ne postoji konfiguracija njegovog tipa
+	  - izbačeni su tipovi dogadjaja (enumeratori) i mogućnost
+	  uključivanja u konfiguraciji
+	  - izbačeni su suvišni identifikatori dogadjaja, njih će
+	  definisati sistemski automat
+	  - izbačeni su svi typedef-ovi
+	  - dodat je ES_EVT_CREATE() radi lakšeg pisanja
+	  - Refaktor EVT_STATIC_MASK -> EVT_CONST_MASK
+	  - brojači slobodnih mesta u redu za čekanje su sada tipa
+	  uint_fast8_t, bili su size_t što je nepotrebno
+	  - izbačena je struktura evtIntr, podaci su direktno ugrađeni u
+	  esEvtHeader
+	  - dodate su funkcije esEvtPostI() i esEvtPostAheadI()
+	  - Komentarisana je korisnička callback funkcija uTimestampGet()
+	  - Dodat je veći broj internih funkcija koje direktno pristupaju
+	  redu za cekanje
+	  - U funkcijama qPutI_() i qPutAheadI_() je dodata provera da li
+	  je red cekanja spreman da prihvati nov dogadjaja. Ova provera se
+	  ne može isključiti i uvek je aktivna. Kada se koriste debug
+	  makroi generisaće se obaveštenje o tome. Sada ove funkcije
+	  ažuriraju i brojače popunjenosti reda.
+	  - Funkcija esEvtUnreserve() je pokušavala i da izbriše dogadjaj,
+	  NISAM SIGURAN DA JE PAMETNO DA ONA TO RADI!
+	  - Funkcija esEvtPost(), esEvtPostI(), esEvtPostAhead() i
+	  esEvtPostAheadI() sada proveravaju potpis dogadjaja.
+	* [r85] inc/kernel/core.h:
+	  - doxygen komentari
+	  - izbačeni su svi typedef-ovi
+	  - izbačena je struktura epaIntr. Ugrađena je u esEpaHeader
+	  - esEpaHeader struktura sada čuva i ime EPA objekta
+	  - Refaktor: esEpaGetHeader() -> esEpaHeaderGet()
+	* [r84] Doxyfile:
+	  - Prebacivanje konfiguracije na novu verziju doxygen-a
+	* [r83] inc/eSolid.h[DEL]:
+	  - Ne koristi se glavni eSolid.h jer nije imao nikakvu svrhu
+	* [r82] config/kernel_config.h:
+	  - doxygen komentari
+	  - Refaktor: SPROC -> SMP
+	  - Refaktor: OPT_EVT_USE_TIME -> OPT_EVT_USE_TIMESTAMP
+	  - Refaktor: OPT_EVT_USE_TIME_T -> OPT_EVT_USE_TIMESTAMP_T
+	  - Jednostavnije dodeljivanje tipa promenljive
+	* [r81] doc:
+	  - Direktorijum html i latex su stavljeni pod svn:ignore
+	* [r80] doc, doc/html[DEL], doc/img/EPAs.dia, doc/img/EPAs.png,
+	  doc/img/eSolid_CORE.dia[ADD], doc/img/eSolid_CORE.png[ADD],
+	  doc/img/eSolid_EPN.dia[ADD], doc/img/eSolid_EPN.png[ADD],
+	  doc/img/eSolid_EVT.dia[ADD], doc/img/eSolid_EVT.png[ADD],
+	  doc/img/eSolid_MM.dia, doc/img/eSolid_MM.png,
+	  doc/img/eSolid_SMP.dia[ADD], doc/img/eSolid_SMP.png[ADD],
+	  doc/img/eSolid_SP.dia[DEL], doc/img/eSolid_SP.png[DEL],
+	  doc/img/eSolid_TEM.dia[ADD], doc/img/eSolid_TEM.png[ADD],
+	  doc/img/eSolid_small.dia, doc/img/eSolid_small.png,
+	  doc/img/evt_struct.dia, doc/img/evt_struct.png,
+	  doc/img/queuePtr.dia, doc/img/queuePtr.png, doc/inc/core[DEL],
+	  doc/inc/dbg[DEL], doc/inc/eSolid.dox[DEL],
+	  doc/inc/eSolid_cfg.dox[DEL], doc/inc/ett[DEL], doc/inc/hal[DEL],
+	  doc/inc/kernel[CPY], doc/inc/kernel/cfg[DEL],
+	  doc/inc/kernel/core.dox, doc/inc/kernel/epe.dox[DEL],
+	  doc/inc/kernel/epn.dox, doc/inc/kernel/evt.dox,
+	  doc/inc/kernel/kernel.dox, doc/inc/kernel/mem.dox[DEL],
+	  doc/inc/kernel/mm.dox[CPY], doc/inc/kernel/registry.dox,
+	  doc/inc/kernel/smp.dox[CPY], doc/inc/kernel/sproc.dox[DEL],
+	  doc/inc/kernel/tem.dox, doc/inc/port[DEL],
+	  doc/inc/primitive/list.dox, doc/inc/primitive/primitive.dox,
+	  doc/inc/primitive/queue.dox, doc/latex[DEL],
+	  doc/pages/doc_irq_handlers.dox, doc/pages/licence.dox,
+	  doc/pages/literature.dox, doc/pages/main.dox,
+	  doc/pages/structure.dox, doc/pages/usage.dox, doc/src/core[DEL],
+	  doc/src/dbg[DEL], doc/src/eSolid.dox[DEL], doc/src/hal[DEL],
+	  doc/src/kernel[CPY], doc/src/kernel/core.dox,
+	  doc/src/kernel/eot[DEL], doc/src/kernel/epe[DEL],
+	  doc/src/kernel/epn[DEL], doc/src/kernel/epn.dox[CPY],
+	  doc/src/kernel/evt.dox[CPY], doc/src/kernel/kernel.dox[ADD],
+	  doc/src/kernel/mm.dox[CPY], doc/src/kernel/smm.h[DEL],
+	  doc/src/kernel/smp[DEL], doc/src/kernel/smp.dox[CPY],
+	  doc/src/kernel/str[DEL], doc/src/kernel/tem[DEL],
+	  doc/src/kernel/tem.dox[CPY], doc/src/port[DEL]:
+	  - Ažuriranje dokumentacije
+
+2013-02-26  nenad
+
+	* [r79] inc/kernel/kernel.h, inc/port[DEL], src/kernel/mm.c:
+	  - Modul MM više ne zavisi od arhitekture i na taj način jezgro
+	  nema potreben da zna za koji se port kompajlira. Uklanja se Port
+	  direktorijum
+	* [r78] inc/kernel/mm.h:
+	  - Uklonjene su funkcije memCopy i memMove
+
+2013-02-23  nenad
+
+	* [r62] inc/kernel/evt.h:
+	  - todo zamerke
+
+2013-02-22  nenad
+
+	* [r61] inc/kernel/evt.h:
+	  - Refaktor: EVT_ID() -> ES_EVT_ID()
+	* [r60] inc/kernel/smp.h[CPY], inc/kernel/sproc.h[DEL],
+	  src/kernel/smp.c[CPY], src/kernel/sproc.c[DEL]:
+	  - Preimenovanje sproc.h -> smp.h
+	  - Preimenovanje sproc.c -> smp.c
+	  - Refaktor: esHsmTopState() -> esSMTopState()
+	  - Refaktor: esHsmIsInState() -> esSMIsInState()
+	  - Refaktor: SMP_... -> ES_...
+	* [r59] src/kernel/evt.c:
+	  - Refaktor: esEpaGetId() -> esEpaGetHeader()
+	* [r58] inc/kernel/mm.h, src/kernel/mm.c, src/kernel/mm_pkg.h:
+	  - Uklonjen je nepotrebni makro ES_MEMORY_DEFINE pošto se sada
+	  koristi OPT_MM_MANAGED_SIZE
+	  - Uklonjena je memory pool klasa
+	  - Uklonjene su Ctor i Init funkcije
+	  - doxygen komentarisanje
+	  - MM sada koristi promenljive definisane u linker skripti za
+	  dobavljanje memorije kada je OPT_MM_MANAGED_SIZE == 0
+	  - Uklonjene su #if-else-endif za odabir algoritma MM
+	  - hmemInit() je sada interna funkcija koju poziva kernel
+	* [r57] inc/kernel/kernel.h:
+	  - doxygen komentarisanje
+	  - Uklonjena je funkcija esKernelSysVer, sada se koristi #define
+	  - Uklonjeni su nepotrebni typedef-ovi
+	* [r56] inc/kernel/core.h, src/kernel/core.c:
+	  - Uklonjena je kontrolna struktura kernel-a, članovima se
+	  pristupa direktno u strukturi esEpaHeader
+	  - Uklonjeni su typedef-ovi koje korisnik ne koristi
+	  - esKernelInit() se više ne koristi za inicijalizaciju MM, to se
+	  sada radi automatski preko OPT_MM_MANAGED_SIZE
+	  - Uklonjena je funkcija esKernelSysVer, sada se koristi #define
+	  - Refaktor: esEpaGetId() -> esEpaGetHeader()
+	  - doxygen komentarisanje
+	  - esKernelStart() je direktno i scheduler u COOPERATIVE režimu
+	  rada
+	* [r55] config/kernel_config.h:
+	  - Refaktor: memStaticClass -> esMemStaticClass
+	  - Uklonjeno je podešavanje za izbor algoritma MM i dodata je
+	  opcija koja konfiguriše koliko RAM memorije da preuzme MM
+
+2013-02-19  nenad
+
+	* [r54] .cproject, config/kernel_config.h, inc/kernel/core.h,
+	  inc/kernel/mm.h, src/kernel/core.c, src/kernel/mm.c:
+	  - Refaktor memorijskih klasa
+
+2012-12-10  nenad
+
+	* [r53] .cproject:
+	  Update projekta
+
+2012-10-30  nenad
+
+	* [r51] .cproject, .project:
+	  - Projekat je udešen da se može kompajlirati
+	* [r50] src/kernel/stp_messages.c[ADD], src/kernel/stp_messages.h:
+	  - STP poruke su pravilno napisane. Bile su napisane kao da ih je
+	  pisao srednjoškolac.
+
+2012-10-24  nenad
+
+	* [r49] src/kernel/core.c, src/kernel/evt.c, src/kernel/mm.c,
+	  src/kernel/sproc.c, src/kernel/stp_messages.h:
+	  - Nastavak ubacivanja STP makroa u ostale module
+
+2012-10-22  nenad
+
+	* [r48] src/kernel/core.c, src/kernel/stp_messages.h:
+	  - Nastavak ubacivanja STP makroa
+
+2012-10-19  nenad
+
+	* [r47] .cproject, .project, src/kernel/core.c,
+	  src/kernel/kernel_private.h, src/kernel/stp_messages.h[ADD]:
+	  - Započeto je ubacivanje STP makroa
+	  - Kreirana je datoteka za STP makroe
+	  - Projekat sada zavisi i od ETT projekta
+
+2012-10-17  nenad
+
+	* [r45] .[CPY]:
+	  Granananje za Dejana
+	* [r43]
+	  - Bump verzije na 1.0alpha03
+	* [r42]
+	  - Podrazumevane vrednosti su praktičnije
+	  - Neke opcije su dodatno dokumentovane
+
+2012-10-16  nenad
+
+	* [r41]
+	  - Podrazumevane vrednosti su praktičnije
+	  - Neke opcije su dodatno dokumentovane
+	  - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto
+	  OPT_KERNEL_SCHEDULER_ROUNDROBIN, i
+	  OPT_KERNEL_SCHEDULER_COOPERATIVE umesto
+	  OPT_KERNEL_SCHEDULER_FIXEDPRIO
+	* [r40]
+	  - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto
+	  OPT_KERNEL_SCHEDULER_ROUNDROBIN
+	  - Kozmetičke izmene
+	* [r39]
+	  - Izbačena je opcija ES_KERNEL_ENABLE, uvek je uključen
+	* [r38]
+	  - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto
+	  OPT_KERNEL_SCHEDULER_ROUNDROBIN, i
+	  OPT_KERNEL_SCHEDULER_COOPERATIVE umesto
+	  OPT_KERNEL_SCHEDULER_FIXEDPRIO
+	  - Dodate su funkcije za inicijalizaciju HAL-a i STP-a u funkciju
+	  esKernelInit
+
+2012-10-15  nenad
+
+	* [r37]
+	  Izbačen je suvišni dogadjaj i status NOEX
+
+2012-10-12  nenad
+
+	* [r36]
+	  - Prilikom inicijalizaciji se ipak salje dogadjaj SIG_INIT
+	  - Dispecer je napisan po treci put, znatno su mu prosirene
+	  mogucnosti
+
+2012-10-08  nenad
+
+	* [r35]
+	  - Prilikom inicijalizacije dispečer šalje ENTRY signal, a ne INIT
+	  signal.
+
+2012-10-07  nenad
+
+	* [r34]
+	  - Izbačen je makro za proveru stanja FSM automata
+	  - Napisan je novi dispečer, jednostavniji za modifikaciju i
+	  održavanje
+	* [r33]
+	  - Funkcija hsmDispatch je sada deo internog interfejsa
+	* [r32]
+	  - Ispravljena je greška u evtPost funkciji, treba da se
+	  inkrementira brojač, a ne dekrementira.
+	* [r31]
+	  - Inicijalizacija rdy bitmape je ispravljena, sada Epa objekat
+	  može da ima prioritet 0.
+	  - Dodata je funkcija za ispitavanje rdy bitmape da li ima
+	  spremnih objekata
+	  - Izmena schedulera u loop režim
+	  - Kozmetičke izmene
+	* [r30]
+	  - Preuređen je raspored enumeratora zbog postizanja boljih
+	  performansi switch strukture u dispečeru
+
+2012-10-03  nenad
+
+	* [r29]
+	  Projekat se kompajlira, otklonjene su greške u funkcijama za
+	  događaje. Treba uraditi još dosta korekcija da proradi DBG
+	  sistem.
+
+2012-10-02  nenad
+
+	* [r28]
+	  - Update projektnih podesavanja
+	* [r27]
+	  - Briše se stari PORT sistem
+	* [r26]
+	  - Datoteke se prebacuju u kernel direktorijum
+	* [r25]
+	  - Datoteke se prebacuju u kernel direktorijum
+	* [r24]
+	  - Briše se stari PORT sistem
+	* [r23]
+	  - Briše se stari PORT sistem
+	* [r22]
+	  - Briše se stari PORT sistem
+	* [r21]
+	  - Dodat je profil za ARM CM3 arhitekturu
+	* [r20]
+	  - Brisu se suvisne datoteke
+	  - Kernel port sada ima profile
+	* [r19]
+	  - Prebacivanje u kernel direktorijum
+	  - Dodat je EPA modul
+	* [r18]
+	  - Datoteke se prebacuju u kernel direktorijum
+	* [r17]
+	  - Ciscenje nepotrebnih datoteka
+	* [r16]
+	  - Konfiguracija je prebacena u sam projekat
+
+2012-09-27  nenad
+
+	* [r15]
+	  - Zadnje podešavanje ovog projekta
+
+2012-09-22  nenad
+
+	* [r10]
+	  - Arhitektura porta treba da bude ista kao za HAL
+
+2012-09-16  nenad
+
+	* [r9]
+	  evt.c
+	  - Dodati su nedostajuće provere da li se koristi jezgro.
+
+2012-05-26  nenad
+
+	* [r8]
+	  Sve promene su vezane za refaktoring iz HALDSM projekta.
+
+2012-04-07  nenad
+
+	* [r7]
+	  Promenjene su pretprocesorske promenljive.
+
+2012-04-05  nenad
+
+	* [r6]
+	  Priprema se prelazak na nezavisne module.
+
+2012-04-02  nenad
+
+	* [r5]
+	  Obrisani su suvišni fajlovi.
+
+2012-04-01  nenad
+
+	* [r4]
+	  Ubacen je ETT doxygen direktorijum.
+	  Izvrisan je EPN podmodul iz CORE modula.
+	* [r3]
+	  Prebacivanje kernel-a u kompaktni oblik
+	* [r2]
+	  Inicijalni import datoteka
+	* [r1]
+	  Inicijalni import
+
