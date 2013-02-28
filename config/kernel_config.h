@@ -24,8 +24,7 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Konfiguracija eSolid Kernel-a
- * ------------------------------------------------------------------------------------------------
- * @addtogroup  kernel_cfg
+ * @defgroup    kernel_cfg Kernel configuration
  ****************************************************************************************//** @{ */
 
 
@@ -43,54 +42,67 @@
  * @name        Debagiranje Kernel-a
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Debug podrska Kernel modula
+/**
+ * @brief       Debug podrska Kernel-a
  * @details     Ukoliko je ova opcija:
- *              - definisana: omoguceno je debagiranje modula,
- *              - nedefinisana: nije omoguceno debagiranje modula.
+ *                  - definisana: omoguceno je debagiranje kernela,
+ *                  - nedefinisana: nije omoguceno debagiranje kernela.
+ *
  * @note        Ova opcija mora biti definisana ukoliko se zeli debagiranje
- *              pojedinih podmodula.
- *//*--------------------------------------------------------------------------------------------*/
+ *              pojedinih modula.
+ */
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_DBG
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Debug podrska State Processor (SPROC) podmodula
+/**
+ * @brief       Debug podrska State Machine Processor (SMP) modula
  * @details     Ukoliko je ova opcija:
- *              - definisana: omoguceno je debagiranje modula,
- *              - nedefinisana: nije omoguceno debagiranje modula.
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - definisana: omoguceno je debagiranje modula,
+ *                  - nedefinisana: nije omoguceno debagiranje modula.
+ *
+ * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
+ *              opcija @ref OPT_KERNEL_DBG.
+ */
 #if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG_SPROC
+# define OPT_KERNEL_DBG_SMP
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Debug podrska CORE podmodula
  * @details     Ukoliko je ova opcija:
- *              - definisana: omoguceno je debagiranje modula,
- *              - nedefinisana: nije omoguceno debagiranje modula.
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - definisana: omoguceno je debagiranje modula,
+ *                  - nedefinisana: nije omoguceno debagiranje modula.
+ *
+ * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
+ *              opcija @ref OPT_KERNEL_DBG.
+ */
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_DBG_CORE
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Debug podrska Event Management (EVT) podmodula
  * @details     Ukoliko je ova opcija:
- *              - definisana: omoguceno je debagiranje modula,
- *              - nedefinisana: nije omoguceno debagiranje modula.
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - definisana: omoguceno je debagiranje modula,
+ *                  - nedefinisana: nije omoguceno debagiranje modula.
+ *
+ * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
+ *              opcija @ref OPT_KERNEL_DBG.
+ */
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_DBG_EVT
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Debug podrska Memory Management (MM) podmodula
  * @details     Ukoliko je ova opcija:
- *              - definisana: omoguceno je debagiranje modula,
- *              - nedefinisana: nije omoguceno debagiranje modula.
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - definisana: omoguceno je debagiranje modula,
+ *                  - nedefinisana: nije omoguceno debagiranje modula.
+ *
+ * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
+ *              opcija @ref OPT_KERNEL_DBG.
+ */
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_DBG_MM
 #endif
@@ -100,63 +112,40 @@
  * @name        Podesavanje Kernel-a
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Da li se koriste dinamicki objekti
  * @details     Ukoliko je promenljiva:
- *              - definisana: za alokaciju memorije se koristi memorijska klasa
- *              koja je data u argumentu esEpaCreate().
- *              - nedefinisana: za alokaciju memorije se koristi
- *              esMemStaticClass klasa memorije
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - definisana: za alokaciju memorije se koristi memorijska
+ *                  klasa koja je data u argumentu funkcija.
+ *                  - nedefinisana: za alokaciju memorije se koristi
+ *                  @ref esMemStaticClass klasa memorije
+ */
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_USE_DYNAMIC
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Maksimalan prioritet EPA objekata u sistemu
  * @details     Ova opcija omogucava da se ujedno definise maksimalan broj EPA
  *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
  *              maksimalan broj prioriteta na 8-bitnoj arhitekturi. 16-bitne i
  *              32-bitne arhitekture podrazavaju vide od 64 EPA objekata.
  * @note        Podrazumevano podesavanje: 8 nivoa
- *//*--------------------------------------------------------------------------------------------*/
+ */
 #if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
-# define OPT_KERNEL_EPA_PRIO_MAX                  8U
+# define OPT_KERNEL_EPA_PRIO_MAX        8U
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Maksimalan prioritet prekidnih rutina kernela
  * @details     Ovim se ogranicava prioritet prekidnih rutina koje jezgro
  *              koristi. Ovo podesavanje je izuzetno korisno kada postoji
  *              potreba da se pojedini hardverski prekidi ne prekidaju od strane
  *              jezgra.
- *//*--------------------------------------------------------------------------------------------*/
+ * @note        Podrazumevano podesavanje: ES_PRIO_REALTIME
+ */
 #if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX)
 # define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Planiranje zadataka bez istiskivanja sa fiksiranim prioritetom.
- * @note        Ovo je podrazumevano podesavanje
- *//*--------------------------------------------------------------------------------------------*/
-#if !defined(OPT_KERNEL_SCHEDULER_COOPERATIVE) && !defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE) || defined(__DOXYGEN__)
-# define OPT_KERNEL_SCHEDULER_COOPERATIVE
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Planiranje zadataka sa istiskivanjem sa Round-Robin tehnikom.
- * @details     Ukoliko je ova opcija:
- *              - definisana: omoguceno je istiskivanje zadataka
- *              - nedefinisana: nije omoguceno istiskivanje zadataka
- *              (koristi se neki drugi rezim scheduler-a).
- *              Ukoliko je omoguceno istiskivanje zadataka, onda mogu da postoje
- *              vise EPA objekata sa istim nivoom prioriteta. Tada se vrsi
- *              planiranje zadataka po Round-Robin algoritmu.
- * @note        Ostale opcije za rezim rada OPT_KERNEL_SCHEDULER_xxx ne smeju
- *              biti istovremeno definisane.
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_SCHEDULER_PREEMPTIVE
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -171,7 +160,7 @@
  *              available to the heap allocator and/or can be used directly
  *              through the simplified core memory allocator.
  * @note        In order to let the OS manage the whole RAM the linker script
- *              must provide the @p __heap_base__ and @p __heap_end__ symbols.
+ *              must provide the @p _sheap and @p _eheap symbols.
  * @note        DEFAULT: 0 (All memory)
  */
 #if !defined(OPT_MM_MANAGED) || defined(__DOXYGEN__)
@@ -180,52 +169,51 @@
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Podesavanje Event Management (EVT) podmodula
+ * @name        Podesavanje Event Management (EVT) modula
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Koristi se atribut o velicini dogadjaja
  * @details     Moguce vrednosti:
- *              - nedefinisano - ne koristi se atribut o velicini
- *              - definisano   - koristi se atribut o velicini
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - nedefinisano - ne koristi se atribut o velicini
+ *                  - definisano   - koristi se atribut o velicini
+ *
+ *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_SIZE_T.
+ * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
+ *              velicini.
+ */
 #if defined(__DOXYGEN__)
 # define OPT_EVT_USE_SIZE
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Koristi se pokazivac na proizvodjaca dogadjaja.
  * @details     Moguce vrednosti:
- *              - nedefinisano - pokazivac na objekat se ne koristi
- *              - definisano   - pokazivac na objekat se koristi
- *//*--------------------------------------------------------------------------------------------*/
+ *                  - nedefinisano - pokazivac na objekat se ne koristi
+ *                  - definisano   - pokazivac na objekat se koristi
+ *
+ * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
+ *              generatoru.
+ */
 #if defined(__DOXYGEN__)
-# define OPT_EVT_USE_TRANSMITTER
+# define OPT_EVT_USE_GENERATOR
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Koristi se vremenski marker dogadjaja.
  * @details     Moguce vrednosti:
  *              - nedefinisano - vrem. marker se ne koristi
  *              - definisano   - vrem. marker se koristi
- *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_TIME_T.
- *//*--------------------------------------------------------------------------------------------*/
+ *
+ *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_TIMESTAMP_T.
+ * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
+ *              vremenskom markeru.
+ */
 #if defined(__DOXYGEN__)
-# define OPT_EVT_USE_TIME
+# define OPT_EVT_USE_TIMESTAMP
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Koristi se tip dogadjaja.
- * @details     Moguce vrednosti:
- *              - nedefinisano - tip dogadjaja se ne koristi
- *              - definisano   - tip dogadjaja se koristi
- *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_TYPE_T.
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_TYPE
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Tip promenljive za identifikator dogadjaja.
  * @details     Tip podatka treba da dovoljne velicine moze da predstavi sve
  *              dogadjaje u sistemu. Na primer, ako u sistemu postoje manje od
@@ -235,102 +223,65 @@
  *              treba voditi racuna o zauzecu strukture koja opisuje dogadjaj i
  *              njenom poravnjanju (alignement) u memoriji, gde se moze javiti
  *              potreba za vecim tipom od minimalnog.
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EVT_ID_T
+ * @note        Podrazumevano podesavanje: uint_fast8_t
+ */
+#if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
+# define OPT_EVT_ID_T                   uint_fast8_t
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Tip podataka za cuvanje velicine prosirenog dogadjaja.
- * @note        Ovo podesavanje moze da se zaobidje definisanjem OPT_EVT_SIZE_T.
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EVT_SIZE_T
+ * @note        Podrazumevano podesavanje: size_t
+ */
+#if !defined(OPT_EVT_SIZE_T) || defined(__DOXYGEN__)
+# define OPT_EVT_SIZE_T                 size_t
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Tip za cuvanje vremenskih atributa dogadjaja.
- * @note        Ovo podesavanje moze da se zaobidje definisanjem OPT_EVT_TIME_T.
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EVT_TIME_T
+ * @note        Podrazumevano podesavanje: uint32_t
+ */
+#if !defined(OPT_EVT_TIMESTAMP_T) || defined(__DOXYGEN__)
+# define OPT_EVT_TIMESTAMP_T            uint32_t
 #endif
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Tip za cuvanje tipa dogadjaja.
- * @note        Ovo podesavanje moze da se zaobidje definisanjem OPT_EVT_TYPE_T.
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(__DOXYGEN__)
-# define OPT_EVT_TYPE_T
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Atribut za strukture dogadaja
  * @details     Prilikom slanja dogadjaja drugim sistemima javlja se problem
  *              pakovanja podataka unutar strukture dogadjaja.
  *              Ovom promenljivom se moze definisati koja direktiva ce se
  *              koristiti za strukture dogadjaja (poravnjanje, pakovanje).
- *//*--------------------------------------------------------------------------------------------*/
+ * @note        Podrazumevano podesavanje: /
+ */
 #if !defined(OPT_EVT_STRUCT_ATTRIB) || defined(__DOXYGEN__)
 # define OPT_EVT_STRUCT_ATTRIB
 #endif
 
+/** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
- * @brief       Dobavlja vremenski marker za dogadjaje
- * @details     Ovo je makro koji poziva callback funkciju za tacno vreme.
- *              Zadatak te funkcije je da pruzi informaciju o tacnom vremenu
- *              koje se utiskuje u tek kreirani dogadjaj. Korisnik ima za
- *              zadatak da u ovom makrou napise ime funkcije koja dobavlja
- *              trenutno vreme i sistem ce je pozivati u odgovarajucim trenucima.
- *//*--------------------------------------------------------------------------------------------*/
-#if !defined(EVT_TIMESTAMP_GET) || defined(__DOXYGEN__)
-# define EVT_TIMESTAMP_GET()            0U
+ * @name        Tipovi podataka koje korisnik definise
+ * @{ *//*---------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Tip podataka za identifikator dogadjaja
+ */
+typedef OPT_EVT_ID_T                    esEvtId_T;
+
+/**
+ * @brief       Tip podataka za vremenski marker dogadjaja
+ */
+#if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
+typedef OPT_EVT_TIMESTAMP_T             esEvtTimestamp_T;
+#endif
+
+/**
+ * @brief       Tip podataka za atribut velicine dogadjaja
+ */
+#if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
+typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
-
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Tip podataka za identifikator dogadjaja
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(OPT_EVT_ID_T)
-typedef OPT_EVT_ID_T                    esEvtId_T;
-#else
-typedef uint8_t                         esEvtId_T;
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Tip podataka za vremenski marker dogadjaja
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(OPT_EVT_USE_TIME) || defined(__DOXYGEN__)
-# if defined(OPT_EVT_TIME_T)
-typedef OPT_EVT_TIME_T                  esEvtTime_T;
-# else
-typedef uint32_t                        esEvtTime_T;
-# endif
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Tip podataka za atribut velicine dogadjaja
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-# if defined(OPT_EVT_SIZE_T)
-typedef OPT_EVT_SIZE_T                  esEvtSize_T;
-# else
-typedef uint8_t                         esEvtSize_T;
-# endif
-#endif
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Tip podataka za atribut tipa dogadjaja
- *//*--------------------------------------------------------------------------------------------*/
-#if defined(OPT_EVT_USE_TYPE) || defined(__DOXYGEN__)
-# if defined(OPT_EVT_TYPE_T)
-typedef OPT_EVT_TYPE_T                  esEvtType_T;
-# else
-typedef uint8_t                         esEvtType_T;
-# endif
-#endif
 
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
