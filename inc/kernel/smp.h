@@ -24,9 +24,7 @@
  * @file
  * @author      Nenad Radulovic
  * @brief   	Interfejs State Machine Processor (SMP) modula.
- * ------------------------------------------------------------------------------------------------
- * @addtogroup  sproc_intf
- * @brief       Interfejs State Machine Processor (SMP) modula.
+ * @addtogroup  smp_intf
  ****************************************************************************************//** @{ */
 
 
@@ -36,6 +34,7 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Makroi za tranziciju stanja
  * @{ *//*---------------------------------------------------------------------------------------*/
@@ -49,7 +48,7 @@
  *              tip desnog izraza.
  */
 #define ES_STATE_TRAN(epa, state)                                              \
-    (((esEpaHeader_T *)(epa))->pState = (esPtrState_T)(state), RETN_TRAN)
+    (((esEpaHeader_T *)(epa))->exec.ptrState = (esPtrState_T)(state), RETN_TRAN)
 
 /**
  * @brief       Vraca dispeceru informaciju o super stanju trenutnog stanja.
@@ -61,29 +60,7 @@
  * @note        Koristi se samo kod HSM automata.
  */
 #define ES_STATE_SUPER(epa, state)                                             \
-    (((esEpaHeader_T *)(epa))->pState = (esPtrState_T)(state), RETN_SUPER)
-
-/**
- * @brief       Vraca dispeceru informaciju da treba da se izvrsi inicijalna
- *              tranzicija.
- * @param       epa                     Pokazivac na strukturu HSM automata,
- * @param       state                   naredno stanje automata.
- */
-#define ES_STATE_INIT(epa, state)                                              \
-    (((esEpaHeader_T *)(epa))->pState = (esPtrState_T)(state), RETN_INIT)
-
-/**
- * @brief       Vraca dispeceru informaciju da automat ulazi u flowchart deo
- *              dijagrama stanja.
- * @details     Ovaj makro se koristi kada se zeli tranzicija u sledece stanje
- *              bez dogadjaja. Naime, kada se ovaj makro koristi, dispecer sam
- *              generise @ref SIG_NOEX dogadjaj tako da automat moze da obradi
- *              flowchart bez spoljasnih dogadjaja. Flowchart se pise u odeljku
- *              koji obradjuje SIG_NOEX, dok se u SIG_ENTRY odeljku samo
- *              koristi ovaj makro.
- */
-#define ES_STATE_NOEX()                                                        \
-    (RETN_NOEX)
+    (((esEpaHeader_T *)(epa))->exec.ptrState = (esPtrState_T)(state), RETN_SUPER)
 
 /**
  * @brief       Vraca dispeceru informaciju da je dogadjaj opsluzen.
@@ -110,12 +87,11 @@ extern "C" {
 
 /**
  * @brief       Nabrajanje odgovora state handler funkcije.
- *
- *              State handler funkcija preko ovih nabrajanja govori SMP
+ * @details     State handler funkcija preko ovih nabrajanja govori SMP
  *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
  *              dogadjaj.
  */
-typedef enum smpState {
+enum esState {
 /**
  * @brief       Ne treba izvrsiti nikakve dalje akcije.
  * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
@@ -153,29 +129,28 @@ typedef enum smpState {
  */
     RETN_SUPER
 
-} esState_T;
+};
 
 /**
- * @brief       Tip pokazivaca na state handler funkcije.
- * @details     Funkcije vracaju esState_T , a kao parametar prihvataju
- *              void pokazivac na strukturu izvrsne jedinice i pokazivac na
- *              dogadjaje ili sam dogadjaj.
- */
-typedef esState_T (* esPtrState_T) (esEpaHeader_T *, esEvtHeader_T *);
-
-/**
- * @brief       Struktura HSM izvrsne jedinice
+ * @brief       Struktura HSM automata
  */
 struct smExec {
 /**
+ * @brief       Pokazivac na state handler funkciju.
+ * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
+ *              dogadjaja.
+ */
+    esPtrState_T    ptrState;
+
+/**
  * @brief       Niz za cuvanje izvornih stanja HSM automata
  */
-    esPtrState_T        * pSrcStates;
+    esPtrState_T    * pSrcStates;
 
 /**
  * @brief       Niz za cuvanje odredisnih stanja HSM automata
  */
-    esPtrState_T        * pDstStates;
+    esPtrState_T    * pDstStates;
 };
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
@@ -187,8 +162,8 @@ struct smExec {
 
 /**
  * @brief       Da li je automat aEpa u datom aState stanju?
- * @param       aEpa                    Pokazivac na strukturu HSM automata,
- * @param       aState                  stanje automata koje se ispituje.
+ * @param       [in] aEpa               Pokazivac na strukturu HSM automata,
+ * @param       [in] aState             stanje automata koje se ispituje.
  * @return                              Da li je automat u tom stanju ili
  *                                      podstanju.
  * @retval      TRUE                    Automat je u tom stanju ili podstanju.
@@ -207,9 +182,9 @@ bool_T esSMIsInState(
 
 /**
  * @brief       Najvisi nivo u hijerarhiji HSM automata.
- * @param       aEpa                    Pokazivac na strukturu HSM automata,
- * @param       aEvt                    pokazivac/podatak na strukturu dogadjaja.
- * @return      esState_T             status funkcije.
+ * @param       [in] aEpa               Pokazivac na strukturu HSM automata,
+ * @param       [in] aEvt               pokazivac/podatak na strukturu dogadjaja.
+ * @return      esState_T               status funkcije.
  * @note        Uvek vraca odgovor IGNORED, jer ona ne prihvata nikakav
  *              dogadjaj.
  * @api
@@ -227,6 +202,6 @@ esState_T esSMTopState(
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
- * END of sproc.h
+ * END of smp.h
  *************************************************************************************************/
-#endif /* SPROC_H_ */
+#endif /* SMP_H_ */
