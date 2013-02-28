@@ -24,33 +24,22 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Implementacija Memory Management modula.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  mm_impl
  ****************************************************************************************//** @{ */
 
 
-/*************************************************************************************************
- * INCLUDE FILES
- *************************************************************************************************/
+/*============================================================================  INCLUDE FILES  ==*/
 
 #define MM_PKG_H_VAR
 #include "kernel_private.h"
+#include "primitive/list.h"
 
+/*============================================================================  LOCAL DEFINES  ==*/
 
-/*************************************************************************************************
- * LOCAL DEFINES
- *************************************************************************************************/
-
-/*-----------------------------------------------------------------------------------------------*
- * Local debug defines
- *-----------------------------------------------------------------------------------*//** @cond */
-
+/**
+ * @brief       Local debug define macro.
+ */
 MM_DBG_DEFINE_MODULE(Memory Management);
-
-
-/** @endcond *//*--------------------------------------------------------------------------------*
- * Local user defines
- *-----------------------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Konstante za status blokova
@@ -59,10 +48,8 @@ MM_DBG_DEFINE_MODULE(Memory Management);
 /**
  * @brief       Maska koja se koristi za definisanje statusa bloka
  * @details     U implementaciji se koristi MSB bit za oznacavanje da li je
- *              blok zauzet ili nije.
- *
- *              Ukoliko je bit setovan na MSB poziciji onda je blok zauzet, u
- *              suprotnom nije zauzet.
+ *              blok zauzet ili nije. Ukoliko je bit setovan na MSB poziciji
+ *              onda je blok zauzet, u suprotnom nije zauzet.
  */
 #define BLOCK_STATUS_MASK               (size_t)ES_MASK_MSB(size_t)
 
@@ -78,10 +65,7 @@ MM_DBG_DEFINE_MODULE(Memory Management);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
-
-/*************************************************************************************************
- * LOCAL MACRO's
- *************************************************************************************************/
+/*============================================================================  LOCAL MACRO's  ==*/
 
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Makroi za manipulaciju sa statusom blokova
@@ -91,49 +75,38 @@ MM_DBG_DEFINE_MODULE(Memory Management);
  * @brief       Izvlacenje statusa bloka iz @c size clana.
  * @return      status da li je blok slobodan.
  */
-#define BLK_STAT_QUERY(currBlk)                                             \
+#define BLK_STAT_QUERY(currBlk)                                                 \
     ((currBlk)->blk.size & BLOCK_STATUS_MASK)
 
 /**
  * @brief       Vrsi postavljanje statusa bloka da je zauzet.
  */
-#define BLK_STAT_BUSY(currBlk)                                              \
+#define BLK_STAT_BUSY(currBlk)                                                  \
     (currBlk)->blk.size |= BLOCK_STATUS_MASK
 
 /**
  * @brief       Vrsi postavljanje statusa bloka da je slobodan.
  */
-#define BLK_STAT_FREE(currBlk)                                              \
+#define BLK_STAT_FREE(currBlk)                                                  \
     (currBlk)->blk.size &= ~BLOCK_STATUS_MASK
 
 /** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Makroi za manipulaciju sa listama fizickih blokova
- * @brief       Koristi se posebna implementacija Single Linked list with
+
+/**
+ * @brief       Makroi za manipulaciju sa listama fizickih blokova
+ * @details     Koristi se posebna implementacija Single Linked list with
  *              Sentinel gde nije potrebno vrsiti skeniranje liste prilikom
  *              dodavanja ili oduzimanja elemenata
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-#define PHY_BLK_PREV(currBlk)                                               \
+ */
+#define PHY_BLK_PREV(currBlk)                                                   \
     ((hmemBlkHdr_T *)((uint8_t *)(currBlk) + currBlk->blk.size + sizeof(hmemBlk_T)))
 
-/** @} *//*--------------------------------------------------------------------------------------*/
 
+/*=========================================================================  LOCAL DATA TYPES  ==*/
 
-/*************************************************************************************************
- * LOCAL CONSTANTS
- *************************************************************************************************/
-
-
-/*************************************************************************************************
- * LOCAL DATA TYPES
- *************************************************************************************************/
-
-/*-----------------------------------------------------------------------------------------------*/
 /**
  * @brief       Struktura jednog bloka memorije.
  */
-/*-----------------------------------------------------------------------------------------------*/
 typedef struct hmemBlk {
 /**
  * @brief       Velicina ovog bloka memorije u bajtovima.
@@ -146,14 +119,11 @@ typedef struct hmemBlk {
     esSlsList_T     phyList;
 } hmemBlk_T;
 
-/*-----------------------------------------------------------------------------------------------*/
 /**
  * @extends     hmemBlk_T
  * @brief       Zaglavlje jedne slobodne oblasti memorije.
- *
- *              Ovo zaglavlje postoji samo u slobodnim oblastima memorije.
+ * @details     Ovo zaglavlje postoji samo u slobodnim oblastima memorije.
  */
-/*-----------------------------------------------------------------------------------------------*/
 typedef struct hmemBlkHdr {
 /**
  * @brief       Lista fizickih blokova i zauzece blokova
@@ -165,60 +135,8 @@ typedef struct hmemBlkHdr {
     esDlsList_T     freeList;
 } hmemBlkHdr_T;
 
-
-/*************************************************************************************************
- * LOCAL TABLES
- *************************************************************************************************/
-
-
-/*************************************************************************************************
- * SHARED GLOBAL VARIABLES
- *************************************************************************************************/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Klase memorijskog alokatora
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Dinamicki memorijski alokator (heap memory)
- */
-const C_ROM esMemClass_T esMemHeapClass = {
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-};
-
-/**
- * @brief       Staticki memorijski alokator (static memory)
- * @todo        Napisati funkcije za staticki alokator, sada samo koristiom heap.
- */
-const C_ROM esMemClass_T esMemStaticClass = {
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-};
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-#if (OPT_MM_MANAGED_SIZE != 0U)
-/*
- * Provera da li je OPT_MM_MANAGED_SIZE veca od velicine dva blokovska zaglavlja
- * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
- * moze predstaviti jednim blokom.
- */
-# if (OPT_MM_MANAGED_SIZE > (sizeof(hmemBlkHdr_T) * 2))) && (OPT_MM_MANAGED_SIZE < ES_MASK_MSB(size_t))
-static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
-# else
-#  error "KERNEL=>MM: OPT_MM_MANAGED_SIZE has invalid value."
-# endif
-#else
-extern uint8_t _sheap;
-extern uint8_t _eheap;
-#endif
-
-/*************************************************************************************************
- * LOCAL GLOBAL VARIABLES
- *************************************************************************************************/
+/*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
+/*==========================================================================  LOCAL VARIABLES  ==*/
 
 /**
  * @brief       Cuvar liste slobodnih blokova
@@ -233,28 +151,62 @@ static hmemBlkHdr_T * heapSentinel;
 static void * dbgHeapBegin;
 static void * dbgHeapEnd;
 #endif
+/** @} *//*--------------------------------------------------------------------------------------*/
+
+#if (OPT_MM_MANAGED_SIZE != 0U)
+/*
+ * Provera da li je OPT_MM_MANAGED_SIZE veca od velicine dva blokovska zaglavlja
+ * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
+ * moze predstaviti jednim blokom.
+ */
+# if (OPT_MM_MANAGED_SIZE > (sizeof(hmemBlkHdr_T) * 2))) && (OPT_MM_MANAGED_SIZE < ES_MASK_MSB(size_t))
+static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
+# else
+#  error "KERNEL=>MM: OPT_MM_MANAGED_SIZE has invalid value."
+# endif
+#endif
+
+/*=========================================================================  GLOBAL VARIABLES  ==*/
+
+/*-------------------------------------------------------------------------------------------*//**
+* @name        Klase memorijskog alokatora
+* @{ *//*---------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Dinamicki memorijski alokator (heap memory)
+ */
+const C_ROM esMemClass_T esMemHeapClass = {
+   &esHmemAlloc,
+   &esHmemDeAlloc,
+   &esHmemBlockSize,
+};
+
+/**
+ * @brief       Staticki memorijski alokator (static memory)
+ * @todo        Napisati funkcije za staticki alokator, sada samo koristiom heap.
+ */
+const C_ROM esMemClass_T esMemStaticClass = {
+   &esHmemAlloc,
+   &esHmemDeAlloc,
+   &esHmemBlockSize,
+};
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
+#if (OPT_MM_MANAGED_SIZE == 0U)
+/**
+ * @brief       Pocetak heap memorije, definicija je u linker skripti.
+ */
+extern uint8_t _sheap;
 
-/*************************************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- *************************************************************************************************/
+/**
+ * @brief       Kraj heap memorije, definicija je u linker skripti.
+ */
+extern uint8_t _eheap;
+#endif
 
-
-/*************************************************************************************************
- ***                                I M P L E M E N T A T I O N                                ***
- *************************************************************************************************/
-
-
-
-/*************************************************************************************************
- * GLOBAL FUNCTION DEFINITIONS
- *************************************************************************************************/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @ingroup         mem_intf
- * @{ *//*---------------------------------------------------------------------------------------*/
+/*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
+/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 
 void hmemInit(
     void) {
@@ -278,14 +230,14 @@ void hmemInit(
     freeMemory->blk.size = aSize - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T);
     heapSentinel = (hmemBlkHdr_T *)((uint8_t *)freeMemory + freeMemory->blk.size + sizeof(hmemBlk_T));
     heapSentinel->blk.size = (size_t)0;
-    esSlsSentinelInit(
+    esSlsSentinelInit_(
         &(heapSentinel->blk.phyList));
-    esSlsNodeAddHeadI(
+    esSlsNodeAddHead_(
         &(heapSentinel->blk.phyList),
         &(freeMemory->blk.phyList));
-    esDlsSentinelInit(
+    esDlsSentinelInit_(
         &(heapSentinel->freeList));
-    esDlsNodeAddHeadI(
+    esDlsNodeAddHead_(
         &(heapSentinel->freeList),
         &(freeMemory->freeList));
     BLK_STAT_BUSY(heapSentinel);
@@ -304,14 +256,14 @@ void hmemInit(
     freeMemory->blk.size = (size_t)((uint8_t *)&_eheap - (uint8_t *)&_sheap - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T));
     heapSentinel = (hmemBlkHdr_T *)((uint8_t *)&_eheap - sizeof(hmemBlkHdr_T));
     heapSentinel->blk.size = (size_t)0;
-    esSlsSentinelInit(
+    esSlsSentinelInit_(
         &(heapSentinel->blk.phyList));
-    esSlsNodeAddHeadI(
+    esSlsNodeAddHead_(
         &(heapSentinel->blk.phyList),
         &(freeMemory->blk.phyList));
-    esDlsSentinelInit(
+    esDlsSentinelInit_(
         &(heapSentinel->freeList));
-    esDlsNodeAddHeadI(
+    esDlsNodeAddHead_(
         &(heapSentinel->freeList),
         &(freeMemory->freeList));
     BLK_STAT_BUSY(heapSentinel);
@@ -329,7 +281,8 @@ void hmemInit(
 
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
+
 void * esHmemAlloc(
     size_t  aSize) {
 
@@ -382,11 +335,11 @@ void * esHmemAllocI(
                 freeBlk = PHY_BLK_PREV(freeBlk);
                 freeBlk->blk.size = aSize;
                 prevPhy = PHY_BLK_PREV(freeBlk);
-                esSlsNodeAddAfterI(
+                esSlsNodeAddAfter_(
                     &(prevPhy->blk.phyList),
                     &(freeBlk->blk.phyList));
             } else {
-                esDlsNodeRemoveI(
+                esDlsNodeRemove_(
                     &(freeBlk->freeList));
             }
             BLK_STAT_BUSY(freeBlk);
@@ -460,10 +413,10 @@ void esHmemDeAllocI(
     BLK_STAT_FREE(freeBlk);
 
     if (BLOCK_IS_FREE == blkStat) {
-        esDlsNodeRemoveI(
+        esDlsNodeRemove_(
             &(currPhy->freeList));
         tmpPhy = PHY_BLK_PREV(freeBlk);
-        esSlsNodeRemoveAfterI(
+        esSlsNodeRemoveAfter_(
             &(tmpPhy->blk.phyList));
         currPhy->blk.size += freeBlk->blk.size + sizeof(hmemBlk_T);
         freeBlk = currPhy;
@@ -472,14 +425,14 @@ void esHmemDeAllocI(
     blkStat = BLK_STAT_QUERY(currPhy);
 
     if (BLOCK_IS_FREE == blkStat) {
-        esDlsNodeRemoveI(
+        esDlsNodeRemove_(
             &(currPhy->freeList));
         tmpPhy = PHY_BLK_PREV(currPhy);
-        esSlsNodeRemoveAfterI(
+        esSlsNodeRemoveAfter_(
             &(tmpPhy->blk.phyList));
         freeBlk->blk.size += currPhy->blk.size + sizeof(hmemBlk_T);
     }
-    esDlsNodeAddHeadI(
+    esDlsNodeAddHead_(
         &(heapSentinel->freeList),
         &(freeBlk->freeList));
     ES_TRACE(
@@ -523,79 +476,7 @@ size_t esHmemFreeSpaceI(
     return ((size_t)(free & ~BLOCK_STATUS_MASK));                               /* U slucaju da je samo sentinel prividno dostupan.         */
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-void * esMemCopy(
-    void        * C_RESTRICT aDst,
-    const void  * C_RESTRICT aSrc,
-    size_t      aLength) {
-
-#if !defined(ES_OPTIMIZE_SPEED)
-    uint8_t * dst;
-    uint8_t * src;
-
-    MM_DBG_CHECK((void *)0 != aDst);
-    MM_DBG_CHECK((void *)0 != aSrc);
-    MM_DBG_CHECK(aDst != aSrc);
-    dst = (uint8_t *)aDst;
-    src = (uint8_t *)aSrc;
-
-    while ((size_t)0 != aLength--) {
-        *dst++ = *src++;
-    }
-
-    return (aDst);
-#else
-
-    /*
-     * todo Napisati funkciju optimizovanu za brzinu (kopiranje 4-32 bajta u jednom ciklusu)
-     */
-#endif
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void * esMemMove(
-    void        * aDst,
-    const void  * aSrc,
-    size_t      aLength) {
-
-#if !defined(ES_OPTIMIZE_SPEED)
-    uint8_t * dst;
-    uint8_t * src;
-
-    MM_DBG_CHECK((void *)0 != aDst);
-    MM_DBG_CHECK((void *)0 != aSrc);
-    MM_DBG_CHECK(aDst != aSrc);
-    dst = (uint8_t *)aDst;
-    src = (uint8_t *)aSrc;
-
-    while ((size_t)0 != aLength--) {
-        *dst++ = *src++;
-    }
-
-    return (aDst);
-#else
-
-    /*
-     * todo Napisati funkciju optimizovanu za brzinu (kopiranje 4-32 bajta u jednom ciklusu)
-     */
-#endif
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
-/*************************************************************************************************
- * LOCAL FUNCTION DEFINITIONS
- *************************************************************************************************/
-
-
-/*************************************************************************************************
- * CONFIGURATION ERRORS
- *************************************************************************************//** @cond */
-
-
+/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//*************************************************************************
  * END of mem.c
  *************************************************************************************************/
