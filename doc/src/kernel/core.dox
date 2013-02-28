@@ -1,10 +1,8 @@
 /*********************************************************************************************//**
 @file
-@brief          Opis strukture eSolid-a
+@addtogroup     kernel_impl
 *//** @{ *//**
-@page           struct Struktura eSolid-a
+@defgroup       core_impl Kernel Core (CORE)
+@brief          Kernel Core (CORE) implementacija
 
-eSolid se sastoji od sledecih podstruktura:
-
-@image          html eSolid_structure.png
 **//** @} *//*************************************************************************************/

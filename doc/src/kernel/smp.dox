@@ -1,10 +1,8 @@
 /*********************************************************************************************//**
 @file
-@brief          Opis strukture eSolid-a
+@addtogroup     kernel_impl
 *//** @{ *//**
-@page           struct Struktura eSolid-a
+@defgroup       smp_impl State Machine Processor (SMP)
+@brief          State Machine Processor (SMP) implementacija
 
-eSolid se sastoji od sledecih podstruktura:
-
-@image          html eSolid_structure.png
 **//** @} *//*************************************************************************************/

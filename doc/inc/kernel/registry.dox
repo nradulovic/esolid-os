@@ -1,10 +1,8 @@
 /*********************************************************************************************//**
 @file
-@brief          Opis strukture eSolid-a
+@addtogroup     kernel_intf
 *//** @{ *//**
-@page           struct Struktura eSolid-a
+@defgroup       reg_intf Kernel Registry facility
+@brief          Registar EPA objekata
 
-eSolid se sastoji od sledecih podstruktura:
-
-@image          html eSolid_structure.png
 **//** @} *//*************************************************************************************/

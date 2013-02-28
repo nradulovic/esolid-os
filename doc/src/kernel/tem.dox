@@ -1,10 +1,8 @@
 /*********************************************************************************************//**
 @file
-@brief          Opis strukture eSolid-a
+@addtogroup     kernel_impl
 *//** @{ *//**
-@page           struct Struktura eSolid-a
+@defgroup       tem_impl Time Event Management (TEM)
+@brief          Time Event Management (TEM) implementacija
 
-eSolid se sastoji od sledecih podstruktura:
-
-@image          html eSolid_structure.png
 **//** @} *//*************************************************************************************/
