@@ -42,7 +42,7 @@
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input.1882893960" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.assembler.base.input"/>
 							</tool>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.debug.295651622" name="ARM Sourcery Linux GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.c.compiler.debug">
-								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.658707077" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.658707077" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.optimize" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.694785778" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/esolid-hal/inc/port/family/stm32l1xx/cmsis}&quot;"/>
@@ -110,8 +110,10 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="fwSolid.org.eclipse.cdt.cross.arm.gnu.linux.elf.1703285894" name="ARM Linux GCC (GNUARM) Application"/>
 	</storageModule>
-	<storageModule moduleId="refreshScope" versionNumber="1">
-		<resource resourceType="PROJECT" workspacePath="/lcsw-eSolid"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="dbg-o0-gcc">
+			<resource resourceType="PROJECT" workspacePath="/lcsw-eSolid"/>
+		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
