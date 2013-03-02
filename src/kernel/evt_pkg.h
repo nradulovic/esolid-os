@@ -114,6 +114,44 @@ void evtQDeInitI(
 esEvtHeader_T * evtQGetI(
     esEpaHeader_T       * aEpa);
 
+/**
+ * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
+ * @param       aEpa                    Pokazivac na red za cekanje,
+ * @param       aEvt                    pokazivac na dogadjaj koji se salje.
+ * @iclass
+ */
+void evtQPutAheadI(
+    esEpaHeader_T       * aEpa,
+    esEvtHeader_T       * aEvt);
+
+/**
+ * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
+ * @param       aEpa                    Pokazivac na red za cekanje,
+ * @param       aEvt                    pokazivac na dogadjaj koji se salje.
+ */
+void evtQPutAhead(
+    esEpaHeader_T       * aEpa,
+    esEvtHeader_T       * aEvt);
+
+/**
+ * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
+ * @param       aEpa                    Pokazivac na red za cekanje,
+ * @param       aEvt                    pokazivac na dogadjaj koji se salje.
+ * @iclass
+ */
+void evtQPutI(
+    esEpaHeader_T       * aEpa,
+    esEvtHeader_T       * aEvt);
+
+/**
+ * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
+ * @param       aEpa                    Pokazivac na red za cekanje,
+ * @param       aEvt                    pokazivac na dogadjaj koji se salje.
+ */
+void evtQPut(
+    esEpaHeader_T       * aEpa,
+    esEvtHeader_T       * aEvt);
+
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #if defined(__cplusplus)
 }
