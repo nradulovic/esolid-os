@@ -131,19 +131,7 @@ typedef struct hmemBlkHdr {
 } hmemBlkHdr_T;
 
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
-
-void esSmemDeAlloc(
-    void * mem);
-
-size_t esSmemBlockSize(
-    void * mem);
-
 /*==========================================================================  LOCAL VARIABLES  ==*/
-
-/**
- * @brief       Pokazivac na slobodnu memoriju staticnog memorijskog menadzera
- */
-static void * smemFree;
 
 /**
  * @brief       Cuvar liste slobodnih blokova
@@ -183,30 +171,19 @@ static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATT
  * @brief       Dinamicki memorijski alokator (heap memory)
  */
 const C_ROM esMemClass_T esMemHeapClass = {
-#if (OPT_MM_HEAP_SIZE == 0U)
-    &esSmemAlloc,
-    &esSmemDeAlloc,
-    &esSmemBlockSize,
-#else
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-#endif
+   &esHmemAlloc,
+   &esHmemDeAlloc,
+   &esHmemBlockSize,
 };
 
 /**
  * @brief       Staticki memorijski alokator (static memory)
+ * @todo        Napisati funkcije za staticki alokator, sada samo koristiom heap.
  */
 const C_ROM esMemClass_T esMemStaticClass = {
-#if (OPT_MM_HEAP_SIZE == -1)
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-#else
-    &esSmemAlloc,
-    &esSmemDeAlloc,
-    &esSmemBlockSize,
-#endif
+   &esHmemAlloc,
+   &esHmemDeAlloc,
+   &esHmemBlockSize,
 };
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -226,36 +203,48 @@ extern uint8_t _eheap;
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 
-void smemInitI(
-    void) {
-
-#if (OPT_MM_MANAGED_SIZE != 0)
-    smemFree = (void *)&heap;
-    smemEnd = (void *)((void *)&heap + sizeof(heap));
-#else
-    smemFree = (void *)&_sheap;
-#endif
-}
-
-void hmemInitI(
+void hmemInit(
     void) {
 
     hmemBlkHdr_T    * freeMemory;
 
-#if (OPT_MM_HEAP_SIZE == 0)
+#if (OPT_MM_MANAGED_SIZE != 0U)
+    MM_DBG_CHECK((void *)0 != aHeap);
+    MM_DBG_CHECK(aSize > (sizeof(hmemBlkHdr_T) * 2));
+    MM_DBG_CHECK(aSize < (size_t)BLOCK_STATUS_MASK);
+    MM_DBG_CHECK((size_t)0U == (aSize & (C_DATA_ALIGNMENT - 1U)));
+    MM_DBG_CHECK((size_t)0U == ((size_t)aHeap & (C_DATA_ALIGNMENT - 1U)));
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapInit,
+        heap,
+        OPT_MM_MANAGED_SIZE);
+    hmemBlkHdr_T    * freeMemory;
 
-    return;
-#elif (OPT_MM_HEAP_SIZE == -1)
-    size_t freeSpace;
-
-    freeSpace = esSmemFreeSpaceI();
-    freeMemory = (hmemBlkHdr_T *)esSmemAllocI(freeSpace);
-    freeMemory->blk.size = freeSpace - sizeof(hmemBlkHdr_T) - sizeof(hmemBlk_T);
+    freeMemory = (hmemBlkHdr_T *)aHeap;
+    freeMemory->blk.size = aSize - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T);
+    heapSentinel = (hmemBlkHdr_T *)((uint8_t *)freeMemory + freeMemory->blk.size + sizeof(hmemBlk_T));
+    heapSentinel->blk.size = (size_t)0;
+    esSlsSentinelInit_(
+        &(heapSentinel->blk.phyList));
+    esSlsNodeAddHead_(
+        &(heapSentinel->blk.phyList),
+        &(freeMemory->blk.phyList));
+    esDlsSentinelInit_(
+        &(heapSentinel->freeList));
+    esDlsNodeAddHead_(
+        &(heapSentinel->freeList),
+        &(freeMemory->freeList));
+    BLK_STAT_BUSY(heapSentinel);
+    BLK_STAT_FREE(freeMemory);
+    ES_TRACE(
+        STP_FILT_MEM_0,
+        txtMemHeapFree,
+        esHmemFreeSpace());
 #else
-    freeMemory = (hmemBlkHdr_T *)esSmemAllocI(ES_ALIGN(OPT_MM_HEAP_SIZE, ES_CPU_ATTRIB_ALIGNMENT) + sizeof(hmemBlkHdr_T) + sizeof(hmemBlk_T));
-    freeMemory->blk.size = ES_ALIGN(OPT_MM_HEAP_SIZE, ES_CPU_ATTRIB_ALIGNMENT);
-#endif
-    heapSentinel = PHY_BLK_PREV(freeMemory) - 1U;
+    freeMemory = (hmemBlkHdr_T *)&_sheap;
+    freeMemory->blk.size = (size_t)((uint8_t *)&_eheap - (uint8_t *)&_sheap - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T));
+    heapSentinel = (hmemBlkHdr_T *)((uint8_t *)&_eheap - sizeof(hmemBlkHdr_T));
     heapSentinel->blk.size = (size_t)0;
     esSlsSentinelInit_(
         &(heapSentinel->blk.phyList));
@@ -271,75 +260,15 @@ void hmemInitI(
     BLK_STAT_FREE(freeMemory);
 
 # if defined(OPT_DBG_MM)
-    dbgHeapBegin = (void *)freeMemory;
+    dbgHeapBegin = (void *)&_sheap;
     dbgHeapEnd = (void *)heapSentinel;
 # endif
+#endif
 
 }
 
 /*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
-/*-----------------------------------------------------------------------------------------------*/
-size_t esSmemFreeSpaceI(
-    void) {
-
-#if (OPT_MM_MANAGED_SIZE != 0U)
-    return ((void *)((void *)&heap + sizeof(heap)) - smemFree);
-#else
-    return ((void *)&_eheap - smemFree);
-#endif
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void * esSmemAlloc(
-    size_t          aSize) {
-
-    ES_CRITICAL_DECL();
-    void * tmp;
-
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    tmp = esSmemAllocI(
-        aSize);
-    ES_CRITICAL_EXIT();
-
-    return (tmp);
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void * esSmemAllocI(
-    size_t          aSize) {
-
-    void * tmp;
-    /**
-     * @todo više ne postoji PORT_SUPP_UNALIGNED_ACCESS!!! tu treba nešto drugo
-     */
-#if (PORT_SUPP_UNALIGNED_ACCESS != PORT_TRUE) || defined(OPT_OPTIMIZE_SPEED)
-    aSize = ES_ALIGN(aSize, ES_CPU_ATTRIB_ALIGNMENT);
-#endif
-
-#if (OPT_MM_MANAGED_SIZE != 0U)
-    if (((void *)((void *)&heap + sizeof(heap)) - smemFree) >= aSize) {
-        tmp = smemFree;
-        smemFree += aSize;
-    } else {
-        /* Nema memorije */
-        tmp = (void *)0;
-    }
-#else
-    if (((void *)&_eheap - smemFree) >= aSize) {
-        tmp = smemFree;
-        smemFree += aSize;
-    } else {
-        /* Nema memorije */
-        tmp = (void *)0;
-    }
-#endif
-
-    return (tmp);
-}
-
-/*-----------------------------------------------------------------------------------------------*/
 void * esHmemAlloc(
     size_t  aSize) {
 
@@ -356,7 +285,7 @@ void * esHmemAlloc(
 
 /*-----------------------------------------------------------------------------------------------*/
 void * esHmemAllocI(
-    size_t          aSize) {
+    size_t  aSize) {
 
     hmemBlkHdr_T * prevPhy;
     hmemBlkHdr_T * freeBlk;
@@ -365,11 +294,8 @@ void * esHmemAllocI(
         aSize = sizeof(hmemBlkHdr_T) - sizeof(hmemBlk_T);
     }
 
-    /**
-     * @todo više ne postoji PORT_SUPP_UNALIGNED_ACCESS!!! tu treba nešto drugo
-     */
 #if (PORT_SUPP_UNALIGNED_ACCESS != PORT_TRUE) || defined(OPT_OPTIMIZE_SPEED)
-    aSize = ES_ALIGN(aSize, ES_CPU_ATTRIB_ALIGNMENT);
+    aSize = ES_ALIGN(aSize, C_DATA_ALIGNMENT);
 #endif
     DLS_FOR_EACH_ENTRY(
         hmemBlkHdr_T,
@@ -396,7 +322,6 @@ void * esHmemAllocI(
             return ((void *)&(freeBlk->freeList));
         }
     }
-    /* No free space to allocate.*/
 
     return((void *)0);
 }
@@ -407,8 +332,6 @@ size_t esHmemBlockSize(
 
     hmemBlkHdr_T * currBlk;
 
-    /* currBlk = (hmemBlk_T *)aMemory; */
-    /* --currBlk; */
     currBlk = C_CONTAINER_OF((esDlsList_T *)aMemory, hmemBlkHdr_T, freeList);
 
     return ((size_t)(currBlk->blk.size & ~BLOCK_STATUS_MASK));

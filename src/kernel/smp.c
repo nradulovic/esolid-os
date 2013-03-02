@@ -83,7 +83,6 @@ void hsmDispatch(
                     dstState[1] = aEpa->exec.ptrState;
                     --srcEnd;
 
-
                     if (srcState[srcEnd] != dstState[1]) {                      /* tran: b) src ?!= super(dst)                              */
                         (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
                         ++srcEnd;
@@ -178,7 +177,7 @@ TRANSITION_EXECUTION:
 
         case RETN_DEFERRED : {
             aEpa->exec.ptrState = srcState[0];
-            esEvtPost(
+            evtQPut(
                 aEpa,
                 (esEvtHeader_T *)aEvt);
 
@@ -242,7 +241,6 @@ bool_T esSMIsInState (
     esPtrState_T tmpState;
     esPtrState_T savedState;
     bool_T       ans;
-
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     savedState = aEpa->exec.ptrState;                                                  /* sacuvaj trenutno stanje automata                         */

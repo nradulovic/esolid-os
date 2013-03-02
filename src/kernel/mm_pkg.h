@@ -65,19 +65,10 @@ struct esMemClass {
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Initializes Static Memory manager
- * @notapi
+ * @brief       Inicijalizuje memorijski alokator sa memorijom @c aHeap sa
+ *              velicinom koja je odredjena opcijom OPT_MM_MANAGED_SIZE
  */
-void smemInitI(
-    void);
-
-/**
- * @brief       Inicijalizuje heap memorijski alokator velicinom koja je
- *              odredjena opcijom OPT_MM_HEAP_SIZE
- * @pre         Staticna memorija mora da bude inicijalizovana pre ove funkcije.
- * @notapi
- */
-void hmemInitI(
+void hmemInit(
     void);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/
