@@ -52,9 +52,6 @@ struct currCtx {
 
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE_ALWAYS void schedRdyRmEpaI_(
-    esEpaHeader_T       * aEpa);
-
 C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
     void);
 
@@ -86,29 +83,6 @@ static struct currCtx currCtx;
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Funkcije za rad sa redom za cekanje na izvrsavanje
  * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Izbacuje EPA objekat iz reda za cekanje
- */
-C_INLINE_ALWAYS void schedRdyRmEpaI_(
-    esEpaHeader_T       * aEpa) {
-
-    unative_T indxGroup;
-    unative_T indx;
-
-    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    indxGroup = (unative_T)0U;
-#else
-    indxGroup = aEpa->internals.prio >> PRIO_INDX_PWR;
-#endif
-    rdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
-
-    if ((unative_T)0U == rdyBitmap.bit[indxGroup]) {
-        rdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
-    }
-}
 
 /**
  * @brief       Vraca stanje reda za cekanje.
@@ -197,7 +171,7 @@ C_INLINE_ALWAYS void schedRdyRegI_(
 C_INLINE_ALWAYS void schedRdyUnRegI_(
     const esEpaHeader_T * aEpa) {
 
-    schedRdyRmEpaI_(
+    schedRdyRmI_(
         (esEpaHeader_T *)aEpa);
     rdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)0U;
 }
@@ -402,10 +376,6 @@ C_NORETURN void esKernelStart(void) {
             ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
             evtDestroyI_(
                 newEvt);
-
-            if (TRUE == evtQIsEmpty_(currCtx.epa)) {
-                schedRdyRmEpaI_(currCtx.epa);
-            }
         }
         currCtx.epa = (esEpaHeader_T *)0U;
         ES_CRITICAL_EXIT();
