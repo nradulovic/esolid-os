@@ -35,31 +35,6 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-#if defined(OPT_KERNEL_DBG_SMP)
-# define SMP_ASSERT                      DBG_ASSERT
-# define SMP_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define SMP_ASSERT_COMPILE              DBG_COMPILE_ASSERT
-# define SMP_DBG_DECL                    DBG_DECL
-# define SMP_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define SMP_DBG_MACRO                   DBG_MACRO
-# define SMP_DBG_CHECK                   DBG_CHECK
-#else
-# define SMP_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define SMP_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define SMP_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
-# define SMP_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define SMP_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define SMP_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define SMP_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {

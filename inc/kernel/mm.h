@@ -66,14 +66,13 @@ extern const C_ROM esMemClass_T esMemStaticClass;
  * @param       aSize                   Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
  * @return      Pokazivac na rezervisani memorijski blok.
- * @api
  * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
  *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
  *              standardna implementacija @c malloc C funkcije. Ukoliko se
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
- * @todo        Nije napisana
+ * @api
  */
 void * esSmemAlloc(
     size_t      aSize);
@@ -83,17 +82,19 @@ void * esSmemAlloc(
  * @param       aSize                   Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
  * @return      Pokazivac na rezervisani memorijski blok.
- * @iclass
  * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
  *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
  *              standardna implementacija @c malloc C funkcije. Ukoliko se
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
- * @todo        Nije napisana
+ * @iclass
  */
 void * esSmemAllocI(
     size_t      aSize);
+
+size_t esSmemFreeSpaceI(
+    void);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -105,13 +106,13 @@ void * esSmemAllocI(
  * @param       aSize                   Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
  * @return      Pokazivac na rezervisani memorijski blok.
- * @api
  * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
  *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
  *              standardna implementacija @c malloc C funkcije. Ukoliko se
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
+ * @api
  */
 void * esHmemAlloc(
     size_t      aSize);
@@ -121,13 +122,13 @@ void * esHmemAlloc(
  * @param       aSize                   Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
  * @return      Pokazivac na rezervisani memorijski blok.
- * @iclass
  * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
  *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
  *              standardna implementacija @c malloc C funkcije. Ukoliko se
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
+ * @iclass
  */
 void * esHmemAllocI(
     size_t      aSize);
@@ -155,12 +156,12 @@ void esHmemDeAllocI(
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
  * @return      Velicina slobodne memorije u bajtovima.
- * @api
  * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
  *              za first fit algoritam, moze se desiti da postoji dovoljno
  *              slobodne memorije, ali ne i za blok zahtevane velicine. U tom
  *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
  *              zahtev.
+ * @api
  */
 size_t esHmemFreeSpace(
     void);
@@ -168,12 +169,12 @@ size_t esHmemFreeSpace(
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
  * @return      Velicina slobodne memorije u bajtovima.
- * @iclass
- *
- *              Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
+ * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
  *              za first fir algoritam, moze se desiti da postoji dovoljno
  *              slobodne memorije, ali ne i bloka zahtevane velicine. U tom
- *              slucaju ce memorijski alokator pasti.
+ *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
+ *              zahtev.
+ * @iclass
  */
 size_t esHmemFreeSpaceI(
     void);
@@ -183,12 +184,12 @@ size_t esHmemFreeSpaceI(
  * @param 		aMemory					Pokazivac na prethodno dodeljen
  * 										memorijski prostor.
  * @return		Velicina dodeljenog memorijskog prostora.
- * @api
  * @details     Sa obzirom da alokatori koriste granulaciju i/ili imaju
  *              implementaciono ogranicenje, prilikom dodeljivanja memorije moze
  *              se dodeliti veca memorija od zahtevane. Ova funkcija se moze
  *              koristiti ukoliko je potrebna informacija o stvarnoj velicini
  *              dodeljenog bloka.
+ * @api
  */
 size_t esHmemBlockSize(
 	void 		* aMemory);

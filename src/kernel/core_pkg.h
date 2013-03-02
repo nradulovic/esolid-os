@@ -45,34 +45,6 @@
 /*==================================================================================  MACRO's  ==*/
 
 /*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-#if defined(OPT_KERNEL_DBG_CORE)
-# define CORE_ASSERT                  DBG_ASSERT
-# define CORE_ASSERT_ALWAYS           DBG_ASSERT_ALWAYS
-# define CORE_COMPILE_ASSERT          DBG_COMPILE_ASSERT
-# define CORE_DBG_DECL                DBG_DECL
-# define CORE_DBG_DEFINE_MODULE       DBG_DEFINE_MODULE
-# define CORE_DBG_ENTRY               DBG_ENTRY
-# define CORE_DBG_EXIT                DBG_EXIT
-# define CORE_DBG_MACRO               DBG_MACRO
-# define CORE_DBG_CHECK               DBG_CHECK
-#else
-# define CORE_ASSERT(expr)            DBG_EMPTY_MACRO()
-# define CORE_ASSERT_ALWAYS(expr)     DBG_EMPTY_MACRO()
-# define CORE_COMPILE_ASSERT(expr)    DBG_EMPTY_DECL()
-# define CORE_DBG_DECL(expr)          DBG_EMPTY_DECL()
-# define CORE_DBG_DEFINE_MODULE(expr) DBG_EMPTY_DECL()
-# define CORE_DBG_ENTRY()             DBG_EMPTY_MACRO()
-# define CORE_DBG_EXIT()              DBG_EMPTY_MACRO()
-# define CORE_DBG_MACRO(expr)         DBG_EMPTY_MACRO()
-# define CORE_DBG_CHECK(expr)         DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
  * @ingroup     Pomocni makroi za rad sa bitmapom
  * @{ *//*---------------------------------------------------------------------------------------*/
 #if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
@@ -148,6 +120,29 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
 #endif
     rdyBitmap.bitGroup |= (unative_T)1U << indxGroup;
     rdyBitmap.bit[indxGroup] |= (unative_T)1U << indx;
+}
+
+/**
+ * @brief       Izbacuje EPA objekat iz reda za cekanje
+ */
+C_INLINE_ALWAYS void schedRdyRmI_(
+    esEpaHeader_T       * aEpa) {
+
+    unative_T indxGroup;
+    unative_T indx;
+
+    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    indxGroup = (unative_T)0U;
+#else
+    indxGroup = aEpa->prio >> PRIO_INDX_PWR;
+#endif
+    rdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
+
+    if ((unative_T)0U == rdyBitmap.bit[indxGroup]) {
+        rdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
+    }
 }
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/

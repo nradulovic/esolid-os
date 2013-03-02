@@ -167,6 +167,26 @@
 # define OPT_MM_MANAGED_SIZE            0U
 #endif
 
+/**
+ * @brief       Initial heap memory size.
+ * @details     Size of the RAM area that is initially given to the heap memory
+ *              manager. If there is a need for more heap memory the system will
+ *              automatically require aditional memory space from static memory
+ *              manager.
+ *
+ *              If initial heap memory size value is set to zero the heap memory
+ *              manager will be disabled. All calls to it will be redirected to
+ *              static memory manager. Please note, that in this case you will
+ *              not be able to free memory area once it is acquired.
+ *
+ *              If you wish to disable static memory manager and use only heap
+ *              memory manager enter here -1.
+ * @note        DEFAULT: -1 (Only heap memory manager enabled)
+ */
+#if !defined(OPT_MM_STATIC_SIZE) || defined(__DOXYGEN__)
+# define OPT_MM_HEAP_SIZE               -1
+#endif
+
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Podesavanje Event Management (EVT) modula

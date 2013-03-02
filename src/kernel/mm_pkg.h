@@ -34,31 +34,6 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- * @brief       Makroi za debug podrsku
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-#if defined(OPT_KERNEL_DBG_MM) || defined(__DOXYGEN__)
-# define MM_ASSERT                      DBG_ASSERT
-# define MM_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define MM_ASSERT_COMPILE              DBG_ASSERT_COMPILE
-# define MM_DBG_DECL                    DBG_DECL
-# define MM_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define MM_DBG_MACRO                   DBG_MACRO
-# define MM_DBG_CHECK                   DBG_CHECK
-#else
-# define MM_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define MM_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define MM_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
-# define MM_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define MM_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define MM_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define MM_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
@@ -90,10 +65,19 @@ struct esMemClass {
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Inicijalizuje memorijski alokator sa memorijom @c aHeap sa
- *              velicinom koja je odredjena opcijom OPT_MM_MANAGED_SIZE
+ * @brief       Initializes Static Memory manager
+ * @notapi
  */
-void hmemInit(
+void smemInitI(
+    void);
+
+/**
+ * @brief       Inicijalizuje heap memorijski alokator velicinom koja je
+ *              odredjena opcijom OPT_MM_HEAP_SIZE
+ * @pre         Staticna memorija mora da bude inicijalizovana pre ove funkcije.
+ * @notapi
+ */
+void hmemInitI(
     void);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/

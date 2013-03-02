@@ -1,5 +1,15 @@
+2013-03-01  nenad
+
+	* [r97] .cproject,
+	  .settings/org.eclipse.ltk.core.refactoring.prefs[ADD], Doxyfile:
+	  - Prelazak u 1.0a05
+
 2013-02-28  nenad
 
+	* [r96] ChangeLog[ADD], log.txt[DEL], readme.txt:
+	  - Ažuriranje readme.txt
+	  - Više se ne koristi log.txt već se koristi automatski generisan
+	  ChangeLog
 	* [r95] .cproject:
 	  - dodata je opcija -save-temps
 	  - koristi se dodatna HAL putanja za linker skripte

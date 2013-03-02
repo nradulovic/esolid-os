@@ -33,31 +33,6 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- * @brief       Makroi za debug podrsku.
- * @{ *//*---------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
-# define EVT_ASSERT                      DBG_ASSERT
-# define EVT_ASSERT_ALWAYS               DBG_ASSERT_ALWAYS
-# define EVT_ASSERT_COMPILE              DBG_ASSERT_COMPILE
-# define EVT_DBG_DECL                    DBG_DECL
-# define EVT_DBG_DEFINE_MODULE           DBG_DEFINE_MODULE
-# define EVT_DBG_MACRO                   DBG_MACRO
-# define EVT_DBG_CHECK                   DBG_CHECK
-#else
-# define EVT_ASSERT(expr)                DBG_EMPTY_MACRO()
-# define EVT_ASSERT_ALWAYS(expr)         DBG_EMPTY_MACRO()
-# define EVT_ASSERT_COMPILE(expr)        DBG_EMPTY_DECL()
-# define EVT_DBG_DECL(expr)              DBG_EMPTY_DECL()
-# define EVT_DBG_DEFINE_MODULE(expr)     DBG_EMPTY_DECL()
-# define EVT_DBG_MACRO(expr)             DBG_EMPTY_MACRO()
-# define EVT_DBG_CHECK(expr)             DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)
 extern "C" {
@@ -71,26 +46,14 @@ extern const C_ROM esEvtHeader_T evtSignal[];
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Vraca da li je red cekanja za dogadjaje prazan
- * @param       aEpa                    Pokazivac na EPA objekat
- * @return      Status reda za cekanje.
- *  @retval     TRUE - red za cekanje je prazan.
- *  @retval     FALSE - red za cekanje nije prazan.
- */
-C_INLINE_ALWAYS bool_T evtQIsEmpty_(
-    esEpaHeader_T       * aEpa) {
-
-    return (esQpIsEmpty_(&(aEpa->evtQueue.queue)));
-}
-
-/**
  * @brief       Unistava dogadjaj.
  * @param       aEvt                    Pokazivac na dogadjaj koji treba da se
  *                                      unisti.
  * @details     Ukoliko dati @c aEvt dogadjaj nema vise ni jednog korisnika,
  *              onda ce memorijski prostor koji on zauzima biti recikliran, u
  *              suprotnom, dogadjaj nastavlja da postoji.
- * @iclass
+ * @notapi
+ * @inline
  */
 C_INLINE_ALWAYS void evtDestroyI_(
     esEvtHeader_T       * aEvt) {
@@ -109,6 +72,8 @@ C_INLINE_ALWAYS void evtDestroyI_(
  *              cuvanje bafera dogadjaja.
  * @param       aQueueSize              Maksimalan broj dogadjaja u baferu.
  * @return      Potreban memorijski prostor u bajtovima.
+ * @notapi
+ * @inline
  */
 C_INLINE_ALWAYS size_t evtQReqSize_(
     size_t              aQueueSize) {
@@ -123,6 +88,7 @@ C_INLINE_ALWAYS size_t evtQReqSize_(
  * @param       aQueueSize              velicina potrebnog reda cekanja.
  * @details     Inicijalizuje strukturu i rezervise memorijski prostor za red
  *              cekanja za dati @c aEvtQueue red cekanja.
+ * @notapi
  */
 void evtQInitI(
     esEpaHeader_T       * aEpa,
@@ -134,6 +100,7 @@ void evtQInitI(
  * @param       aEpa                    Pokazivac na red cekanja koji se
  *                                      dekonstruise.
  * @details     Svi dogadjaji koji su u redu cekanja ce se prikupiti i obrisati.
+ * @notapi
  */
 void evtQDeInitI(
     esEpaHeader_T       * aEpa);
@@ -142,48 +109,10 @@ void evtQDeInitI(
  * @brief       Dobavlja dogadjaj iz reda za cekanje @c aEvtQueue
  * @param       aEpa                    Pokazivac na red za cekanje.
  * @return      Dogadjaj iz reda cekanja.
- * @iclass
+ * @notapi
  */
 esEvtHeader_T * evtQGetI(
     esEpaHeader_T       * aEpa);
-
-/**
- * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- * @iclass
- */
-void evtQPutAheadI(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/**
- * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- */
-void evtQPutAhead(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/**
- * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- * @iclass
- */
-void evtQPutI(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/**
- * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- */
-void evtQPut(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #if defined(__cplusplus)

@@ -37,13 +37,11 @@
  * @name        Definition group
  * @brief       brief description
  * @{ *//*---------------------------------------------------------------------------------------*/
-#define STP_FILT_EPA_STATUS_0           (1UL << 0)
-#define STP_FILT_EPA_EXECUTION_0        (1UL << 1)
-#define STP_FILT_EPA_EXECUTION_1        (1UL << 2)
-#define STP_FILT_EVT_0                  (1UL << 3)
-#define STP_FILT_EVT_Q_0                (1UL << 4)
-#define STP_FILT_KERN_STATUS_0          (1UL << 5)
-#define STP_FILT_MEM_0                  (1UL << 6)
+#define LOG_FILT_CORE                   (1UL << 0)
+#define LOG_FILT_EVT                    (1UL << 1)
+#define LOG_FILT_MM                     (1UL << 2)
+#define LOG_FILT_SMP                    (1UL << 3)
+#define LOG_FILT_KERNEL                 (1UL << 4)
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
