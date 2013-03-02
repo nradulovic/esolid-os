@@ -52,10 +52,13 @@ struct currCtx {
 
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
+C_INLINE_ALWAYS void schedRdyRmEpaI_(
+    esEpaHeader_T       * aEpa);
+
 C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
     void);
 
-C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetI_(
+C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
     void);
 
 C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
@@ -85,6 +88,29 @@ static struct currCtx currCtx;
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /**
+ * @brief       Izbacuje EPA objekat iz reda za cekanje
+ */
+C_INLINE_ALWAYS void schedRdyRmEpaI_(
+    esEpaHeader_T       * aEpa) {
+
+    unative_T indxGroup;
+    unative_T indx;
+
+    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    indxGroup = (unative_T)0U;
+#else
+    indxGroup = aEpa->internals.prio >> PRIO_INDX_PWR;
+#endif
+    rdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
+
+    if ((unative_T)0U == rdyBitmap.bit[indxGroup]) {
+        rdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
+    }
+}
+
+/**
  * @brief       Vraca stanje reda za cekanje.
  * @return      Boolean vrednost koja karakterise stanje reda za cekanje
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
@@ -107,7 +133,7 @@ C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
  * @brief       Vraca pokazivac na sledeci EPA objekat sa najvecim prioritetom.
  * @return      EPA objekat sa najvecim prioritetom koji ceka na izvrsenje.
  */
-C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetI_(
+C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
     void) {
 
     uint_fast8_t prio;
@@ -171,7 +197,7 @@ C_INLINE_ALWAYS void schedRdyRegI_(
 C_INLINE_ALWAYS void schedRdyUnRegI_(
     const esEpaHeader_T * aEpa) {
 
-    schedRdyRmI_(
+    schedRdyRmEpaI_(
         (esEpaHeader_T *)aEpa);
     rdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)0U;
 }
@@ -210,15 +236,22 @@ void esEpaInit(
         aEpa,
         aEvtBuff,
         aDescription->evtQueueDepth);
-    aEpa->prio = aDescription->epaPrio;
-    aEpa->name = aDescription->epaName;
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    schedRdyRegI_(
-        aEpa);
-    esEvtPostAheadI(
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    evtQPutAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         aEpa,
         (esEvtHeader_T *)&evtSignal[SIG_INIT]);
+    aEpa->prio = aDescription->epaPrio;
+    aEpa->name = aDescription->epaName;
+    schedRdyRegI_(
+        aEpa);
+    schedRdyInsertI_(
+        aEpa);
+
+#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
+    if (KERNEL_RUNNING == esKernelStatus()) {
+        EPE_SCHED_NOTIFY_RDY();
+    }
+#endif
     ES_CRITICAL_EXIT();
 }
 
@@ -253,7 +286,7 @@ esEpaHeader_T * esEpaCreate(
         aDescription);
 
 #if defined(OPT_KERNEL_USE_DYNAMIC)
-    newEpa->memClass = aMemClass;
+    newEpa->internals.memClass = aMemClass;
 #endif
 
     return (newEpa);
@@ -313,8 +346,7 @@ void esEpaPrioSet(
     ES_CRITICAL_DECL();
     bool_T state;
 
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     state = schedRdyIsEpaRdy_(
         aEpa);
     schedRdyUnRegI_(
@@ -340,8 +372,7 @@ void esKernelInit(
     void) {
 
     esHalInit();
-    smemInitI();
-    hmemInitI();
+    hmemInit();
     schedInit();
 
 #if defined(OPT_STP_ENABLE)
@@ -350,7 +381,7 @@ void esKernelInit(
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-void esKernelStart(void) {
+C_NORETURN void esKernelStart(void) {
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
@@ -360,19 +391,21 @@ void esKernelStart(void) {
 
         while (FALSE == schedRdyIsEmptyI_()) {
             esEvtHeader_T * newEvt;
-            esEpaHeader_T * newEpa;
 
-            newEpa = currCtx.epa = schedRdyGetI_();
+            currCtx.epa = schedRdyGetEpaI_();
             newEvt = evtQGetI(
-                newEpa);
+                currCtx.epa);
             ES_CRITICAL_EXIT();
             hsmDispatch(
-                newEpa,
+                currCtx.epa,
                 newEvt);
-            ES_CRITICAL_ENTER(
-                OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
             evtDestroyI_(
                 newEvt);
+
+            if (TRUE == evtQIsEmpty_(currCtx.epa)) {
+                schedRdyRmEpaI_(currCtx.epa);
+            }
         }
         currCtx.epa = (esEpaHeader_T *)0U;
         ES_CRITICAL_EXIT();
