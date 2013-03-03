@@ -65,8 +65,14 @@ struct esMemClass {
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Inicijalizuje memorijski alokator sa memorijom @c aHeap sa
- *              velicinom koja je odredjena opcijom OPT_MM_MANAGED_SIZE
+ * @brief       Inicijalizuje staticni memorijski alokator sa velicinom koja je
+ *              odredjena opcijom @ref OPT_MM_MANAGED_SIZE.
+ */
+void smemInit(
+    void);
+/**
+ * @brief       Inicijalizuje heap memorijski alokator sa velicinom koja je
+ *              odredjena opcijom @ref OPT_MM_HEAP_SIZE
  */
 void hmemInit(
     void);

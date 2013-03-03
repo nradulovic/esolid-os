@@ -93,6 +93,19 @@ void * esSmemAlloc(
 void * esSmemAllocI(
     size_t      aSize);
 
+/**
+ * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
+ * @return      Velicina slobodne memorije u bajtovima.
+ * @api
+ */
+size_t esSmemFreeSpace(
+    void);
+
+/**
+ * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
+ * @return      Velicina slobodne memorije u bajtovima.
+ * @iclass
+ */
 size_t esSmemFreeSpaceI(
     void);
 
