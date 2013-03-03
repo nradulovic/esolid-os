@@ -60,11 +60,29 @@
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 
-/*============================================================================  LOCAL MACRO's  ==*/
+#if (OPT_MM_MANAGED_SIZE == 0U) || defined(__DOXYGEN__)
+/**
+ * @brief       Pocetak heap memorije
+ */
+# define HEAP_BEGIN                     (void *)&_sheap
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Makroi za manipulaciju sa statusom blokova
- * @{ *//*---------------------------------------------------------------------------------------*/
+/**
+ * @brief       Kraj heap memorije
+ */
+# define HEAP_END                       (void *)&_eheap
+
+/**
+ * @brief       Velicina heap memorije
+ */
+# define HEAP_SIZE                      (size_t)(&_eheap - &_sheap)
+
+#else
+# define HEAP_BEGIN                     (void *)&heap
+# define HEAP_END                       (void *)(HEAP_BEGIN + sizeof(heap))
+# define HEAP_SIZE                      sizeof(heap)
+#endif
+
+/*============================================================================  LOCAL MACRO's  ==*/
 
 /**
  * @brief       Izvlacenje statusa bloka iz @c size clana.
@@ -85,8 +103,6 @@
 #define BLK_STAT_FREE(currBlk)                                                  \
     (currBlk)->blk.size &= ~BLOCK_STATUS_MASK
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-
 /**
  * @brief       Makroi za manipulaciju sa listama fizickih blokova
  * @details     Koristi se posebna implementacija Single Linked list with
@@ -95,7 +111,6 @@
  */
 #define PHY_BLK_PREV(currBlk)                                                   \
     ((hmemBlkHdr_T *)((uint8_t *)(currBlk) + currBlk->blk.size + sizeof(hmemBlk_T)))
-
 
 /*=========================================================================  LOCAL DATA TYPES  ==*/
 
@@ -154,11 +169,7 @@ static void * dbgHeapEnd;
  * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
  * moze predstaviti jednim blokom.
  */
-# if (OPT_MM_MANAGED_SIZE > (sizeof(hmemBlkHdr_T) * 2))) && (OPT_MM_MANAGED_SIZE < ES_MASK_MSB(size_t))
 static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
-# else
-#  error "KERNEL=>MM: OPT_MM_MANAGED_SIZE has invalid value."
-# endif
 #endif
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
@@ -178,7 +189,6 @@ const C_ROM esMemClass_T esMemHeapClass = {
 
 /**
  * @brief       Staticki memorijski alokator (static memory)
- * @todo        Napisati funkcije za staticki alokator, sada samo koristiom heap.
  */
 const C_ROM esMemClass_T esMemStaticClass = {
    &esHmemAlloc,
