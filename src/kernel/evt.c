@@ -44,23 +44,12 @@ C_INLINE_ALWAYS void evtInit_(
     size_t              aDataSize,
     esEvtId_T           aEvtId);
 
-C_INLINE_ALWAYS void qInitI_(
-    evtQueue_T          * aEvtQueue,
-    esEvtHeader_T       ** aEvtBuff,
-    size_t              aQueueSize);
-
-C_INLINE_ALWAYS void qDeInitI_(
-    evtQueue_T * aEvtQueue);
-
-C_INLINE_ALWAYS esEvtHeader_T * qGetI_(
-    evtQueue_T          * aEvtQueue);
-
-C_INLINE_ALWAYS void qPutI_(
-    evtQueue_T          * aEvtQueue,
+C_INLINE void evtQPutI_(
+    esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt);
 
-C_INLINE_ALWAYS void qPutAheadI_(
-    evtQueue_T          * aEvtQueue,
+C_INLINE void evtQPutAheadI_(
+    esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt);
 
 /*==========================================================================  LOCAL VARIABLES  ==*/
@@ -138,108 +127,22 @@ C_INLINE_ALWAYS void evtInit_(
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /**
- * @brief       Inicijalizacija reda za cekanje
- */
-C_INLINE_ALWAYS void qInitI_(
-    evtQueue_T          * aEvtQueue,
-    esEvtHeader_T       ** aEvtBuff,
-    size_t              aQueueSize) {
-
-    esQpInit_(
-        &(aEvtQueue->queue),
-        (void **)aEvtBuff,
-        aQueueSize);
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    aEvtQueue->freeCurr = esQpFreeSpace_(
-        &(aEvtQueue->queue));
-    aEvtQueue->freeMin = aEvtQueue->freeCurr;
-#endif
-}
-
-/**
- * @brief       DeInicijalizacija reda za cekanje
- * @param       aEvtQueue               Pokazivac na red cekanja.
- * @details     Funkcija uzima preostale dogadjaje i pokusava da ih reciklira.
- */
-C_INLINE_ALWAYS void qDeInitI_(
-    evtQueue_T * aEvtQueue) {
-
-    esEvtHeader_T * tmpEvt;
-
-    while (FALSE == esQpIsEmpty_(&(aEvtQueue->queue))) {
-        tmpEvt = qGetI_(
-            aEvtQueue);
-        evtDestroyI_(
-            tmpEvt);
-    }
-    esQpDeInit_(
-        &(aEvtQueue->queue));
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    aEvtQueue->freeMin = aEvtQueue->freeCurr = 0U;
-#endif
-}
-
-/**
- * @brief       Dobavlja dogadjaj iz reda za cekanje
- * @param       aEvtQueue               Pokazivac na red za cekanje.
- * @return      Dogadjaj sa pocetka reda za cekanje.
- */
-C_INLINE_ALWAYS esEvtHeader_T * qGetI_(
-    evtQueue_T          * aEvtQueue) {
-
-    esEvtHeader_T * tmpEvt;
-
-    ES_TRACE(
-        STP_FILT_EVT_Q_0,
-        txtEvtQget,
-        aEvtQueue);
-    tmpEvt = (esEvtHeader_T *)esQpGet_(
-        &(aEvtQueue->queue));
-    ES_TRACE(
-        STP_FILT_EVT_Q_0,
-        txtEvtQFree,
-        esQpFreeSpace_(&(aEvtQueue->queue)));
-
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & tmpEvt->dynamic)) {               /* Da li je dogadjaj dinamičan?                             */
-        uint_fast8_t tmpR;
-        uint_fast8_t tmpU;
-
-        tmpR = tmpEvt->dynamic & ~EVT_USERS_MASK;
-        tmpU = tmpEvt->dynamic & EVT_USERS_MASK;
-        --tmpU;
-        tmpEvt->dynamic = tmpR | tmpU;
-    }
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    ++(aEvtQueue->freeCurr);
-#endif
-
-    return (tmpEvt);
-}
-
-/**
  * @brief       Postavlja dogadjaj na kraju reda za cekanje
- * @param       aEvtQueue               Pokazivac na red za cekanje
+ * @param       aEpa                    Pokazivac na EPA objekat
  * @param       aEvt                    dogadjaj koji se postavlja u red.
  */
-C_INLINE_ALWAYS void qPutI_(
-    evtQueue_T          * aEvtQueue,
+C_INLINE void evtQPutI_(
+    esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    if (FALSE == esQpIsFull_(&(aEvtQueue->queue))) {
+    if (FALSE == esQpIsFull_(&(aEpa->evtQueue.queue))) {
 
 #if defined(OPT_EVT_USE_TIMESTAMP)
         aEvt->timestamp = uTimestampGet();
 #endif
         esQpPut_(
-            &(aEvtQueue->queue),
+            &(aEpa->evtQueue.queue),
             (void *)aEvt);
-        ES_TRACE(
-            STP_FILT_EVT_Q_0,
-            txtEvtQFree,
-            esQpFreeSpace_(&(aEvtQueue->queue)));
 
         if ((uint_fast8_t)0U == (EVT_CONST_MASK & aEvt->dynamic)) {                 /* Da li je dogadjaj dinamičan?                             */
             uint_fast8_t tmpR;
@@ -252,31 +155,33 @@ C_INLINE_ALWAYS void qPutI_(
         }
 
 #if defined(OPT_KERNEL_DBG_EVT)
-    --(aEvtQueue->freeCurr);
-    if (aEvtQueue->freeCurr < aEvtQueue->freeMin) {
-        aEvtQueue->freeMin = aEvtQueue->freeCurr;
+    --(aEpa->evtQueue.freeCurr);
+    if (aEpa->evtQueue.freeCurr < aEpa->evtQueue.freeMin) {
+        aEpa->evtQueue.freeMin = aEpa->evtQueue.freeCurr;
     }
 #endif
+    schedRdyInsertI_(
+        aEpa);
     } else {
     }
 }
 
 /**
  * @brief       Postavlja dogadjaj na pocetku reda za cekanje
- * @param       aEvtQueue               Pokazivac na red za cekanje
+ * @param       aEpa                    Pokazivac na EPA objekat
  * @param       aEvt                    dogadjaj koji se postavlja u red.
  */
-C_INLINE_ALWAYS void qPutAheadI_(
-    evtQueue_T          * aEvtQueue,
+C_INLINE void evtQPutAheadI_(
+    esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    if (FALSE == esQpIsFull_(&(aEvtQueue->queue))) {
+    if (FALSE == esQpIsFull_(&(aEpa->evtQueue.queue))) {
 
 #if defined(OPT_EVT_USE_TIMESTAMP)
         aEvt->timestamp = uTimestampGet();
 #endif
         esQpPutAhead_(
-            &(aEvtQueue->queue),
+            &(aEpa->evtQueue.queue),
             (void *)aEvt);
 
         if ((uint_fast8_t)0U == (EVT_CONST_MASK & aEvt->dynamic)) {
@@ -290,13 +195,16 @@ C_INLINE_ALWAYS void qPutAheadI_(
         }
 
 #if defined(OPT_KERNEL_DBG_EVT)
-    --(aEvtQueue->freeCurr);
-    if (aEvtQueue->freeCurr < aEvtQueue->freeMin) {
-        aEvtQueue->freeMin = aEvtQueue->freeCurr;
+    --(aEpa->evtQueue.freeCurr);
+    if (aEpa->evtQueue.freeCurr < aEpa->evtQueue.freeMin) {
+        aEpa->evtQueue.freeMin = aEpa->evtQueue.freeCurr;
     }
 #endif
+    schedRdyInsertI_(
+        aEpa);
     } else {
     }
+
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -306,63 +214,29 @@ esEvtHeader_T * evtQGetI(
 
     esEvtHeader_T * tmpEvt;
 
-    tmpEvt = qGetI_(
-        &(aEpa->evtQueue));
+    tmpEvt = (esEvtHeader_T *)esQpGet_(
+        &(aEpa->evtQueue.queue));
+
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & tmpEvt->dynamic)) {               /* Da li je dogadjaj dinamičan?                             */
+        uint_fast8_t tmpR;
+        uint_fast8_t tmpU;
+
+        tmpR = tmpEvt->dynamic & ~EVT_USERS_MASK;
+        tmpU = tmpEvt->dynamic & EVT_USERS_MASK;
+        --tmpU;
+        tmpEvt->dynamic = tmpR | tmpU;
+    }
 
     if (TRUE == esQpIsEmpty_(&(aEpa->evtQueue.queue))) {
         schedRdyRmI_(
             aEpa);
     }
 
+#if defined(OPT_KERNEL_DBG_EVT)
+    ++(aEpa->evtQueue.freeCurr);
+#endif
+
     return (tmpEvt);
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void evtQPutAheadI(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt) {
-
-    qPutAheadI_(
-        &(aEpa->evtQueue),
-        aEvt);
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void evtQPutAhead(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt) {
-
-    ES_CRITICAL_DECL();
-
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    qPutAheadI_(
-        &(aEpa->evtQueue),
-        aEvt);
-    ES_CRITICAL_EXIT();
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void evtQPutI(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt) {
-
-    qPutI_(
-        &(aEpa->evtQueue),
-        aEvt);
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void evtQPut(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt) {
-
-    ES_CRITICAL_DECL();
-
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    qPutI_(
-        &(aEpa->evtQueue),
-        aEvt);
-    ES_CRITICAL_EXIT();
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -371,18 +245,36 @@ void evtQInitI(
     esEvtHeader_T       ** aEvtBuff,
     size_t              aQueueSize) {
 
-    qInitI_(
-        &(aEpa->evtQueue),
-        aEvtBuff,
+    esQpInit_(
+        &(aEpa->evtQueue.queue),
+        (void **)aEvtBuff,
         aQueueSize);
+
+#if defined(OPT_KERNEL_DBG_EVT)
+    aEpa->evtQueue.freeCurr = esQpFreeSpace_(
+        &(aEpa->evtQueue.queue));
+    aEpa->evtQueue.freeMin = aEpa->evtQueue.freeCurr;
+#endif
 }
 
 /*-----------------------------------------------------------------------------------------------*/
 void evtQDeInitI(
     esEpaHeader_T       * aEpa) {
 
-    qDeInitI_(
-        &(aEpa->evtQueue));
+    esEvtHeader_T * tmpEvt;
+
+    while (FALSE == esQpIsEmpty_(&(aEpa->evtQueue.queue))) {
+        tmpEvt = esQpGet_(
+            &(aEpa->evtQueue.queue));
+        evtDestroyI_(
+            tmpEvt);
+    }
+    esQpDeInit_(
+        &(aEpa->evtQueue.queue));
+
+#if defined(OPT_KERNEL_DBG_EVT)
+    aEpa->evtQueue.freeMin = aEpa->evtQueue.freeCurr = 0U;
+#endif
 }
 
 /*==============================================================  GLOBAL FUNCTION DEFINITIONS  ==*/
@@ -447,11 +339,9 @@ void esEvtPost(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    qPutI_(
-        &(aEpa->evtQueue),
-        aEvt);
-    schedRdyInsertI_(
-        aEpa);
+    evtQPutI_(
+       aEpa,
+       aEvt);
     ES_CRITICAL_EXIT();
 }
 
@@ -460,11 +350,9 @@ void esEvtPostI(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    qPutI_(
-        &(aEpa->evtQueue),
-        aEvt);
-    schedRdyInsertI_(
-        aEpa);
+    evtQPutI_(
+       aEpa,
+       aEvt);
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -475,11 +363,9 @@ void esEvtPostAhead(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    qPutAheadI_(
-        &(aEpa->evtQueue),
+    evtQPutAheadI_(
+        aEpa,
         aEvt);
-    schedRdyInsertI_(
-        aEpa);
     ES_CRITICAL_EXIT();
 }
 
@@ -488,11 +374,9 @@ void esEvtPostAheadI(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       * aEvt) {
 
-    qPutAheadI_(
-        &(aEpa->evtQueue),
+    evtQPutAheadI_(
+        aEpa,
         aEvt);
-    schedRdyInsertI_(
-        aEpa);
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/
