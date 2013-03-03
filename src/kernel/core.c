@@ -210,16 +210,14 @@ void esEpaInit(
         aEpa,
         aEvtBuff,
         aDescription->evtQueueDepth);
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    evtQPutAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
-        aEpa,
-        (esEvtHeader_T *)&evtSignal[SIG_INIT]);
     aEpa->prio = aDescription->epaPrio;
     aEpa->name = aDescription->epaName;
+    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedRdyRegI_(
         aEpa);
-    schedRdyInsertI_(
-        aEpa);
+    esEvtPostAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
+        aEpa,
+        (esEvtHeader_T *)&evtSignal[SIG_INIT]);
 
 #if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
     if (KERNEL_RUNNING == esKernelStatus()) {
