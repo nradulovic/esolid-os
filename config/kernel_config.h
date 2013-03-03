@@ -305,6 +305,12 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
+#if (OPT_MM_MANAGED_SIZE != 0U)
+# if (OPT_MM_HEAP_SIZE > OPT_MM_MANAGED_SIZE)
+#  error "eSolid->kernel: MM module: Heap Memory size cannot be bigger than Managed Managed size"
+# endif
+#endif
+
 /** @endcond *//** @} *//*************************************************************************
  * END of kernel_cfg.h
  *************************************************************************************************/
