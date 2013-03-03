@@ -177,7 +177,7 @@ TRANSITION_EXECUTION:
 
         case RETN_DEFERRED : {
             aEpa->exec.ptrState = srcState[0];
-            evtQPut(
+            esEvtPost(
                 aEpa,
                 (esEvtHeader_T *)aEvt);
 
