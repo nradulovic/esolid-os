@@ -86,24 +86,6 @@ typedef struct esEpaDef esEpaDef_T;
  */
 typedef struct esEpaHeader esEpaHeader_T;
 
-/**
- * @brief       Nabrajanje odgovora state handler funkcije.
- */
-typedef enum esState esState_T;
-
-/**
- * @brief       Tip pokazivaca na state handler funkcije.
- * @details     Funkcije vracaju esState_T , a kao parametar prihvataju
- *              void pokazivac na strukturu izvrsne jedinice i pokazivac na
- *              dogadjaje ili sam dogadjaj.
- */
-typedef esState_T (* esPtrState_T) (esEpaHeader_T *, esEvtHeader_T *);
-
-/**
- * @brief       Stanje kernel-a
- */
-typedef enum esKernelStatus esKernelStatus_T;
-
 /** @} *//*--------------------------------------------------------------------------------------*/
 
 #include "kernel/mm.h"
@@ -114,7 +96,7 @@ typedef enum esKernelStatus esKernelStatus_T;
 /**
  * @brief       Stanje kernel-a
  */
-enum esKernelStatus {
+typedef enum esKernelStatus {
 /**
  * @brief       Kernel se ne izvrsava
  */
@@ -124,7 +106,7 @@ enum esKernelStatus {
  * @brief       Kernel se izvrsava
  */
     KERNEL_RUNNING
-};
+} esKernelStatus_T;
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/

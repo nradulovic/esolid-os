@@ -32,7 +32,6 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 #include "kernel/kernel.h"
-#include "stp/stp.h"
 #include "stp_messages.h"
 #include "mm_pkg.h"
 #include "evt_pkg.h"
