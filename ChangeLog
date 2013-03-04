@@ -1,50 +1,163 @@
+2013-03-04  nenad
+
+	* [r119] /branches/custom-d/.cproject:
+	  - Ispravna podešavanja, uključene su opcije za dodatnu proveru
+	  ispravnosti koda
+	* [r118] /branches/custom-d/src/kernel/smp.c,
+	  /branches/custom-d/src/kernel/smp_pkg.h:
+	  - Funkcija hsmReqSize() više nije inline
+	* [r117] /branches/custom-d/src/kernel/evt.c,
+	  /branches/custom-d/src/kernel/evt_pkg.h:
+	  - Funkcija evtQReqSize() više nije inline
+	  - Funkcija evtQDeInit() je ispravnije napisana
+	* [r116] /branches/custom-d/inc/kernel/smp.h:
+	  - Datoteka mora da definiše typedef enum esState i pokazivač na
+	  funkcije stanja
+	* [r115] /branches/custom-d/inc/kernel/mm.h,
+	  /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/mm_pkg.h:
+	  - Refaktor klase: esMemHeapClass -> esMemDynClass
+	  - Izbačena je funkcija: esSmemFreeSpaceI() - suvišna
+	  - Refaktor: esHmem*() -> esDmem*()
+	  - Postoji jedinstvena init funkcija mmInit()
+	  - koriste se isključivo uint8_t * pokazivači
+	  - Refaktor struktura: hmem* -> dmem*
+	  - Dorađene su funkcije za statični memorijski alokator.
+	  - Funkcije za dinamični memorijski alokator su lepše napisane
+	* [r114] /branches/custom-d/inc/kernel/kernel.h,
+	  /branches/custom-d/src/kernel/kernel_private.h:
+	  - Ne učitava se STP modul
+	  - Izbačene su prototipovi unapred za enumeratore jer to nije po ISO
+	  C90 standardu
+	* [r113] /branches/custom-d/inc/kernel/core.h,
+	  /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/core_pkg.h:
+	  - Ubačen je potpis za strukturu EPA objekta
+	  - Izbačena su funkcije: esEpaInit(), esEpaDeInit() -> ugradjene su
+	  direktno u esEpaCreate() i esEpaDestroy()
+	  - Inline funkcije je lepše napisane
+	  - Funkcija esEpaCreate() je imala grešku prilikom alociranja memorije
+	  - esKernelStart() koristi auto-promenljive za brzi rad
+	* [r112] /branches/custom-d/config/kernel_config.h:
+	  - Izbačena je opcija OPT_KERNEL_USE_DYNAMIC (kernel je sada uvek
+	  dinamičan)
+	* [r111] /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/evt.c,
+	  /branches/custom-d/src/kernel/evt_pkg.h:
+	  - Refaktor: evtQDeInitI() -> evtQDeInit()
+	  - Refaktor: evtQInitI() -> evtQInit()
+
+2013-03-03  nenad
+
+	* [r110] /branches/custom-d/src/kernel/mm.c:
+	  - Početak rada na Static MM-u
+	* [r109] /branches/custom-d/.cproject:
+	  - Promena procesora u HAL-u
+	* [r108] /branches/custom-d/inc/kernel/mm.h,
+	  /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/mm_pkg.h:
+	  - Početak rada na statičnom memorijskom menadžeru
+	* [r107] /branches/custom-d/src/kernel/smp.c:
+	  - Koriste se API funkcije EVT modula prilikom slanja odbačenog
+	  događaja
+	* [r106] /branches/custom-d/src/kernel/core.c:
+	  - Koriste se API funkcije EVT modula prilikom inicijalizacije EPA
+	  objekta
+	* [r105] /branches/custom-d/src/kernel/evt.c,
+	  /branches/custom-d/src/kernel/evt_pkg.h:
+	  - Uklonjene su suvišne inline i interfejs funkcije
+	* [r104] /branches/custom-d/config/kernel_config.h:
+	  - Dodata je opcija OPT_MM_HEAP_SIZE za konfiguraciju Heap memory
+	  manager-a
+
+2013-03-02  nenad
+
+	* [r103] /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/mm_pkg.h,
+	  /branches/custom-d/src/kernel/smp.c:
+	  - Uklonjeni su STP i DBG makroi
+	* [r102] /branches/custom-d/src/kernel/evt.c,
+	  /branches/custom-d/src/kernel/evt_pkg.h:
+	  - Uklonjeni su STP i DBG makroi
+	* [r101] /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/core_pkg.h,
+	  /branches/custom-d/src/kernel/evt.c:
+	  - EPA se izbacuje iz reda za cekanje spremnih EPA cim se preuzme
+	  zadnji dogadjaj iz reda za cekanje dogadjaja
+	* [r100] /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/core_pkg.h:
+	  - Uklonjeni su STP i DBG makroi
+	* [r99] /branches/custom-d/.cproject, /branches/custom-d/ChangeLog,
+	  /branches/custom-d/config/kernel_config.h,
+	  /branches/custom-d/inc/kernel/mm.h,
+	  /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/core_pkg.h,
+	  /branches/custom-d/src/kernel/evt.c,
+	  /branches/custom-d/src/kernel/evt_pkg.h,
+	  /branches/custom-d/src/kernel/kernel_private.h,
+	  /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/mm_pkg.h,
+	  /branches/custom-d/src/kernel/smp.c,
+	  /branches/custom-d/src/kernel/smp_pkg.h,
+	  /branches/custom-d/src/kernel/stp_messages.h:
+	  - Komit pre vraćanja na staru verziju, ova nešto ne radi.
+
 2013-03-01  nenad
 
-	* [r97] .cproject,
-	  .settings/org.eclipse.ltk.core.refactoring.prefs[ADD], Doxyfile:
+	* [r97] /branches/custom-d/.cproject,
+	  /branches/custom-d/.settings/org.eclipse.ltk.core.refactoring.prefs[ADD],
+	  /branches/custom-d/Doxyfile:
 	  - Prelazak u 1.0a05
 
 2013-02-28  nenad
 
-	* [r96] ChangeLog[ADD], log.txt[DEL], readme.txt:
+	* [r96] /branches/custom-d/ChangeLog[ADD],
+	  /branches/custom-d/log.txt[DEL], /branches/custom-d/readme.txt:
 	  - Ažuriranje readme.txt
 	  - Više se ne koristi log.txt već se koristi automatski generisan
 	  ChangeLog
-	* [r95] .cproject:
+	* [r95] /branches/custom-d/.cproject:
 	  - dodata je opcija -save-temps
 	  - koristi se dodatna HAL putanja za linker skripte
-	* [r94] inc/kernel/smp.h, src/kernel/smp.c,
-	  src/kernel/smp_pkg.h[CPY], src/kernel/sproc_pkg.h[DEL]:
+	* [r94] /branches/custom-d/inc/kernel/smp.h,
+	  /branches/custom-d/src/kernel/smp.c,
+	  /branches/custom-d/src/kernel/smp_pkg.h[CPY],
+	  /branches/custom-d/src/kernel/sproc_pkg.h[DEL]:
 	  - doxygen komentari
 	  - Promene zbog izmena esEpaHeader strukture
-	* [r93] inc/kernel/kernel.h:
+	* [r93] /branches/custom-d/inc/kernel/kernel.h:
 	  - doxygen komentari
 	  - Ovde se nalaze svi potrebni typedef-ovi
 	  - Prebačene su kernel funkcije iz core.h
-	* [r92] inc/primitive/list.h, inc/primitive/queue.h:
+	* [r92] /branches/custom-d/inc/primitive/list.h,
+	  /branches/custom-d/inc/primitive/queue.h:
 	  - doxygen komentari
-	  - Refaktor svih funkcija: uklonjene su I sufiksi i dodat je "_"
-	  sufiks koji označava inline funkcije
-	* [r91] src/kernel/stp_messages.c, src/kernel/stp_messages.h:
-	  - Dodat je još jedan niz za obaveštenje da je red čekanja pun i
-	  ne može da primi nov dogadjaj.
-	* [r90] inc/kernel/mm.h, src/kernel/mm.c, src/kernel/mm_pkg.h:
+	  - Refaktor svih funkcija: uklonjene su I sufiksi i dodat je "_" sufiks
+	  koji označava inline funkcije
+	* [r91] /branches/custom-d/src/kernel/stp_messages.c,
+	  /branches/custom-d/src/kernel/stp_messages.h:
+	  - Dodat je još jedan niz za obaveštenje da je red čekanja pun i ne
+	  može da primi nov dogadjaj.
+	* [r90] /branches/custom-d/inc/kernel/mm.h,
+	  /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/mm_pkg.h:
 	  - doxygen komentari
 	  - Izbačene su funkcije esMemMove() i esMemCopy()
 	  - ostale izmene zbog refaktora funkcija iz primitive
-	* [r89] src/kernel/kernel_private.h:
+	* [r89] /branches/custom-d/src/kernel/kernel_private.h:
 	  - doxygen komentari
 	  - dodati su makroi za debagovanje
-	* [r88] src/kernel/evt_pkg.h:
+	* [r88] /branches/custom-d/src/kernel/evt_pkg.h:
 	  - doxygen komentari
-	  - dynamic član evtHeader strukture je sada uvek tipa
-	  uint_fast8_t, više ne postoji konfiguracija njegovog tipa
+	  - dynamic član evtHeader strukture je sada uvek tipa uint_fast8_t,
+	  više ne postoji konfiguracija njegovog tipa
 	  - izbačeni su svi typedef-ovi
 	  - izbačena je struktura evtIntr, podaci su direktno ugrađeni u
 	  esEvtHeader
-	  - Dodat je veći broj internih funkcija koje direktno pristupaju
-	  redu za cekanje
-	* [r87] src/kernel/core.c, src/kernel/core_pkg.h:
+	  - Dodat je veći broj internih funkcija koje direktno pristupaju redu
+	  za cekanje
+	* [r87] /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/core_pkg.h:
 	  - doxygen komentari
 	  - izbačeni su svi typedef-ovi iz API-ja
 	  - izbačena je struktura epaIntr. Ugrađena je u esEpaHeader
@@ -53,124 +166,169 @@
 	  - Napisani su odgovarajući prototipovi
 	  - izbačeni su svi typedef-ovi iz implementacije
 	  - izbačena je funkcija schedRdyInit_() - nepotrebno
-	  - izbačena je funkcija schedRdyGetPrioI_() - spojena je u
-	  funkciju schedRdyGetEpaI_()
+	  - izbačena je funkcija schedRdyGetPrioI_() - spojena je u funkciju
+	  schedRdyGetEpaI_()
 	  - Funkcije koje pripadaju Kernel-u koriste KERN_ makroe
 	  - izbačena je funkcija scheduler() - spojena je u funkciju
 	  esKernelStart()
 	  - funkcija esKernelStart ima atribut C_NORETURN
-	* [r86] inc/kernel/evt.h, src/kernel/evt.c:
+	* [r86] /branches/custom-d/inc/kernel/evt.h,
+	  /branches/custom-d/src/kernel/evt.c:
 	  - doxygen komentari
-	  - dynamic član evtHeader strukture je sada uvek tipa
-	  uint_fast8_t, više ne postoji konfiguracija njegovog tipa
-	  - izbačeni su tipovi dogadjaja (enumeratori) i mogućnost
-	  uključivanja u konfiguraciji
-	  - izbačeni su suvišni identifikatori dogadjaja, njih će
-	  definisati sistemski automat
+	  - dynamic član evtHeader strukture je sada uvek tipa uint_fast8_t,
+	  više ne postoji konfiguracija njegovog tipa
+	  - izbačeni su tipovi dogadjaja (enumeratori) i mogućnost uključivanja
+	  u konfiguraciji
+	  - izbačeni su suvišni identifikatori dogadjaja, njih će definisati
+	  sistemski automat
 	  - izbačeni su svi typedef-ovi
 	  - dodat je ES_EVT_CREATE() radi lakšeg pisanja
 	  - Refaktor EVT_STATIC_MASK -> EVT_CONST_MASK
-	  - brojači slobodnih mesta u redu za čekanje su sada tipa
-	  uint_fast8_t, bili su size_t što je nepotrebno
+	  - brojači slobodnih mesta u redu za čekanje su sada tipa uint_fast8_t,
+	  bili su size_t što je nepotrebno
 	  - izbačena je struktura evtIntr, podaci su direktno ugrađeni u
 	  esEvtHeader
 	  - dodate su funkcije esEvtPostI() i esEvtPostAheadI()
 	  - Komentarisana je korisnička callback funkcija uTimestampGet()
-	  - Dodat je veći broj internih funkcija koje direktno pristupaju
-	  redu za cekanje
-	  - U funkcijama qPutI_() i qPutAheadI_() je dodata provera da li
-	  je red cekanja spreman da prihvati nov dogadjaja. Ova provera se
-	  ne može isključiti i uvek je aktivna. Kada se koriste debug
-	  makroi generisaće se obaveštenje o tome. Sada ove funkcije
-	  ažuriraju i brojače popunjenosti reda.
-	  - Funkcija esEvtUnreserve() je pokušavala i da izbriše dogadjaj,
-	  NISAM SIGURAN DA JE PAMETNO DA ONA TO RADI!
+	  - Dodat je veći broj internih funkcija koje direktno pristupaju redu
+	  za cekanje
+	  - U funkcijama qPutI_() i qPutAheadI_() je dodata provera da li je red
+	  cekanja spreman da prihvati nov dogadjaja. Ova provera se ne može
+	  isključiti i uvek je aktivna. Kada se koriste debug makroi generisaće
+	  se obaveštenje o tome. Sada ove funkcije ažuriraju i brojače
+	  popunjenosti reda.
+	  - Funkcija esEvtUnreserve() je pokušavala i da izbriše dogadjaj, NISAM
+	  SIGURAN DA JE PAMETNO DA ONA TO RADI!
 	  - Funkcija esEvtPost(), esEvtPostI(), esEvtPostAhead() i
 	  esEvtPostAheadI() sada proveravaju potpis dogadjaja.
-	* [r85] inc/kernel/core.h:
+	* [r85] /branches/custom-d/inc/kernel/core.h:
 	  - doxygen komentari
 	  - izbačeni su svi typedef-ovi
 	  - izbačena je struktura epaIntr. Ugrađena je u esEpaHeader
 	  - esEpaHeader struktura sada čuva i ime EPA objekta
 	  - Refaktor: esEpaGetHeader() -> esEpaHeaderGet()
-	* [r84] Doxyfile:
+	* [r84] /branches/custom-d/Doxyfile:
 	  - Prebacivanje konfiguracije na novu verziju doxygen-a
-	* [r83] inc/eSolid.h[DEL]:
+	* [r83] /branches/custom-d/inc/eSolid.h[DEL]:
 	  - Ne koristi se glavni eSolid.h jer nije imao nikakvu svrhu
-	* [r82] config/kernel_config.h:
+	* [r82] /branches/custom-d/config/kernel_config.h:
 	  - doxygen komentari
 	  - Refaktor: SPROC -> SMP
 	  - Refaktor: OPT_EVT_USE_TIME -> OPT_EVT_USE_TIMESTAMP
 	  - Refaktor: OPT_EVT_USE_TIME_T -> OPT_EVT_USE_TIMESTAMP_T
 	  - Jednostavnije dodeljivanje tipa promenljive
-	* [r81] doc:
+	* [r81] /branches/custom-d/doc:
 	  - Direktorijum html i latex su stavljeni pod svn:ignore
-	* [r80] doc, doc/html[DEL], doc/img/EPAs.dia, doc/img/EPAs.png,
-	  doc/img/eSolid_CORE.dia[ADD], doc/img/eSolid_CORE.png[ADD],
-	  doc/img/eSolid_EPN.dia[ADD], doc/img/eSolid_EPN.png[ADD],
-	  doc/img/eSolid_EVT.dia[ADD], doc/img/eSolid_EVT.png[ADD],
-	  doc/img/eSolid_MM.dia, doc/img/eSolid_MM.png,
-	  doc/img/eSolid_SMP.dia[ADD], doc/img/eSolid_SMP.png[ADD],
-	  doc/img/eSolid_SP.dia[DEL], doc/img/eSolid_SP.png[DEL],
-	  doc/img/eSolid_TEM.dia[ADD], doc/img/eSolid_TEM.png[ADD],
-	  doc/img/eSolid_small.dia, doc/img/eSolid_small.png,
-	  doc/img/evt_struct.dia, doc/img/evt_struct.png,
-	  doc/img/queuePtr.dia, doc/img/queuePtr.png, doc/inc/core[DEL],
-	  doc/inc/dbg[DEL], doc/inc/eSolid.dox[DEL],
-	  doc/inc/eSolid_cfg.dox[DEL], doc/inc/ett[DEL], doc/inc/hal[DEL],
-	  doc/inc/kernel[CPY], doc/inc/kernel/cfg[DEL],
-	  doc/inc/kernel/core.dox, doc/inc/kernel/epe.dox[DEL],
-	  doc/inc/kernel/epn.dox, doc/inc/kernel/evt.dox,
-	  doc/inc/kernel/kernel.dox, doc/inc/kernel/mem.dox[DEL],
-	  doc/inc/kernel/mm.dox[CPY], doc/inc/kernel/registry.dox,
-	  doc/inc/kernel/smp.dox[CPY], doc/inc/kernel/sproc.dox[DEL],
-	  doc/inc/kernel/tem.dox, doc/inc/port[DEL],
-	  doc/inc/primitive/list.dox, doc/inc/primitive/primitive.dox,
-	  doc/inc/primitive/queue.dox, doc/latex[DEL],
-	  doc/pages/doc_irq_handlers.dox, doc/pages/licence.dox,
-	  doc/pages/literature.dox, doc/pages/main.dox,
-	  doc/pages/structure.dox, doc/pages/usage.dox, doc/src/core[DEL],
-	  doc/src/dbg[DEL], doc/src/eSolid.dox[DEL], doc/src/hal[DEL],
-	  doc/src/kernel[CPY], doc/src/kernel/core.dox,
-	  doc/src/kernel/eot[DEL], doc/src/kernel/epe[DEL],
-	  doc/src/kernel/epn[DEL], doc/src/kernel/epn.dox[CPY],
-	  doc/src/kernel/evt.dox[CPY], doc/src/kernel/kernel.dox[ADD],
-	  doc/src/kernel/mm.dox[CPY], doc/src/kernel/smm.h[DEL],
-	  doc/src/kernel/smp[DEL], doc/src/kernel/smp.dox[CPY],
-	  doc/src/kernel/str[DEL], doc/src/kernel/tem[DEL],
-	  doc/src/kernel/tem.dox[CPY], doc/src/port[DEL]:
+	* [r80] /branches/custom-d/doc, /branches/custom-d/doc/html[DEL],
+	  /branches/custom-d/doc/img/EPAs.dia,
+	  /branches/custom-d/doc/img/EPAs.png,
+	  /branches/custom-d/doc/img/eSolid_CORE.dia[ADD],
+	  /branches/custom-d/doc/img/eSolid_CORE.png[ADD],
+	  /branches/custom-d/doc/img/eSolid_EPN.dia[ADD],
+	  /branches/custom-d/doc/img/eSolid_EPN.png[ADD],
+	  /branches/custom-d/doc/img/eSolid_EVT.dia[ADD],
+	  /branches/custom-d/doc/img/eSolid_EVT.png[ADD],
+	  /branches/custom-d/doc/img/eSolid_MM.dia,
+	  /branches/custom-d/doc/img/eSolid_MM.png,
+	  /branches/custom-d/doc/img/eSolid_SMP.dia[ADD],
+	  /branches/custom-d/doc/img/eSolid_SMP.png[ADD],
+	  /branches/custom-d/doc/img/eSolid_SP.dia[DEL],
+	  /branches/custom-d/doc/img/eSolid_SP.png[DEL],
+	  /branches/custom-d/doc/img/eSolid_TEM.dia[ADD],
+	  /branches/custom-d/doc/img/eSolid_TEM.png[ADD],
+	  /branches/custom-d/doc/img/eSolid_small.dia,
+	  /branches/custom-d/doc/img/eSolid_small.png,
+	  /branches/custom-d/doc/img/evt_struct.dia,
+	  /branches/custom-d/doc/img/evt_struct.png,
+	  /branches/custom-d/doc/img/queuePtr.dia,
+	  /branches/custom-d/doc/img/queuePtr.png,
+	  /branches/custom-d/doc/inc/core[DEL],
+	  /branches/custom-d/doc/inc/dbg[DEL],
+	  /branches/custom-d/doc/inc/eSolid.dox[DEL],
+	  /branches/custom-d/doc/inc/eSolid_cfg.dox[DEL],
+	  /branches/custom-d/doc/inc/ett[DEL],
+	  /branches/custom-d/doc/inc/hal[DEL],
+	  /branches/custom-d/doc/inc/kernel[CPY],
+	  /branches/custom-d/doc/inc/kernel/cfg[DEL],
+	  /branches/custom-d/doc/inc/kernel/core.dox,
+	  /branches/custom-d/doc/inc/kernel/epe.dox[DEL],
+	  /branches/custom-d/doc/inc/kernel/epn.dox,
+	  /branches/custom-d/doc/inc/kernel/evt.dox,
+	  /branches/custom-d/doc/inc/kernel/kernel.dox,
+	  /branches/custom-d/doc/inc/kernel/mem.dox[DEL],
+	  /branches/custom-d/doc/inc/kernel/mm.dox[CPY],
+	  /branches/custom-d/doc/inc/kernel/registry.dox,
+	  /branches/custom-d/doc/inc/kernel/smp.dox[CPY],
+	  /branches/custom-d/doc/inc/kernel/sproc.dox[DEL],
+	  /branches/custom-d/doc/inc/kernel/tem.dox,
+	  /branches/custom-d/doc/inc/port[DEL],
+	  /branches/custom-d/doc/inc/primitive/list.dox,
+	  /branches/custom-d/doc/inc/primitive/primitive.dox,
+	  /branches/custom-d/doc/inc/primitive/queue.dox,
+	  /branches/custom-d/doc/latex[DEL],
+	  /branches/custom-d/doc/pages/doc_irq_handlers.dox,
+	  /branches/custom-d/doc/pages/licence.dox,
+	  /branches/custom-d/doc/pages/literature.dox,
+	  /branches/custom-d/doc/pages/main.dox,
+	  /branches/custom-d/doc/pages/structure.dox,
+	  /branches/custom-d/doc/pages/usage.dox,
+	  /branches/custom-d/doc/src/core[DEL],
+	  /branches/custom-d/doc/src/dbg[DEL],
+	  /branches/custom-d/doc/src/eSolid.dox[DEL],
+	  /branches/custom-d/doc/src/hal[DEL],
+	  /branches/custom-d/doc/src/kernel[CPY],
+	  /branches/custom-d/doc/src/kernel/core.dox,
+	  /branches/custom-d/doc/src/kernel/eot[DEL],
+	  /branches/custom-d/doc/src/kernel/epe[DEL],
+	  /branches/custom-d/doc/src/kernel/epn[DEL],
+	  /branches/custom-d/doc/src/kernel/epn.dox[CPY],
+	  /branches/custom-d/doc/src/kernel/evt.dox[CPY],
+	  /branches/custom-d/doc/src/kernel/kernel.dox[ADD],
+	  /branches/custom-d/doc/src/kernel/mm.dox[CPY],
+	  /branches/custom-d/doc/src/kernel/smm.h[DEL],
+	  /branches/custom-d/doc/src/kernel/smp[DEL],
+	  /branches/custom-d/doc/src/kernel/smp.dox[CPY],
+	  /branches/custom-d/doc/src/kernel/str[DEL],
+	  /branches/custom-d/doc/src/kernel/tem[DEL],
+	  /branches/custom-d/doc/src/kernel/tem.dox[CPY],
+	  /branches/custom-d/doc/src/port[DEL]:
 	  - Ažuriranje dokumentacije
 
 2013-02-26  nenad
 
-	* [r79] inc/kernel/kernel.h, inc/port[DEL], src/kernel/mm.c:
-	  - Modul MM više ne zavisi od arhitekture i na taj način jezgro
-	  nema potreben da zna za koji se port kompajlira. Uklanja se Port
+	* [r79] /branches/custom-d/inc/kernel/kernel.h,
+	  /branches/custom-d/inc/port[DEL], /branches/custom-d/src/kernel/mm.c:
+	  - Modul MM više ne zavisi od arhitekture i na taj način jezgro nema
+	  potreben da zna za koji se port kompajlira. Uklanja se Port
 	  direktorijum
-	* [r78] inc/kernel/mm.h:
+	* [r78] /branches/custom-d/inc/kernel/mm.h:
 	  - Uklonjene su funkcije memCopy i memMove
 
 2013-02-23  nenad
 
-	* [r62] inc/kernel/evt.h:
+	* [r62] /branches/custom-d/inc/kernel/evt.h:
 	  - todo zamerke
 
 2013-02-22  nenad
 
-	* [r61] inc/kernel/evt.h:
+	* [r61] /branches/custom-d/inc/kernel/evt.h:
 	  - Refaktor: EVT_ID() -> ES_EVT_ID()
-	* [r60] inc/kernel/smp.h[CPY], inc/kernel/sproc.h[DEL],
-	  src/kernel/smp.c[CPY], src/kernel/sproc.c[DEL]:
+	* [r60] /branches/custom-d/inc/kernel/smp.h[CPY],
+	  /branches/custom-d/inc/kernel/sproc.h[DEL],
+	  /branches/custom-d/src/kernel/smp.c[CPY],
+	  /branches/custom-d/src/kernel/sproc.c[DEL]:
 	  - Preimenovanje sproc.h -> smp.h
 	  - Preimenovanje sproc.c -> smp.c
 	  - Refaktor: esHsmTopState() -> esSMTopState()
 	  - Refaktor: esHsmIsInState() -> esSMIsInState()
 	  - Refaktor: SMP_... -> ES_...
-	* [r59] src/kernel/evt.c:
+	* [r59] /branches/custom-d/src/kernel/evt.c:
 	  - Refaktor: esEpaGetId() -> esEpaGetHeader()
-	* [r58] inc/kernel/mm.h, src/kernel/mm.c, src/kernel/mm_pkg.h:
-	  - Uklonjen je nepotrebni makro ES_MEMORY_DEFINE pošto se sada
-	  koristi OPT_MM_MANAGED_SIZE
+	* [r58] /branches/custom-d/inc/kernel/mm.h,
+	  /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/mm_pkg.h:
+	  - Uklonjen je nepotrebni makro ES_MEMORY_DEFINE pošto se sada koristi
+	  OPT_MM_MANAGED_SIZE
 	  - Uklonjena je memory pool klasa
 	  - Uklonjene su Ctor i Init funkcije
 	  - doxygen komentarisanje
@@ -178,220 +336,651 @@
 	  dobavljanje memorije kada je OPT_MM_MANAGED_SIZE == 0
 	  - Uklonjene su #if-else-endif za odabir algoritma MM
 	  - hmemInit() je sada interna funkcija koju poziva kernel
-	* [r57] inc/kernel/kernel.h:
+	* [r57] /branches/custom-d/inc/kernel/kernel.h:
 	  - doxygen komentarisanje
 	  - Uklonjena je funkcija esKernelSysVer, sada se koristi #define
 	  - Uklonjeni su nepotrebni typedef-ovi
-	* [r56] inc/kernel/core.h, src/kernel/core.c:
-	  - Uklonjena je kontrolna struktura kernel-a, članovima se
-	  pristupa direktno u strukturi esEpaHeader
+	* [r56] /branches/custom-d/inc/kernel/core.h,
+	  /branches/custom-d/src/kernel/core.c:
+	  - Uklonjena je kontrolna struktura kernel-a, članovima se pristupa
+	  direktno u strukturi esEpaHeader
 	  - Uklonjeni su typedef-ovi koje korisnik ne koristi
-	  - esKernelInit() se više ne koristi za inicijalizaciju MM, to se
-	  sada radi automatski preko OPT_MM_MANAGED_SIZE
+	  - esKernelInit() se više ne koristi za inicijalizaciju MM, to se sada
+	  radi automatski preko OPT_MM_MANAGED_SIZE
 	  - Uklonjena je funkcija esKernelSysVer, sada se koristi #define
 	  - Refaktor: esEpaGetId() -> esEpaGetHeader()
 	  - doxygen komentarisanje
-	  - esKernelStart() je direktno i scheduler u COOPERATIVE režimu
-	  rada
-	* [r55] config/kernel_config.h:
+	  - esKernelStart() je direktno i scheduler u COOPERATIVE režimu rada
+	* [r55] /branches/custom-d/config/kernel_config.h:
 	  - Refaktor: memStaticClass -> esMemStaticClass
-	  - Uklonjeno je podešavanje za izbor algoritma MM i dodata je
-	  opcija koja konfiguriše koliko RAM memorije da preuzme MM
+	  - Uklonjeno je podešavanje za izbor algoritma MM i dodata je opcija
+	  koja konfiguriše koliko RAM memorije da preuzme MM
 
 2013-02-19  nenad
 
-	* [r54] .cproject, config/kernel_config.h, inc/kernel/core.h,
-	  inc/kernel/mm.h, src/kernel/core.c, src/kernel/mm.c:
+	* [r54] /branches/custom-d/.cproject,
+	  /branches/custom-d/config/kernel_config.h,
+	  /branches/custom-d/inc/kernel/core.h,
+	  /branches/custom-d/inc/kernel/mm.h,
+	  /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/mm.c:
 	  - Refaktor memorijskih klasa
 
 2012-12-10  nenad
 
-	* [r53] .cproject:
+	* [r53] /branches/custom-d/.cproject:
 	  Update projekta
 
 2012-10-30  nenad
 
-	* [r51] .cproject, .project:
+	* [r51] /branches/custom-d/.cproject, /branches/custom-d/.project:
 	  - Projekat je udešen da se može kompajlirati
-	* [r50] src/kernel/stp_messages.c[ADD], src/kernel/stp_messages.h:
-	  - STP poruke su pravilno napisane. Bile su napisane kao da ih je
-	  pisao srednjoškolac.
+	* [r50] /branches/custom-d/src/kernel/stp_messages.c[ADD],
+	  /branches/custom-d/src/kernel/stp_messages.h:
+	  - STP poruke su pravilno napisane. Bile su napisane kao da ih je pisao
+	  srednjoškolac.
 
 2012-10-24  nenad
 
-	* [r49] src/kernel/core.c, src/kernel/evt.c, src/kernel/mm.c,
-	  src/kernel/sproc.c, src/kernel/stp_messages.h:
+	* [r49] /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/evt.c,
+	  /branches/custom-d/src/kernel/mm.c,
+	  /branches/custom-d/src/kernel/sproc.c,
+	  /branches/custom-d/src/kernel/stp_messages.h:
 	  - Nastavak ubacivanja STP makroa u ostale module
 
 2012-10-22  nenad
 
-	* [r48] src/kernel/core.c, src/kernel/stp_messages.h:
+	* [r48] /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/stp_messages.h:
 	  - Nastavak ubacivanja STP makroa
 
 2012-10-19  nenad
 
-	* [r47] .cproject, .project, src/kernel/core.c,
-	  src/kernel/kernel_private.h, src/kernel/stp_messages.h[ADD]:
+	* [r47] /branches/custom-d/.cproject, /branches/custom-d/.project,
+	  /branches/custom-d/src/kernel/core.c,
+	  /branches/custom-d/src/kernel/kernel_private.h,
+	  /branches/custom-d/src/kernel/stp_messages.h[ADD]:
 	  - Započeto je ubacivanje STP makroa
 	  - Kreirana je datoteka za STP makroe
 	  - Projekat sada zavisi i od ETT projekta
 
 2012-10-17  nenad
 
-	* [r45] .[CPY]:
+	* [r45] /branches/custom-d[CPY]:
 	  Granananje za Dejana
-	* [r43]
+	* [r43] /trunk/Doxyfile, /trunk/log.txt, /trunk/readme.txt:
 	  - Bump verzije na 1.0alpha03
-	* [r42]
+	* [r42] /trunk/config/kernel_config.h:
 	  - Podrazumevane vrednosti su praktičnije
 	  - Neke opcije su dodatno dokumentovane
 
 2012-10-16  nenad
 
-	* [r41]
+	* [r41] /trunk/config/kernel_config.h:
 	  - Podrazumevane vrednosti su praktičnije
 	  - Neke opcije su dodatno dokumentovane
 	  - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto
-	  OPT_KERNEL_SCHEDULER_ROUNDROBIN, i
-	  OPT_KERNEL_SCHEDULER_COOPERATIVE umesto
-	  OPT_KERNEL_SCHEDULER_FIXEDPRIO
-	* [r40]
+	  OPT_KERNEL_SCHEDULER_ROUNDROBIN, i OPT_KERNEL_SCHEDULER_COOPERATIVE
+	  umesto OPT_KERNEL_SCHEDULER_FIXEDPRIO
+	* [r40] /trunk/inc/kernel/core.h:
 	  - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto
 	  OPT_KERNEL_SCHEDULER_ROUNDROBIN
 	  - Kozmetičke izmene
-	* [r39]
+	* [r39] /trunk/inc/kernel/evt.h:
 	  - Izbačena je opcija ES_KERNEL_ENABLE, uvek je uključen
-	* [r38]
+	* [r38] /trunk/src/kernel/core.c:
 	  - Sada se koristi opcija OPT_KERNEL_SCHEDULER_PREEMPTIVE umesto
-	  OPT_KERNEL_SCHEDULER_ROUNDROBIN, i
-	  OPT_KERNEL_SCHEDULER_COOPERATIVE umesto
-	  OPT_KERNEL_SCHEDULER_FIXEDPRIO
+	  OPT_KERNEL_SCHEDULER_ROUNDROBIN, i OPT_KERNEL_SCHEDULER_COOPERATIVE
+	  umesto OPT_KERNEL_SCHEDULER_FIXEDPRIO
 	  - Dodate su funkcije za inicijalizaciju HAL-a i STP-a u funkciju
 	  esKernelInit
 
 2012-10-15  nenad
 
-	* [r37]
+	* [r37] /trunk/.cproject, /trunk/inc/kernel/evt.h,
+	  /trunk/src/kernel/evt.c:
 	  Izbačen je suvišni dogadjaj i status NOEX
 
 2012-10-12  nenad
 
-	* [r36]
+	* [r36] /trunk/inc/kernel/sproc.h, /trunk/src/kernel/core.c,
+	  /trunk/src/kernel/sproc.c:
 	  - Prilikom inicijalizaciji se ipak salje dogadjaj SIG_INIT
-	  - Dispecer je napisan po treci put, znatno su mu prosirene
-	  mogucnosti
+	  - Dispecer je napisan po treci put, znatno su mu prosirene mogucnosti
 
 2012-10-08  nenad
 
-	* [r35]
+	* [r35] /trunk/src/kernel/core.c:
 	  - Prilikom inicijalizacije dispečer šalje ENTRY signal, a ne INIT
 	  signal.
 
 2012-10-07  nenad
 
-	* [r34]
+	* [r34] /trunk/src/kernel/sproc.c:
 	  - Izbačen je makro za proveru stanja FSM automata
-	  - Napisan je novi dispečer, jednostavniji za modifikaciju i
-	  održavanje
-	* [r33]
+	  - Napisan je novi dispečer, jednostavniji za modifikaciju i održavanje
+	* [r33] /trunk/src/kernel/sproc_pkg.h:
 	  - Funkcija hsmDispatch je sada deo internog interfejsa
-	* [r32]
-	  - Ispravljena je greška u evtPost funkciji, treba da se
-	  inkrementira brojač, a ne dekrementira.
-	* [r31]
-	  - Inicijalizacija rdy bitmape je ispravljena, sada Epa objekat
-	  može da ima prioritet 0.
-	  - Dodata je funkcija za ispitavanje rdy bitmape da li ima
-	  spremnih objekata
+	* [r32] /trunk/src/kernel/evt.c:
+	  - Ispravljena je greška u evtPost funkciji, treba da se inkrementira
+	  brojač, a ne dekrementira.
+	* [r31] /trunk/src/kernel/core.c:
+	  - Inicijalizacija rdy bitmape je ispravljena, sada Epa objekat može da
+	  ima prioritet 0.
+	  - Dodata je funkcija za ispitavanje rdy bitmape da li ima spremnih
+	  objekata
 	  - Izmena schedulera u loop režim
 	  - Kozmetičke izmene
-	* [r30]
-	  - Preuređen je raspored enumeratora zbog postizanja boljih
-	  performansi switch strukture u dispečeru
+	* [r30] /trunk/inc/kernel/sproc.h:
+	  - Preuređen je raspored enumeratora zbog postizanja boljih performansi
+	  switch strukture u dispečeru
 
 2012-10-03  nenad
 
-	* [r29]
-	  Projekat se kompajlira, otklonjene su greške u funkcijama za
-	  događaje. Treba uraditi još dosta korekcija da proradi DBG
-	  sistem.
+	* [r29] /trunk/.cproject, /trunk/.project, /trunk/Doxyfile,
+	  /trunk/config/kernel_config.h, /trunk/inc/kernel/core.h,
+	  /trunk/inc/kernel/epa.h[DEL], /trunk/inc/kernel/evt.h,
+	  /trunk/inc/kernel/kernel.h, /trunk/inc/kernel/mm.h,
+	  /trunk/inc/kernel/sproc.h, /trunk/inc/port/variant[DEL],
+	  /trunk/src/kernel/core.c[CPY], /trunk/src/kernel/core_pkg.h[CPY],
+	  /trunk/src/kernel/core_private.h[DEL], /trunk/src/kernel/evt.c,
+	  /trunk/src/kernel/evt_pkg.h, /trunk/src/kernel/kernel.c[DEL],
+	  /trunk/src/kernel/kernel_pkg.h[DEL],
+	  /trunk/src/kernel/kernel_private.h[CPY], /trunk/src/kernel/mm.c,
+	  /trunk/src/kernel/mm_pkg.h, /trunk/src/kernel/sproc.c,
+	  /trunk/src/kernel/sproc_pkg.h:
+	  Projekat se kompajlira, otklonjene su greške u funkcijama za događaje.
+	  Treba uraditi još dosta korekcija da proradi DBG sistem.
 
 2012-10-02  nenad
 
-	* [r28]
+	* [r28] /trunk/.cproject, /trunk/.project:
 	  - Update projektnih podesavanja
-	* [r27]
+	* [r27] /trunk/src/port[DEL]:
 	  - Briše se stari PORT sistem
-	* [r26]
+	* [r26] /trunk/src/kernel[CPY]:
 	  - Datoteke se prebacuju u kernel direktorijum
-	* [r25]
+	* [r25] /trunk/src/core[DEL]:
 	  - Datoteke se prebacuju u kernel direktorijum
-	* [r24]
+	* [r24] /trunk/inc/port/common[DEL], /trunk/inc/port/platform[DEL],
+	  /trunk/inc/port/profile[DEL], /trunk/inc/port/variant/linux_x86[DEL],
+	  /trunk/inc/port/variant/linux_x86_x64[DEL],
+	  /trunk/inc/port/variant/stm32l1xx_md[DEL],
+	  /trunk/inc/port/variant/win_x86[DEL],
+	  /trunk/inc/port/variant/win_x86_x64[DEL]:
 	  - Briše se stari PORT sistem
-	* [r23]
+	* [r23] /trunk/inc/port/arch/x86[DEL]:
 	  - Briše se stari PORT sistem
-	* [r22]
+	* [r22] /trunk/inc/port/arch/arm_cm3[DEL]:
 	  - Briše se stari PORT sistem
-	* [r21]
+	* [r21] /trunk/inc/port/arch/arm_cm3_kernel.h[ADD]:
 	  - Dodat je profil za ARM CM3 arhitekturu
-	* [r20]
+	* [r20] /trunk/inc/port/kernel_profiles.h[ADD],
+	  /trunk/inc/port/port.h[DEL], /trunk/inc/port/port_detect.h[DEL]:
 	  - Brisu se suvisne datoteke
 	  - Kernel port sada ima profile
-	* [r19]
+	* [r19] /trunk/inc/kernel[CPY], /trunk/inc/kernel/cfg[DEL],
+	  /trunk/inc/kernel/core.h[CPY], /trunk/inc/kernel/epa.h[ADD],
+	  /trunk/inc/kernel/evt.h, /trunk/inc/kernel/kernel.h[CPY],
+	  /trunk/inc/kernel/mm.h, /trunk/inc/kernel/sproc.h:
 	  - Prebacivanje u kernel direktorijum
 	  - Dodat je EPA modul
-	* [r18]
+	* [r18] /trunk/inc/core[DEL]:
 	  - Datoteke se prebacuju u kernel direktorijum
-	* [r17]
+	* [r17] /trunk/inc/eSolid.h, /trunk/inc/eSolid_cfg.h[DEL]:
 	  - Ciscenje nepotrebnih datoteka
-	* [r16]
+	* [r16] /trunk/config[ADD], /trunk/config/kernel_config.h[ADD]:
 	  - Konfiguracija je prebacena u sam projekat
 
 2012-09-27  nenad
 
-	* [r15]
+	* [r15] /trunk/.cproject:
 	  - Zadnje podešavanje ovog projekta
 
 2012-09-22  nenad
 
-	* [r10]
+	* [r10] /trunk/.cproject, /trunk/inc/port/profile[ADD],
+	  /trunk/src/core/kernel_pkg.h:
 	  - Arhitektura porta treba da bude ista kao za HAL
 
 2012-09-16  nenad
 
-	* [r9]
+	* [r9] /trunk/.cproject, /trunk/src/core/evt.c,
+	  /trunk/src/core/kernel_pkg.h:
 	  evt.c
 	  - Dodati su nedostajuće provere da li se koristi jezgro.
 
 2012-05-26  nenad
 
-	* [r8]
+	* [r8] /trunk/inc/port/arch/arm_cm3/hal[DEL],
+	  /trunk/inc/port/arch/x86/hal[DEL],
+	  /trunk/inc/port/common/GCC/hal[DEL], /trunk/inc/primitive/list.h,
+	  /trunk/inc/primitive/queue.h, /trunk/src/core/evt.c,
+	  /trunk/src/core/evt_pkg.h, /trunk/src/core/kernel.c,
+	  /trunk/src/core/kernel_pkg.h, /trunk/src/core/mm.c,
+	  /trunk/src/core/sproc.c, /trunk/src/core/sproc_pkg.h:
 	  Sve promene su vezane za refaktoring iz HALDSM projekta.
 
 2012-04-07  nenad
 
-	* [r7]
+	* [r7] /trunk/.cproject:
 	  Promenjene su pretprocesorske promenljive.
 
 2012-04-05  nenad
 
-	* [r6]
+	* [r6] /trunk/.cproject, /trunk/.project,
+	  /trunk/inc/core/cfg/epe_cfg.h[DEL],
+	  /trunk/inc/core/cfg/kernel_cfg.h[CPY], /trunk/inc/core/core.h,
+	  /trunk/inc/core/epe.h[DEL], /trunk/inc/core/kernel.h[CPY],
+	  /trunk/inc/dbg[DEL], /trunk/inc/ett[DEL], /trunk/inc/hal[DEL],
+	  /trunk/src/core/core_private.h, /trunk/src/core/epe.c[DEL],
+	  /trunk/src/core/epe_pkg.h[DEL], /trunk/src/core/kernel.c[CPY],
+	  /trunk/src/core/kernel_pkg.h[CPY], /trunk/src/dbg[DEL],
+	  /trunk/src/ett[DEL]:
 	  Priprema se prelazak na nezavisne module.
 
 2012-04-02  nenad
 
-	* [r5]
+	* [r5] /trunk/.cproject, /trunk/.project:
 	  Obrisani su suvišni fajlovi.
 
 2012-04-01  nenad
 
-	* [r4]
+	* [r4] /trunk/doc/inc/ett[ADD], /trunk/doc/inc/ett/ett.dox[ADD],
+	  /trunk/doc/inc/ett/str.dox[ADD], /trunk/src/core/epn[DEL]:
 	  Ubacen je ETT doxygen direktorijum.
 	  Izvrisan je EPN podmodul iz CORE modula.
-	* [r3]
+	* [r3] /trunk/Doxyfile, /trunk/doc/img/EPAs.dia,
+	  /trunk/doc/img/EPAs.png, /trunk/doc/img/HSMdispatch.dia[DEL],
+	  /trunk/doc/img/HSMdispatch.png[DEL], /trunk/doc/img/eSolid.dia[DEL],
+	  /trunk/doc/img/eSolid.png[DEL], /trunk/doc/img/eSolid_EOT.dia[DEL],
+	  /trunk/doc/img/eSolid_EOT.png[DEL],
+	  /trunk/doc/img/eSolid_EPE.dia[DEL],
+	  /trunk/doc/img/eSolid_EPE.png[DEL],
+	  /trunk/doc/img/eSolid_EPN.dia[DEL],
+	  /trunk/doc/img/eSolid_EPN.png[DEL], /trunk/doc/img/eSolid_MM.dia[ADD],
+	  /trunk/doc/img/eSolid_MM.png[ADD], /trunk/doc/img/eSolid_SMM.dia[DEL],
+	  /trunk/doc/img/eSolid_SMM.png[DEL],
+	  /trunk/doc/img/eSolid_SMP.dia[DEL],
+	  /trunk/doc/img/eSolid_SMP.png[DEL], /trunk/doc/img/eSolid_SP.dia[ADD],
+	  /trunk/doc/img/eSolid_SP.png[ADD], /trunk/doc/img/eSolid_STR.dia[DEL],
+	  /trunk/doc/img/eSolid_STR.png[DEL],
+	  /trunk/doc/img/eSolid_TEM.dia[DEL],
+	  /trunk/doc/img/eSolid_TEM.png[DEL],
+	  /trunk/doc/img/eSolid_structure.dia,
+	  /trunk/doc/img/eSolid_structure.png,
+	  /trunk/doc/img/eot_evtExt.dia[DEL],
+	  /trunk/doc/img/eot_evtExt.png[DEL],
+	  /trunk/doc/img/eot_evtPln.dia[DEL],
+	  /trunk/doc/img/eot_evtPln.png[DEL],
+	  /trunk/doc/img/eot_evtStd.dia[DEL],
+	  /trunk/doc/img/eot_evtStd.png[DEL],
+	  /trunk/doc/img/epe_epaHSM.dia[DEL],
+	  /trunk/doc/img/epe_epaHSM.png[DEL],
+	  /trunk/doc/img/evt_struct.dia[ADD],
+	  /trunk/doc/img/evt_struct.png[ADD],
+	  /trunk/doc/inc/core/cfg/core_cfg.dox,
+	  /trunk/doc/inc/core/cfg/eot_cfg.dox[DEL],
+	  /trunk/doc/inc/core/cfg/epe_cfg.dox[DEL],
+	  /trunk/doc/inc/core/cfg/epn_cfg.dox[DEL],
+	  /trunk/doc/inc/core/cfg/smm_cfg.dox[DEL],
+	  /trunk/doc/inc/core/cfg/smp_cfg.dox[DEL],
+	  /trunk/doc/inc/core/cfg/str_cfg.dox[DEL],
+	  /trunk/doc/inc/core/cfg/tem_cfg.dox[DEL],
+	  /trunk/doc/inc/core/core.dox, /trunk/doc/inc/core/eot.dox[DEL],
+	  /trunk/doc/inc/core/epn.dox, /trunk/doc/inc/core/evt.dox[ADD],
+	  /trunk/doc/inc/core/kernel.dox[ADD], /trunk/doc/inc/core/mem.dox[ADD],
+	  /trunk/doc/inc/core/registry.dox[ADD],
+	  /trunk/doc/inc/core/smm.dox[DEL], /trunk/doc/inc/core/smp.dox[DEL],
+	  /trunk/doc/inc/core/sproc.dox[ADD], /trunk/doc/inc/core/str.dox[DEL],
+	  /trunk/doc/inc/core/tem.dox, /trunk/doc/inc/hal/hal_compiler.dox,
+	  /trunk/doc/inc/hal/hal_cpu.dox, /trunk/doc/inc/hal/hal_crc.dox[ADD],
+	  /trunk/doc/inc/hal/hal_detect.dox, /trunk/doc/inc/hal/hal_gpio.dox,
+	  /trunk/doc/inc/hal/hal_interrupt.dox,
+	  /trunk/inc/core/cfg/eot_cfg.h[DEL], /trunk/inc/core/cfg/epe_cfg.h,
+	  /trunk/inc/core/cfg/epn_cfg.h[DEL],
+	  /trunk/inc/core/cfg/evt_cfg.h[ADD], /trunk/inc/core/cfg/mm_cfg.h[ADD],
+	  /trunk/inc/core/cfg/smm_cfg.h[DEL],
+	  /trunk/inc/core/cfg/smp_cfg.h[DEL],
+	  /trunk/inc/core/cfg/sproc_cfg.h[ADD],
+	  /trunk/inc/core/cfg/str_cfg.h[DEL],
+	  /trunk/inc/core/cfg/tem_cfg.h[DEL], /trunk/inc/core/core.h,
+	  /trunk/inc/core/eot.h[DEL], /trunk/inc/core/epe.h,
+	  /trunk/inc/core/epn.h[DEL], /trunk/inc/core/evt.h[ADD],
+	  /trunk/inc/core/mm.h[ADD], /trunk/inc/core/smm.h[DEL],
+	  /trunk/inc/core/smp.h[DEL], /trunk/inc/core/sproc.h[ADD],
+	  /trunk/inc/core/str.h[DEL], /trunk/inc/core/tem.h[DEL],
+	  /trunk/inc/dbg/dbg.h, /trunk/inc/eSolid.h,
+	  /trunk/inc/hal/hal_compiler.h, /trunk/inc/port/arch/ARM_CM3[DEL],
+	  /trunk/inc/port/arch/arm_cm3[ADD],
+	  /trunk/inc/port/arch/arm_cm3/core.h[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/GCC[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/GCC/compiler.h[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/compiler.h[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/cpu.h[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/interrupt.h[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/script[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/script/arm-cm3_ram.ld[ADD],
+	  /trunk/inc/port/arch/arm_cm3/hal/script/arm-cm3_rom.ld[ADD],
+	  /trunk/inc/port/arch/x86/core[DEL],
+	  /trunk/inc/port/common/GCC/hal/compiler.h,
+	  /trunk/inc/port/port_detect.h,
+	  /trunk/inc/port/variant/stm32l1xx_md/hal/cpu.h,
+	  /trunk/inc/primitive/list.h, /trunk/inc/primitive/queue.h,
+	  /trunk/log.txt[ADD], /trunk/src/core/core_private.h,
+	  /trunk/src/core/eot[DEL], /trunk/src/core/epe[DEL],
+	  /trunk/src/core/epe.c[ADD], /trunk/src/core/epe_pkg.h[ADD],
+	  /trunk/src/core/evt.c[ADD], /trunk/src/core/evt_pkg.h[ADD],
+	  /trunk/src/core/mm.c[ADD], /trunk/src/core/mm_pkg.h[ADD],
+	  /trunk/src/core/smm[DEL], /trunk/src/core/smp[DEL],
+	  /trunk/src/core/sproc.c[ADD], /trunk/src/core/sproc_pkg.h[ADD],
+	  /trunk/src/core/str[DEL], /trunk/src/core/tem[DEL],
+	  /trunk/src/dbg/eS_dbgValidBool.c, /trunk/src/dbg/eS_dbgValidSint32.c,
+	  /trunk/src/dbg/eS_dbgValidString.c,
+	  /trunk/src/dbg/eS_dbgValidUint32.c, /trunk/src/dbg/eS_printSDEC.c,
+	  /trunk/src/dbg/eS_printUDEC.c, /trunk/src/port/arch[ADD],
+	  /trunk/src/port/arch/arm_cm3[ADD],
+	  /trunk/src/port/arch/arm_cm3/core[ADD],
+	  /trunk/src/port/arch/arm_cm3/core/port_epe.c[ADD]:
 	  Prebacivanje kernel-a u kompaktni oblik
-	* [r2]
+	* [r2] /trunk/.checkstyle[ADD], /trunk/.cproject[ADD],
+	  /trunk/.project[ADD], /trunk/.settings[ADD],
+	  /trunk/.settings/org.eclipse.cdt.codan.core.prefs[ADD],
+	  /trunk/Doxyfile[ADD], /trunk/doc[ADD], /trunk/doc/example[ADD],
+	  /trunk/doc/example/eot_evt_id.c[ADD],
+	  /trunk/doc/example/eot_evt_wrid.c[ADD],
+	  /trunk/doc/example/eot_ext_param.c[ADD],
+	  /trunk/doc/example/eot_macros.c[ADD],
+	  /trunk/doc/example/evtClass.c[ADD],
+	  /trunk/doc/example/extEvents.c[ADD],
+	  /trunk/doc/example/irq_fast.c[ADD],
+	  /trunk/doc/example/irq_regular.c[ADD],
+	  /trunk/doc/example/smp_structsExt.c[ADD],
+	  /trunk/doc/example/smp_usr_signals.c[ADD],
+	  /trunk/doc/example/tem_decl.c[ADD],
+	  /trunk/doc/example/tem_func.c[ADD], /trunk/doc/html[ADD],
+	  /trunk/doc/img[ADD], /trunk/doc/img/EPAs.dia[ADD],
+	  /trunk/doc/img/EPAs.png[ADD], /trunk/doc/img/HSMdispatch-supported
+	  features.dia[ADD], /trunk/doc/img/HSMdispatch-supported
+	  features.png[ADD], /trunk/doc/img/HSMdispatch.dia[ADD],
+	  /trunk/doc/img/HSMdispatch.png[ADD], /trunk/doc/img/Signs.svg[ADD],
+	  /trunk/doc/img/dls.dia[ADD], /trunk/doc/img/dls.png[ADD],
+	  /trunk/doc/img/eSolid.dia[ADD], /trunk/doc/img/eSolid.png[ADD],
+	  /trunk/doc/img/eSolid_EOT.dia[ADD],
+	  /trunk/doc/img/eSolid_EOT.png[ADD],
+	  /trunk/doc/img/eSolid_EPE.dia[ADD],
+	  /trunk/doc/img/eSolid_EPE.png[ADD],
+	  /trunk/doc/img/eSolid_EPN.dia[ADD],
+	  /trunk/doc/img/eSolid_EPN.png[ADD],
+	  /trunk/doc/img/eSolid_SMM.dia[ADD],
+	  /trunk/doc/img/eSolid_SMM.png[ADD],
+	  /trunk/doc/img/eSolid_SMP.dia[ADD],
+	  /trunk/doc/img/eSolid_SMP.png[ADD],
+	  /trunk/doc/img/eSolid_STR.dia[ADD],
+	  /trunk/doc/img/eSolid_STR.png[ADD],
+	  /trunk/doc/img/eSolid_TEM.dia[ADD],
+	  /trunk/doc/img/eSolid_TEM.png[ADD],
+	  /trunk/doc/img/eSolid_logo.png[ADD],
+	  /trunk/doc/img/eSolid_logo.svg[ADD],
+	  /trunk/doc/img/eSolid_small.dia[ADD],
+	  /trunk/doc/img/eSolid_small.png[ADD],
+	  /trunk/doc/img/eSolid_structure.dia[ADD],
+	  /trunk/doc/img/eSolid_structure.png[ADD],
+	  /trunk/doc/img/eot_evtExt.dia[ADD],
+	  /trunk/doc/img/eot_evtExt.png[ADD],
+	  /trunk/doc/img/eot_evtPln.dia[ADD],
+	  /trunk/doc/img/eot_evtPln.png[ADD],
+	  /trunk/doc/img/eot_evtStd.dia[ADD],
+	  /trunk/doc/img/eot_evtStd.png[ADD],
+	  /trunk/doc/img/epe_epaHSM.dia[ADD],
+	  /trunk/doc/img/epe_epaHSM.png[ADD], /trunk/doc/img/hist1.png[ADD],
+	  /trunk/doc/img/hist2.png[ADD], /trunk/doc/img/queuePtr.dia[ADD],
+	  /trunk/doc/img/queuePtr.png[ADD], /trunk/doc/img/sign-error.png[ADD],
+	  /trunk/doc/img/sign-info.png[ADD], /trunk/doc/img/sign-mid.png[ADD],
+	  /trunk/doc/img/sign-ok.png[ADD], /trunk/doc/img/sign-warn.png[ADD],
+	  /trunk/doc/img/sls.dia[ADD], /trunk/doc/img/sls.png[ADD],
+	  /trunk/doc/img/state.png[ADD], /trunk/doc/img/threads.dia[ADD],
+	  /trunk/doc/img/threads.png[ADD], /trunk/doc/img/tranA.png[ADD],
+	  /trunk/doc/img/tranB.png[ADD], /trunk/doc/img/tranC.png[ADD],
+	  /trunk/doc/img/tranD.png[ADD], /trunk/doc/img/tranE.png[ADD],
+	  /trunk/doc/img/tranF.png[ADD], /trunk/doc/img/tranG.png[ADD],
+	  /trunk/doc/img/tranH.png[ADD], /trunk/doc/img/tranI.png[ADD],
+	  /trunk/doc/inc[ADD], /trunk/doc/inc/core[ADD],
+	  /trunk/doc/inc/core/cfg[ADD],
+	  /trunk/doc/inc/core/cfg/core_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/eot_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/epe_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/epn_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/smm_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/smp_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/str_cfg.dox[ADD],
+	  /trunk/doc/inc/core/cfg/tem_cfg.dox[ADD],
+	  /trunk/doc/inc/core/core.dox[ADD], /trunk/doc/inc/core/eot.dox[ADD],
+	  /trunk/doc/inc/core/epe.dox[ADD], /trunk/doc/inc/core/epn.dox[ADD],
+	  /trunk/doc/inc/core/smm.dox[ADD], /trunk/doc/inc/core/smp.dox[ADD],
+	  /trunk/doc/inc/core/str.dox[ADD], /trunk/doc/inc/core/tem.dox[ADD],
+	  /trunk/doc/inc/dbg[ADD], /trunk/doc/inc/dbg/dbg.dox[ADD],
+	  /trunk/doc/inc/eSolid.dox[ADD], /trunk/doc/inc/eSolid_cfg.dox[ADD],
+	  /trunk/doc/inc/hal[ADD], /trunk/doc/inc/hal/hal.dox[ADD],
+	  /trunk/doc/inc/hal/hal_compiler.dox[ADD],
+	  /trunk/doc/inc/hal/hal_cpu.dox[ADD],
+	  /trunk/doc/inc/hal/hal_detect.dox[ADD],
+	  /trunk/doc/inc/hal/hal_gpio.dox[ADD],
+	  /trunk/doc/inc/hal/hal_interrupt.dox[ADD],
+	  /trunk/doc/inc/hal/hal_usart.dox[ADD], /trunk/doc/inc/port[ADD],
+	  /trunk/doc/inc/port/arch[ADD], /trunk/doc/inc/port/arch/ARM_CM3[ADD],
+	  /trunk/doc/inc/port/arch/ARM_CM3/ARM_CM3.dox[ADD],
+	  /trunk/doc/inc/port/arch/ARM_CM3/core[ADD],
+	  /trunk/doc/inc/port/arch/ARM_CM3/core/cfg[ADD],
+	  /trunk/doc/inc/port/arch/X86[ADD],
+	  /trunk/doc/inc/port/arch/X86/x86.dox[ADD],
+	  /trunk/doc/inc/port/common[ADD], /trunk/doc/inc/port/common/GCC[ADD],
+	  /trunk/doc/inc/port/common/GCC/gcc.dox[ADD],
+	  /trunk/doc/inc/port/common/IAR[ADD],
+	  /trunk/doc/inc/port/common/IAR/iar.dox[ADD],
+	  /trunk/doc/inc/port/platform[ADD],
+	  /trunk/doc/inc/port/platform/STM32L_DISCOVERY[ADD],
+	  /trunk/doc/inc/port/platform/STM32L_DISCOVERY/STM32L1_DISCOVERY.dox[ADD],
+	  /trunk/doc/inc/port/port.dox[ADD], /trunk/doc/inc/port/variant[ADD],
+	  /trunk/doc/inc/port/variant/STM32F10x_LD_VL[ADD],
+	  /trunk/doc/inc/port/variant/STM32F10x_LD_VL/STM32F10X_LD_VL.dox[ADD],
+	  /trunk/doc/inc/port/variant/STM32L1XX_MD[ADD],
+	  /trunk/doc/inc/port/variant/STM32L1XX_MD/STM32L1XX_MD.dox[ADD],
+	  /trunk/doc/inc/primitive[ADD], /trunk/doc/inc/primitive/list.dox[ADD],
+	  /trunk/doc/inc/primitive/primitive.dox[ADD],
+	  /trunk/doc/inc/primitive/queue.dox[ADD], /trunk/doc/index.html[ADD],
+	  /trunk/doc/latex[ADD], /trunk/doc/pages[ADD],
+	  /trunk/doc/pages/doc_irq_handlers.dox[ADD],
+	  /trunk/doc/pages/licence.dox[ADD],
+	  /trunk/doc/pages/literature.dox[ADD], /trunk/doc/pages/main.dox[ADD],
+	  /trunk/doc/pages/structure.dox[ADD], /trunk/doc/pages/usage.dox[ADD],
+	  /trunk/doc/src[ADD], /trunk/doc/src/core[ADD],
+	  /trunk/doc/src/core/core.dox[ADD], /trunk/doc/src/core/eot[ADD],
+	  /trunk/doc/src/core/eot/eot.dox[ADD], /trunk/doc/src/core/epe[ADD],
+	  /trunk/doc/src/core/epe/epe.dox[ADD], /trunk/doc/src/core/epn[ADD],
+	  /trunk/doc/src/core/epn/epn.dox[ADD], /trunk/doc/src/core/smm.h[ADD],
+	  /trunk/doc/src/core/smm.h/smm.dox[ADD], /trunk/doc/src/core/smp[ADD],
+	  /trunk/doc/src/core/smp/smp.dox[ADD], /trunk/doc/src/core/str[ADD],
+	  /trunk/doc/src/core/str/str.dox[ADD], /trunk/doc/src/core/tem[ADD],
+	  /trunk/doc/src/core/tem/tem.dox[ADD], /trunk/doc/src/dbg[ADD],
+	  /trunk/doc/src/dbg/dbg.dox[ADD], /trunk/doc/src/eSolid.dox[ADD],
+	  /trunk/doc/src/hal[ADD], /trunk/doc/src/hal/hal.dox[ADD],
+	  /trunk/doc/src/port[ADD], /trunk/doc/src/port/variant[ADD],
+	  /trunk/doc/src/port/variant/STM32F10X_LD_VL[ADD],
+	  /trunk/doc/src/port/variant/STM32F10X_LD_VL/gpio.dox[ADD],
+	  /trunk/doc/src/port/variant/STM32F10X_LD_VL/usart.dox[ADD],
+	  /trunk/inc[ADD], /trunk/inc/core[ADD], /trunk/inc/core/cfg[ADD],
+	  /trunk/inc/core/cfg/eot_cfg.h[ADD],
+	  /trunk/inc/core/cfg/epe_cfg.h[ADD],
+	  /trunk/inc/core/cfg/epn_cfg.h[ADD],
+	  /trunk/inc/core/cfg/smm_cfg.h[ADD],
+	  /trunk/inc/core/cfg/smp_cfg.h[ADD],
+	  /trunk/inc/core/cfg/str_cfg.h[ADD],
+	  /trunk/inc/core/cfg/tem_cfg.h[ADD], /trunk/inc/core/core.h[ADD],
+	  /trunk/inc/core/eot.h[ADD], /trunk/inc/core/epe.h[ADD],
+	  /trunk/inc/core/epn.h[ADD], /trunk/inc/core/smm.h[ADD],
+	  /trunk/inc/core/smp.h[ADD], /trunk/inc/core/str.h[ADD],
+	  /trunk/inc/core/tem.h[ADD], /trunk/inc/dbg[ADD],
+	  /trunk/inc/dbg/cfg[ADD], /trunk/inc/dbg/dbg.h[ADD],
+	  /trunk/inc/eSolid.h[ADD], /trunk/inc/eSolid_cfg.h[ADD],
+	  /trunk/inc/ett[ADD], /trunk/inc/ett/ett.h[ADD], /trunk/inc/hal[ADD],
+	  /trunk/inc/hal/hal.h[ADD], /trunk/inc/hal/hal_compiler.h[ADD],
+	  /trunk/inc/hal/hal_cpu.h[ADD], /trunk/inc/hal/hal_crc.h[ADD],
+	  /trunk/inc/hal/hal_gpio.h[ADD], /trunk/inc/hal/hal_interrupt.h[ADD],
+	  /trunk/inc/hal/hal_support.h[ADD], /trunk/inc/hal/hal_usart.h[ADD],
+	  /trunk/inc/hal/script[ADD],
+	  /trunk/inc/hal/script/stm32l152rbt6_rom.ld[ADD], /trunk/inc/port[ADD],
+	  /trunk/inc/port/arch[ADD], /trunk/inc/port/arch/ARM_CM3[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/core[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/core/epe.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/core/smm.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/core/tem_def.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/GCC[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/GCC/compiler.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/compiler.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/cpu.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/interrupt.h[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/script[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/script/arm-cm3_ram.ld[ADD],
+	  /trunk/inc/port/arch/ARM_CM3/hal/script/arm-cm3_rom.ld[ADD],
+	  /trunk/inc/port/arch/x86[ADD], /trunk/inc/port/arch/x86/core[ADD],
+	  /trunk/inc/port/arch/x86/core/epe.h[ADD],
+	  /trunk/inc/port/arch/x86/core/smm.h[ADD],
+	  /trunk/inc/port/arch/x86/hal[ADD],
+	  /trunk/inc/port/arch/x86/hal/GCC[ADD],
+	  /trunk/inc/port/arch/x86/hal/GCC/compiler.h[ADD],
+	  /trunk/inc/port/arch/x86/hal/compiler.h[ADD],
+	  /trunk/inc/port/arch/x86/hal/cpu.h[ADD],
+	  /trunk/inc/port/arch/x86/hal/interrupt.h[ADD],
+	  /trunk/inc/port/arch/x86/hal/script[ADD], /trunk/inc/port/common[ADD],
+	  /trunk/inc/port/common/GCC[ADD], /trunk/inc/port/common/GCC/hal[ADD],
+	  /trunk/inc/port/common/GCC/hal/compiler.h[ADD],
+	  /trunk/inc/port/common/IAR[ADD], /trunk/inc/port/platform[ADD],
+	  /trunk/inc/port/platform/STM32L-DISCOVERY[ADD],
+	  /trunk/inc/port/port.h[ADD], /trunk/inc/port/port_detect.h[ADD],
+	  /trunk/inc/port/variant[ADD], /trunk/inc/port/variant/linux_x86[ADD],
+	  /trunk/inc/port/variant/linux_x86/hal[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64/hal[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64/hal/compiler.h[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64/hal/cpu.h[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64/hal/crc.h[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64/hal/gpio.h[ADD],
+	  /trunk/inc/port/variant/linux_x86_x64/hal/usart.h[ADD],
+	  /trunk/inc/port/variant/stm32f10x_ld_vl[ADD],
+	  /trunk/inc/port/variant/stm32f10x_ld_vl/hal[ADD],
+	  /trunk/inc/port/variant/stm32f10x_ld_vl/hal/cpu.h[ADD],
+	  /trunk/inc/port/variant/stm32f10x_ld_vl/hal/crc.h[ADD],
+	  /trunk/inc/port/variant/stm32f10x_ld_vl/hal/gpio.h[ADD],
+	  /trunk/inc/port/variant/stm32f10x_ld_vl/hal/usart.h[ADD],
+	  /trunk/inc/port/variant/stm32l1xx_md[ADD],
+	  /trunk/inc/port/variant/stm32l1xx_md/hal[ADD],
+	  /trunk/inc/port/variant/stm32l1xx_md/hal/cpu.h[ADD],
+	  /trunk/inc/port/variant/stm32l1xx_md/hal/crc.h[ADD],
+	  /trunk/inc/port/variant/stm32l1xx_md/hal/gpio.h[ADD],
+	  /trunk/inc/port/variant/stm32l1xx_md/hal/usart.h[ADD],
+	  /trunk/inc/port/variant/win_x86[ADD],
+	  /trunk/inc/port/variant/win_x86/hal[ADD],
+	  /trunk/inc/port/variant/win_x86_x64[ADD],
+	  /trunk/inc/port/variant/win_x86_x64/hal[ADD],
+	  /trunk/inc/primitive[ADD], /trunk/inc/primitive/list.h[ADD],
+	  /trunk/inc/primitive/queue.h[ADD], /trunk/licence.txt[ADD],
+	  /trunk/makefile.defs[ADD], /trunk/makefile.init[ADD],
+	  /trunk/makefile.targets[ADD], /trunk/readme.txt[ADD], /trunk/src[ADD],
+	  /trunk/src/core[ADD], /trunk/src/core/core_private.h[ADD],
+	  /trunk/src/core/eot[ADD], /trunk/src/core/eot/eS_evtDestroy.c[ADD],
+	  /trunk/src/core/eot/eS_evtDestroyI.c[ADD],
+	  /trunk/src/core/eot/eS_evtExtCreate.c[ADD],
+	  /trunk/src/core/eot/eS_evtPlnCreate.c[ADD],
+	  /trunk/src/core/eot/eS_evtPost.c[ADD],
+	  /trunk/src/core/eot/eS_evtPostAhead.c[ADD],
+	  /trunk/src/core/eot/eS_evtQGet.c[ADD],
+	  /trunk/src/core/eot/eS_evtQGetI.c[ADD],
+	  /trunk/src/core/eot/eS_evtQPush.c[ADD],
+	  /trunk/src/core/eot/eS_evtQPushI.c[ADD],
+	  /trunk/src/core/eot/eS_evtQPut.c[ADD],
+	  /trunk/src/core/eot/eS_evtQPutI.c[ADD],
+	  /trunk/src/core/eot/eS_evtReserve.c[ADD],
+	  /trunk/src/core/eot/eS_evtUnReserve.c[ADD],
+	  /trunk/src/core/eot/eot_evtFetchI.c[ADD],
+	  /trunk/src/core/eot/eot_evtQCtor.c[ADD],
+	  /trunk/src/core/eot/eot_evtQDtor.c[ADD],
+	  /trunk/src/core/eot/eot_pkg.h[ADD], /trunk/src/core/epe[ADD],
+	  /trunk/src/core/epe/eS_epaCreate.c[ADD],
+	  /trunk/src/core/epe/eS_epaDestroy.c[ADD],
+	  /trunk/src/core/epe/eS_epaPrioGet.c[ADD],
+	  /trunk/src/core/epe/eS_epaPrioSet.c[ADD],
+	  /trunk/src/core/epe/eS_epeGetId.c[ADD],
+	  /trunk/src/core/epe/eS_kernStart.c[ADD],
+	  /trunk/src/core/epe/epe_epaCtor.c[ADD],
+	  /trunk/src/core/epe/epe_epaDtor.c[ADD],
+	  /trunk/src/core/epe/epe_pkg.c[ADD],
+	  /trunk/src/core/epe/epe_pkg.h[ADD],
+	  /trunk/src/core/epe/epe_regCtor.c[ADD],
+	  /trunk/src/core/epe/epe_regRegister.c[ADD],
+	  /trunk/src/core/epe/epe_regUnRegister.c[ADD],
+	  /trunk/src/core/epe/epe_schedScheduleI.c[ADD],
+	  /trunk/src/core/epn[ADD], /trunk/src/core/epn/epn_pkg.h[ADD],
+	  /trunk/src/core/smm[ADD], /trunk/src/core/smm/eS_hmemAlloc.c[ADD],
+	  /trunk/src/core/smm/eS_hmemAllocI.c[ADD],
+	  /trunk/src/core/smm/eS_hmemBlockSize.c[ADD],
+	  /trunk/src/core/smm/eS_hmemCtor.c[ADD],
+	  /trunk/src/core/smm/eS_hmemDeAlloc.c[ADD],
+	  /trunk/src/core/smm/eS_hmemDeAllocI.c[ADD],
+	  /trunk/src/core/smm/eS_hmemFreeSpace.c[ADD],
+	  /trunk/src/core/smm/eS_hmemFreeSpaceI.c[ADD],
+	  /trunk/src/core/smm/eS_memCopy.c[ADD],
+	  /trunk/src/core/smm/eS_memMove.c[ADD],
+	  /trunk/src/core/smm/smm_pkg.c[ADD],
+	  /trunk/src/core/smm/smm_pkg.h[ADD], /trunk/src/core/smp[ADD],
+	  /trunk/src/core/smp/eS_hsmDispatch.c[ADD],
+	  /trunk/src/core/smp/eS_hsmIsInState.c[ADD],
+	  /trunk/src/core/smp/eS_hsmTopState.c[ADD],
+	  /trunk/src/core/smp/smp_hsmCtor.c[ADD],
+	  /trunk/src/core/smp/smp_hsmDtor.c[ADD],
+	  /trunk/src/core/smp/smp_pkg.c[ADD],
+	  /trunk/src/core/smp/smp_pkg.h[ADD], /trunk/src/core/str[ADD],
+	  /trunk/src/core/str/str_pkg.h[ADD], /trunk/src/core/tem[ADD],
+	  /trunk/src/core/tem/eS_tmrCreate.c[ADD],
+	  /trunk/src/core/tem/eS_tmrDestroy.c[ADD],
+	  /trunk/src/core/tem/eS_tmrDisable.c[ADD],
+	  /trunk/src/core/tem/eS_tmrEnable.c[ADD],
+	  /trunk/src/core/tem/eS_tmrReset.c[ADD],
+	  /trunk/src/core/tem/eS_tmrSet.c[ADD],
+	  /trunk/src/core/tem/tem_pkg.h[ADD], /trunk/src/dbg[ADD],
+	  /trunk/src/dbg/dbg_private.c[ADD], /trunk/src/dbg/dbg_private.h[ADD],
+	  /trunk/src/dbg/eS_dbgValidBool.c[ADD],
+	  /trunk/src/dbg/eS_dbgValidSint32.c[ADD],
+	  /trunk/src/dbg/eS_dbgValidString.c[ADD],
+	  /trunk/src/dbg/eS_dbgValidUint32.c[ADD],
+	  /trunk/src/dbg/eS_printBIN.c[ADD],
+	  /trunk/src/dbg/eS_printCONFIG.c[ADD],
+	  /trunk/src/dbg/eS_printHEX.c[ADD], /trunk/src/dbg/eS_printSDEC.c[ADD],
+	  /trunk/src/dbg/eS_printString.c[ADD],
+	  /trunk/src/dbg/eS_printUDEC.c[ADD],
+	  /trunk/src/dbg/eS_sendDigits.c[ADD], /trunk/src/ett[ADD],
+	  /trunk/src/ett/eS_GetByte.c[ADD], /trunk/src/ett/eS_PutEppByte.c[ADD],
+	  /trunk/src/ett/eS_PutStpByte.c[ADD],
+	  /trunk/src/ett/eS_SendPendingResponse.c[ADD],
+	  /trunk/src/ett/eS_isr_ProcessInputEvent.c[ADD],
+	  /trunk/src/ett/es_ettConfiguration.c[ADD],
+	  /trunk/src/ett/ett_ProcessingEPPdata.c[ADD],
+	  /trunk/src/ett/ett_ProcessingSTPdata.c[ADD],
+	  /trunk/src/ett/ett_private.c[ADD], /trunk/src/ett/ett_private.h[ADD],
+	  /trunk/src/ett/ett_task_mangment.c[ADD], /trunk/src/port[ADD],
+	  /trunk/src/port/variant[ADD],
+	  /trunk/src/port/variant/STM32F10X_LD_VL[ADD],
+	  /trunk/src/port/variant/STM32F10X_LD_VL/crc.c[ADD],
+	  /trunk/src/port/variant/STM32F10X_LD_VL/gpio.c[ADD],
+	  /trunk/src/port/variant/STM32F10X_LD_VL/usart.c[ADD],
+	  /trunk/src/port/variant/stm32l1xx_md[ADD],
+	  /trunk/src/port/variant/stm32l1xx_md/hal[ADD],
+	  /trunk/src/port/variant/stm32l1xx_md/hal/gpio.c[ADD],
+	  /trunk/src/port/variant/stm32l1xx_md/hal/startup.S[ADD]:
 	  Inicijalni import datoteka
-	* [r1]
+	* [r1] /branches[ADD], /tags[ADD], /trunk[ADD]:
 	  Inicijalni import
 
