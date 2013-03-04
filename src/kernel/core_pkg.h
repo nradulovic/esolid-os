@@ -128,21 +128,27 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
 C_INLINE_ALWAYS void schedRdyRmI_(
     esEpaHeader_T       * aEpa) {
 
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    unative_T indx;
+
+    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+    rdyBitmap.bit[0] &= ~((unative_T)1U << indx);
+
+    if ((unative_T)0U == rdyBitmap.bit[0]) {
+        rdyBitmap.bitGroup &= ~((unative_T)1U << 0);
+    }
+#else
     unative_T indxGroup;
     unative_T indx;
 
     indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    indxGroup = (unative_T)0U;
-#else
-    indxGroup = aEpa->internals.prio >> PRIO_INDX_PWR;
-#endif
+    indxGroup = aEpa->prio >> PRIO_INDX_PWR;
     rdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
 
     if ((unative_T)0U == rdyBitmap.bit[indxGroup]) {
         rdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
     }
+#endif
 }
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/

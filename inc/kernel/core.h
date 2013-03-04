@@ -33,6 +33,17 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
+
+/**
+ * @brief       Konstanta za potpis EPA objekta
+ * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
+ *              koje prihvate pokazivac na EPA objekat bile sigurne da je EPA
+ *              objekat validan. EPA objekti koji su obrisani nemaju ovaj potpis.
+ * @pre         Opcija @ref OPT_KERNEL_DBG mora da bude aktivna kako bi bila
+ *              omogucena provera pokazivaca.
+ */
+#define EPA_SIGNATURE                   (0xDEEF)
+
 /*==================================================================================  MACRO's  ==*/
 
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
@@ -104,7 +115,14 @@ struct esEpaHeader {
  */
     struct evtQueue evtQueue;
 
-#if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_CORE) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
+ */
+    uint_fast32_t   signature;
+#endif
+
+#if (OPT_MM_DYNAMIC_SIZE > 0U)                                                  /* Koriste se dinamički i statični memorijski alokatori     */
 /**
  * @brief       Memorijska klasa EPA objekta
  */
@@ -134,35 +152,18 @@ struct esEpaHeader {
  * @brief       Kreira EPA objekat.
  * @param       [in] aMemClass          Klasa memorije koja se koristi za
  *                                      skladistenje:
- *  @arg        esMemHeapClass
+ *  @arg        esMemDynClass
  *  @arg        esMemStaticClass
  * @param       [in] aDescription       pokazivac na opisnu strukturu EPA objekta.
  * @return      Pokazivac na strukturu zaglavlja EPA objekta.
  * @see         esEpaDef_T
  * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
- *              funkcija poziva esEpaInit() sa odgovarajucim parametrima.
+ *              funkcija vrsi inicijalizaciju EPA objekta sa odgovarajucim 
+ * 				parametrima.
  * @api
  */
 esEpaHeader_T * esEpaCreate(
     const C_ROM esMemClass_T * aMemClass,
-    const C_ROM esEpaDef_T * aDescription);
-
-/**
- * @brief       Inicijalizuje EPA objekat
- * @param       [out] aEpa              Pokazivac na strukturu EPA objekta,
- * @param       [in] aStateBuff         memorija za cuvanje stanja HSM automata,
- * @param       [in] aEvtBuff           memorija za cuvanje reda za cekanje,
- * @param       [in] aDescription       pokazivac na opisnu strukturu EPA
- *                                      objekta.
- * @details     Ova funkcija se poziva od strane esEpaCreate, a ovde je
- *              stavljena na raspolaganju naprednijim korisnicima koji zele vecu
- *              kontrolu nad rasporedjivanjem memorijskog prostora.
- * @api
- */
-void esEpaInit(
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        * aStateBuff,
-    esEvtHeader_T       ** aEvtBuff,
     const C_ROM esEpaDef_T * aDescription);
 
 /**
@@ -173,14 +174,6 @@ void esEpaInit(
  * @api
  */
 void esEpaDestroy(
-    esEpaHeader_T       * aEpa);
-
-/**
- * @brief       Vrsi deinicijalizaciju koriscenih struktura
- * @param       [out] aEpa              Pokazivac na strukturu EPA objekta.
- * @api
- */
-void esEpaDeInit(
     esEpaHeader_T       * aEpa);
 
 /**

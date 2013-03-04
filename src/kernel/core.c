@@ -70,6 +70,12 @@ C_INLINE_ALWAYS void schedRdyUnRegI_(
 static void schedInit(
     void);
 
+C_INLINE void epaInit_(
+    esEpaHeader_T       * aEpa,
+    esPtrState_T        * aStateBuff,
+    esEvtHeader_T       ** aEvtBuff,
+    const C_ROM esEpaDef_T * aDescription);
+
 /*==========================================================================  LOCAL VARIABLES  ==*/
 
 /**
@@ -110,19 +116,23 @@ C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
 C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
     void) {
 
-    uint_fast8_t prio;
+#if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    esEpaHeader_T * epa;
+
+    epa = rdyBitmap.list[ES_CPU_FLS(rdyBitmap.bit[0])];
+
+    return (epa);
+#else
     unative_T indxGroup;
     unative_T indx;
+    esEpaHeader_T * epa;
 
-    #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-        indxGroup = (unative_T)0U;
-    #else
-        indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
-    #endif
-        indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
-        prio = indx | (indxGroup << PRIO_INDX_PWR);
+    indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
+    indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
+    epa = rdyBitmap.list[indx | (indxGroup << PRIO_INDX_PWR)];
 
-    return (rdyBitmap.list[prio]);
+    return (epa);
+#endif
 }
 
 /**
@@ -136,24 +146,38 @@ C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
 C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
     const esEpaHeader_T * aEpa) {
 
+#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+    unative_T indx;
+    bool_T ans;
+
+    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+
+    if (rdyBitmap.bit[0] & ((unative_T)1U << indx)) {
+
+        ans = TRUE;
+    } else {
+
+        ans = FALSE;
+    }
+
+    return (ans);
+#else
     unative_T indxGroup;
     unative_T indx;
 
     indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    indxGroup = (unative_T)0U;
-#else
     indxGroup = aEpa->internals.prio >> PRIO_INDX_PWR;
-#endif
 
     if (rdyBitmap.bit[indxGroup] & ((unative_T)1U << indx)) {
 
-        return (TRUE);
+        ans = TRUE;
     } else {
 
-        return (FALSE);
+        ans = FALSE;
     }
+
+    return (ans);
+#endif
 }
 
 /**
@@ -171,8 +195,6 @@ C_INLINE_ALWAYS void schedRdyRegI_(
 C_INLINE_ALWAYS void schedRdyUnRegI_(
     const esEpaHeader_T * aEpa) {
 
-    schedRdyRmI_(
-        (esEpaHeader_T *)aEpa);
     rdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)0U;
 }
 
@@ -188,12 +210,16 @@ static void schedInit(
     currCtx.status = KERNEL_STOPPED;
 }
 
-/*==============================================================  GLOBAL FUNCTION DEFINITIONS  ==*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @ingroup     core_intf
- * @{ *//*---------------------------------------------------------------------------------------*/
-void esEpaInit(
+/**
+ * @brief       Inicijalizuje EPA objekat
+ * @param       [out] aEpa              Pokazivac na strukturu EPA objekta,
+ * @param       [in] aStateBuff         memorija za cuvanje stanja HSM automata,
+ * @param       [in] aEvtBuff           memorija za cuvanje reda za cekanje,
+ * @param       [in] aDescription       pokazivac na opisnu strukturu EPA
+ *                                      objekta.
+ * @notapi
+ */
+C_INLINE void epaInit_(
     esEpaHeader_T       * aEpa,
     esPtrState_T        * aStateBuff,
     esEvtHeader_T       ** aEvtBuff,
@@ -212,85 +238,123 @@ void esEpaInit(
         aDescription->evtQueueDepth);
     aEpa->prio = aDescription->epaPrio;
     aEpa->name = aDescription->epaName;
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedRdyRegI_(
         aEpa);
     esEvtPostAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         aEpa,
         (esEvtHeader_T *)&evtSignal[SIG_INIT]);
-
-#if defined(OPT_KERNEL_SCHEDULER_PREEMPTIVE)
-    if (KERNEL_RUNNING == esKernelStatus()) {
-        EPE_SCHED_NOTIFY_RDY();
-    }
-#endif
     ES_CRITICAL_EXIT();
 }
+
+/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+/*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
+/*-------------------------------------------------------------------------------------------*//**
+ * @ingroup     core_intf
+ * @{ *//*---------------------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------------------------*/
 esEpaHeader_T * esEpaCreate(
     const C_ROM esMemClass_T * aMemClass,
     const C_ROM esEpaDef_T * aDescription) {
 
-    esEpaHeader_T * newEpa;
-    size_t epaSize;
-    size_t stateBuff;
-    size_t evtBuff;
+    uint8_t * newEpa;
+    size_t coreSize;
+    size_t smpQSize;
+    size_t evtQSize;
 
-    epaSize = aDescription->epaWorkspaceSize;
-    stateBuff = epaSize + 1U;
-    epaSize += hsmReqSize_(
-        aDescription->hsmStateDepth);
-    evtBuff = epaSize + 1U;
-    epaSize += evtQReqSize_(
-        aDescription->evtQueueDepth);
-
-#if defined(OPT_KERNEL_USE_DYNAMIC) || defined(__DOXYGEN__)
-    newEpa = (esEpaHeader_T *)(* aMemClass->pAlloc)(epaSize);
+#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
+                                                                                /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
+                                                                                /* radi brzeg pristupa memoriji.                            */
+    coreSize = ES_ALIGN(
+        aDescription->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
+    smpQSize = ES_ALIGN(hsmReqSize(
+        aDescription->hsmStateDepth), ES_CPU_ATTRIB_ALIGNMENT);
+    evtQSize = ES_ALIGN(evtQReqSize(
+        aDescription->evtQueueDepth), ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    (void)aMemClass;
-    newEpa = (esEpaHeader_T *)esHmemAlloc(epaSize);
+    coreSize = aDescription->epaWorkspaceSize;
+    smpQSize = hsmReqSize(
+        aDescription->hsmStateDepth);
+    evtQSize = evtQReqSize(
+        aDescription->evtQueueDepth);
 #endif
-    esEpaInit(
-        newEpa,
-        (esPtrState_T *)((uint8_t *)newEpa + stateBuff),
-        (esEvtHeader_T **)((uint8_t *)newEpa + evtBuff),
+
+#if (OPT_MM_DYNAMIC_SIZE == -1)                                                 /* Koristi se samo staticni memorijski menadzer             */
+    (void)aMemClass;
+    {
+        ES_CRITICAL_DECL();
+
+        ES_CRITICAL_ENTER(
+            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        newEpa = esSmemAllocI(coreSize + smpQSize + evtQSize);
+        ES_CRITICAL_EXIT();
+    }
+#elif (OPT_MM_DYNAMIC_SIZE == 0U)                                               /* Koristi se samo dinamicni memorijski menadzer            */
+    (void)aMemClass;
+    {
+        ES_CRITICAL_DECL();
+
+        ES_CRITICAL_ENTER(
+            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        newEpa = esDmemAllocI(coreSize + smpQSize + evtQSize);
+        ES_CRITICAL_EXIT();
+    }
+#else                                                                           /* Koriste se oba memorijska menadzera                      */
+    newEpa = (* aMemClass->pAlloc)(coreSize + smpQSize + evtQSize);
+#endif
+    epaInit_(
+        (esEpaHeader_T *)newEpa,
+        (esPtrState_T *)(newEpa + coreSize),
+        (esEvtHeader_T **)(newEpa + coreSize + smpQSize),
         aDescription);
 
-#if defined(OPT_KERNEL_USE_DYNAMIC)
-    newEpa->internals.memClass = aMemClass;
+#if (OPT_MM_DYNAMIC_SIZE > 0U)                                                  /* Koriste se oba memorijska menadzera                      */
+    newEpa->memClass = aMemClass;
 #endif
 
-    return (newEpa);
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void esEpaDeInit(
-    esEpaHeader_T       * aEpa) {
-
-    ES_CRITICAL_DECL();
-
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    schedRdyUnRegI_(
-        aEpa);
-    evtQDeInit(
-        aEpa);
-    ES_CRITICAL_EXIT();
-    hsmDeInit(
-        aEpa);
+    return ((esEpaHeader_T *)newEpa);
 }
 
 /*-----------------------------------------------------------------------------------------------*/
 void esEpaDestroy(
     esEpaHeader_T       * aEpa) {
 
-#if !defined(OPT_KERNEL_USE_DYNAMIC)
-    (void)aEpa;                                                                 /* Skloni upozorenje o neiskoriscenom parametru.            */
-#else
+#if (OPT_MM_DYNAMIC_SIZE == -1)                                                 /* Koristi se samo staticni memorijski menadzer             */
+    /* Greska */
+#elif (OPT_MM_DYNAMIC_SIZE == 0U)                                               /* Koristi se samo dinamicni memorijski menadzer            */
+    ES_CRITICAL_DECL();
+
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    schedRdyRmI_(
+        aEpa);
+    schedRdyUnRegI_(
+        aEpa);
+    ES_CRITICAL_EXIT();
+    evtQDeInit(
+        aEpa);
+    hsmDeInit(
+        aEpa);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    esDmemDeAllocI(
+        (void *)aEpa);
+    ES_CRITICAL_EXIT();
+#else                                                                           /* Koriste se oba memorijska menadzera                      */
+    ES_CRITICAL_DECL();
     const esMemClass_T * tmpMemClass;
 
     tmpMemClass = aEpa->memClass;
-    esEpaDeInit(
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    schedRdyUnRegI_(
+        aEpa);
+    ES_CRITICAL_EXIT();
+    evtQDeInit(
+        aEpa);
+    hsmDeInit(
         aEpa);
     (*tmpMemClass->pDeAlloc)((void *)aEpa);
 #endif
@@ -318,8 +382,11 @@ void esEpaPrioSet(
     ES_CRITICAL_DECL();
     bool_T state;
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     state = schedRdyIsEpaRdy_(
+        aEpa);
+    schedRdyRmI_(
         aEpa);
     schedRdyUnRegI_(
         aEpa);
@@ -344,7 +411,7 @@ void esKernelInit(
     void) {
 
     esHalInit();
-    hmemInit();
+    mmInit();
     schedInit();
 
 #if defined(OPT_STP_ENABLE)
@@ -356,6 +423,7 @@ void esKernelInit(
 C_NORETURN void esKernelStart(void) {
     ES_CRITICAL_DECL();
 
+    currCtx.status = KERNEL_RUNNING;
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
@@ -363,15 +431,17 @@ C_NORETURN void esKernelStart(void) {
 
         while (FALSE == schedRdyIsEmptyI_()) {
             esEvtHeader_T * newEvt;
+            esEpaHeader_T * newEpa;
 
-            currCtx.epa = schedRdyGetEpaI_();
+            currCtx.epa = newEpa = schedRdyGetEpaI_();
             newEvt = evtQGetI(
-                currCtx.epa);
+                newEpa);
             ES_CRITICAL_EXIT();
             hsmDispatch(
-                currCtx.epa,
+                newEpa,
                 newEvt);
-            ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            ES_CRITICAL_ENTER(
+                OPT_KERNEL_INTERRUPT_PRIO_MAX);
             evtDestroyI_(
                 newEvt);
         }
