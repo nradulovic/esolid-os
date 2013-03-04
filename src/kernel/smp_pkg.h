@@ -50,12 +50,10 @@ extern "C" {
  * @param       aStateDept              Maksimalna hijerarhijska dubina stanja
  *                                      automata.
  * @return      Potreban memorijski prostor u bajtovima.
+ * @notapi
  */
-C_INLINE_ALWAYS size_t hsmReqSize_(
-    size_t              aStateDept) {
-
-    return (aStateDept * (size_t)2U * sizeof(esPtrState_T));
-}
+size_t hsmReqSize(
+    size_t              aStateDept);
 
 /**
  * @brief       Pokrece dati HSM automat.

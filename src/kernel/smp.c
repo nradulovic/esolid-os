@@ -49,6 +49,17 @@
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+
+size_t hsmReqSize(
+    size_t              aStateDept) {
+
+    size_t needed;
+
+    needed = aStateDept * (size_t)2U * sizeof(esPtrState_T);
+
+    return (needed);
+}
+
 /*-----------------------------------------------------------------------------------------------*/
 void hsmDispatch(
     esEpaHeader_T       * aEpa,
