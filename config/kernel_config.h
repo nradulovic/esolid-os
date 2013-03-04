@@ -113,18 +113,6 @@
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /**
- * @brief       Da li se koriste dinamicki objekti
- * @details     Ukoliko je promenljiva:
- *                  - definisana: za alokaciju memorije se koristi memorijska
- *                  klasa koja je data u argumentu funkcija.
- *                  - nedefinisana: za alokaciju memorije se koristi
- *                  @ref esMemStaticClass klasa memorije
- */
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_USE_DYNAMIC
-#endif
-
-/**
  * @brief       Maksimalan prioritet EPA objekata u sistemu
  * @details     Ova opcija omogucava da se ujedno definise maksimalan broj EPA
  *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
@@ -168,23 +156,22 @@
 #endif
 
 /**
- * @brief       Initial heap memory size.
- * @details     Size of the RAM area that is initially given to the heap memory
- *              manager. If there is a need for more heap memory the system will
- *              automatically require aditional memory space from static memory
+ * @brief       Dynamic memory size.
+ * @details     Size of the RAM area that is given to the dynamic memory manager.
+ *              Here you can specify how much memory is given to dynamic memory
  *              manager.
  *
- *              If initial heap memory size value is set to zero the heap memory
- *              manager will be disabled. All calls to it will be redirected to
- *              static memory manager. Please note, that in this case you will
- *              not be able to free memory area once it is acquired.
+ *              If dynamic memory size value is set to zero the dynamic memory
+ *              manager will use all static memory effectively disabling static
+ *              memory manager. All calls to static memory manager will be
+ *              redirected to dynamic memory manager.
  *
- *              If you wish to disable static memory manager and use only heap
- *              memory manager enter here -1.
- * @note        DEFAULT: -1 (Only heap memory manager enabled)
+ *              If you wish to disable dynamic memory manager and use only
+ *              static memory manager enter here -1.
+ * @note        DEFAULT: 0 (Only dynamic memory manager is enabled)
  */
 #if !defined(OPT_MM_STATIC_SIZE) || defined(__DOXYGEN__)
-# define OPT_MM_HEAP_SIZE               -1
+# define OPT_MM_DYNAMIC_SIZE            0U
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
