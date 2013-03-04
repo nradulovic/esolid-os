@@ -208,6 +208,20 @@ C_INLINE void evtQPutAheadI_(
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/
+
+/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+
+size_t evtQReqSize(
+    size_t              aQueueSize) {
+
+    size_t needed;
+
+    needed = aQueueSize * sizeof(void *);
+
+    return (needed);
+}
+
+/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*-----------------------------------------------------------------------------------------------*/
 esEvtHeader_T * evtQGetI(
     esEpaHeader_T       * aEpa) {
@@ -261,13 +275,17 @@ void evtQInit(
 void evtQDeInit(
     esEpaHeader_T       * aEpa) {
 
+    ES_CRITICAL_DECL();
     esEvtHeader_T * tmpEvt;
 
     while (FALSE == esQpIsEmpty_(&(aEpa->evtQueue.queue))) {
         tmpEvt = esQpGet_(
             &(aEpa->evtQueue.queue));
+        ES_CRITICAL_ENTER(
+            OPT_KERNEL_INTERRUPT_PRIO_MAX);
         evtDestroyI_(
             tmpEvt);
+        ES_CRITICAL_EXIT();
     }
     esQpDeInit_(
         &(aEpa->evtQueue.queue));
@@ -277,8 +295,7 @@ void evtQDeInit(
 #endif
 }
 
-/*==============================================================  GLOBAL FUNCTION DEFINITIONS  ==*/
-
+/*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup         evt_intf
  * @{ *//*---------------------------------------------------------------------------------------*/
@@ -291,7 +308,7 @@ esEvtHeader_T * esEvtCreate(
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = (esEvtHeader_T *)esDmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
     evtInit_(
         newEvt,
@@ -308,7 +325,7 @@ esEvtHeader_T * esEvtCreateI(
 
     esEvtHeader_T * newEvt;
 
-    newEvt = (esEvtHeader_T *)esHmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = (esEvtHeader_T *)esDmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
         dataSize,
@@ -338,7 +355,8 @@ void esEvtPost(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutI_(
        aEpa,
        aEvt);
@@ -362,7 +380,8 @@ void esEvtPostAhead(
 
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutAheadI_(
         aEpa,
         aEvt);

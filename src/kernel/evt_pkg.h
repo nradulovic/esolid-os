@@ -63,7 +63,7 @@ C_INLINE_ALWAYS void evtDestroyI_(
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
     aEvt->signature = ~EVT_SIGNATURE;                                           /* Postavljanje lošeg potpisa                               */
 #endif
-        esHmemDeAllocI((void *)aEvt);
+        esDmemDeAllocI((void *)aEvt);
     }
 }
 
@@ -73,13 +73,9 @@ C_INLINE_ALWAYS void evtDestroyI_(
  * @param       aQueueSize              Maksimalan broj dogadjaja u baferu.
  * @return      Potreban memorijski prostor u bajtovima.
  * @notapi
- * @inline
  */
-C_INLINE_ALWAYS size_t evtQReqSize_(
-    size_t              aQueueSize) {
-
-    return (aQueueSize * sizeof(void *));
-}
+size_t evtQReqSize(
+    size_t              aQueueSize);
 
 /**
  * @brief       Konstruise red cekanja za dogadjaje.
