@@ -55,26 +55,15 @@ struct esMemClass {
  */
     void (*pDeAlloc)(void *);
 
-/**
- * @brief       Velicina alocirane memorijske oblasti
- */
-    size_t (*pBlockSize)(void *);
 };
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Inicijalizuje staticni memorijski alokator sa velicinom koja je
- *              odredjena opcijom @ref OPT_MM_MANAGED_SIZE.
+ * @brief       Inicijalizuje memorijske alokatore
  */
-void smemInit(
-    void);
-/**
- * @brief       Inicijalizuje heap memorijski alokator sa velicinom koja je
- *              odredjena opcijom @ref OPT_MM_HEAP_SIZE
- */
-void hmemInit(
+void mmInit(
     void);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/

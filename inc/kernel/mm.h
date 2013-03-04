@@ -48,7 +48,7 @@ extern "C" {
 /**
  * @brief       Dinamicki memorijski alokator (heap memory)
  */
-extern const C_ROM esMemClass_T esMemHeapClass;
+extern const C_ROM esMemClass_T esMemDynClass;
 
 /**
  * @brief       Staticki memorijski alokator (static memory)
@@ -101,14 +101,6 @@ void * esSmemAllocI(
 size_t esSmemFreeSpace(
     void);
 
-/**
- * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
- * @return      Velicina slobodne memorije u bajtovima.
- * @iclass
- */
-size_t esSmemFreeSpaceI(
-    void);
-
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Funkcije dinamickog memorijskog alokatora
@@ -127,7 +119,7 @@ size_t esSmemFreeSpaceI(
  *              standardom.
  * @api
  */
-void * esHmemAlloc(
+void * esDmemAlloc(
     size_t      aSize);
 
 /**
@@ -143,7 +135,7 @@ void * esHmemAlloc(
  *              standardom.
  * @iclass
  */
-void * esHmemAllocI(
+void * esDmemAllocI(
     size_t      aSize);
 
 /**
@@ -153,7 +145,7 @@ void * esHmemAllocI(
  * 										memorijski prostor.
  * @api
  */
-void esHmemDeAlloc(
+void esDmemDeAlloc(
     void        * aMemory);
 
 /**
@@ -163,7 +155,7 @@ void esHmemDeAlloc(
  *                                      memorijski prostor.
  * @iclass
  */
-void esHmemDeAllocI(
+void esDmemDeAllocI(
     void        * aMemory);
 
 /**
@@ -176,7 +168,7 @@ void esHmemDeAllocI(
  *              zahtev.
  * @api
  */
-size_t esHmemFreeSpace(
+size_t esDmemFreeSpace(
     void);
 
 /**
@@ -189,7 +181,7 @@ size_t esHmemFreeSpace(
  *              zahtev.
  * @iclass
  */
-size_t esHmemFreeSpaceI(
+size_t esDmemFreeSpaceI(
     void);
 
 /**
@@ -204,7 +196,7 @@ size_t esHmemFreeSpaceI(
  *              dodeljenog bloka.
  * @api
  */
-size_t esHmemBlockSize(
+size_t esDmemBlockSize(
 	void 		* aMemory);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
