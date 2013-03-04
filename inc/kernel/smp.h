@@ -91,7 +91,7 @@ extern "C" {
  *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
  *              dogadjaj.
  */
-enum esState {
+typedef enum esState {
 /**
  * @brief       Ne treba izvrsiti nikakve dalje akcije.
  * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
@@ -129,7 +129,15 @@ enum esState {
  */
     RETN_SUPER
 
-};
+} esState_T;
+
+/**
+ * @brief       Tip pokazivaca na state handler funkcije.
+ * @details     Funkcije vracaju esState_T , a kao parametar prihvataju
+ *              void pokazivac na strukturu izvrsne jedinice i pokazivac na
+ *              dogadjaje ili sam dogadjaj.
+ */
+typedef esState_T (* esPtrState_T) (esEpaHeader_T *, esEvtHeader_T *);
 
 /**
  * @brief       Struktura HSM automata
