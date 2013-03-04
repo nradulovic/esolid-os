@@ -54,6 +54,10 @@
 									<listOptionValue builtIn="false" value="STM32F10X_LD_VL"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags.2144039958" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags" value="-c -fmessage-length=0 -save-temps" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections.2050512915" name="Data sections (-fdata-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.datasections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections.343751728" name="Function sections (-ffunction-sections)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.functionsections" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.pedantic.1631009388" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.pedantic" value="true" valueType="boolean"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.extrawarn.2020318207" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.warnings.extrawarn" value="true" valueType="boolean"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input.633800905" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.c.compiler.base.input"/>
 							</tool>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.cpp.compiler.debug.1045174637" name="ARM Sourcery Linux GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.linux.lib.cpp.compiler.debug">
@@ -86,8 +90,8 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc/port/arch/arm_cm3/cmsis"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc/port/family/stm32f10x/cmsis"/>
 						<entry flags="RESOLVED" kind="macro" name="STM32F10X_LD_VL" value=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/linker-scripts/gcc/variant/STM32F100xBxx"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/dbg-STM32F10x_ld_vl-o0-csgcc"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/inc/hal/script"/>
 						<entry flags="" kind="libraryFile" name="esolid-hal" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
