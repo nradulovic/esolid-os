@@ -240,7 +240,7 @@ esEvtHeader_T * evtQGetI(
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-void evtQInitI(
+void evtQInit(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       ** aEvtBuff,
     size_t              aQueueSize) {
@@ -258,7 +258,7 @@ void evtQInitI(
 }
 
 /*-----------------------------------------------------------------------------------------------*/
-void evtQDeInitI(
+void evtQDeInit(
     esEpaHeader_T       * aEpa) {
 
     esEvtHeader_T * tmpEvt;

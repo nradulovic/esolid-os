@@ -206,7 +206,7 @@ void esEpaInit(
         aDescription->hsmInitState,
         aStateBuff,
         aDescription->hsmStateDepth);
-    evtQInitI(
+    evtQInit(
         aEpa,
         aEvtBuff,
         aDescription->evtQueueDepth);
@@ -273,7 +273,7 @@ void esEpaDeInit(
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedRdyUnRegI_(
         aEpa);
-    evtQDeInitI(
+    evtQDeInit(
         aEpa);
     ES_CRITICAL_EXIT();
     hsmDeInit(

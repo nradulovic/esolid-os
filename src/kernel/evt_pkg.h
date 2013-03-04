@@ -90,7 +90,7 @@ C_INLINE_ALWAYS size_t evtQReqSize_(
  *              cekanja za dati @c aEvtQueue red cekanja.
  * @notapi
  */
-void evtQInitI(
+void evtQInit(
     esEpaHeader_T       * aEpa,
     esEvtHeader_T       ** aStorage,
     size_t              aQueueSize);
@@ -102,7 +102,7 @@ void evtQInitI(
  * @details     Svi dogadjaji koji su u redu cekanja ce se prikupiti i obrisati.
  * @notapi
  */
-void evtQDeInitI(
+void evtQDeInit(
     esEpaHeader_T       * aEpa);
 
 /**
