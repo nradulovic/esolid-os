@@ -32,6 +32,18 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
+
+/**
+ * @brief       Konstanta za potpis dogadjaja
+ * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
+ *              koje prime dogadjaj bile sigurne da je dogadjaj kreiran
+ *              funkcijom esEvtCreate() i da je i dalje validan. Dogadjaji koji
+ *              se obrisu nemaju ovaj potpis.
+ * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
+ *              omogucena provera pokazivaca.
+ */
+#define EVT_SIGNATURE                   (0xFEED)
+
 /*==================================================================================  MACRO's  ==*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)

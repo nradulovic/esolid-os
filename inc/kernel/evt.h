@@ -24,6 +24,8 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Menadzmet dogadjaja
+ * @details     This file is not meant to be included in application code
+ *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  evt_intf
  ****************************************************************************************//** @{ */
 
@@ -65,17 +67,6 @@
  *              korisnika dogadjaja u jednom trenutku iznosi 63 EPA objekata.
  */
 #define EVT_USERS_MASK                  ((uint_fast8_t)0x3F)
-
-/**
- * @brief       Konstanta za potpis dogadjaja
- * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
- *              koje prime dogadjaj bile sigurne da je dogadjaj kreiran
- *              funkcijom esEvtCreate() i da je i dalje validan. Dogadjaji koji
- *              se obrisu nemaju ovaj potpis.
- * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
- *              omogucena provera pokazivaca.
- */
-#define EVT_SIGNATURE                   (0xFEED)
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 

@@ -163,6 +163,9 @@ C_INLINE void evtQPutI_(
     schedRdyInsertI_(
         aEpa);
     } else {
+        /* Red za dogadjaje je pun */
+        evtDestroyI_(
+            aEvt);
     }
 }
 
@@ -203,6 +206,9 @@ C_INLINE void evtQPutAheadI_(
     schedRdyInsertI_(
         aEpa);
     } else {
+        /* Red za dogadjaje je pun */
+        evtDestroyI_(
+            aEvt);
     }
 
 }
@@ -308,7 +314,7 @@ esEvtHeader_T * esEvtCreate(
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    newEvt = (esEvtHeader_T *)esDmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(dataSize);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
     evtInit_(
         newEvt,
@@ -325,7 +331,7 @@ esEvtHeader_T * esEvtCreateI(
 
     esEvtHeader_T * newEvt;
 
-    newEvt = (esEvtHeader_T *)esDmemAllocI(dataSize);                           /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(dataSize);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
         dataSize,
