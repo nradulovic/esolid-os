@@ -59,6 +59,22 @@ extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
+
+/**
+ * @brief       Stanje kernel-a
+ */
+typedef enum esKernelStatus {
+/**
+ * @brief       Kernel se ne izvrsava
+ */
+    KERNEL_STOPPED,
+
+/**
+ * @brief       Kernel se izvrsava
+ */
+    KERNEL_RUNNING
+} esKernelStatus_T;
+
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Karakteristicni tipovi podataka
  * @{ *//*---------------------------------------------------------------------------------------*/
@@ -92,21 +108,6 @@ typedef struct esEpaHeader esEpaHeader_T;
 #include "kernel/evt.h"
 #include "kernel/smp.h"
 #include "kernel/core.h"
-
-/**
- * @brief       Stanje kernel-a
- */
-typedef enum esKernelStatus {
-/**
- * @brief       Kernel se ne izvrsava
- */
-    KERNEL_STOPPED,
-
-/**
- * @brief       Kernel se izvrsava
- */
-    KERNEL_RUNNING
-} esKernelStatus_T;
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/

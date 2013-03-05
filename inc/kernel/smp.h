@@ -24,6 +24,8 @@
  * @file
  * @author      Nenad Radulovic
  * @brief   	Interfejs State Machine Processor (SMP) modula.
+ * @details     This file is not meant to be included in application code
+ *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  smp_intf
  ****************************************************************************************//** @{ */
 
