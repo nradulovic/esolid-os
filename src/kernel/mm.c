@@ -164,13 +164,13 @@ static void dummyDeAlloc(
 /**
  * @brief       Cuvar liste slobodnih blokova
  */
-static dmemBlkHdr_T * dmemSentinel;
+static dmemBlkHdr_T * gDmemSentinel;
 #endif
 
 /**
  * @brief       Cuvar vrednosti slobodne memorije staticnog alokatora
  */
-static uint8_t * smemSentinel;
+static uint8_t * gSmemSentinel;
 
 #if (OPT_MM_MANAGED_SIZE != 0U)
 /*
@@ -233,7 +233,7 @@ extern uint8_t _eheap;
 static void smemInit(
     void) {
 
-    smemSentinel = HEAP_BEGIN;
+    gSmemSentinel = HEAP_BEGIN;
 }
 
 /**
@@ -247,19 +247,19 @@ static void dmemInit(
     uint8_t         * dend) {
 
     ((dmemBlkHdr_T *)dbegin)->blk.size = (size_t)(dend - dbegin - sizeof(dmemBlk_T) - sizeof(dmemBlkHdr_T));
-    dmemSentinel = ((dmemBlkHdr_T *)dend - 1U);
-    dmemSentinel->blk.size = (size_t)0;
+    gDmemSentinel = ((dmemBlkHdr_T *)dend - 1U);
+    gDmemSentinel->blk.size = (size_t)0;
     esSlsSentinelInit_(
-        &(dmemSentinel->blk.phyList));
+        &(gDmemSentinel->blk.phyList));
     esSlsNodeAddHead_(
-        &(dmemSentinel->blk.phyList),
+        &(gDmemSentinel->blk.phyList),
         &(((dmemBlkHdr_T *)dbegin)->blk.phyList));
     esDlsSentinelInit_(
-        &(dmemSentinel->freeList));
+        &(gDmemSentinel->freeList));
     esDlsNodeAddHead_(
-        &(dmemSentinel->freeList),
+        &(gDmemSentinel->freeList),
         &(((dmemBlkHdr_T *)dbegin)->freeList));
-    BLK_STAT_BUSY(dmemSentinel);
+    BLK_STAT_BUSY(gDmemSentinel);
     BLK_STAT_FREE((dmemBlkHdr_T *)dbegin);
 }
 
@@ -304,7 +304,7 @@ size_t esSmemFreeSpace(
 #if (OPT_MM_DYNAMIC_SIZE != 0U)
     size_t freeSpace;
 
-    freeSpace = HEAP_END - smemSentinel;
+    freeSpace = HEAP_END - gSmemSentinel;
 
     return (freeSpace);
 #else
@@ -320,9 +320,9 @@ void * esSmemAllocI(
 #if (OPT_MM_DYNAMIC_SIZE != 0U)
     void * tmp;
 
-    if (aSize <= (HEAP_END - smemSentinel)) {
-        tmp = smemSentinel;
-        smemSentinel += aSize;
+    if (aSize <= (HEAP_END - gSmemSentinel)) {
+        tmp = gSmemSentinel;
+        gSmemSentinel += aSize;
     } else {
         tmp = (void *)0;
     }
@@ -395,7 +395,7 @@ void * esDmemAllocI(
     DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,
-        &(dmemSentinel->freeList),
+        &(gDmemSentinel->freeList),
         freeBlk) {
 
         if (freeBlk->blk.size >= aSize) {
@@ -498,7 +498,7 @@ void esDmemDeAllocI(
         freeBlk->blk.size += currPhy->blk.size + sizeof(dmemBlk_T);
     }
     esDlsNodeAddHead_(
-        &(dmemSentinel->freeList),
+        &(gDmemSentinel->freeList),
         &(freeBlk->freeList));
 #else
     (void)aMemory;
@@ -536,7 +536,7 @@ size_t esDmemFreeSpaceI(
     DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,
-        &(dmemSentinel->freeList),
+        &(gDmemSentinel->freeList),
         currBlk) {
         free += currBlk->blk.size;
     }
