@@ -24,6 +24,8 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Osnovne funkcije kernel-a
+ * @details     This file is not meant to be included in application code
+ *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  core_intf
  ****************************************************************************************//** @{ */
 
@@ -33,17 +35,6 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
-
-/**
- * @brief       Konstanta za potpis EPA objekta
- * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
- *              koje prihvate pokazivac na EPA objekat bile sigurne da je EPA
- *              objekat validan. EPA objekti koji su obrisani nemaju ovaj potpis.
- * @pre         Opcija @ref OPT_KERNEL_DBG mora da bude aktivna kako bi bila
- *              omogucena provera pokazivaca.
- */
-#define EPA_SIGNATURE                   (0xDEEF)
-
 /*==================================================================================  MACRO's  ==*/
 
 /*-------------------------------------------------------------------------  C++ extern begin  --*/

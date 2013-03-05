@@ -34,22 +34,6 @@
 /*============================================================================  LOCAL DEFINES  ==*/
 /*============================================================================  LOCAL MACRO's  ==*/
 /*=========================================================================  LOCAL DATA TYPES  ==*/
-
-/**
- * @brief       Trenutno izvrsavana EPA jedinica
- */
-struct currCtx {
-/**
- * @brief       Pokazivac na trenutni EPA objekat koji se izvrsava
- */
-    esEpaHeader_T   * epa;
-
-/**
- * @brief       Trenutno stanje schedulera
- */
-    esKernelStatus_T status;
-};
-
 /*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
 C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
@@ -79,9 +63,14 @@ C_INLINE void epaInit_(
 /*==========================================================================  LOCAL VARIABLES  ==*/
 
 /**
- * @brief       Podaci o trenutnom kontekstu
+ * @brief       Pokazivac na EPA objekat koji se trenutno izvrsava
  */
-static struct currCtx currCtx;
+static esEpaHeader_T   * gCurrEpa;
+
+/**
+ * @brief       Trenutno stanje kernel-a
+ */
+static esKernelStatus_T gKernelStatus;
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
@@ -98,15 +87,28 @@ static struct currCtx currCtx;
  */
 C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
     void) {
+
+#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
     bool_T answer;
 
-    if ((unative_T)0U == rdyBitmap.bitGroup) {
+    if ((unative_T)0U == gRdyBitmap.bit[0]) {
         answer = TRUE;
     } else {
         answer = FALSE;
     }
 
     return (answer);
+#else
+    bool_T answer;
+
+    if ((unative_T)0U == gRdyBitmap.bitGroup) {
+        answer = TRUE;
+    } else {
+        answer = FALSE;
+    }
+
+    return (answer);
+#endif
 }
 
 /**
@@ -119,7 +121,7 @@ C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
 #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     esEpaHeader_T * epa;
 
-    epa = rdyBitmap.list[ES_CPU_FLS(rdyBitmap.bit[0])];
+    epa = gRdyBitmap.list[ES_CPU_FLS(gRdyBitmap.bit[0])];
 
     return (epa);
 #else
@@ -127,9 +129,9 @@ C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
     unative_T indx;
     esEpaHeader_T * epa;
 
-    indxGroup = ES_CPU_FLS(rdyBitmap.bitGroup);
-    indx = ES_CPU_FLS(rdyBitmap.bit[indxGroup]);
-    epa = rdyBitmap.list[indx | (indxGroup << PRIO_INDX_PWR)];
+    indxGroup = ES_CPU_FLS(gRdyBitmap.bitGroup);
+    indx = ES_CPU_FLS(gRdyBitmap.bit[indxGroup]);
+    epa = gRdyBitmap.list[indx | (indxGroup << PRIO_INDX_PWR)];
 
     return (epa);
 #endif
@@ -146,21 +148,16 @@ C_INLINE_ALWAYS esEpaHeader_T * schedRdyGetEpaI_(
 C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
     const esEpaHeader_T * aEpa) {
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    unative_T indx;
-    bool_T ans;
+#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+    bool_T answer;
 
-    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-
-    if (rdyBitmap.bit[0] & ((unative_T)1U << indx)) {
-
-        ans = TRUE;
+    if (gRdyBitmap.bit[0] & ((unative_T)1U << aEpa->prio)) {
+        answer = TRUE;
     } else {
-
-        ans = FALSE;
+        answer = FALSE;
     }
 
-    return (ans);
+    return (answer);
 #else
     unative_T indxGroup;
     unative_T indx;
@@ -168,15 +165,13 @@ C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
     indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
     indxGroup = aEpa->internals.prio >> PRIO_INDX_PWR;
 
-    if (rdyBitmap.bit[indxGroup] & ((unative_T)1U << indx)) {
-
-        ans = TRUE;
+    if (gRdyBitmap.bit[indxGroup] & ((unative_T)1U << indx)) {
+        answer = TRUE;
     } else {
-
-        ans = FALSE;
+        answer = FALSE;
     }
 
-    return (ans);
+    return (answer);
 #endif
 }
 
@@ -186,7 +181,7 @@ C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
 C_INLINE_ALWAYS void schedRdyRegI_(
     const esEpaHeader_T * aEpa) {
 
-    rdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)aEpa;
+    gRdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)aEpa;
 }
 
 /**
@@ -195,7 +190,7 @@ C_INLINE_ALWAYS void schedRdyRegI_(
 C_INLINE_ALWAYS void schedRdyUnRegI_(
     const esEpaHeader_T * aEpa) {
 
-    rdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)0U;
+    gRdyBitmap.list[aEpa->prio] = (esEpaHeader_T *)0U;
 }
 
 /** @} *//*--------------------------------------------------------------------------------------*/
@@ -206,8 +201,8 @@ C_INLINE_ALWAYS void schedRdyUnRegI_(
 static void schedInit(
     void) {
 
-    currCtx.epa = (esEpaHeader_T *)0U;
-    currCtx.status = KERNEL_STOPPED;
+    gCurrEpa = (esEpaHeader_T *)0U;
+    gKernelStatus = KERNEL_STOPPED;
 }
 
 /**
@@ -242,7 +237,7 @@ C_INLINE void epaInit_(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedRdyRegI_(
         aEpa);
-    esEvtPostAheadI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
+    esEvtPostI(                                                              /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         aEpa,
         (esEvtHeader_T *)&evtSignal[SIG_INIT]);
     ES_CRITICAL_EXIT();
@@ -364,7 +359,7 @@ void esEpaDestroy(
 esEpaHeader_T * esEpaHeaderGet(
     void) {
 
-    return (currCtx.epa);
+    return (gCurrEpa);
 }
 
 /*-----------------------------------------------------------------------------------------------*/
@@ -423,7 +418,7 @@ void esKernelInit(
 C_NORETURN void esKernelStart(void) {
     ES_CRITICAL_DECL();
 
-    currCtx.status = KERNEL_RUNNING;
+    gKernelStatus = KERNEL_RUNNING;
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
@@ -433,7 +428,7 @@ C_NORETURN void esKernelStart(void) {
             esEvtHeader_T * newEvt;
             esEpaHeader_T * newEpa;
 
-            currCtx.epa = newEpa = schedRdyGetEpaI_();
+            gCurrEpa = newEpa = schedRdyGetEpaI_();
             newEvt = evtQGetI(
                 newEpa);
             ES_CRITICAL_EXIT();
@@ -445,7 +440,7 @@ C_NORETURN void esKernelStart(void) {
             evtDestroyI_(
                 newEvt);
         }
-        currCtx.epa = (esEpaHeader_T *)0U;
+        gCurrEpa = (esEpaHeader_T *)0U;
         ES_CRITICAL_EXIT();
         /* ES_CPU_SLEEP(); */
         ES_CRITICAL_ENTER(
@@ -457,7 +452,7 @@ C_NORETURN void esKernelStart(void) {
 esKernelStatus_T esKernelStatus(
     void) {
 
-    return (currCtx.status);
+    return (gKernelStatus);
 }
 /** @} *//*--------------------------------------------------------------------------------------*/
 

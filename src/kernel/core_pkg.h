@@ -42,12 +42,23 @@
 /** @endcond*/
 
 /*==================================================================================  DEFINES  ==*/
+
+/**
+ * @brief       Konstanta za potpis EPA objekta
+ * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
+ *              koje prihvate pokazivac na EPA objekat bile sigurne da je EPA
+ *              objekat validan. EPA objekti koji su obrisani nemaju ovaj potpis.
+ * @pre         Opcija @ref OPT_KERNEL_DBG mora da bude aktivna kako bi bila
+ *              omogucena provera pokazivaca.
+ */
+#define EPA_SIGNATURE                   (0xDEEF)
+
 /*==================================================================================  MACRO's  ==*/
 
 /*-------------------------------------------------------------------------------------------*//**
  * @ingroup     Pomocni makroi za rad sa bitmapom
  * @{ *//*---------------------------------------------------------------------------------------*/
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
 # define PRIO_INDX                      OPT_KERNEL_EPA_PRIO_MAX
 # define PRIO_INDX_GROUP                1
 #else
@@ -69,12 +80,18 @@ extern "C" {
  * @brief       Bitmap spremnih EPA objekata
  */
 struct rdyBitmap {
+#if !(OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS) || defined(__DOXYGEN__)
 /**
  * @brief       Grupa prioriteta EPA objekata
  * @details     Prilikom trazenja sledeceg aktivnog EPA objekta prvo se
  *              pretrazuje ovaj clan.
+ * @note        Ovaj clan se ne koristi kada uslov
+ *              "OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS" nije ispunjen. U
+ *              tom slucaju, generisani kod je manji i efikasniji prilikom
+ *              komutacije EPA objekata.
  */
     unative_T       bitGroup;
+#endif
 
 /**
  * @brief       Prioriteti EPA objekata
@@ -94,7 +111,7 @@ struct rdyBitmap {
 /**
  * @brief       Bitmape spremnih EPA objekata
  */
-CORE_PKG_H_EXT struct rdyBitmap rdyBitmap;
+CORE_PKG_H_EXT struct rdyBitmap gRdyBitmap;
 
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
@@ -108,18 +125,16 @@ CORE_PKG_H_EXT struct rdyBitmap rdyBitmap;
 C_INLINE_ALWAYS void schedRdyInsertI_(
     const esEpaHeader_T * aEpa) {
 
+#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+    gRdyBitmap.bit[0] |= (unative_T)1U << aEpa->prio;
+#else
     unative_T indxGroup;
     unative_T indx;
 
     indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    indxGroup = (unative_T)0U;
-#else
-    indxGroup = aEpa->prio >> PRIO_INDX_PWR;
+    gRdyBitmap.bitGroup |= (unative_T)1U << indxGroup;
+    gRdyBitmap.bit[indxGroup] |= (unative_T)1U << indx;
 #endif
-    rdyBitmap.bitGroup |= (unative_T)1U << indxGroup;
-    rdyBitmap.bit[indxGroup] |= (unative_T)1U << indx;
 }
 
 /**
@@ -128,25 +143,18 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
 C_INLINE_ALWAYS void schedRdyRmI_(
     esEpaHeader_T       * aEpa) {
 
-#if (OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    unative_T indx;
-
-    indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-    rdyBitmap.bit[0] &= ~((unative_T)1U << indx);
-
-    if ((unative_T)0U == rdyBitmap.bit[0]) {
-        rdyBitmap.bitGroup &= ~((unative_T)1U << 0);
-    }
+#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+    gRdyBitmap.bit[0] &= ~((unative_T)1U << aEpa->prio);
 #else
     unative_T indxGroup;
     unative_T indx;
 
     indx = aEpa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
     indxGroup = aEpa->prio >> PRIO_INDX_PWR;
-    rdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
+    gRdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
 
-    if ((unative_T)0U == rdyBitmap.bit[indxGroup]) {
-        rdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
+    if ((unative_T)0U == gRdyBitmap.bit[indxGroup]) {
+        gRdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
     }
 #endif
 }
