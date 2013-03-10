@@ -34,6 +34,14 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 
+#define ES_MM_DYNAMIC_ONLY              0
+#define ES_MM_STATIC_ONLY               -1
+#define ES_SMP_FSM_ONLY                 1
+#define ES_SMP_HSM_ONLY                 2
+#define ES_SMP_FSM_AND_HSM              3
+#define ES_KERNEL_API_MM                0
+#define ES_KERNEL_API_SM                1
+#define ES_KERNEL_API_FULL              2
 /* Ovde se pisu podesavanja projekta ------------------------------------------------------------*/
 
 
@@ -113,6 +121,29 @@
  * @{ *//*---------------------------------------------------------------------------------------*/
 
 /**
+ * @brief       Nivo kernel interfejsa koji se koristi
+ * @details     Ovom promenljivom se definise koji interfejs kernal se koristi.
+ *              U zavisnosti od potrebe aplikacije moguce je koristiti sledece
+ *              nivoe:
+ *              - 0 - omogucen je samo Memory Management modul. Korisnik moze da
+ *              koristi samo interfejs Memory Management modula. Ukljucivanje
+ *              interfejsa ostalih modula je zabranjeno.
+ *              - 1 - omogucen je State Machine Processor (SMP). Sa obzirom da
+ *              SMP modul koristi funkcije MM modula onda je i MM modul, takodje,
+ *              aktiviran. Ovaj nivo interfejsa se najcesce koristi kada je
+ *              potrebno pokrenuti do nekoliko automata prekidnim rutinama ili u
+ *              glavnoj programskoj petlji.
+ *              - 2 - omogucen je kompletan interfejs kernel-a. Ovaj interfejs
+ *              se koristi kada je potrebno konkuretno pokrenuti nekoliko
+ *              razlicitih EPA objekata.
+ * @note        Podrazumevano podesavanje: 2 (ukljucen je kompletan kernel
+ *              interfejs)
+ */
+#if !defined(OPT_KERNEL_API_LEVEL) || defined(__DOXYGEN__)
+# define OPT_KERNEL_API_LEVEL           ES_KERNEL_API_FULL
+#endif
+
+/**
  * @brief       Maksimalan prioritet EPA objekata u sistemu
  * @details     Ova opcija omogucava da se ujedno definise maksimalan broj EPA
  *              objekata u sistemu. Podrazumevano podesavanje je 64 sto je i
@@ -132,7 +163,7 @@
  *              jezgra.
  * @note        Podrazumevano podesavanje: ES_PRIO_REALTIME
  */
-#if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX)
+#if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX) || defined(__DOXYGEN__)
 # define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
 #endif
 
@@ -156,7 +187,7 @@
 #endif
 
 /**
- * @brief       Dynamic memory size.
+ * @brief       Distribution of static and dynamic memory
  * @details     Size of the RAM area that is given to the dynamic memory manager.
  *              Here you can specify how much memory is given to dynamic memory
  *              manager.
@@ -168,10 +199,36 @@
  *
  *              If you wish to disable dynamic memory manager and use only
  *              static memory manager enter here -1.
- * @note        DEFAULT: 0 (Only dynamic memory manager is enabled)
+ *
+ *              Options:
+ *              - @ref ES_MM_STATIC_ONLY - Only static memory management is
+ *              enabled
+ *              - @ref ES_MM_DYNAMIC_ONLY - Only dynamic memory management is
+ *              enabled
+ *              - any other value - both memory managers are enabled.
+ * @note        DEFAULT: ES_MM_DYNAMIC_ONLY (Only dynamic memory manager is
+ *              enabled)
  */
 #if !defined(OPT_MM_STATIC_SIZE) || defined(__DOXYGEN__)
-# define OPT_MM_DYNAMIC_SIZE            0U
+# define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
+#endif
+
+/** @} *//*--------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------*//**
+ * @name        Podesavanje State Machine Processor (SMP) modula
+ * @{ *//*---------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Omogucavanje vise tipova automata
+ * @details     Ovom opcijom se definisu moguci tipovi automata u aplikaciji:
+ *              - 1 - omoguceni su samo FSM automati
+ *              - 2 - omoguceni su samo HSM automati
+ *              - 3 - omogucena su oba tipa automata, selekcija dispecera se
+ *              vrsi dinamicki.
+ * @note        Podrazumevano podesavanje: 3 (Omogucena su oba tipa automata)
+ */
+#if !defined(OPT_SMP_SM_TYPES) || defined(__DOXYGEN__)
+# define OPT_SMP_SM_TYPES               ES_SMP_FSM_AND_HSM
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/
