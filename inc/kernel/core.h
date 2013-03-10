@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,35 +20,37 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Osnovne funkcije kernel-a
  * @details     This file is not meant to be included in application code
  *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  core_intf
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
 #ifndef CORE_H_
 #define CORE_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
+#include "kernel/smp.h"
+#include "primitive/queue.h"
 
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
 
 /**
  * @brief       Definiciona struktura koja opisuje jedan EPA objekat
  * @api
  */
-struct esEpaDef {
+typedef struct esEpaDef {
 /**
  * @brief       Deskriptivno ime EPA objekta
  * @details     Pokazivac na znakovni niz koji cuva ime jedinice za obradu
@@ -77,43 +79,86 @@ struct esEpaDef {
 /**
  * @brief       Inicijalno stanje HSM automata
  */
-    esPtrState_T    hsmInitState;
+    esState_T       smInitState;
 
 /**
  * @brief       Maksimalna dubina hijerarhije stanja HSM automata.
  */
-    uint8_t         hsmStateDepth;
+    uint8_t         smLevels;
+} esEpaDef_T;
+
+/**
+ * @brief       Red cekanja za dogadjaje.
+ * @details     Ova struktura opisuje redove cekanja za dogadjaje koji se
+ *              koriste za aktivne objekte. Red cekanja zajedno sa
+ *              procesorom konacnih automata (SMP) cini jedan agent za obradu
+ *              dogadjaja, (Event Processing Agent - EPA).
+ *
+ *              Struktura sadrzi samo podatke za upravljanje reda cekanja i ne
+ *              sadrzi memorijski prostor za cuvanje dogadjaja. Memorijski
+ *              prostor se mora rezervisati unapred i predati pokazivac na taj
+ *              prostor EVT-u prilikom inicijalizacije reda cekanja.
+ *
+ *              U redovima cekanja se cuvaju samo pokazivaci ka dogadjajima, a
+ *              ne i same instance dogadjaja.
+ *
+ *              Pored navedenog reda za cekanje, struktura moze da sadrzi
+ *              brojace zauzeca reda za cekanje. @ref free pokazuje trenutni
+ *              broj praznih lokacija dok @ref freeMin sadrzi najmanji broj
+ *              slobodnih lokacija ikada.
+ * @notapi
+ */
+struct evtQueue {
+/**
+ * @brief       Instanca reda za cekanje opste namene
+ */
+    esQueuePtr_T    queue;
+
+#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
+/**
+ * @brief       Trenutni broj slobodnih lokacija u redu za cekanje
+ */
+    uint_fast8_t    free;
+
+/**
+ * @brief       Najmanji broj slobodnih lokacija u redu za cekanje
+ */
+    uint_fast8_t    freeMin;
+#endif
 };
 
 /**
- * @extends     smExec
+ * @extends     esSm
  * @brief       Zaglavlje Event Processing Agent objekta
  * @details     EPA objekat se sastoji od internih podataka koji se nalaze u
  *              ovoj strukturi i korisničkih podataka koji se dodaju na ovu
  *              strukturu.
  * @api
  */
-struct esEpaHeader {
+typedef struct esEpa {
 /**
  * @brief       Struktura izvrsne jedinice.
  * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
  *              podacima ove strukture je zabranjen drugim modulima.
  */
-    struct smExec   exec;
+    struct esSm     sm;
 
 /**
  * @brief       Red cekanja za dogadjaje.
  */
     struct evtQueue evtQueue;
 
-#if defined(OPT_KERNEL_DBG_CORE) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
+#if defined(OPT_KERNEL_DBG_CORE) && defined(OPT_DBG_USE_CHECK)                  \
+    || defined(__DOXYGEN__)
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
-    uint_fast32_t   signature;
+    uint32_t        signature;
 #endif
 
-#if (OPT_MM_DYNAMIC_SIZE > 0U)                                                  /* Koriste se dinamički i statični memorijski alokatori     */
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
+    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
+    || defined(__DOXYGEN__)
 /**
  * @brief       Memorijska klasa EPA objekta
  */
@@ -130,22 +175,81 @@ struct esEpaHeader {
  * @brief       Ime EPA objekta
  */
     const C_ROM char * name;
-};
+} esEpa_T;
 
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/*------------------------------------------------------------------------*//**
+ * @name        Transport dogadjaja
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta.
+ * @api
+ */
+void esEvtPost(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta.
+ * @iclass
+ */
+void esEvtPostI(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta. Za razliku od
+ *              esEvtPost() funkcije dogadjaj se postavlja na pocetku reda za
+ *              cekanje. Najcesce se koristi kada je potrebno da se EPA objektu
+ *              hitno posalje neki dogadjaj od znacaja koji treba da obradi.
+ * @api
+ */
+void esEvtPostAhead(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta. Za razliku od
+ *              esEvtPost() funkcije dogadjaj se postavlja na pocetku reda za
+ *              cekanje. Najcesce se koristi kada je potrebno da se EPA objektu
+ *              hitno posalje neki dogadjaj od znacaja koji treba da obradi.
+ * @iclass
+ */
+void esEvtPostAheadI(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
  * @name        Osnovne funkcije za menadzment EPA objekata
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Kreira EPA objekat.
- * @param       [in] aMemClass          Klasa memorije koja se koristi za
+ * @param       [in] memClass           Klasa memorije koja se koristi za
  *                                      skladistenje:
  *  @arg        esMemDynClass
  *  @arg        esMemStaticClass
- * @param       [in] aDescription       pokazivac na opisnu strukturu EPA objekta.
+ * @param       [in] description        Opisna struktura EPA objekta.
  * @return      Pokazivac na strukturu zaglavlja EPA objekta.
  * @see         esEpaDef_T
  * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
@@ -153,59 +257,57 @@ struct esEpaHeader {
  * 				parametrima.
  * @api
  */
-esEpaHeader_T * esEpaCreate(
-    const C_ROM esMemClass_T * aMemClass,
-    const C_ROM esEpaDef_T * aDescription);
+esEpa_T * esEpaCreate(
+    const C_ROM esMemClass_T *  memClass,
+    const C_ROM esEpaDef_T *    description);
 
 /**
  * @brief       Unistava EPA objekat.
- * @param       [in] aEpa               Pokazivac na strukturu EPA objekta.
+ * @param       [in] epa                Pokazivac na strukturu EPA objekta.
  * @details     Vrsi se oslobadjanje memorije ukoliko je EPA objekat koristio
  *              dinamicki memorijski alokator.
  * @api
  */
 void esEpaDestroy(
-    esEpaHeader_T       * aEpa);
+    esEpa_T *       epa);
 
 /**
  * @brief       Vraca Id pokazivac EPA objekta.
  * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
  * @api
  */
-esEpaHeader_T * esEpaHeaderGet(
+esEpa_T * esEpaGet(
     void);
 
 /**
  * @brief       Dobavlja prioritet EPA objekta
- * @param       [in] aEpa               Pokazivac na EPA objekat
+ * @param       [in] epa                Pokazivac na EPA objekat
  * @return      Trenutni prioritet EPA objekta.
  * @api
  */
 uint8_t esEpaPrioGet(
-    const esEpaHeader_T * aEpa);
+    const esEpa_T * epa);
 
 /**
  * @brief       Postavlja nov prioritet EPA objekta.
- * @param       [out] aEpa              Pokazivac na EPA objekat,
- * @param       [in] aNewPrio           nov prioritet EPA objekta.
+ * @param       [out] epa               Pokazivac na EPA objekat,
+ * @param       [in] newPrio            nov prioritet EPA objekta.
  * @warning     Ukoliko je zahtevani prioritet vec zauzet javice se assert
  *              obavestenje.
  * @api
  */
 void esEpaPrioSet(
-    esEpaHeader_T       * aEpa,
-    uint8_t             aNewPrio);
+    esEpa_T *       epa,
+    uint8_t         newPrio);
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-------------------------------------------------------------------*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of core.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* CORE_H_ */
