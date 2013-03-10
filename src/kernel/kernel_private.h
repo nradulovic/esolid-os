@@ -36,6 +36,7 @@
 #include "mm_pkg.h"
 #include "evt_pkg.h"
 #include "smp_pkg.h"
+#include "evtq_pkg.h"
 #include "core_pkg.h"
 
 /*==================================================================================  DEFINES  ==*/
