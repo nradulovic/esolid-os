@@ -31,9 +31,20 @@
 #ifndef SMP_PKG_H_
 #define SMP_PKG_H_
 
-
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
+
+#if (OPT_SMP_SM_TYPES == 1)
+# define SM_DISPATCH(sm, evt)                                                   \
+    fsmDispatch(sm, evt)
+#elif (OPT_SMP_SM_TYPES == 2)
+# define SM_DISPATCH(sm, evt)                                                   \
+    hsmDispatch(sm, evt)
+#else
+# define SM_DISPATCH(sm, evt)                                                   \
+    (*(sm)->dispatch)(sm, evt)
+#endif
+
 /*==================================================================================  MACRO's  ==*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
@@ -42,6 +53,9 @@ extern "C" {
 
 /*===============================================================================  DATA TYPES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
+
+extern const C_ROM esEvt_T evtSignal[];
+
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
@@ -52,46 +66,40 @@ extern "C" {
  * @return      Potreban memorijski prostor u bajtovima.
  * @notapi
  */
-size_t hsmReqSize(
-    size_t              aStateDept);
+size_t stateQReqSize(
+    uint8_t         levels);
+
+esStatus_T hsmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt);
+
+esStatus_T fsmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt);
 
 /**
- * @brief       Pokrece dati HSM automat.
- * @param       aEpa                    Pokazivac na strukturu HSM automata,
- * @param       aEvt                    podatak/pokazivac na podatak dogadjaja.
- * @details     Ovu funkcija se pokrece nakon zakljucivanja da je dati
- *              automat spreman za rad. Dispecer pokrece stateHandler funkcije i
- *              ispituje njihovu povratnu vrednost. U zavisnosti od povratne
- *              vrednosti funkcije stanja on preduzima dodatne akcije. Kada je
- *              zavrsena obrada dogadjaja, dispecer postavlja prazan signal
- *              (SIG_EMPTY) u pokazivac dogadjaja cime se govori da je zavrsena
- *              obrada prethodnog dogadjaja i da je automat spreman da prihvati
- *              nov dogadjaj.
- */
-void hsmDispatch(
-    esEpaHeader_T       * aEpa,
-    const esEvtHeader_T * aEvt);
-
-/**
- * @brief       Konstruise HSM automat
- * @param       aEpa                    Pokazivac na tek kreiran EPA objekat,
- * @param       aInitState              inicijalno stanje automata,
- * @param       aStateBuff              pokazivac na memorijski bafer za stanja,
- * @param       aStateDepth             maksimalna hijerarhijska dubina stanja
+ * @brief       Konstruise automat
+ * @param       [out] sm                Pokazivac na tek kreiranu strukturu
+ *                                      automata,
+ * @param       [in] initState          inicijalno stanje automata,
+ * @param       [in] stateQueue         pokazivac na memorijski bafer za stanja,
+ * @param       [in] levels             maksimalna hijerarhijska dubina stanja
  *                                      automata.
+ * @notapi
  */
-void hsmInit(
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        aInitState,
-    esPtrState_T        * aStateBuff,
-    size_t              aStateDepth);
+void smInit (
+    esSm_T *        sm,
+    esState_T       initState,
+    esState_T *     stateQueue,
+    size_t          levels);
 
 /**
  * @brief       Dekonstruise HSM automat
- * @param       aEpa                    Pokazivac na kreiran EPA objekat.
+ * @param       [out] sm                Pokazivac na kreiran automat.
+ * @notapi
  */
-void hsmDeInit(
-    esEpaHeader_T       * aEpa);
+void smDeInit(
+    esSm_T *        sm);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
