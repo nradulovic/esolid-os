@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,25 +20,25 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Implementacija Memory Management modula.
  * @addtogroup  mm_impl
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
-/*============================================================================  INCLUDE FILES  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
 
 #define MM_PKG_H_VAR
 #include "kernel_private.h"
 #include "primitive/list.h"
 
-/*============================================================================  LOCAL DEFINES  ==*/
+/*=========================================================  LOCAL DEFINES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/*------------------------------------------------------------------------*//**
  * @name        Konstante za status blokova
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Maska koja se koristi za definisanje statusa bloka
@@ -58,18 +58,18 @@
  */
 #define BLOCK_IS_FREE                   (size_t)0U
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+/** @} *//*-------------------------------------------------------------------*/
 
-#if (OPT_MM_MANAGED_SIZE == 0U) || defined(__DOXYGEN__)
+#if (OPT_MM_MANAGED_SIZE == 0U) || defined(__DOXYGEN__)                         /* Koristi se linker skripta.                               */
 /**
  * @brief       Pocetak heap memorije
  */
-# define HEAP_BEGIN                     (uint8_t *)&_sheap
+# define HEAP_BEGIN                     &_sheap
 
 /**
  * @brief       Kraj heap memorije
  */
-# define HEAP_END                       (uint8_t *)&_eheap
+# define HEAP_END                       &_eheap
 
 /**
  * @brief       Velicina heap memorije
@@ -82,7 +82,7 @@
 # define HEAP_SIZE                      sizeof(heap)
 #endif
 
-/*============================================================================  LOCAL MACRO's  ==*/
+/*=========================================================  LOCAL MACRO's  ==*/
 
 /**
  * @brief       Izvlacenje statusa bloka iz @c size clana.
@@ -112,7 +112,7 @@
 #define PHY_BLK_PREV(currBlk)                                                   \
     ((dmemBlkHdr_T *)((uint8_t *)(currBlk) + currBlk->blk.size + sizeof(dmemBlk_T)))
 
-/*=========================================================================  LOCAL DATA TYPES  ==*/
+/*======================================================  LOCAL DATA TYPES  ==*/
 
 /**
  * @brief       Struktura jednog bloka memorije.
@@ -146,26 +146,24 @@ typedef struct dmemBlkHdr {
     esDlsList_T     freeList;
 } dmemBlkHdr_T;
 
-/*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
+/*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-static void smemInit(
+C_UNUSED_FUNC static void smemInit(
     void);
 
-static void dmemInit(
+C_UNUSED_FUNC static void dmemInit(
     uint8_t     * dbegin,
     uint8_t     * dend);
 
-static void dummyDeAlloc(
+C_UNUSED_FUNC static void dummyDeAlloc(
     void            * aMemory);
 
-/*==========================================================================  LOCAL VARIABLES  ==*/
+/*=======================================================  LOCAL VARIABLES  ==*/
 
-#if (OPT_MM_DYNAMIC_SIZE != -1) || defined(__DOXYGEN__)
 /**
  * @brief       Cuvar liste slobodnih blokova
  */
 static dmemBlkHdr_T * gDmemSentinel;
-#endif
 
 /**
  * @brief       Cuvar vrednosti slobodne memorije staticnog alokatora
@@ -181,17 +179,17 @@ static uint8_t * gSmemSentinel;
 static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
 #endif
 
-/*=========================================================================  GLOBAL VARIABLES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/*------------------------------------------------------------------------*//**
 * @name        Klase memorijskog alokatora
-* @{ *//*---------------------------------------------------------------------------------------*/
+* @{ *//*---------------------------------------------------------------------*/
 
 /**
  * @brief       Dinamicki memorijski alokator
  */
 const C_ROM esMemClass_T esMemDynClass = {
-#if (OPT_MM_DYNAMIC_SIZE == -1)
+#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     &esSmemAlloc,
     &dummyDeAlloc,
 #else
@@ -204,7 +202,7 @@ const C_ROM esMemClass_T esMemDynClass = {
  * @brief       Staticki memorijski alokator
  */
 const C_ROM esMemClass_T esMemStaticClass = {
-#if (OPT_MM_DYNAMIC_SIZE == 0U)
+#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     &esDmemAlloc,
     &esDmemDeAlloc,
 #else
@@ -213,7 +211,7 @@ const C_ROM esMemClass_T esMemStaticClass = {
 #endif
 };
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+/** @} *//*-------------------------------------------------------------------*/
 
 /**
  * @brief       Pocetak heap memorije, definicija je u linker skripti.
@@ -225,7 +223,7 @@ extern uint8_t _sheap;
  */
 extern uint8_t _eheap;
 
-/*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
+/*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 
 /**
  * @brief       Inicijalizacija statičnog memorijskog menadzera
@@ -243,10 +241,11 @@ static void smemInit(
  * @param       dend                    kraj memorijske oblasti
  */
 static void dmemInit(
-    uint8_t         * dbegin,
-    uint8_t         * dend) {
+    uint8_t *       dbegin,
+    uint8_t *       dend) {
 
-    ((dmemBlkHdr_T *)dbegin)->blk.size = (size_t)(dend - dbegin - sizeof(dmemBlk_T) - sizeof(dmemBlkHdr_T));
+    ((dmemBlkHdr_T *)dbegin)->blk.size =
+        (size_t)(dend - dbegin - sizeof(dmemBlk_T) - sizeof(dmemBlkHdr_T));
     gDmemSentinel = ((dmemBlkHdr_T *)dend - 1U);
     gDmemSentinel->blk.size = (size_t)0;
     esSlsSentinelInit_(
@@ -273,35 +272,37 @@ static void dummyDeAlloc(
     (void)aMemory;
 }
 
-/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+/*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+/*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
-/*-----------------------------------------------------------------------------------------------*/
-void mmInit(
+/*----------------------------------------------------------------------------*/
+void esMemInit(
     void) {
 
-#if (OPT_MM_DYNAMIC_SIZE > 0U)
+    esHalInit();
+
+#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+    dmemInit(
+        HEAP_BEGIN,
+        HEAP_END);
+#elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+    smemInit();
+#else
     void * tmp;
 
     smemInit();
     tmp = esSmemAlloc(
-        OPT_MM_DYNAMIC_SIZE);
+        OPT_MM_DISTRIBUTION);
     dmemInit(
-        tmp, (tmp + (size_t)OPT_MM_DYNAMIC_SIZE));
-#elif (OPT_MM_DYNAMIC_SIZE == 0U)
-    dmemInit(
-        HEAP_BEGIN,
-        HEAP_END);
-#elif (OPT_MM_DYNAMIC_SIZE == -1)
-    smemInit();
+        tmp, (tmp + (size_t)OPT_MM_DISTRIBUTION));
 #endif
 }
 
-/*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
-
+/*----------------------------------------------------------------------------*/
 size_t esSmemFreeSpace(
     void) {
 
-#if (OPT_MM_DYNAMIC_SIZE != 0U)
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     size_t freeSpace;
 
     freeSpace = HEAP_END - gSmemSentinel;
@@ -313,84 +314,84 @@ size_t esSmemFreeSpace(
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 void * esSmemAllocI(
-    size_t          aSize) {
+    size_t          size) {
 
-#if (OPT_MM_DYNAMIC_SIZE != 0U)
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     void * tmp;
 
-    if (aSize <= (HEAP_END - gSmemSentinel)) {
+    if (size <= (HEAP_END - gSmemSentinel)) {
         tmp = gSmemSentinel;
-        gSmemSentinel += aSize;
+        gSmemSentinel += size;
     } else {
         tmp = (void *)0;
     }
 
     return (tmp);
 #else
-    (void)aSize;
+    (void)size;
 
     return ((void *)0);
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 void * esSmemAlloc(
-    size_t          aSize) {
+    size_t          size) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
     void * tmp;
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    tmp = esSmemAllocI(aSize);
+    tmp = esSmemAllocI(size);
     ES_CRITICAL_EXIT();
 
     return (tmp);
 #else
-    (void)aSize;
+    (void)size;
 
     return ((void *)0);
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 void * esDmemAlloc(
-    size_t          aSize) {
+    size_t          size) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
     void * tmpMem;
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpMem = esDmemAllocI(
-        aSize);
+        size);
     ES_CRITICAL_EXIT();
 
     return (tmpMem);
 #else
-    (void)aSize;
+    (void)size;
 
     return ((void *)0);
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 void * esDmemAllocI(
-    size_t          aSize) {
+    size_t          size) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     dmemBlkHdr_T * prevPhy;
     dmemBlkHdr_T * freeBlk;
 
-    if (aSize < (sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T))) {
-        aSize = sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T);
+    if (size < (sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T))) {
+        size = sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T);
     }
 
 #if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
-    aSize = ES_ALIGN(aSize, ES_CPU_ATTRIB_ALIGNMENT);
+    size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
 #endif
     DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
@@ -398,12 +399,12 @@ void * esDmemAllocI(
         &(gDmemSentinel->freeList),
         freeBlk) {
 
-        if (freeBlk->blk.size >= aSize) {
+        if (freeBlk->blk.size >= size) {
 
-            if (freeBlk->blk.size >= (aSize + sizeof(dmemBlkHdr_T))) {
-                freeBlk->blk.size -= (aSize + sizeof(dmemBlk_T));
+            if (freeBlk->blk.size >= (size + sizeof(dmemBlkHdr_T))) {
+                freeBlk->blk.size -= (size + sizeof(dmemBlk_T));
                 freeBlk = PHY_BLK_PREV(freeBlk);
-                freeBlk->blk.size = aSize;
+                freeBlk->blk.size = size;
                 prevPhy = PHY_BLK_PREV(freeBlk);
                 esSlsNodeAddAfter_(
                     &(prevPhy->blk.phyList),
@@ -420,56 +421,56 @@ void * esDmemAllocI(
 
     return ((void *)0);
 #else
-    (void)aSize;
+    (void)size;
 
     return ((void *)0);
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 size_t esDmemBlockSize(
-    void            * aMemory) {
+    void *          mem) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     dmemBlkHdr_T * currBlk;
 
-    currBlk = C_CONTAINER_OF((esDlsList_T *)aMemory, dmemBlkHdr_T, freeList);
+    currBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
 
     return ((size_t)(currBlk->blk.size & ~BLOCK_STATUS_MASK));
 #else
-    (void)aMemory;
+    (void)mem;
 
     return (0);
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 void esDmemDeAlloc(
-    void            * aMemory) {
+    void *          mem) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
     esDmemDeAllocI(
-        aMemory);
+        mem);
     ES_CRITICAL_EXIT();
 #else
-    (void)aMemory;
+    (void)mem;
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 void esDmemDeAllocI(
-    void            * aMemory) {
+    void *          mem) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     size_t blkStat;
     dmemBlkHdr_T * freeBlk;
     dmemBlkHdr_T * currPhy;
     dmemBlkHdr_T * tmpPhy;
 
-    freeBlk = C_CONTAINER_OF((esDlsList_T *)aMemory, dmemBlkHdr_T, freeList);
+    freeBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
     currPhy = esSlsNodeEntry(
         dmemBlkHdr_T,
         blk.phyList,
@@ -501,15 +502,15 @@ void esDmemDeAllocI(
         &(gDmemSentinel->freeList),
         &(freeBlk->freeList));
 #else
-    (void)aMemory;
+    (void)mem;
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 size_t esDmemFreeSpace(
     void) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
     size_t tmpSize;
 
@@ -523,13 +524,13 @@ size_t esDmemFreeSpace(
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 size_t esDmemFreeSpaceI(
     void) {
 
-#if (OPT_MM_DYNAMIC_SIZE != -1)
-    size_t  free;
-    dmemBlkHdr_T   * currBlk;
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+    size_t free;
+    dmemBlkHdr_T * currBlk;
 
     free = (size_t)0;
 
@@ -547,7 +548,7 @@ size_t esDmemFreeSpaceI(
 #endif
 }
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of mem.c
- *************************************************************************************************/
+ ******************************************************************************/

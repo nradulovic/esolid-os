@@ -48,24 +48,17 @@ struct esMemClass {
 /**
  * @brief       Memorijski alokator
  */
-    void * (*pAlloc)(size_t);
+    void * (*alloc)(size_t);
 
 /**
  * @brief       Memorijski dealokator
  */
-    void (*pDeAlloc)(void *);
+    void (*deAlloc)(void *);
 
 };
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
-
-/**
- * @brief       Inicijalizuje memorijske alokatore
- */
-void mmInit(
-    void);
-
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
