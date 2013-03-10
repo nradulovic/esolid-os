@@ -114,12 +114,12 @@ C_INLINE void epaInit_(
     esEpa_T *       epa,
     esState_T *     stateQueue,
     esEvt_T **      evtQueue,
-    const C_ROM esEpaDef_T * description);
+    const C_ROM esEpaDef_T * definition);
 
 C_INLINE void esEpaDeInit_(
     esEpa_T *       epa);
 
-C_INLINE esEvt_T * evtGetI_(
+esEvt_T * evtFetchI(
     esEpa_T *       epa);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -326,7 +326,7 @@ C_INLINE_ALWAYS void schedRdyRmI_(
  * @param       [out] epa               Pokazivac na strukturu EPA objekta,
  * @param       [in] stateQueue         memorija za cuvanje stanja HSM automata,
  * @param       [in] evtQueue           memorija za cuvanje reda za cekanje,
- * @param       [in] description        pokazivac na opisnu strukturu EPA
+ * @param       [in] definicionu        pokazivac na definicionu strukturu EPA
  *                                      objekta.
  * @notapi
  */
@@ -334,27 +334,21 @@ C_INLINE void epaInit_(
     esEpa_T *       epa,
     esState_T *     stateQueue,
     esEvt_T **      evtQueue,
-    const C_ROM esEpaDef_T * description) {
+    const C_ROM esEpaDef_T * definition) {
 
     ES_CRITICAL_DECL();
 
     smInit(
         (esSm_T *)epa,
-        description->smInitState,
+        definition->smInitState,
         stateQueue,
-        description->smLevels);
-    esQpInit_(
-        &(epa->evtQueue.queue),
-        (void **)evtQueue,
-        description->evtQueueDepth);
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    epa->evtQueue.free = esQpFreeSpace_(
-        &(epa->evtQueue.queue));
-    epa->evtQueue.freeMin = epa->evtQueue.free;
-#endif
-    epa->prio = description->epaPrio;
-    epa->name = description->epaName;
+        definition->smLevels);
+    evtQInit(
+        &epa->evtQueue,
+        evtQueue,
+        definition->evtQueueDepth);
+    epa->prio = definition->epaPrio;
+    epa->name = definition->epaName;
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedRdyRegI_(
@@ -383,25 +377,21 @@ C_INLINE void esEpaDeInit_(
         epa);
     ES_CRITICAL_EXIT();
 
-    while (FALSE == esQpIsEmpty_(&(epa->evtQueue.queue))) {
+    while (FALSE == evtQIsEmptyI_(&epa->evtQueue)) {
         esEvt_T * evt;
 
-        evt = esQpGet_(
-            &(epa->evtQueue.queue));
+        evt = evtQGetI_(
+            &epa->evtQueue);
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         esEvtDestroyI(
             evt);
         ES_CRITICAL_EXIT();
     }
-    esQpDeInit_(
-        &(epa->evtQueue.queue));
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    epa->evtQueue.freeMin = epa->evtQueue.free = 0U;
-#endif
-    esSmDeInit(
-        &(epa->sm));
+    evtQDeInit(
+        &epa->evtQueue);
+    smDeInit(
+        &epa->sm);
 }
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -415,24 +405,20 @@ C_INLINE void esEpaDeInit_(
  * @return      Dogadjaj iz reda cekanja.
  * @notapi
  */
-C_INLINE esEvt_T * evtGetI_(
+esEvt_T * evtFetchI(
     esEpa_T *       epa) {
 
     esEvt_T * evt;
 
-    evt = esQpGet_(
-        &(epa->evtQueue.queue));
-    evtUsrRm_(
+    evt = evtQGetI_(
+        &epa->evtQueue);
+    evtUsrRmI_(
         evt);
 
-    if (TRUE == esQpIsEmpty_(&(epa->evtQueue.queue))) {
+    if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         schedRdyRmI_(
             epa);
     }
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    ++(epa->evtQueue.free);
-#endif
 
     return (evt);
 }
@@ -461,23 +447,22 @@ void esEvtPostI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
-    if (FALSE == esQpIsFull_(&(epa->evtQueue.queue))) {
-        esQpPut_(
-            &(epa->evtQueue.queue),
-            (void *)evt);
-        evtUsrAdd_(
-            evt);
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    --(epa->evtQueue.free);
-    if (epa->evtQueue.free < epa->evtQueue.freeMin) {
-        epa->evtQueue.freeMin = epa->evtQueue.free;
-    }
-#endif
+    if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         schedRdyInsertI_(
             epa);
+        evtQPutI_(
+            &epa->evtQueue,
+            evt);
+        evtUsrAddI_(
+            evt);
+    } else if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
+        evtQPutI_(
+            &epa->evtQueue,
+            evt);
+        evtUsrAddI_(
+            evt);
     } else {
-        /* Red za dogadjaje je pun */
+        /* Greska! Red je pun. */
         esEvtDestroyI(
             evt);
     }
@@ -503,23 +488,22 @@ void esEvtPostAheadI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
-    if (FALSE == esQpIsFull_(&(epa->evtQueue.queue))) {
-        esQpPutAhead_(
-            &(epa->evtQueue.queue),
-            (void *)evt);
-        evtUsrAdd_(
-            evt);
-
-#if defined(OPT_KERNEL_DBG_EVT)
-    --(epa->evtQueue.free);
-    if (epa->evtQueue.free < epa->evtQueue.freeMin) {
-        epa->evtQueue.freeMin = epa->evtQueue.free;
-    }
-#endif
+    if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         schedRdyInsertI_(
             epa);
+        evtQPutAheadI_(
+            &epa->evtQueue,
+            evt);
+        evtUsrAddI_(
+            evt);
+    } else if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
+        evtQPutAheadI_(
+            &epa->evtQueue,
+            evt);
+        evtUsrAddI_(
+            evt);
     } else {
-        /* Red za dogadjaje je pun */
+        /* Greska! Red je pun. */
         esEvtDestroyI(
             evt);
     }
@@ -540,15 +524,20 @@ esEpa_T * esEpaCreate(
                                                                                 /* radi brzeg pristupa memoriji.                            */
     coreSize = ES_ALIGN(
         definition->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
-    smpQSize = ES_ALIGN(stateQReqSize(
-        definition->smLevels), ES_CPU_ATTRIB_ALIGNMENT);
+    smpQSize = ES_ALIGN(
+        stateQReqSize(
+            definition->smLevels),
+        ES_CPU_ATTRIB_ALIGNMENT);
     evtQSize = ES_ALIGN(
-        definition->evtQueueDepth * sizeof(void *), ES_CPU_ATTRIB_ALIGNMENT);
+        evtQReqSize(
+            definition->evtQueueDepth),
+        ES_CPU_ATTRIB_ALIGNMENT);
 #else
     coreSize = definition->epaWorkspaceSize;
     smpQSize = stateQReqSize(
         definition->smLevels);
-    evtQSize = definition->evtQueueDepth * sizeof(void *);
+    evtQSize = evtQReqSize(
+        definition->evtQueueDepth
 #endif
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
@@ -680,7 +669,7 @@ void esKernelStart(
             esStatus_T status;
 
             gCurrentEpa = epa = schedRdyGetEpaI_();
-            evt = evtGetI_(
+            evt = evtFetchI(
                 epa);
             ES_CRITICAL_EXIT();
             status = SM_DISPATCH(
