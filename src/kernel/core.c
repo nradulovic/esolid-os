@@ -527,8 +527,8 @@ void esEvtPostAheadI(
 
 /*----------------------------------------------------------------------------*/
 esEpa_T * esEpaCreate(
-    const C_ROM esMemClass_T * memClass,
-    const C_ROM esEpaDef_T * description) {
+    const C_ROM esMemClass_T *  memClass,
+    const C_ROM esEpaDef_T *    definition) {
 
     uint8_t * newEpa;
     size_t coreSize;
@@ -539,16 +539,16 @@ esEpa_T * esEpaCreate(
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     coreSize = ES_ALIGN(
-        description->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
+        definition->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
     smpQSize = ES_ALIGN(stateQReqSize(
-        description->smLevels), ES_CPU_ATTRIB_ALIGNMENT);
+        definition->smLevels), ES_CPU_ATTRIB_ALIGNMENT);
     evtQSize = ES_ALIGN(
-        description->evtQueueDepth * sizeof(void *), ES_CPU_ATTRIB_ALIGNMENT);
+        definition->evtQueueDepth * sizeof(void *), ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    coreSize = description->epaWorkspaceSize;
+    coreSize = definition->epaWorkspaceSize;
     smpQSize = stateQReqSize(
-        description->smLevels);
-    evtQSize = description->evtQueueDepth * sizeof(void *);
+        definition->smLevels);
+    evtQSize = definition->evtQueueDepth * sizeof(void *);
 #endif
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
@@ -575,13 +575,13 @@ esEpa_T * esEpaCreate(
     }
 #else
     newEpa = (* memClass->alloc)(coreSize + smpQSize + evtQSize);
-    ((esEpa_T *)newEpa)->memClass = memClass;
+    *((const C_ROM struct esMemClass **)newEpa) = memClass;
 #endif
     epaInit_(
         (esEpa_T *)newEpa,
         (esState_T *)(newEpa + coreSize),
         (esEvt_T **)(newEpa + coreSize + smpQSize),
-        description);
+        definition);
 
     return ((esEpa_T *)newEpa);
 }
@@ -591,7 +591,7 @@ void esEpaDestroy(
     esEpa_T *       epa) {
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    /* Greska */
+    /* Greska! Statican objekat */
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
 
@@ -602,10 +602,10 @@ void esEpaDestroy(
     esDmemDeAllocI(
         epa);
     ES_CRITICAL_EXIT();
-#else                                                                           /* Koriste se oba memorijska menadzera                      */
+#else
     esEpaDeInit_(
         epa);
-    (* epa->memClass->alloc)(epa);
+    (**((const C_ROM struct esMemClass **)epa))(epa);
 #endif
 }
 

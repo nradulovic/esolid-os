@@ -77,12 +77,12 @@ typedef struct esEpaDef {
     size_t          evtQueueDepth;
 
 /**
- * @brief       Inicijalno stanje HSM automata
+ * @brief       Inicijalno stanje automata
  */
     esState_T       smInitState;
 
 /**
- * @brief       Maksimalna dubina hijerarhije stanja HSM automata.
+ * @brief       Maksimalna dubina hijerarhije stanja automata.
  */
     uint8_t         smLevels;
 } esEpaDef_T;
@@ -154,15 +154,6 @@ typedef struct esEpa {
  * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
     uint32_t        signature;
-#endif
-
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
-    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Memorijska klasa EPA objekta
- */
-    const C_ROM struct esMemClass * memClass;
 #endif
 
 /**
@@ -249,7 +240,7 @@ void esEvtPostAheadI(
  *                                      skladistenje:
  *  @arg        esMemDynClass
  *  @arg        esMemStaticClass
- * @param       [in] description        Opisna struktura EPA objekta.
+ * @param       [in] definition         Definiciona struktura EPA objekta.
  * @return      Pokazivac na strukturu zaglavlja EPA objekta.
  * @see         esEpaDef_T
  * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
@@ -259,7 +250,7 @@ void esEvtPostAheadI(
  */
 esEpa_T * esEpaCreate(
     const C_ROM esMemClass_T *  memClass,
-    const C_ROM esEpaDef_T *    description);
+    const C_ROM esEpaDef_T *    definition);
 
 /**
  * @brief       Unistava EPA objekat.
