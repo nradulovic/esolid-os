@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,49 +20,50 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief   	Interfejs State Machine Processor (SMP) modula.
  * @details     This file is not meant to be included in application code
  *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  smp_intf
- ****************************************************************************************//** @{ */
-
+ *********************************************************************//** @{ */
 
 #ifndef SMP_H_
 #define SMP_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
+#include "kernel/evt.h"
 
-/*-------------------------------------------------------------------------------------------*//**
+/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
+
+/*------------------------------------------------------------------------*//**
  * @name        Makroi za tranziciju stanja
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Vraca dispeceru informaciju da treba da se izvrsi tranzicija.
- * @param       epa                     Pokazivac na strukturu HSM automata,
- * @param       state                   naredno stanje automata.
+ * @param       sm                      Pokazivac na strukturu automata,
+ * @param       stateHandler            naredno stanje automata.
  * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
  *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
  *              tip desnog izraza.
  */
-#define ES_STATE_TRAN(epa, state)                                              \
-    (((esEpaHeader_T *)(epa))->exec.ptrState = (esPtrState_T)(state), RETN_TRAN)
+#define ES_STATE_TRAN(sm, stateHandler)                                         \
+    (((esSm_T *)(sm))->state = (esState_T)(stateHandler), RETN_TRAN)
 
 /**
  * @brief       Vraca dispeceru informaciju o super stanju trenutnog stanja.
- * @param       epa                     Pokazivac na strukturu HSM automata,
- * @param       state                   super stanje trenutnog stanja.
+ * @param       sm                     Pokazivac na strukturu automata,
+ * @param       stateHandler           super stanje trenutnog stanja.
  * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
  *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
  *              tip desnog izraza.
  * @note        Koristi se samo kod HSM automata.
  */
-#define ES_STATE_SUPER(epa, state)                                             \
-    (((esEpaHeader_T *)(epa))->exec.ptrState = (esPtrState_T)(state), RETN_SUPER)
+#define ES_STATE_SUPER(sm, stateHandler)                                             \
+    (((esSm_T *)(sm))->state = (esState_T)(stateHandler), RETN_SUPER)
 
 /**
  * @brief       Vraca dispeceru informaciju da je dogadjaj opsluzen.
@@ -79,13 +80,58 @@
 #define ES_STATE_IGNORED()                                                     \
     (RETN_IGNORED)
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
+
+/**
+ * @brief       Identifikatori predefinisanih dogadjaja
+ * @details     Zadnji predefinisan identifikator je @ref SIG_ID_USR. Nakon ovog
+ *              identifikatora korisnik definise svoje, aplikacione
+ *              identifikatore dogadjaja.
+ */
+enum evtId {
+/**
+ * @brief       Signalni dogadjaj - prazan signal.
+ * @note        Ne koristi se.
+ */
+    SIG_EMPTY,
+
+/**
+ * @brief       Signalni dogadjaj - zahteva se entry obrada u datom stanju.
+ */
+    SIG_ENTRY,
+
+/**
+ * @brief       Signalni dogadjaj - zahteva se exit obrada u datom stanju.
+ */
+    SIG_EXIT,
+
+/**
+ * @brief       Signalni dogadjaj - zahteva se inicijalizaciona (init) putanja.
+ */
+    SIG_INIT,
+
+/**
+ * @brief       Signalni dogadjaj - zahteva se super stanje.
+ * @details     Od funkcije stanja (u aplikaciji) se zahteva koje je njeno
+ *              super stanje. Funkcija stanja mora da vrati pokazivac na njeno
+ *              super stanje.
+ */
+    SIG_SUPER,
+
+/**
+ * @brief       Domen korisnickih identifikatora dogadjaja.
+ * @details     Nakon ovog identifikatora korisnik definise svoje, aplikacione
+ *              identifikatore dogadjaja.
+ */
+    SIG_ID_USR = 15
+};
+
 
 /**
  * @brief       Nabrajanje odgovora state handler funkcije.
@@ -93,13 +139,13 @@ extern "C" {
  *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
  *              dogadjaj.
  */
-typedef enum esState {
+typedef enum esStatus {
 /**
- * @brief       Ne treba izvrsiti nikakve dalje akcije.
- * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
- *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
+ * @brief       Treba izvrsiti tranziciju ka drugom stanju.
+ * @details     Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
+ *              drugom stanju.
  */
-    RETN_HANDLED,
+    RETN_TRAN,
 
 /**
  * @brief       Treba odloziti pristigli dogadjaj.
@@ -107,6 +153,13 @@ typedef enum esState {
  *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
  */
     RETN_DEFERRED,
+
+/**
+ * @brief       Ne treba izvrsiti nikakve dalje akcije.
+ * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
+ *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
+ */
+    RETN_HANDLED,
 
 /**
  * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
@@ -117,13 +170,6 @@ typedef enum esState {
     RETN_IGNORED,
 
 /**
- * @brief       Treba izvrsiti tranziciju ka drugom stanju.
- * @details     Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
- *              drugom stanju.
- */
-    RETN_TRAN,
-
-/**
  * @brief       Vraca se koje je super stanje date state handler funkcije.
  * @details     Ova vrednost se vraca kada state handler funkcija ne zna da
  *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
@@ -131,87 +177,139 @@ typedef enum esState {
  */
     RETN_SUPER
 
-} esState_T;
+} esStatus_T;
 
 /**
  * @brief       Tip pokazivaca na state handler funkcije.
- * @details     Funkcije vracaju esState_T , a kao parametar prihvataju
- *              void pokazivac na strukturu izvrsne jedinice i pokazivac na
- *              dogadjaje ili sam dogadjaj.
+ * @details     Funkcije vracaju esStatus_T , a kao parametar prihvataju
+ *              pokazivac na strukturu izvrsne jedinice i pokazivac na
+ *              dogadjaj.
  */
-typedef esState_T (* esPtrState_T) (esEpaHeader_T *, esEvtHeader_T *);
+typedef esStatus_T (* esState_T) (void *, esEvt_T *);
 
 /**
- * @brief       Struktura HSM automata
+ * @brief       Struktura automata
  */
-struct smExec {
+typedef struct esSm {
+
+#if (OPT_KERNEL_API_LEVEL < 2)                                                  \
+    && (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                              \
+    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
+    || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na klasu memorijskog alokatora
+ * @details     Ovaj clan strukture se koristi samo u ukoliko se ne koristi
+ *              kernel interfejs.
+ */
+    const C_ROM struct esMemClass * memClass;
+#endif
+
 /**
  * @brief       Pokazivac na state handler funkciju.
  * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
  *              dogadjaja.
  */
-    esPtrState_T    ptrState;
+    esState_T       state;
 
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_AND_HSM) || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na dispecer funkciju datog automata
+ * @details     Ovaj clan strukture se koristi samo ukoliko se istovremeno
+ *              koriste FSM i HSM automati.
+ */
+    esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
+#endif
+
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
 /**
  * @brief       Niz za cuvanje izvornih stanja HSM automata
+ * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
  */
-    esPtrState_T    * pSrcStates;
+    esState_T *     stateQBegin;
 
 /**
  * @brief       Niz za cuvanje odredisnih stanja HSM automata
+ * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
  */
-    esPtrState_T    * pDstStates;
-};
+    esState_T *     stateQEnd;
+#endif
+} esSm_T;
 
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/*------------------------------------------------------------------------*//**
  * @name Funkcije za rad sa konacnim automatom (State Machine)
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Da li je automat aEpa u datom aState stanju?
- * @param       [in] aEpa               Pokazivac na strukturu HSM automata,
- * @param       [in] aState             stanje automata koje se ispituje.
- * @return                              Da li je automat u tom stanju ili
- *                                      podstanju.
- * @retval      TRUE                    Automat je u tom stanju ili podstanju.
- * @retval      FALSE                   Automat nije u tom stanju.
- * @details     Vraca da li je @c aEpa u navedenom stanju ili podstanju
- *              @c aState. Funkcija za vreme ispitivanja automata @c aEpa
- *              zabranjuje prekide, da se ne bi istovremeno pokrenuo automat u
- *              toku ispitivanja. Kada se zavrsi sa ispitivanjem automata,
- *              funkcija vraca automat u stanje koje je zatekla, istovremeno,
- *              omogucavajuci prekide.
+ * @brief       Inicijalizuje SMP modul
+ * @details     Pre koriscenja funkcija SMP modula mora se pozvati ova funkcija.
+ * @note        Funkcija ce pozvati inicijalizator funkciju MM modula automatski.
  * @api
  */
-bool_T esSMIsInState(
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        aState);
+void esSmpInit(
+    void);
+
+/**
+ * @brief       Kreira automat
+ * @param       [in] memClass           Memorijska klasa alokatora
+ *  @arg        esMemDynClass           dinamicki alokator
+ *  @arg        esMemStaticClass        staticki alokator
+ * @param       [in] initState          inicijalno stanje automata
+ * @param       [in] levels             hijerarhijska dubina automata
+ * @return      Pokazivac na kreirani automat.
+ * @api
+ */
+esSm_T * esSmCreate(
+    esMemClass_T *  memClass,
+    esState_T       initState,
+    uint8_t         levels);
+
+/**
+ * @brief       Unistava automat
+ * @param       [out] sm                Pokazivac na postojeci automat.
+ * @api
+ */
+void esSmDestroy(
+    esSm_T *        sm);
+
+/**
+ * @brief       Pokrece dati HSM automat.
+ * @param       [in] sm                 Pokazivac na strukturu automata,
+ * @param       [in] evt                pokazivac na dogadjaj.
+ * @return      Status obrade dogadjaja.
+ * @details     Ovu funkcija se pokrece nakon zakljucivanja da je dati
+ *              automat spreman za rad. Dispecer pokrece stateHandler funkcije i
+ *              ispituje njihovu povratnu vrednost. U zavisnosti od povratne
+ *              vrednosti funkcije stanja on preduzima dodatne akcije.
+ * @api
+ */
+esStatus_T esSmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt);
 
 /**
  * @brief       Najvisi nivo u hijerarhiji HSM automata.
- * @param       [in] aEpa               Pokazivac na strukturu HSM automata,
- * @param       [in] aEvt               pokazivac/podatak na strukturu dogadjaja.
- * @return      esState_T               status funkcije.
+ * @param       [in] sm                 Pokazivac na strukturu HSM automata,
+ * @param       [in] evt                pokazivac/podatak na strukturu dogadjaja.
+ * @return      esStatus_T              status funkcije.
  * @note        Uvek vraca odgovor IGNORED, jer ona ne prihvata nikakav
  *              dogadjaj.
  * @api
  */
-esState_T esSMTopState(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
+esStatus_T esSmTopState(
+    void *          sm,
+    esEvt_T *       evt);
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-------------------------------------------------------------------*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of smp.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* SMP_H_ */
