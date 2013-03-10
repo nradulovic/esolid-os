@@ -188,18 +188,36 @@ typedef enum esStatus {
 typedef esStatus_T (* esState_T) (void *, esEvt_T *);
 
 /**
+ * @brief       Definiciona struktura koja opisuje jedan SM objekat
+ * @api
+ */
+typedef struct esSmDef {
+/**
+ * @brief       Potrebna memorija radnog okruzenja za SM objekat
+ */
+    size_t          smWorkspaceSize;
+
+/**
+ * @brief       Inicijalno stanje automata
+ */
+    esState_T       smInitState;
+
+/**
+ * @brief       Maksimalna dubina hijerarhije stanja automata.
+ */
+    uint8_t         smLevels;
+} esSmDef_T;
+
+/**
  * @brief       Struktura automata
  */
 typedef struct esSm {
 
-#if (OPT_KERNEL_API_LEVEL < 2)                                                  \
-    && (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                              \
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                              \
     && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
     || defined(__DOXYGEN__)
 /**
  * @brief       Pokazivac na klasu memorijskog alokatora
- * @details     Ovaj clan strukture se koristi samo u ukoliko se ne koristi
- *              kernel interfejs.
  */
     const C_ROM struct esMemClass * memClass;
 #endif
@@ -256,15 +274,14 @@ void esSmpInit(
  * @param       [in] memClass           Memorijska klasa alokatora
  *  @arg        esMemDynClass           dinamicki alokator
  *  @arg        esMemStaticClass        staticki alokator
- * @param       [in] initState          inicijalno stanje automata
- * @param       [in] levels             hijerarhijska dubina automata
+ * @param       [in] definition         Definiciona struktura SM automata.
  * @return      Pokazivac na kreirani automat.
+ * @see         esSmDef_T
  * @api
  */
 esSm_T * esSmCreate(
-    esMemClass_T *  memClass,
-    esState_T       initState,
-    uint8_t         levels);
+    const C_ROM esMemClass_T *  memClass,
+    const C_ROM esSmDef_T *     definition);
 
 /**
  * @brief       Unistava automat

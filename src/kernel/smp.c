@@ -382,32 +382,30 @@ esStatus_T esSmDispatch(
 
 /*----------------------------------------------------------------------------*/
 esSm_T * esSmCreate(
-    esMemClass_T *  memClass,
-    esState_T       initState,
-    uint8_t         levels) {
+    const C_ROM esMemClass_T *  memClass,
+    const C_ROM esSmDef_T *     definition) {
 
-#if (OPT_KERNEL_API_LEVEL == ES_KERNEL_API_SM)                                  /* Da li je ukljucen API nivo SM? */
     uint8_t * newSm;
     size_t smpSize;
     size_t stateQSize;
 
-# if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)        /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
+#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     smpSize = ES_ALIGN(
-        sizeof(esSm_T),
+        definition->smWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
     stateQSize = ES_ALIGN(
         stateQReqSize(
-            levels),
+            definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
-# else
-    smpSize = sizeof(esSm_T);
+#else
+    smpSize = definition->smWorkspaceSize;
     stateQSize = stateQReqSize(
-        levels);
+        definition->smLevels);
 # endif
 
-# if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     (void)aMemClass;
     {
         ES_CRITICAL_DECL();
@@ -418,7 +416,7 @@ esSm_T * esSmCreate(
             smpSize + stateQSize);
         ES_CRITICAL_EXIT();
     }
-# elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     (void)memClass;
     {
         ES_CRITICAL_DECL();
@@ -429,38 +427,29 @@ esSm_T * esSmCreate(
             smpSize + stateQSize);
         ES_CRITICAL_EXIT();
     }
-# else
+#else
     newSm = (* memClass->alloc)(smpSize + stateQSize);
-    ((esSm_T *)newSm)->memClass = aMemClass;
-# endif
+    *((const C_ROM struct esMemClass **)newSm) = memClass;
+#endif
     smInit(
         (esSm_T *)newSm,
-        initState,
+        definition->smInitState,
         (esState_T *)(newSm + smpSize),
-        levels);
+        definition->smInitState);
 
     return ((esSm_T *)newSm);
-#else /* !(OPT_KERNEL_API_LEVEL == ES_KERNEL_API_SM) */
-    /* Greska! Ne moze ova f-ja u ovom API nivou */
-    (void)memClass;
-    (void)initState;
-    (void)levels;
-
-    return ((esSm_T *)0U);
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
 void esSmDestroy(
     esSm_T *        sm) {
 
-#if (OPT_KERNEL_API_LEVEL == ES_KERNEL_API_SM)                                  /* Da li je ukljucen API nivo SM? */
     smDeInit(
         sm);
 
-# if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     /* Greska! Staticni objekat */
-# elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     {
         ES_CRITICAL_DECL();
 
@@ -470,12 +459,8 @@ void esSmDestroy(
             sm);
         ES_CRITICAL_EXIT();
     }
-# else
-    (* sm->memClass->deAlloc)(sm);
-# endif
-#else /* !(OPT_KERNEL_API_LEVEL == ES_KERNEL_API_SM) */
-    /* Greska! Ne moze ova f-ja u ovom API nivou */
-    (void)sm;
+#else
+    (**((const C_ROM struct esMemClass **)sm))(sm);
 #endif
 }
 
