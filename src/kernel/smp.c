@@ -435,7 +435,7 @@ esSm_T * esSmCreate(
         (esSm_T *)newSm,
         definition->smInitState,
         (esState_T *)(newSm + smpSize),
-        definition->smInitState);
+        definition->smLevels);
 
     return ((esSm_T *)newSm);
 }
