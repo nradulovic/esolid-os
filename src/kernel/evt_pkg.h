@@ -34,6 +34,13 @@
 /*==================================================================================  DEFINES  ==*/
 
 /**
+ * @brief       Bit maska za brojac korisnika dogadjaja
+ * @details     Brojac korisnika je 6-bitni, što znači da maksimalan broj
+ *              korisnika dogadjaja u jednom trenutku iznosi 63 EPA objekata.
+ */
+#define EVT_USERS_MASK                  ((uint_fast8_t)0x3F)
+
+/**
  * @brief       Konstanta za potpis dogadjaja
  * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
  *              koje prime dogadjaj bile sigurne da je dogadjaj kreiran
@@ -52,75 +59,43 @@ extern "C" {
 
 /*===============================================================================  DATA TYPES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
-
-extern const C_ROM esEvtHeader_T evtSignal[];
-
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Unistava dogadjaj.
- * @param       aEvt                    Pokazivac na dogadjaj koji treba da se
- *                                      unisti.
- * @details     Ukoliko dati @c aEvt dogadjaj nema vise ni jednog korisnika,
- *              onda ce memorijski prostor koji on zauzima biti recikliran, u
- *              suprotnom, dogadjaj nastavlja da postoji.
- * @notapi
- * @inline
+ * @brief       Povecava broj korisnika koji koriste dogadjaj
+ * @param       evt                     Dogadjaj koji ce se koristiti
  */
-C_INLINE_ALWAYS void evtDestroyI_(
-    esEvtHeader_T       * aEvt) {
+C_INLINE_ALWAYS void evtUsrAdd_(
+    esEvt_T         * evt) {
 
-    if ((uint_fast8_t)0U == aEvt->dynamic) {
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic)) {                  /* Da li je dogadjaj dinamičan?                             */
+        uint_fast8_t tmpR;
+        uint_fast8_t tmpU;
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
-    aEvt->signature = ~EVT_SIGNATURE;                                           /* Postavljanje lošeg potpisa                               */
-#endif
-        esDmemDeAllocI((void *)aEvt);
+        tmpR = evt->dynamic & ~EVT_USERS_MASK;
+        tmpU = evt->dynamic & EVT_USERS_MASK;
+        ++tmpU;
+        evt->dynamic = tmpR | tmpU;
     }
 }
 
 /**
- * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
- *              cuvanje bafera dogadjaja.
- * @param       aQueueSize              Maksimalan broj dogadjaja u baferu.
- * @return      Potreban memorijski prostor u bajtovima.
- * @notapi
+ * @brief       Smanjuje broj korisnika koji koriste dogadjaj
+ * @param       evt                     Dogadjaj koji se koristio
  */
-size_t evtQReqSize(
-    size_t              aQueueSize);
+C_INLINE_ALWAYS void evtUsrRm_(
+    esEvt_T         * evt) {
 
-/**
- * @brief       Konstruise red cekanja za dogadjaje.
- * @param       aEpa                    Pokazivac na postojeci EPA objekat
- * @param       aStorage                memorijski prostor za red cekanja,
- * @param       aQueueSize              velicina potrebnog reda cekanja.
- * @details     Inicijalizuje strukturu i rezervise memorijski prostor za red
- *              cekanja za dati @c aEvtQueue red cekanja.
- * @notapi
- */
-void evtQInit(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       ** aStorage,
-    size_t              aQueueSize);
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic)) {                  /* Da li je dogadjaj dinamičan?                             */
+        uint_fast8_t tmpR;
+        uint_fast8_t tmpU;
 
-/**
- * @brief       Dekonstruise red cekanja za dogadjaje
- * @param       aEpa                    Pokazivac na red cekanja koji se
- *                                      dekonstruise.
- * @details     Svi dogadjaji koji su u redu cekanja ce se prikupiti i obrisati.
- * @notapi
- */
-void evtQDeInit(
-    esEpaHeader_T       * aEpa);
-
-/**
- * @brief       Dobavlja dogadjaj iz reda za cekanje @c aEvtQueue
- * @param       aEpa                    Pokazivac na red za cekanje.
- * @return      Dogadjaj iz reda cekanja.
- * @notapi
- */
-esEvtHeader_T * evtQGetI(
-    esEpaHeader_T       * aEpa);
+        tmpR = evt->dynamic & ~EVT_USERS_MASK;
+        tmpU = evt->dynamic & EVT_USERS_MASK;
+        --tmpU;
+        evt->dynamic = tmpR | tmpU;
+    }
+}
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #if defined(__cplusplus)
