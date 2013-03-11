@@ -74,7 +74,7 @@ struct rdyBitmap {
  *              tom slucaju, generisani kod je manji i efikasniji prilikom
  *              komutacije EPA objekata.
  */
-    unative_T       bitGroup;
+    volatile unative_T       bitGroup;
 #endif
 
 /**
@@ -82,7 +82,7 @@ struct rdyBitmap {
  * @details     Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
  *              EPA objekat, onda se pretraga nastavlja ovde.
  */
-    unative_T       bit[PRIO_INDX_GROUP];
+    volatile unative_T       bit[PRIO_INDX_GROUP];
 
 /**
  * @brief       Lista aktivnih EPA objekata;
@@ -137,7 +137,7 @@ static esKernelStatus_T gKernelStatus;
 /**
  * @brief       Bitmape spremnih EPA objekata
  */
-static volatile struct rdyBitmap gRdyBitmap;
+static struct rdyBitmap gRdyBitmap;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
