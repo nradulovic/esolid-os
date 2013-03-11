@@ -137,7 +137,7 @@ static esKernelStatus_T gKernelStatus;
 /**
  * @brief       Bitmape spremnih EPA objekata
  */
-static struct rdyBitmap gRdyBitmap;
+static volatile struct rdyBitmap gRdyBitmap;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
