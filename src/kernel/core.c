@@ -92,19 +92,19 @@ struct rdyBitmap {
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
+C_INLINE bool_T schedRdyIsEmptyI_(
     void);
 
-C_INLINE_ALWAYS esEpa_T *schedRdyGetEpaI_(
+C_INLINE esEpa_T *schedRdyGetEpaI_(
     void);
 
-C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
+C_INLINE bool_T schedRdyIsEpaRdy_(
     const esEpa_T * epa);
 
-C_INLINE_ALWAYS void schedRdyRegI_(
+C_INLINE void schedRdyRegI_(
     const esEpa_T * epa);
 
-C_INLINE_ALWAYS void schedRdyUnRegI_(
+C_INLINE void schedRdyUnRegI_(
     const esEpa_T * epa);
 
 static void schedInit(
@@ -162,7 +162,7 @@ static void schedInit(
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
  *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
  */
-C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
+C_INLINE bool_T schedRdyIsEmptyI_(
     void) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -192,7 +192,7 @@ C_INLINE_ALWAYS bool_T schedRdyIsEmptyI_(
  * @brief       Vraca pokazivac na sledeci EPA objekat sa najvecim prioritetom.
  * @return      EPA objekat sa najvecim prioritetom koji ceka na izvrsenje.
  */
-C_INLINE_ALWAYS esEpa_T * schedRdyGetEpaI_(
+C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
 #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
@@ -222,7 +222,7 @@ C_INLINE_ALWAYS esEpa_T * schedRdyGetEpaI_(
  *  @retval     TRUE - EPA objekat ceka na izvrsenje
  *  @retval     FALSE - EPA objekat ne ceka na izvrsenje
  */
-C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
+C_INLINE bool_T schedRdyIsEpaRdy_(
     const esEpa_T * epa) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -255,7 +255,7 @@ C_INLINE_ALWAYS bool_T schedRdyIsEpaRdy_(
 /**
  * @brief       Prijavljuje EPA objekat u red za cekanje.
  */
-C_INLINE_ALWAYS void schedRdyRegI_(
+C_INLINE void schedRdyRegI_(
     const esEpa_T * epa) {
 
     gRdyBitmap.list[epa->prio] = (esEpa_T *)epa;
@@ -264,7 +264,7 @@ C_INLINE_ALWAYS void schedRdyRegI_(
 /**
  * @brief       Odjavljuje EPA objekat iz reda za cekanje.
  */
-C_INLINE_ALWAYS void schedRdyUnRegI_(
+C_INLINE void schedRdyUnRegI_(
     const esEpa_T * epa) {
 
     gRdyBitmap.list[epa->prio] = (esEpa_T *)0U;
@@ -277,7 +277,7 @@ C_INLINE_ALWAYS void schedRdyUnRegI_(
  * @details     EPA objekat na koji pokazuje pokazivac se ubacuje u listu
  *              spremnih EPA objekata na izvrsenje.
  */
-C_INLINE_ALWAYS void schedRdyInsertI_(
+C_INLINE void schedRdyInsertI_(
     const esEpa_T * epa) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -297,7 +297,7 @@ C_INLINE_ALWAYS void schedRdyInsertI_(
  * @param       [in] epa               Pokazivac na EPA objekat koji nije
  *                                      spreman za izvrsenje.
  */
-C_INLINE_ALWAYS void schedRdyRmI_(
+C_INLINE void schedRdyRmI_(
     const esEpa_T * epa) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -326,7 +326,7 @@ C_INLINE_ALWAYS void schedRdyRmI_(
  * @param       [out] epa               Pokazivac na strukturu EPA objekta,
  * @param       [in] stateQueue         memorija za cuvanje stanja HSM automata,
  * @param       [in] evtQueue           memorija za cuvanje reda za cekanje,
- * @param       [in] definicionu        pokazivac na definicionu strukturu EPA
+ * @param       [in] definition         pokazivac na definicionu strukturu EPA
  *                                      objekta.
  * @notapi
  */
