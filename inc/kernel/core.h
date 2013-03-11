@@ -88,85 +88,10 @@ typedef struct esEpaDef {
 } esEpaDef_T;
 
 /**
- * @brief       Red cekanja za dogadjaje.
- * @details     Ova struktura opisuje redove cekanja za dogadjaje koji se
- *              koriste za aktivne objekte. Red cekanja zajedno sa
- *              procesorom konacnih automata (SMP) cini jedan agent za obradu
- *              dogadjaja, (Event Processing Agent - EPA).
- *
- *              Struktura sadrzi samo podatke za upravljanje reda cekanja i ne
- *              sadrzi memorijski prostor za cuvanje dogadjaja. Memorijski
- *              prostor se mora rezervisati unapred i predati pokazivac na taj
- *              prostor EVT-u prilikom inicijalizacije reda cekanja.
- *
- *              U redovima cekanja se cuvaju samo pokazivaci ka dogadjajima, a
- *              ne i same instance dogadjaja.
- *
- *              Pored navedenog reda za cekanje, struktura moze da sadrzi
- *              brojace zauzeca reda za cekanje. @ref free pokazuje trenutni
- *              broj praznih lokacija dok @ref freeMin sadrzi najmanji broj
- *              slobodnih lokacija ikada.
- * @notapi
- */
-struct evtQueue {
-/**
- * @brief       Instanca reda za cekanje opste namene
- */
-    esQueuePtr_T    queue;
-
-#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
-/**
- * @brief       Trenutni broj slobodnih lokacija u redu za cekanje
- */
-    uint_fast8_t    free;
-
-/**
- * @brief       Najmanji broj slobodnih lokacija u redu za cekanje
- */
-    uint_fast8_t    freeMin;
-#endif
-};
-
-/**
- * @extends     esSm
- * @brief       Zaglavlje Event Processing Agent objekta
- * @details     EPA objekat se sastoji od internih podataka koji se nalaze u
- *              ovoj strukturi i korisničkih podataka koji se dodaju na ovu
- *              strukturu.
+ * @brief       Objekt Event Processing Agent-a
  * @api
  */
-typedef struct esEpa {
-/**
- * @brief       Struktura izvrsne jedinice.
- * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
- *              podacima ove strukture je zabranjen drugim modulima.
- */
-    struct esSm     sm;
-
-/**
- * @brief       Red cekanja za dogadjaje.
- */
-    struct evtQueue evtQueue;
-
-#if defined(OPT_KERNEL_DBG_CORE) && defined(OPT_DBG_USE_CHECK)                  \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
- */
-    uint32_t        signature;
-#endif
-
-/**
- * @brief       Prioritet EPA objekta.
- * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
- */
-    uint_fast8_t    prio;
-
-/**
- * @brief       Ime EPA objekta
- */
-    const C_ROM char * name;
-} esEpa_T;
+typedef struct esEpa esEpa_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/

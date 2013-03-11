@@ -52,6 +52,85 @@ extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
+
+/**
+ * @brief       Nabrajanje odgovora state handler funkcije.
+ * @details     State handler funkcija preko ovih nabrajanja govori SMP
+ *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
+ *              dogadjaj.
+ */
+enum smStatus {
+/**
+ * @brief       Treba izvrsiti tranziciju ka drugom stanju.
+ * @details     Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
+ *              drugom stanju.
+ */
+    RETN_TRAN,
+
+/**
+ * @brief       Treba odloziti pristigli dogadjaj.
+ * @details     Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
+ *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
+ */
+    RETN_DEFERRED,
+
+/**
+ * @brief       Ne treba izvrsiti nikakve dalje akcije.
+ * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
+ *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
+ */
+    RETN_HANDLED,
+
+/**
+ * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
+ * @details     Obicno se ovakav odgovor u top state-u automata i koristi se u
+ *              svrhe debagiranja sistema. Dogadjaj se brise iz sistema ako nema
+ *              jos korisnika.
+ */
+    RETN_IGNORED,
+
+/**
+ * @brief       Vraca se koje je super stanje date state handler funkcije.
+ * @details     Ova vrednost se vraca kada state handler funkcija ne zna da
+ *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
+ *              njeno super stanje.
+ */
+    RETN_SUPER
+
+};
+
+typedef struct smIntern {
+/**
+ * @brief       Pokazivac na state handler funkciju.
+ * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
+ *              dogadjaja.
+ */
+    esState_T       state;
+
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_AND_HSM) || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na dispecer funkciju datog automata
+ * @details     Ovaj clan strukture se koristi samo ukoliko se istovremeno
+ *              koriste FSM i HSM automati.
+ */
+    esStatus_T (* dispatch)(struct smIntern *, const esEvt_T *);
+#endif
+
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
+/**
+ * @brief       Niz za cuvanje izvornih stanja HSM automata
+ * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
+ */
+    esState_T *     stateQBegin;
+
+/**
+ * @brief       Niz za cuvanje odredisnih stanja HSM automata
+ * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
+ */
+    esState_T *     stateQEnd;
+#endif
+} smIntern_T;
+
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 
 extern const C_ROM esEvt_T evtSignal[];
@@ -61,7 +140,7 @@ extern const C_ROM esEvt_T evtSignal[];
 /**
  * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
  *              cuvanje bafera stanja.
- * @param       aStateDept              Maksimalna hijerarhijska dubina stanja
+ * @param       levels                  Maksimalna hijerarhijska dubina stanja
  *                                      automata.
  * @return      Potreban memorijski prostor u bajtovima.
  * @notapi
@@ -69,12 +148,26 @@ extern const C_ROM esEvt_T evtSignal[];
 size_t stateQReqSize(
     uint8_t         levels);
 
+/**
+ * @brief       Dispecer HSM automata
+ * @param       [in] sm                 Pokazivac na strukturu HSM automata
+ * @param       [in] evt                Dogadjaj koji treba da se obradi
+ * @return      Status obrade dogadjaja.
+ * @notapi
+ */
 esStatus_T hsmDispatch(
-    esSm_T *        sm,
+    smIntern_T *    sm,
     const esEvt_T * evt);
 
+/**
+ * @brief       Dispecer HSM automata
+ * @param       [in] sm                 Pokazivac na strukturu FSM automata
+ * @param       [in] evt                Dogadjaj koji treba da se obradi
+ * @return      Status obrade dogadjaja.
+ * @notapi
+ */
 esStatus_T fsmDispatch(
-    esSm_T *        sm,
+    smIntern_T *    sm,
     const esEvt_T * evt);
 
 /**
@@ -88,18 +181,18 @@ esStatus_T fsmDispatch(
  * @notapi
  */
 void smInit (
-    esSm_T *        sm,
+    smIntern_T *    sm,
     esState_T       initState,
     esState_T *     stateQueue,
     size_t          levels);
 
 /**
- * @brief       Dekonstruise HSM automat
+ * @brief       Dekonstruise automat
  * @param       [out] sm                Pokazivac na kreiran automat.
  * @notapi
  */
 void smDeInit(
-    esSm_T *        sm);
+    smIntern_T *    sm);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus

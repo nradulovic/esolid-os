@@ -61,6 +61,56 @@
 /*======================================================  LOCAL DATA TYPES  ==*/
 
 /**
+ * @extends     esSm
+ * @brief       Zaglavlje Event Processing Agent objekta
+ * @details     EPA objekat se sastoji od internih podataka koji se nalaze u
+ *              ovoj strukturi i korisničkih podataka koji se dodaju na ovu
+ *              strukturu.
+ * @api
+ */
+struct esEpa {
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
+    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
+    || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na klasu memorijskog alokatora
+ */
+    const C_ROM struct esMemClass * memClass;
+#endif
+
+/**
+ * @brief       Red cekanja za dogadjaje.
+ */
+    struct evtQueue evtQueue;
+
+#if defined(OPT_KERNEL_DBG_CORE) && defined(OPT_DBG_USE_CHECK)                  \
+    || defined(__DOXYGEN__)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
+ */
+    uint32_t        signature;
+#endif
+
+/**
+ * @brief       Prioritet EPA objekta.
+ * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
+ */
+    uint_fast8_t    prio;
+
+/**
+ * @brief       Ime EPA objekta
+ */
+    const C_ROM char * name;
+
+/**
+ * @brief       Struktura izvrsne jedinice.
+ * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
+ *              podacima ove strukture je zabranjen drugim modulima.
+ */
+    struct smIntern sm;
+};
+
+/**
  * @brief       Bitmap spremnih EPA objekata
  */
 struct rdyBitmap {
@@ -116,10 +166,10 @@ C_INLINE void epaInit_(
     esEvt_T **      evtQueue,
     const C_ROM esEpaDef_T * definition);
 
-C_INLINE void esEpaDeInit_(
+C_INLINE void epaDeInit_(
     esEpa_T *       epa);
 
-esEvt_T * evtFetchI(
+static esEvt_T * evtFetchI(
     esEpa_T *       epa);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -339,7 +389,7 @@ C_INLINE void epaInit_(
     ES_CRITICAL_DECL();
 
     smInit(
-        (esSm_T *)epa,
+        &epa->sm,
         definition->smInitState,
         stateQueue,
         definition->smLevels);
@@ -364,7 +414,7 @@ C_INLINE void epaInit_(
  * @param       [out] epa               Pokazivac na strukturu EPA objekta.
  * @notapi
  */
-C_INLINE void esEpaDeInit_(
+C_INLINE void epaDeInit_(
     esEpa_T *       epa) {
 
     ES_CRITICAL_DECL();
@@ -405,7 +455,7 @@ C_INLINE void esEpaDeInit_(
  * @return      Dogadjaj iz reda cekanja.
  * @notapi
  */
-esEvt_T * evtFetchI(
+static esEvt_T * evtFetchI(
     esEpa_T *       epa) {
 
     esEvt_T * evt;
@@ -523,7 +573,7 @@ esEpa_T * esEpaCreate(
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     coreSize = ES_ALIGN(
-        definition->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
+        sizeof(esEpa_T) + definition->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
     smpQSize = ES_ALIGN(
         stateQReqSize(
             definition->smLevels),
@@ -533,7 +583,7 @@ esEpa_T * esEpaCreate(
             definition->evtQueueDepth),
         ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    coreSize = definition->epaWorkspaceSize;
+    coreSize = sizeof(esEpa_T) + definition->epaWorkspaceSize;
     smpQSize = stateQReqSize(
         definition->smLevels);
     evtQSize = evtQReqSize(
@@ -584,7 +634,7 @@ void esEpaDestroy(
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
 
-    esEpaDeInit_(
+    epaDeInit_(
         epa);
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
@@ -592,7 +642,7 @@ void esEpaDestroy(
         epa);
     ES_CRITICAL_EXIT();
 #else
-    esEpaDeInit_(
+    epaDeInit_(
         epa);
     (**((const C_ROM struct esMemClass **)epa))(epa);
 #endif
@@ -673,7 +723,7 @@ void esKernelStart(
                 epa);
             ES_CRITICAL_EXIT();
             status = SM_DISPATCH(
-                (esSm_T *)epa,
+                &epa->sm,
                 evt);
             ES_CRITICAL_ENTER(
                 OPT_KERNEL_INTERRUPT_PRIO_MAX);

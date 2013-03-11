@@ -51,6 +51,10 @@
  *              CPU configuration:
  *              - independent
  *
+ *              Include paths:
+ *              - ./esolid-kernel/inc
+ *              - ./esolid-hal/inc (and port defined paths)
+ *              - ./esolid-ett/inc
  * @addtogroup  kernel_intf
  *********************************************************************//** @{ */
 

@@ -37,50 +37,6 @@
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
-
-/*------------------------------------------------------------------------*//**
- * @name        Makroi za tranziciju stanja
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Vraca dispeceru informaciju da treba da se izvrsi tranzicija.
- * @param       sm                      Pokazivac na strukturu automata,
- * @param       stateHandler            naredno stanje automata.
- * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
- *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
- *              tip desnog izraza.
- */
-#define ES_STATE_TRAN(sm, stateHandler)                                         \
-    (((esSm_T *)(sm))->state = (esState_T)(stateHandler), RETN_TRAN)
-
-/**
- * @brief       Vraca dispeceru informaciju o super stanju trenutnog stanja.
- * @param       sm                     Pokazivac na strukturu automata,
- * @param       stateHandler           super stanje trenutnog stanja.
- * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
- *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
- *              tip desnog izraza.
- * @note        Koristi se samo kod HSM automata.
- */
-#define ES_STATE_SUPER(sm, stateHandler)                                             \
-    (((esSm_T *)(sm))->state = (esState_T)(stateHandler), RETN_SUPER)
-
-/**
- * @brief       Vraca dispeceru informaciju da je dogadjaj opsluzen.
- * @details     Ovaj makro samo obavestava dispecer da je dogadjaj opsluzen i ne
- *              treba da se izvrsi promena stanja.
- */
-#define ES_STATE_HANDLED()                                                     \
-    (RETN_HANDLED)
-
-/**
- * @brief       Vraca dispeceru informaciju da je dogadjaj ignorisan.
- * @details     Dogadjaj se ignorise i ne dolazi do promene stanja automata.
- */
-#define ES_STATE_IGNORED()                                                     \
-    (RETN_IGNORED)
-
-/** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
@@ -132,60 +88,26 @@ enum evtId {
     SIG_ID_USR = 15
 };
 
-
 /**
- * @brief       Nabrajanje odgovora state handler funkcije.
- * @details     State handler funkcija preko ovih nabrajanja govori SMP
- *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
- *              dogadjaj.
+ * @brief       Status koji stateHandler funkcije vracaju dispeceru.
+ * @api
  */
-typedef enum esStatus {
-/**
- * @brief       Treba izvrsiti tranziciju ka drugom stanju.
- * @details     Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
- *              drugom stanju.
- */
-    RETN_TRAN,
-
-/**
- * @brief       Treba odloziti pristigli dogadjaj.
- * @details     Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
- *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
- */
-    RETN_DEFERRED,
-
-/**
- * @brief       Ne treba izvrsiti nikakve dalje akcije.
- * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
- *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
- */
-    RETN_HANDLED,
-
-/**
- * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
- * @details     Obicno se ovakav odgovor u top state-u automata i koristi se u
- *              svrhe debagiranja sistema. Dogadjaj se brise iz sistema ako nema
- *              jos korisnika.
- */
-    RETN_IGNORED,
-
-/**
- * @brief       Vraca se koje je super stanje date state handler funkcije.
- * @details     Ova vrednost se vraca kada state handler funkcija ne zna da
- *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
- *              njeno super stanje.
- */
-    RETN_SUPER
-
-} esStatus_T;
+typedef uint_fast8_t esStatus_T;
 
 /**
  * @brief       Tip pokazivaca na state handler funkcije.
  * @details     Funkcije vracaju esStatus_T , a kao parametar prihvataju
  *              pokazivac na strukturu izvrsne jedinice i pokazivac na
  *              dogadjaj.
+ * @api
  */
 typedef esStatus_T (* esState_T) (void *, esEvt_T *);
+
+/**
+ * @brief       Objekat konacnog automata
+ * @api
+ */
+typedef struct esSm esSm_T;
 
 /**
  * @brief       Definiciona struktura koja opisuje jedan SM objekat
@@ -207,51 +129,6 @@ typedef struct esSmDef {
  */
     uint8_t         smLevels;
 } esSmDef_T;
-
-/**
- * @brief       Struktura automata
- */
-typedef struct esSm {
-
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                              \
-    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Pokazivac na klasu memorijskog alokatora
- */
-    const C_ROM struct esMemClass * memClass;
-#endif
-
-/**
- * @brief       Pokazivac na state handler funkciju.
- * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
- *              dogadjaja.
- */
-    esState_T       state;
-
-#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_AND_HSM) || defined(__DOXYGEN__)
-/**
- * @brief       Pokazivac na dispecer funkciju datog automata
- * @details     Ovaj clan strukture se koristi samo ukoliko se istovremeno
- *              koriste FSM i HSM automati.
- */
-    esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
-#endif
-
-#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
-/**
- * @brief       Niz za cuvanje izvornih stanja HSM automata
- * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
- */
-    esState_T *     stateQBegin;
-
-/**
- * @brief       Niz za cuvanje odredisnih stanja HSM automata
- * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
- */
-    esState_T *     stateQEnd;
-#endif
-} esSm_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
@@ -318,6 +195,50 @@ esStatus_T esSmDispatch(
 esStatus_T esSmTopState(
     void *          sm,
     esEvt_T *       evt);
+
+/**
+ * @brief       Automat @c sm treba da izvrsi tranziciju ka stanju @c state.
+ * @param       [out] sm                Pokazivac trenutne radne povrsine
+ * @param       [in] state              Pokazivac na sledece stanje automata.
+ * @return      Odgovor dispeceru.
+ * @api
+ */
+esStatus_T esRetnTransition(
+    void *          sm,
+    esState_T       state);
+
+/**
+ * @brief       Automat je odbacio dogadjaj.
+ * @return      Odgovor dispeceru.
+ * @api
+ */
+esStatus_T esRetnDeferred(
+    void);
+
+/**
+ * @brief       Automat je zavrsio sa obradom dogadjaja.
+ * @return      Odgovor dispeceru.
+ */
+esStatus_T esRetnHandled(
+    void);
+
+/**
+ * @brief       Automat je ignorisao dogadjaj. Ne preduzima se nikakva dodatna
+ *              akcija.
+ * @return      Odgovor dispeceru.
+ */
+esStatus_T esRetnIgnored(
+    void);
+
+/**
+ * @brief       Automat vraca informaciju o svom superstanju
+ * @param       [out] sm                Pokazivac trenutne radne povrsine.
+ * @param       [in] state              Pokazivac na superstanje.
+ * @return      Odgovor dispeceru.
+ */
+esStatus_T esRetnSuper(
+    void *          sm,
+    esState_T       state);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/

@@ -36,28 +36,59 @@
 
 /**
  * @brief       Posalji predefinisan dogadjaj @c evt automatu @c hsm.
- * @param       epa                     Pokazivac na strukturu EPA objekta,
+ * @param       sm                      Pokazivac na strukturu EPA objekta,
  * @param       state                   pokazivac na funkciju stanja,
  * @param       evt                     redni broj (enumerator) rezervisanog
  *                                      dogadjaj.
  */
-#define EVT_SIGNAL_SEND(epa, state, evt)                                        \
-    (*state)((epa), (esEvt_T *)&evtSignal[evt])
+#define SM_SIGNAL_SEND(sm, state, evt)                                         \
+    (*state)(((sm) + 1U), (esEvt_T *)&evtSignal[evt])
+
+/**
+ * @brief       Posalji dogadjaj @c evt automatu @c hsm.
+ * @param       sm                      Pokazivac na strukturu EPA objekta,
+ * @param       state                   pokazivac na funkciju stanja,
+ * @param       evt                     redni broj (enumerator) rezervisanog
+ *                                      dogadjaj.
+ */
+#define SM_EVT_SEND(sm, state, evt)                                             \
+    (*state)(((sm) + 1U), (evt))
 
 /*======================================================  LOCAL DATA TYPES  ==*/
+
+/**
+ * @brief       Objekat - automat
+ */
+struct esSm {
+
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
+    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
+    || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na klasu memorijskog alokatora
+ */
+    const C_ROM struct esMemClass * memClass;
+#endif
+
+/**
+ * @brief       Automat
+ */
+    struct smIntern sm;
+};
+
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-static esState_T * disTranFindPath(
-    esSm_T *        sm,
+static esState_T * hsmTranFindPath(
+    smIntern_T *    sm,
     esState_T *     exit,
     esState_T *     entry);
 
-static void disTranEnter(
-    esSm_T *        sm,
+static void hsmTranEnter(
+    smIntern_T *    sm,
     esState_T *     entry);
 
-static void disTranExit(
-    esSm_T *        sm,
+static void hsmTranExit(
+    smIntern_T *    sm,
     esState_T *     exit);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -68,31 +99,31 @@ static void disTranExit(
  */
 const C_ROM esEvt_T evtSignal[] = {
     {(esEvtId_T)SIG_EMPTY,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_CONST_MASK,
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_ENTRY,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_CONST_MASK,
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_EXIT,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_CONST_MASK,
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_INIT,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_CONST_MASK,
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_SUPER,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_CONST_MASK,
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
@@ -109,8 +140,8 @@ const C_ROM esEvt_T evtSignal[] = {
  * @return      Pokazivac na pocetak reda stanja za ulaz.
  * @notapi
  */
-static esState_T * disTranFindPath(
-    esSm_T *        sm,
+static esState_T * hsmTranFindPath(
+    smIntern_T *    sm,
     esState_T *     exit,
     esState_T *     entry) {
 
@@ -121,7 +152,7 @@ static esState_T * disTranFindPath(
         return (--entry);
     }
     /* tran: b) src ?== super(dst)                                            */
-    (void)EVT_SIGNAL_SEND(sm, *entry, SIG_SUPER);
+    (void)SM_SIGNAL_SEND(sm, *entry, SIG_SUPER);
     *(--entry) = sm->state;                                                    /* super(dst)                                               */
 
     if (*exit == *entry) {
@@ -130,7 +161,7 @@ static esState_T * disTranFindPath(
         return (entry);
     }
     /* tran: c) super(src) ?== super(dst)                                     */
-    (void)EVT_SIGNAL_SEND(sm, *exit, SIG_SUPER);
+    (void)SM_SIGNAL_SEND(sm, *exit, SIG_SUPER);
     *(++exit) = sm->state;                                                     /* super(src)                                               */
 
     if (*exit == *entry) {
@@ -151,7 +182,7 @@ static esState_T * disTranFindPath(
     --entry;                                                                    /* super(dst)                                               */
 
     while (&esSmTopState != **entry) {
-        (void)EVT_SIGNAL_SEND(sm, *entry, SIG_SUPER);
+        (void)SM_SIGNAL_SEND(sm, *entry, SIG_SUPER);
         *(--entry) = sm->state;
 
         if (*exit == *entry) {
@@ -175,7 +206,7 @@ static esState_T * disTranFindPath(
     }
     /* tran: g) ...super(super(src)) ?== ...super(super(dst))                 */
     while (TRUE) {
-        (void)EVT_SIGNAL_SEND(sm, *exit, SIG_SUPER);
+        (void)SM_SIGNAL_SEND(sm, *exit, SIG_SUPER);
         *(++exit) = sm->state;
         entry = sm->stateQEnd;
 
@@ -201,13 +232,13 @@ static esState_T * disTranFindPath(
  *              stanja.
  * @notapi
  */
-static void disTranEnter(
-    esSm_T *        sm,
+static void hsmTranEnter(
+    smIntern_T *    sm,
     esState_T *     entry) {
 
     while (entry != sm->stateQEnd) {
         ++entry;
-        (void)EVT_SIGNAL_SEND(sm, *entry, SIG_ENTRY);
+        (void)SM_SIGNAL_SEND(sm, *entry, SIG_ENTRY);
     }
 }
 
@@ -218,12 +249,12 @@ static void disTranEnter(
  * @details     Red stanja je terminisan nulom.
  * @notapi
  */
-static void disTranExit(
-    esSm_T *        sm,
+static void hsmTranExit(
+    smIntern_T *    sm,
     esState_T *     exit) {
 
     while (*exit != (esState_T)0U) {
-        (void)EVT_SIGNAL_SEND(sm, *exit, SIG_EXIT);
+        (void)SM_SIGNAL_SEND(sm, *exit, SIG_EXIT);
         ++exit;
     }
 }
@@ -232,7 +263,7 @@ static void disTranExit(
 
 /*----------------------------------------------------------------------------*/
 void smInit (
-    esSm_T *        sm,
+    smIntern_T *    sm,
     esState_T       initState,
     esState_T *     stateQueue,
     size_t          levels) {
@@ -262,10 +293,19 @@ void smInit (
 
 /*----------------------------------------------------------------------------*/
 void smDeInit(
-    esSm_T *        sm) {
+    smIntern_T *    sm) {
 
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
+    sm->state = (esState_T)0U;
+#elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
+    sm->state = (esState_T)0U;
     sm->stateQBegin = (esState_T *)0U;
     sm->stateQEnd = (esState_T *)0U;
+#else
+    sm->state = (esState_T)0U;
+    sm->stateQBegin = (esState_T *)0U;
+    sm->stateQEnd = (esState_T *)0U;
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -278,13 +318,13 @@ size_t stateQReqSize(
 #elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
     size_t needed;
 
-    needed = levels * (size_t)2U * sizeof(esState_T);
+    needed = levels * 2U * sizeof(esState_T *);
 
     return (needed);
 #else
     size_t needed;
 
-    if (levels <= 2) {
+    if (levels == 2) {
 
         needed = 0U;
     } else {
@@ -297,7 +337,7 @@ size_t stateQReqSize(
 
 /*----------------------------------------------------------------------------*/
 esStatus_T hsmDispatch(
-    esSm_T *        sm,
+    smIntern_T *    sm,
     const esEvt_T * evt) {
 
     esState_T * stateQCurr;
@@ -308,24 +348,24 @@ esStatus_T hsmDispatch(
 
     do {
         *stateQCurr = sm->state;
-        status = (esStatus_T)(**stateQCurr)(sm, (esEvt_T *)evt);
+        status = SM_EVT_SEND(sm, *stateQCurr, (esEvt_T *)evt);
         ++stateQCurr;
     } while (RETN_SUPER == status);
     --stateQCurr;
 
     while (RETN_TRAN == status) {
         *sm->stateQEnd = sm->state;
-        stateQCurr = disTranFindPath(
+        stateQCurr = hsmTranFindPath(
             sm,
             stateQCurr,
             sm->stateQEnd);
-        disTranExit(
+        hsmTranExit(
             sm,
             sm->stateQBegin);
-        disTranEnter(
+        hsmTranEnter(
             sm,
             stateQCurr);
-        status = (esStatus_T)EVT_SIGNAL_SEND(sm,*sm->stateQEnd, SIG_INIT);
+        status = (esStatus_T)SM_SIGNAL_SEND(sm,*sm->stateQEnd, SIG_INIT);
         stateQCurr = sm->stateQBegin;
         *sm->stateQBegin = *sm->stateQEnd;
     }
@@ -335,11 +375,8 @@ esStatus_T hsmDispatch(
 }
 
 /*----------------------------------------------------------------------------*/
-/**
- * @todo        Pogledati da li je dobra ova funkcija!!!
- */
 esStatus_T fsmDispatch(
-    esSm_T *        sm,
+    smIntern_T *    sm,
     const esEvt_T * evt) {
 
     esStatus_T status;
@@ -347,13 +384,13 @@ esStatus_T fsmDispatch(
     esState_T newState;
 
     oldState = sm->state;
-    status = (esStatus_T)(*sm->state)(sm, (esEvt_T *)evt);
+    status = SM_EVT_SEND(sm, sm->state, (esEvt_T *)evt);
     newState = sm->state;
 
     while (RETN_TRAN == status) {
-        (void)EVT_SIGNAL_SEND(sm, oldState, SIG_EXIT);
-        (void)EVT_SIGNAL_SEND(sm, newState, SIG_ENTRY);
-        status = EVT_SIGNAL_SEND(sm, newState, SIG_INIT);
+        (void)SM_SIGNAL_SEND(sm, oldState, SIG_EXIT);
+        (void)SM_SIGNAL_SEND(sm, newState, SIG_ENTRY);
+        status = SM_SIGNAL_SEND(sm, newState, SIG_INIT);
         oldState = newState;
         newState = sm->state;
     }
@@ -368,6 +405,42 @@ esStatus_T fsmDispatch(
  * @ingroup         smp_intf
  * @{ *//*--------------------------------------------------------------------*/
 
+esStatus_T esRetnTransition(
+    void *          sm,
+    esState_T       state) {
+
+    ((smIntern_T *)sm - 1U)->state = state;
+
+    return (RETN_TRAN);
+}
+
+esStatus_T esRetnDeferred(
+    void) {
+
+    return (RETN_DEFERRED);
+}
+
+esStatus_T esRetnHandled(
+    void) {
+
+    return (RETN_HANDLED);
+}
+
+esStatus_T esRetnIgnored(
+    void) {
+
+    return (RETN_IGNORED);
+}
+
+esStatus_T esRetnSuper(
+    void *          sm,
+    esState_T       state) {
+
+    ((smIntern_T *)sm - 1U)->state = state;
+
+    return (RETN_SUPER);
+}
+
 /*----------------------------------------------------------------------------*/
 esStatus_T esSmDispatch(
     esSm_T *        sm,
@@ -375,7 +448,7 @@ esStatus_T esSmDispatch(
 
     esStatus_T status;
 
-    status = SM_DISPATCH(sm, evt);
+    status = SM_DISPATCH(&sm->sm, evt);
 
     return (status);
 }
@@ -393,14 +466,14 @@ esSm_T * esSmCreate(
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     smpSize = ES_ALIGN(
-        definition->smWorkspaceSize,
+        sizeof(esSm_T) + definition->smWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
     stateQSize = ES_ALIGN(
         stateQReqSize(
             definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    smpSize = definition->smWorkspaceSize;
+    smpSize = sizeof(esSm_T) + definition->smWorkspaceSize;
     stateQSize = stateQReqSize(
         definition->smLevels);
 # endif
@@ -432,7 +505,7 @@ esSm_T * esSmCreate(
     *((const C_ROM struct esMemClass **)newSm) = memClass;
 #endif
     smInit(
-        (esSm_T *)newSm,
+        &((esSm_T *)newSm)->sm,
         definition->smInitState,
         (esState_T *)(newSm + smpSize),
         definition->smLevels);
@@ -445,7 +518,7 @@ void esSmDestroy(
     esSm_T *        sm) {
 
     smDeInit(
-        sm);
+        &sm->sm);
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     /* Greska! Staticni objekat */
@@ -479,7 +552,7 @@ esStatus_T esSmTopState (
     (void)sm;                                                                  /* Ukloni upozorenje o nekoriscenom parametru               */
     (void)evt;
 
-    return ES_STATE_IGNORED();
+    return (esRetnIgnored());
 }
 
 /** @} *//*-------------------------------------------------------------------*/
