@@ -142,7 +142,7 @@ struct rdyBitmap {
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE bool_T schedRdyIsEmptyI_(
+C_INLINE bool_T schedRdyIsEmpty_(
     void);
 
 C_INLINE esEpa_T *schedRdyGetEpaI_(
@@ -171,6 +171,10 @@ C_INLINE void epaDeInit_(
 
 static esEvt_T * evtFetchI(
     esEpa_T *       epa);
+
+static void evtPushBackI(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
 
@@ -212,7 +216,7 @@ static void schedInit(
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
  *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
  */
-C_INLINE bool_T schedRdyIsEmptyI_(
+C_INLINE bool_T schedRdyIsEmpty_(
     void) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -450,8 +454,8 @@ C_INLINE void epaDeInit_(
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Dobavlja dogadjaj iz reda za cekanje @c aEvtQueue
- * @param       epa                    Pokazivac na red za cekanje.
+ * @brief       Dobavlja dogadjaj iz reda za cekanje epa objekta
+ * @param       epa                    Pokazivac na epa objekat
  * @return      Dogadjaj iz reda cekanja.
  * @notapi
  */
@@ -471,6 +475,26 @@ static esEvt_T * evtFetchI(
     }
 
     return (evt);
+}
+
+/**
+ * @brief       Ubacuje dogadjaj nazad na red cekanja.
+ * @param       epa                     Pokazivac na epa objekat
+ * @param       evt                     Pokazivac na dogadjaj
+ * @details     Ovo se dogadja kada dispecer javi da je dogadjaj odbačen
+ *              (DEFERRED).
+ */
+static void evtPushBackI(
+    esEpa_T *       epa,
+    esEvt_T *       evt) {
+
+    evtQPutAheadI_(
+        &epa->evtQueue,
+        evt);
+    evtUsrAddI_(
+        evt);
+    schedRdyRmI_(
+        epa);
 }
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -498,18 +522,18 @@ void esEvtPostI(
     esEvt_T *       evt) {
 
     if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
+        evtUsrAddI_(
+            evt);
+        evtQPutI_(
+            &epa->evtQueue,
+            evt);
         schedRdyInsertI_(
             epa);
-        evtQPutI_(
-            &epa->evtQueue,
-            evt);
-        evtUsrAddI_(
-            evt);
     } else if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
+        evtUsrAddI_(
+            evt);
         evtQPutI_(
             &epa->evtQueue,
-            evt);
-        evtUsrAddI_(
             evt);
     } else {
         /* Greska! Red je pun. */
@@ -538,20 +562,14 @@ void esEvtPostAheadI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
-    if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
+    if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
+        evtUsrAddI_(
+            evt);
+        evtQPutAheadI_(
+            &epa->evtQueue,
+            evt);
         schedRdyInsertI_(
             epa);
-        evtQPutAheadI_(
-            &epa->evtQueue,
-            evt);
-        evtUsrAddI_(
-            evt);
-    } else if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
-        evtQPutAheadI_(
-            &epa->evtQueue,
-            evt);
-        evtUsrAddI_(
-            evt);
     } else {
         /* Greska! Red je pun. */
         esEvtDestroyI(
@@ -713,7 +731,7 @@ void esKernelStart(
 
     while (TRUE) {
 
-        while (FALSE == schedRdyIsEmptyI_()) {
+        while (FALSE == schedRdyIsEmpty_()) {
             esEvt_T * evt;
             esEpa_T * epa;
             esStatus_T status;
@@ -729,7 +747,7 @@ void esKernelStart(
                 OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
             if (RETN_DEFERRED == status) {
-                esEvtPostI(
+                evtPushBackI(
                     epa,
                     evt);
             } else {
@@ -738,8 +756,8 @@ void esKernelStart(
             }
         }
         gCurrentEpa = (esEpa_T *)0U;
+        ES_CPU_SLEEP();
         ES_CRITICAL_EXIT();
-        /* ES_CPU_SLEEP(); */
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
     }
