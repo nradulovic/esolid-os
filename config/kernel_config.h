@@ -290,7 +290,7 @@
  * @note        Podrazumevano podesavanje: uint_fast8_t
  */
 #if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
-# define OPT_EVT_ID_T                   uint_fast8_t
+# define OPT_EVT_ID_T                   uint32_t
 #endif
 
 /**
