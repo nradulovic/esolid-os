@@ -23,7 +23,7 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Implementacija State Machine Processor modula.
+ * @brief       Implementacija State Machine Processor objekta.
  * @addtogroup  smp_impl
  *********************************************************************//** @{ */
 
@@ -57,9 +57,9 @@
 /*======================================================  LOCAL DATA TYPES  ==*/
 
 /**
- * @brief       Objekat - automat
+ * @brief       Objekat - SM (State Machine)
  */
-struct esSm {
+typedef struct smObject {
 
 #if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
     && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
@@ -71,24 +71,24 @@ struct esSm {
 #endif
 
 /**
- * @brief       Automat
+ * @brief       Instanca automata
  */
-    struct smIntern sm;
-};
+    struct esSm sm;
+} smObject_T;
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
 static esState_T * hsmTranFindPath(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T *     exit,
     esState_T *     entry);
 
 static void hsmTranEnter(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T *     entry);
 
 static void hsmTranExit(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T *     exit);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -141,7 +141,7 @@ const C_ROM esEvt_T evtSignal[] = {
  * @notapi
  */
 static esState_T * hsmTranFindPath(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T *     exit,
     esState_T *     entry) {
 
@@ -233,7 +233,7 @@ static esState_T * hsmTranFindPath(
  * @notapi
  */
 static void hsmTranEnter(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T *     entry) {
 
     while (entry != sm->stateQEnd) {
@@ -250,7 +250,7 @@ static void hsmTranEnter(
  * @notapi
  */
 static void hsmTranExit(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T *     exit) {
 
     while (*exit != (esState_T)0U) {
@@ -263,7 +263,7 @@ static void hsmTranExit(
 
 /*----------------------------------------------------------------------------*/
 void smInit (
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T       initState,
     esState_T *     stateQueue,
     size_t          levels) {
@@ -293,7 +293,7 @@ void smInit (
 
 /*----------------------------------------------------------------------------*/
 void smDeInit(
-    smIntern_T *    sm) {
+    esSm_T *        sm) {
 
 #if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
     sm->state = (esState_T)0U;
@@ -337,7 +337,7 @@ size_t stateQReqSize(
 
 /*----------------------------------------------------------------------------*/
 esStatus_T hsmDispatch(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     const esEvt_T * evt) {
 
     esState_T * stateQCurr;
@@ -376,7 +376,7 @@ esStatus_T hsmDispatch(
 
 /*----------------------------------------------------------------------------*/
 esStatus_T fsmDispatch(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     const esEvt_T * evt) {
 
     esStatus_T status;
@@ -409,7 +409,7 @@ esStatus_T esRetnTransition(
     void *          sm,
     esState_T       state) {
 
-    ((smIntern_T *)sm - 1U)->state = state;
+    ((esSm_T *)sm - 1U)->state = state;
 
     return (RETN_TRAN);
 }
@@ -436,7 +436,7 @@ esStatus_T esRetnSuper(
     void *          sm,
     esState_T       state) {
 
-    ((smIntern_T *)sm - 1U)->state = state;
+    ((esSm_T *)sm - 1U)->state = state;
 
     return (RETN_SUPER);
 }
@@ -448,7 +448,7 @@ esStatus_T esSmDispatch(
 
     esStatus_T status;
 
-    status = SM_DISPATCH(&sm->sm, evt);
+    status = SM_DISPATCH(sm, evt);
 
     return (status);
 }
@@ -458,25 +458,26 @@ esSm_T * esSmCreate(
     const C_ROM esMemClass_T *  memClass,
     const C_ROM esSmDef_T *     definition) {
 
-    uint8_t * newSm;
+    smObject_T * newSm;
     size_t smpSize;
     size_t stateQSize;
 
 #if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
-    smpSize = ES_ALIGN(
-        sizeof(esSm_T) + definition->smWorkspaceSize,
+    smpSize = sizeof(smObject_T);
+    smpSize += ES_ALIGN(
+        definition->smWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
     stateQSize = ES_ALIGN(
         stateQReqSize(
             definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    smpSize = sizeof(esSm_T) + definition->smWorkspaceSize;
+    smpSize = sizeof(smObject_T) + definition->smWorkspaceSize;
     stateQSize = stateQReqSize(
         definition->smLevels);
-# endif
+#endif
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     (void)aMemClass;
@@ -502,15 +503,15 @@ esSm_T * esSmCreate(
     }
 #else
     newSm = (* memClass->alloc)(smpSize + stateQSize);
-    *((const C_ROM struct esMemClass **)newSm) = memClass;
+    newSm->memClass = memClass;
 #endif
     smInit(
-        &((esSm_T *)newSm)->sm,
+        &newSm->sm,
         definition->smInitState,
         (esState_T *)(newSm + smpSize),
         definition->smLevels);
 
-    return ((esSm_T *)newSm);
+    return (&newSm->sm);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -518,7 +519,7 @@ void esSmDestroy(
     esSm_T *        sm) {
 
     smDeInit(
-        &sm->sm);
+        sm);
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     /* Greska! Staticni objekat */
@@ -529,11 +530,16 @@ void esSmDestroy(
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         esDmemDeAllocI(
-            sm);
+            C_CONTAINER_OF(sm, smObject_T, sm));
         ES_CRITICAL_EXIT();
     }
 #else
-    (**((const C_ROM struct esMemClass **)sm))(sm);
+    {
+        smObject_T * smObject;
+
+        smObject = C_CONTAINER_OF(sm, smObject_T, sm);
+        (* smObject->memClass->deAlloc)(smObject);
+    }
 #endif
 }
 

@@ -23,7 +23,7 @@
  *//******************************************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Privatni interfejs State Machine Processor podmodul.
+ * @brief       Privatni interfejs State Machine Processor objekta.
  * @addtogroup  smp_impl
  ****************************************************************************************//** @{ */
 
@@ -99,7 +99,13 @@ enum smStatus {
 
 };
 
-typedef struct smIntern {
+/**
+ * @details     Struktura sadrzi trenutno stanje automata. Ostali clanovi su
+ *              opcioni. Ukoliko se koriste HSM automati koriste se pokazivaci
+ *              na redove cekanja za stanja automata.
+ * @notapi
+ */
+struct esSm {
 /**
  * @brief       Pokazivac na state handler funkciju.
  * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
@@ -113,7 +119,7 @@ typedef struct smIntern {
  * @details     Ovaj clan strukture se koristi samo ukoliko se istovremeno
  *              koriste FSM i HSM automati.
  */
-    esStatus_T (* dispatch)(struct smIntern *, const esEvt_T *);
+    esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
 #endif
 
 #if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
@@ -129,7 +135,7 @@ typedef struct smIntern {
  */
     esState_T *     stateQEnd;
 #endif
-} smIntern_T;
+};
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 
@@ -156,7 +162,7 @@ size_t stateQReqSize(
  * @notapi
  */
 esStatus_T hsmDispatch(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     const esEvt_T * evt);
 
 /**
@@ -167,7 +173,7 @@ esStatus_T hsmDispatch(
  * @notapi
  */
 esStatus_T fsmDispatch(
-    smIntern_T *    sm,
+    esSm_T *        sm,
     const esEvt_T * evt);
 
 /**
@@ -181,7 +187,7 @@ esStatus_T fsmDispatch(
  * @notapi
  */
 void smInit (
-    smIntern_T *    sm,
+    esSm_T *        sm,
     esState_T       initState,
     esState_T *     stateQueue,
     size_t          levels);
@@ -192,7 +198,7 @@ void smInit (
  * @notapi
  */
 void smDeInit(
-    smIntern_T *    sm);
+    esSm_T *        sm);
 
 /*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus

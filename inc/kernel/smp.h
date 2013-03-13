@@ -23,9 +23,7 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief   	Interfejs State Machine Processor (SMP) modula.
- * @details     This file is not meant to be included in application code
- *              independently but through the inclusion of "kernel.h" file.
+ * @brief   	Interfejs State Machine Processor (SMP) objekata
  * @addtogroup  smp_intf
  *********************************************************************//** @{ */
 
@@ -82,35 +80,44 @@ enum evtId {
 
 /**
  * @brief       Domen korisnickih identifikatora dogadjaja.
- * @details     Nakon ovog identifikatora korisnik definise svoje, aplikacione
- *              identifikatore dogadjaja.
  */
     SIG_ID_USR = 15
 };
 
 /**
- * @brief       Status koji stateHandler funkcije vracaju dispeceru.
+ * @brief       Status koji state handler funkcije vracaju dispeceru.
+ * @details     Ovo je apstraktni tip koji se koristi za podatke koji vracaju
+ *              odgovor state handler funkcija dispeceru automata. Preko ovog
+ *              podatka state handler funkcije obavestavaju dispecer koje akcije
+ *              automat zeli da preduzme, kao na primer, tranzicija ka drugom
+ *              stanju.
  * @api
  */
 typedef uint_fast8_t esStatus_T;
 
 /**
- * @brief       Tip pokazivaca na state handler funkcije.
- * @details     Funkcije vracaju esStatus_T , a kao parametar prihvataju
- *              pokazivac na strukturu izvrsne jedinice i pokazivac na
- *              dogadjaj.
+ * @brief       Tip state handler funkcija.
+ * @details     State handler funkcije vracaju esStatus_T , a kao parametar
+ *              prihvataju pokazivac (void *) na strukturu podataka i pokazivac
+ *              na dogadjaj.
  * @api
  */
 typedef esStatus_T (* esState_T) (void *, esEvt_T *);
 
 /**
  * @brief       Objekat konacnog automata
+ * @details     Ovo je apstraktni tip koji se koristi za referenciranje SMP
+ *              objekata.
  * @api
  */
 typedef struct esSm esSm_T;
 
 /**
- * @brief       Definiciona struktura koja opisuje jedan SM objekat
+ * @brief       Definiciona struktura koja opisuje jedan SMP objekat
+ * @details     Ova struktura se koristi prilikom kreiranja novog SMP objekta.
+ *              Potrebno je popuniti ovu strukturu sa zeljenim vrednostima, a
+ *              zatim je predati funkciji esSmCreate(). Na osnovu vrednosti u
+ *              ovoj strukturi funkcija ce kreirati automat.
  * @api
  */
 typedef struct esSmDef {
@@ -140,7 +147,10 @@ typedef struct esSmDef {
 /**
  * @brief       Inicijalizuje SMP modul
  * @details     Pre koriscenja funkcija SMP modula mora se pozvati ova funkcija.
- * @note        Funkcija ce pozvati inicijalizator funkciju MM modula automatski.
+ * @note        Sa obzirom da SMP modul zahteva funkcije MM modula, ova funkcija
+ *              automatski poziva inicijalnu funkciju MM modula.
+ * @note        Ukoliko se koristi kernel, onda ce ova funkcija biti pozvana od
+ *              strane kernel-a u toku inicijalizacije.
  * @api
  */
 void esSmpInit(
@@ -188,8 +198,6 @@ esStatus_T esSmDispatch(
  * @param       [in] sm                 Pokazivac na strukturu HSM automata,
  * @param       [in] evt                pokazivac/podatak na strukturu dogadjaja.
  * @return      esStatus_T              status funkcije.
- * @note        Uvek vraca odgovor IGNORED, jer ona ne prihvata nikakav
- *              dogadjaj.
  * @api
  */
 esStatus_T esSmTopState(
