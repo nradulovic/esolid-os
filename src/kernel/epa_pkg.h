@@ -23,37 +23,86 @@
  *//******************************************************************************************//**
  * @file
  * @author  	Nenad Radulovic
- * @brief       Privatni interfejs osnove kernel-a.
- * @addtogroup  kernel_impl
+ * @brief       Privatni interfejs EPA objekta
+ * @addtogroup  epa_impl
  ****************************************************************************************//** @{ */
 
 
-#ifndef CORE_PKG_H_
-#define CORE_PKG_H_
+#ifndef EPA_PKG_H_
+#define EPA_PKG_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
-/*----------------------------------------------------------------------------------  EXTERNS  --*/
-/** @cond */
-#ifdef CORE_PKG_H_VAR
-# define CORE_PKG_H_EXT
-#else
-# define CORE_PKG_H_EXT extern
-#endif
-/** @endcond*/
-
 /*==================================================================================  DEFINES  ==*/
-
-
-
 /*==================================================================================  MACRO's  ==*/
+
+#define EPA_DISPATCH(epa, evt)                                                  \
+    SM_DISPATCH(&epa->sm, evt)
+
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
+
+/**
+ * @details     EPA objekat se sastoji od internih podataka, redova cekanja za
+ *              dogadjaje i stanja automata (HSM) i korisničkih podataka.
+ * @notapi
+ */
+struct esEpa {
+/**
+ * @brief       Red cekanja za dogadjaje.
+ */
+    struct evtQueue evtQueue;
+
+#if defined(OPT_KERNEL_DBG_EPA) && defined(OPT_DBG_USE_CHECK)                  \
+    || defined(__DOXYGEN__)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
+ */
+    uint32_t        signature;
+#endif
+
+/**
+ * @brief       Prioritet EPA objekta.
+ * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
+ */
+    uint_fast8_t    prio;
+
+/**
+ * @brief       Ime EPA objekta
+ */
+    const C_ROM char * name;
+
+/**
+ * @brief       Automat (FSM ili HSM)
+ */
+    struct esSm     sm;
+};
+
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
+
+/**
+ * @brief       Dobavlja dogadjaj iz reda za cekanje epa objekta
+ * @param       epa                    Pokazivac na epa objekat
+ * @return      Dogadjaj iz reda cekanja.
+ * @notapi
+ */
+esEvt_T * evtFetchI(
+    esEpa_T *       epa);
+
+/**
+ * @brief       Ubacuje dogadjaj nazad na red cekanja.
+ * @param       epa                     Pokazivac na epa objekat
+ * @param       evt                     Pokazivac na dogadjaj
+ * @details     Ovo se dogadja kada dispecer javi da je dogadjaj odbačen
+ *              (DEFERRED).
+ */
+void evtPushBackI(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
 
 /** @} *//*--------------------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------  C++ extern end  --*/
@@ -62,8 +111,7 @@ extern "C" {
 #endif
 
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
 /** @endcond *//** @} *//*************************************************************************
- * END of core_pkg.h
+ * END of epa_pkg.h
  *************************************************************************************************/
-#endif /* CORE_PKG_H_ */
+#endif /* EPA_PKG_H_ */

@@ -23,19 +23,18 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Osnovne funkcije kernel-a
+ * @brief       Interfejs EPA objekata
  * @details     This file is not meant to be included in application code
  *              independently but through the inclusion of "kernel.h" file.
- * @addtogroup  core_intf
+ * @addtogroup  epa_intf
  *********************************************************************//** @{ */
 
 
-#ifndef CORE_H_
-#define CORE_H_
+#ifndef EPA_H_
+#define EPA_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "kernel/smp.h"
-#include "primitive/queue.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -188,14 +187,6 @@ void esEpaDestroy(
     esEpa_T *       epa);
 
 /**
- * @brief       Vraca Id pokazivac EPA objekta.
- * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
- * @api
- */
-esEpa_T * esEpaGet(
-    void);
-
-/**
  * @brief       Dobavlja prioritet EPA objekta
  * @param       [in] epa                Pokazivac na EPA objekat
  * @return      Trenutni prioritet EPA objekta.
@@ -224,6 +215,6 @@ void esEpaPrioSet(
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
- * END of core.h
+ * END of epa.h
  ******************************************************************************/
-#endif /* CORE_H_ */
+#endif /* EPA_H_ */
