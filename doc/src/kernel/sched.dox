@@ -2,7 +2,7 @@
 @file
 @addtogroup     kernel_impl
 *//** @{ *//**
-@defgroup       evt_impl Event (EVT)
-@brief          Event (EVT) implementacija
+@defgroup       sched_impl Scheduler (sched)
+@brief          Scheduler (sched) implementacija
 
 **//** @} *//*************************************************************************************/

@@ -2,8 +2,8 @@
 @file
 @addtogroup     kernel_intf
 *//** @{ *//**
-@defgroup       core_intf Kernel Core (CORE) 
-@brief          Interfejs za jezgro eSolid Operativnog Sistema
-@section        core_doc Kernel Core (CORE)
+@defgroup       epa_intf Event Processing Agent (EPA) 
+@brief          Interfejs Event Processing Agent (EPA) objekata
+@section        epa_doc Event Processing Agent (EPA)
   
 **//** @} *//*************************************************************************************/

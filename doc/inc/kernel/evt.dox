@@ -2,12 +2,12 @@
 @file
 @addtogroup  kernel_intf
 *//** @{ *//**
-@defgroup       evt_intf Event Object Transportation (EVT)
-@brief          Transport dogadjaja izmedju agenata za obradu dogadjaja
-@section        evt_doc Event Object Transportation (EVT)
+@defgroup       evt_intf Event (EVT)
+@brief          Interfejs Event (EVT) objekata
+@section        evt_doc Event (EVT)
 @image          html    eSolid_EVT.png
-Event Object (u daljem tekstu EVT) modul vrsi definisanje dogadjaja i njihov 
-transport izmedju EPA objekata.
+Event (u daljem tekstu EVT) modul vrsi definisanje objekta dogadjaja. Objekat
+dogadjaj ima definisane atribute i metode.
 
 Sa obzirom da postoji potreba za dogadjajima koji sadrze veliku kolicinu 
 podataka, kopiranje celih dogadjaja postaje izuzetno neefikasan proces. Zbog 
@@ -29,7 +29,7 @@ Slanje dogadjaja sa aspekta korisnika se sastoji iz tri faze:
 
 @subsection     evt_representation Reprezentacija dogadjaja
 @image          html    evt_struct.png
-Zaglavlje dogadjaja je opisano strukturom: @ref esEvtHeader. 
+Zaglavlje dogadjaja je opisano strukturom: @ref esEvt. 
 
 @section        evt_usage Koriscenje EVT modula
 @subsection     evt_defining_evt Definisanje dogadjaja

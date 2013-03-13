@@ -2,7 +2,7 @@
 @file
 @addtogroup     kernel_impl
 *//** @{ *//**
-@defgroup       core_impl Kernel Core (CORE)
-@brief          Kernel Core (CORE) implementacija
+@defgroup       evtq_impl Event Queue (EVTQ)
+@brief          Event Queue (EVTQ) implementacija
 
 **//** @} *//*************************************************************************************/

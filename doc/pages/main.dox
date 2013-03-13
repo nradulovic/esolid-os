@@ -159,15 +159,15 @@ objašnjenje tipova dogadjaja, njihovo definisanje i osnovne manipulacije nad
 dogadjajima,
 - @ref smp_doc@n
 koncept izvrsne jedinice, tipovi izvrsne jedinice i njihovo pokretanje,
-- @ref core_doc@n
+- @ref epa_doc@n
 koncept agenta za obradu dogadjaja, konkuretan rad razlicitih tipova agenta,
-- @ref mm_doc@n
-menadzment memorijskog prostora, ovaj modul koriste svi ostali moduli za
-potrebe rezervisanja memorije,
 - @ref epn_doc@n
 formiranje povezane mreže EPA objekata i transfer dogadjaja izmedju objekata,
 - @ref tem_doc@n
 menadzment i generisanje dogadjaja u tacno definisanim vremenskim trenucima,
+- @ref mm_doc@n
+menadzment memorijskog prostora, ovaj modul koriste svi ostali moduli za
+potrebe rezervisanja memorije,
  
 @image       html eSolid_small.png
 @ref struct

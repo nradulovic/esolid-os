@@ -3,7 +3,7 @@
 @addtogroup     kernel_intf
 *//** @{ *//**
 @defgroup       smp_intf State Machine Processor (SMP)
-@brief          Procesor konacnih automata.
+@brief          Interfejs State Machine Processor (SMP) objekata
 @section        smp_doc State Machine Processor (SMP)
 @image          html    eSolid_SMP.png
 SMP modul moze konkurentno da izvrsava razlicite tipove automata i korisnicke 
