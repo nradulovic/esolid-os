@@ -1,5 +1,73 @@
+2013-03-13  nenad
+
+	* [r160] custom-d/Doxyfile:
+	  - Tagovanje verzije 1.0beta01
+	* [r159] custom-d/src/kernel/sched.c[ADD],
+	  custom-d/src/kernel/sched_pkg.h[ADD]:
+	  - CORE modul -> sched modul
+	* [r158] custom-d/inc/kernel/kernel.h,
+	  custom-d/src/kernel/kernel.c[ADD],
+	  custom-d/src/kernel/kernel_private.h:
+	  - CORE modul -> Kernel modul
+	* [r157] custom-d/src/kernel/evtq.c, custom-d/src/kernel/evtq_pkg.h:
+	  - Sitne ispravke koda (nisu bile prisutne greške, već je sada
+	  ispravniji)
+	  - Ubačeni su doxygen komentari
+	* [r156] custom-d/inc/kernel/evt.h, custom-d/src/kernel/evt.c,
+	  custom-d/src/kernel/evt_pkg.h:
+	  - Interfejs: doxygen ispravke
+	* [r155] custom-d/inc/kernel/core.h[DEL],
+	  custom-d/inc/kernel/epa.h[CPY], custom-d/src/kernel/core.c[DEL],
+	  custom-d/src/kernel/core_pkg.h[DEL], custom-d/src/kernel/epa.c[CPY],
+	  custom-d/src/kernel/epa_pkg.h[CPY]:
+	  - CORE modul -> EPA modul
+	  - EPA modul sada poseduje EPA objekat i EPA instancu
+	  - Funkcije su pročišćene
+	* [r154] custom-d/inc/kernel/smp.h, custom-d/src/kernel/smp.c,
+	  custom-d/src/kernel/smp_pkg.h:
+	  - Interfejs: doxygen ispravke
+	  - SMP poseduje SM objekat i SM instancu
+	* [r153] custom-d/doc/inc/kernel/core.dox[DEL],
+	  custom-d/doc/inc/kernel/epa.dox[CPY], custom-d/doc/inc/kernel/evt.dox,
+	  custom-d/doc/inc/kernel/smp.dox, custom-d/doc/pages/main.dox,
+	  custom-d/doc/pages/usage.dox, custom-d/doc/src/kernel/core.dox[DEL],
+	  custom-d/doc/src/kernel/epa.dox[CPY], custom-d/doc/src/kernel/evt.dox,
+	  custom-d/doc/src/kernel/evtq.dox[ADD],
+	  custom-d/doc/src/kernel/sched.dox[ADD]:
+	  - Isravke koje prate izmene u izvornom kodu
+	* [r152] custom-d/config/kernel_config.h:
+	  - dopisani su doxygen komentari za konstante
+	  - sitne ispravke u tekstu
+	  - izbačena je konfiguracija za kernel API, to se više ne koristi
+
+2013-03-12  nenad
+
+	* [r151] custom-d/config/kernel_config.h:
+	  - evtId tip je sada uint32_t
+	* [r150] custom-d/src/kernel/core.c:
+	  - funkcija schedRdyIsEmpty() nije više iclass
+	  - Dodata je funkcija evtPushBack()
+	  - sched - sada se ispravno ponaša sistem u slučaju deferred događaja
+	  - sched - preuređen je redosled izvršavanja operacija kada se ulazi u
+	  idle režim
+	  - ispravka doxygen komentara
+	  - evtPost(): preurešeni su pozivi funkcija tako da odgovara pravilnom
+	  redosledu obrade
+	  - evtPostAhead(): uvek obaveštava scheduler da je EPA spreman za rad
+
 2013-03-11  nenad
 
+	* [r149] custom-d/inc/kernel/core.h, custom-d/inc/kernel/kernel.h,
+	  custom-d/inc/kernel/smp.h, custom-d/src/kernel/core.c,
+	  custom-d/src/kernel/evtq_pkg.h, custom-d/src/kernel/smp.c,
+	  custom-d/src/kernel/smp_pkg.h:
+	  - Interfejs koristi skrivene pokazivače na EPA i SM objekte
+	* [r148] simple[DEL]:
+	  Uklanjanje pogrešnog grananja
+	* [r146] custom-d/Doxyfile:
+	  - Tagovanje v1.0a07
+	* [r145] custom-d/.cproject, custom-d/ChangeLog:
+	  Tagovanje nove verzije
 	* [r144] custom-d/src/kernel/evt_pkg.h:
 	  - C_INLINE_ALWAYS -> C_INLINE (treba prepustiti odluku da se vrsi
 	  inline funkcija kompajleru)
