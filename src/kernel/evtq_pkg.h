@@ -23,12 +23,8 @@
  *//***********************************************************************//**
  * @file
  * @author  	Nenad Radulovic
- * @brief       Interface of evtq_pkg.
- * @details     Detailed description
- * @note        Notes
- * @addtogroup  module_intf
- * @brief		Interface of evtq_pkg module.
- * @section		sec_name Section name
+ * @brief       Privatni interfejs Event Queue modula.
+ * @addtogroup  evtq_impl
  *********************************************************************//** @{ */
 
 #ifndef EVTQ_PKG_H_
@@ -88,22 +84,35 @@ typedef struct evtQueue {
 
 
 /*======================================================  GLOBAL VARIABLES  ==*/
-
-
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
+/**
+ * @brief       Da li je red cekanja prazan?
+ * @param       [in] evtQ               Pokazivac na red cekanja.
+ * @return      Status popunjenosti reda za cekanje dogadjaja.
+ */
 C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsEmpty_(&evtQ->queue));
 }
 
+/**
+ * @brief       Da li je red cekanja pun?
+ * @param       [in] evtQ               Pokazivac na red cekanja.
+ * @return      Status popunjenosti reda za cekanje dogadjaja.
+ */
 C_INLINE_ALWAYS bool_T evtQIsFullI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsFull_(&evtQ->queue));
 }
 
+/**
+ * @brief       Dobavlja jedan dogadjaj iz reda za cekanje
+ * @param       [in] evtQ               Pokazivac na red cekanja.
+ * @return      Dogadjaj sa pocetka reda za cekanje.
+ */
 C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     evtQueue_T *    evtQ) {
 
@@ -119,6 +128,12 @@ C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     return (evt);
 }
 
+/**
+ * @brief       Postavlja dogadjaj u red za cekanje na pocetku reda.
+ * @param       [out] evtQ              Pokazivac na red cekanja.
+ * @param       [in] evt                Pokazivac na dogadjaj koji treba da se
+ *                                      ubaci u red za cekanje.
+ */
 C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
@@ -135,6 +150,12 @@ C_INLINE_ALWAYS void evtQPutAheadI_(
 #endif
 }
 
+/**
+ * @brief       Postavlja dogadjaj u red za cekanje na kraju reda.
+ * @param       [out] evtQ              Pokazivac na red cekanja.
+ * @param       [in] evt                Pokazivac na dogadjaj koji treba da se
+ *                                      ubaci u red za cekanje.
+ */
 C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
@@ -151,14 +172,31 @@ C_INLINE_ALWAYS void evtQPutI_(
 #endif
 }
 
+/**
+ * @brief       Inicijalizije red za cekanje
+ * @param       [out] evtQ              Pokazivac na red za cekanje
+ * @param       [in] evtQBuff           Bafer reda za cekanje
+ * @param       [in] size               Velicina bafera
+ */
 void evtQInit(
     evtQueue_T *    evtQ,
     esEvt_T **      evtQBuff,
     uint8_t         size);
 
+/**
+ * @brief       Deinicijalizuje red za cekanje
+ * @param       evtQ
+ */
 void evtQDeInit(
     evtQueue_T *    evtQ);
 
+/**
+ * @brief       Kolika je potrebna velicina bafera za cuvanje @c levels
+ *              dogadjaja?
+ * @param       [in] levels             Koliko dogadjaja treba da se smesti u
+ *                                      bafer?
+ * @return      Velicinu bafera u bajtovima.
+ */
 size_t evtQReqSize(
     uint8_t         levels);
 
@@ -168,7 +206,6 @@ size_t evtQReqSize(
 #endif
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
 /** @endcond *//** @} *//******************************************************
  * END of evtq_pkg.h
  ******************************************************************************/

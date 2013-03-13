@@ -23,12 +23,8 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Implementation of evtq.
- * @details     Detailed description
- * @note        Notes
- * @addtogroup  module_impl
- * @brief		Implementation of evtq module.
- * @section		sec_name Section name
+ * @brief       Implementacija Event Queue modula
+ * @addtogroup  evtq_impl
  *********************************************************************//** @{ */
                                                                                                   
 /*=========================================================  INCLUDE FILES  ==*/
@@ -45,12 +41,14 @@
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 
+/*----------------------------------------------------------------------------*/
 size_t evtQReqSize(
     uint8_t         levels) {
 
-    return ((size_t)(levels * sizeof(void *)));
+    return ((size_t)(levels * sizeof(void **)));
 }
 
+/*----------------------------------------------------------------------------*/
 void evtQInit(
     evtQueue_T *    evtQ,
     esEvt_T **      evtQBuff,
@@ -68,6 +66,7 @@ void evtQInit(
 #endif
 }
 
+/*----------------------------------------------------------------------------*/
 void evtQDeInit(
     evtQueue_T *    evtQ) {
 
