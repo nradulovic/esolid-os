@@ -25,6 +25,7 @@
  * @author  	Nenad Radulovic
  * @brief       Konfiguracija eSolid Kernel-a
  * @defgroup    kernel_cfg Kernel configuration
+ * @brief       Konfiguracija eSolid Kernel-a
  ****************************************************************************************//** @{ */
 
 
@@ -34,14 +35,41 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 
+/*-------------------------------------------------------------------------------------------*//**
+ * @name        Predefinisane konstante za odabit opcija
+ * @{ *//*---------------------------------------------------------------------------------------*/
+
+/**
+ * @brief       Koristi se za opciju @ref OPT_MM_DISTRIBUTION : Ukljucen je samo
+ *              dinamicki alokator
+ */
 #define ES_MM_DYNAMIC_ONLY              0
+
+/**
+ * @brief       Koristi se za opciju @ref OPT_MM_DISTRIBUTION : Ukljucen je samo
+ *              staticki alokator
+ */
 #define ES_MM_STATIC_ONLY               -1
+
+/**
+ * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su samo
+ *              FSM tipovi automata
+ */
 #define ES_SMP_FSM_ONLY                 1
+
+/**
+ * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su samo
+ *              HSM tipovi automata
+ */
 #define ES_SMP_HSM_ONLY                 2
+
+/**
+ * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su FSM i
+ *              HSM tipovi automata
+ */
 #define ES_SMP_FSM_AND_HSM              3
-#define ES_KERNEL_API_MM                0
-#define ES_KERNEL_API_SM                1
-#define ES_KERNEL_API_FULL              2
+/** @} *//*--------------------------------------------------------------------------------------*/
+
 /* Ovde se pisu podesavanja projekta ------------------------------------------------------------*/
 
 
@@ -77,7 +105,7 @@
 #endif
 
 /**
- * @brief       Debug podrska CORE podmodula
+ * @brief       Debug podrska Event Processing Agent (EPA) modula
  * @details     Ukoliko je ova opcija:
  *                  - definisana: omoguceno je debagiranje modula,
  *                  - nedefinisana: nije omoguceno debagiranje modula.
@@ -86,11 +114,11 @@
  *              opcija @ref OPT_KERNEL_DBG.
  */
 #if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG_CORE
+# define OPT_KERNEL_DBG_EPA
 #endif
 
 /**
- * @brief       Debug podrska Event Management (EVT) podmodula
+ * @brief       Debug podrska Event Management (EVT) modula
  * @details     Ukoliko je ova opcija:
  *                  - definisana: omoguceno je debagiranje modula,
  *                  - nedefinisana: nije omoguceno debagiranje modula.
@@ -103,7 +131,7 @@
 #endif
 
 /**
- * @brief       Debug podrska Memory Management (MM) podmodula
+ * @brief       Debug podrska Memory Management (MM) modula
  * @details     Ukoliko je ova opcija:
  *                  - definisana: omoguceno je debagiranje modula,
  *                  - nedefinisana: nije omoguceno debagiranje modula.
@@ -119,29 +147,6 @@
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Podesavanje Kernel-a
  * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Nivo kernel interfejsa koji se koristi
- * @details     Ovom promenljivom se definise koji interfejs kernal se koristi.
- *              U zavisnosti od potrebe aplikacije moguce je koristiti sledece
- *              nivoe:
- *              - 0 - omogucen je samo Memory Management modul. Korisnik moze da
- *              koristi samo interfejs Memory Management modula. Ukljucivanje
- *              interfejsa ostalih modula je zabranjeno.
- *              - 1 - omogucen je State Machine Processor (SMP). Sa obzirom da
- *              SMP modul koristi funkcije MM modula onda je i MM modul, takodje,
- *              aktiviran. Ovaj nivo interfejsa se najcesce koristi kada je
- *              potrebno pokrenuti do nekoliko automata prekidnim rutinama ili u
- *              glavnoj programskoj petlji.
- *              - 2 - omogucen je kompletan interfejs kernel-a. Ovaj interfejs
- *              se koristi kada je potrebno konkuretno pokrenuti nekoliko
- *              razlicitih EPA objekata.
- * @note        Podrazumevano podesavanje: 2 (ukljucen je kompletan kernel
- *              interfejs)
- */
-#if !defined(OPT_KERNEL_API_LEVEL) || defined(__DOXYGEN__)
-# define OPT_KERNEL_API_LEVEL           ES_KERNEL_API_FULL
-#endif
 
 /**
  * @brief       Maksimalan prioritet EPA objekata u sistemu
@@ -206,6 +211,7 @@
  *              - @ref ES_MM_DYNAMIC_ONLY - Only dynamic memory management is
  *              enabled
  *              - any other value - both memory managers are enabled.
+ *
  * @note        DEFAULT: ES_MM_DYNAMIC_ONLY (Only dynamic memory manager is
  *              enabled)
  */
@@ -225,6 +231,7 @@
  *              - 2 - omoguceni su samo HSM automati
  *              - 3 - omogucena su oba tipa automata, selekcija dispecera se
  *              vrsi dinamicki.
+ *
  * @note        Podrazumevano podesavanje: 3 (Omogucena su oba tipa automata)
  */
 #if !defined(OPT_SMP_SM_TYPES) || defined(__DOXYGEN__)
@@ -287,7 +294,7 @@
  *              treba voditi racuna o zauzecu strukture koja opisuje dogadjaj i
  *              njenom poravnjanju (alignement) u memoriji, gde se moze javiti
  *              potreba za vecim tipom od minimalnog.
- * @note        Podrazumevano podesavanje: uint_fast8_t
+ * @note        Podrazumevano podesavanje: uint32_t
  */
 #if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
 # define OPT_EVT_ID_T                   uint32_t
