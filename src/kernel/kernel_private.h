@@ -37,7 +37,8 @@
 #include "evt_pkg.h"
 #include "smp_pkg.h"
 #include "evtq_pkg.h"
-#include "core_pkg.h"
+#include "epa_pkg.h"
+#include "sched_pkg.h"
 
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/

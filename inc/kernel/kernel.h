@@ -63,7 +63,7 @@
 #define KERNEL_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/core.h"
+#include "kernel/epa.h"
 
 /*===============================================================  DEFINES  ==*/
 
@@ -114,9 +114,9 @@ typedef enum esKernelStatus {
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Inicijalizacija kernel-a
- * @details     Ova funkcija vrsi najpre inicijalizaciju HAL-a, zatim
- *              memorijskog menadzera i prelazi na inicijalizaciju samog kernela.
+ * @brief       Inicijalizuje kernel.
+ * @details     Najpre vrsi inicijalizaciju HAL-a, zatim memorijskog menadzera,
+ *              SMP modula i prelazi na inicijalizaciju samog kernela.
  * @api
  */
 void esKernelInit(
@@ -138,6 +138,14 @@ void esKernelStart(
  * @api
  */
 esKernelStatus_T esKernelStatus(
+    void);
+
+/**
+ * @brief       Vraca Id pokazivac EPA objekta.
+ * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
+ * @api
+ */
+esEpa_T * esKernelEpaGet(
     void);
 
 /** @} *//*-------------------------------------------------------------------*/
