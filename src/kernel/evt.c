@@ -23,7 +23,7 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Implementacija Event Object podmodula.
+ * @brief       Implementacija Event objekta
  * @addtogroup  evt_impl
  *********************************************************************//** @{ */
 
@@ -77,7 +77,7 @@ C_INLINE_ALWAYS void evtInit_(
 # if (OPT_KERNEL_API_LEVEL < 2)
     evt->generator = uGeneratorGet();
 # else
-    evt->generator = esEpaGet();
+    evt->generator = schedEpaGetCurrent_();
 # endif
 #endif
 

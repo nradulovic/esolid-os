@@ -23,7 +23,7 @@
  *//******************************************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Privatni interfejs Event Object podmodula.
+ * @brief       Privatni interfejs Event objekta
  * @addtogroup  evt_impl
  ****************************************************************************************//** @{ */
 

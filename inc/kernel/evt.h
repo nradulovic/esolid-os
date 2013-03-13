@@ -23,7 +23,7 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Menadzmet dogadjaja
+ * @brief       Interfejs Event (EVT) objekata
  * @details     This file is not meant to be included in application code
  *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  evt_intf
