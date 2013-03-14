@@ -62,10 +62,10 @@ C_INLINE_ALWAYS void evtInit_(
     esEvtId_T       id) {
 
     evt->id = id;
-    evt->dynamic = (uint_fast8_t)0U;                                            /* Dogadjaj je dinamican, sa 0 korisnika.                   */
+    evt->dynamic.u = 0U;                                                        /* Dogadjaj je dinamican, sa 0 korisnika.                   */
 
 #if defined(OPT_EVT_USE_TIMESTAMP)
-        evt->timestamp = uTimestampGet();
+    evt->timestamp = uTimestampGet();
 #endif
 
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
@@ -75,6 +75,10 @@ C_INLINE_ALWAYS void evtInit_(
 #if defined(OPT_EVT_USE_GENERATOR)
 
 # if (OPT_KERNEL_API_LEVEL < 2)
+    /**
+     * @todo Sta i kako sa ovim??? Kada da se koristi callback funkcija, a kada
+     *       scheduler funkcija
+     */
     evt->generator = uGeneratorGet();
 # else
     evt->generator = schedEpaGetCurrent_();
@@ -98,10 +102,10 @@ C_INLINE_ALWAYS void evtInit_(
 C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
-    evt->id = 0;
-
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
     evt->signature = ~EVT_SIGNATURE;                                            /* Postavljanje loseg potpisa                               */
+#else
+    (void)evt;
 #endif
 }
 
@@ -121,7 +125,7 @@ esEvt_T * esEvtCreate(
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    newEvt = esDmemAllocI(size);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
     evtInit_(
         newEvt,
@@ -138,7 +142,7 @@ esEvt_T * esEvtCreateI(
 
     esEvt_T * newEvt;
 
-    newEvt = esDmemAllocI(size);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
         size,
@@ -151,14 +155,14 @@ esEvt_T * esEvtCreateI(
 void esEvtReserve(
     esEvt_T *       evt) {
 
-    evt->dynamic |= EVT_RESERVED_MASK;
+    evt->dynamic.s.attrib |= EVT_RESERVED_MASK;
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtUnReserve(
     esEvt_T *       evt) {
 
-    evt->dynamic &= ~EVT_RESERVED_MASK;
+    evt->dynamic.s.attrib &= ~EVT_RESERVED_MASK;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -178,7 +182,7 @@ void esEvtDestroy(
 void esEvtDestroyI(
     esEvt_T *       evt) {
 
-    if ((uint_fast8_t)0U == evt->dynamic) {
+    if ((uint_fast8_t)0U == evt->dynamic.u) {
         evtDeInit_(
             evt);
         esDmemDeAllocI(

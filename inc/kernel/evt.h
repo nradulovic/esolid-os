@@ -49,7 +49,7 @@
  *              dogadjaj oslobodii rezervacije on moze da bude obrisan ako nema
  *              korisnika.
  */
-#define EVT_RESERVED_MASK                ((uint_fast8_t)(1U << 6))
+#define EVT_RESERVED_MASK               ((uint_fast8_t)(1U << 0))
 
 /**
  * @brief       Bit maska za definisanje konstantnog dogadjaja.
@@ -58,7 +58,7 @@
  *              izbrisan. Broj korisnika dogadjaja se ne azurira. Dati dogadjaj
  *              ne moze da postane dinamican.
  */
-#define EVT_CONST_MASK                  ((uint_fast8_t)(1U << 7))
+#define EVT_CONST_MASK                  ((uint_fast8_t)(1U << 1))
 
 /** @} *//*-------------------------------------------------------------------*/
 /*===============================================================  MACRO's  ==*/
@@ -113,9 +113,22 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
     esEvtId_T       id;
 
 /**
- * @brief       Dinamicki atributi dogadjaja
+ * @brief       Unija dinamickih atributa dogadjaja
+ * @details     Koristi se samo za brz pristup clanovima
  */
-    uint_fast8_t    dynamic;
+    union udynamic {
+        uint16_t        u;                                                      /**< @brief     Unija atributa                              */
+
+        /**
+         * @brief       Struktura atributa
+         */
+        struct sdynamic {
+            uint8_t         counter;                                            /**< @brief     Brojac korisnika dogadjaja                  */
+            uint8_t         attrib;                                             /**< @brief     Kvalifikatori dogadjaja.
+                                                                                     @see       EVT_RESERVED_MASK
+                                                                                     @see       EVT_CONST_MASK                              */
+        }               s;                                                      /**< @brief     Struktura atributa                          */
+    }               dynamic;                                                    /**< @brief     Dinamicki atributi dogadjaja                */
 
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
     || defined(__DOXYGEN__)

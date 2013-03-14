@@ -98,36 +98,65 @@ static void hsmTranExit(
  * @brief       Tabela signalnih dogadjaja
  */
 const C_ROM esEvt_T evtSignal[] = {
-    {(esEvtId_T)SIG_EMPTY,
-    EVT_CONST_MASK,
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
-    EVT_SIGNATURE
-#endif
+    [SIG_EMPTY].id = SIG_EMPTY,
+    [SIG_EMPTY].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
     },
-    {(esEvtId_T)SIG_ENTRY,
-    EVT_CONST_MASK,
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
-    EVT_SIGNATURE
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_EMPTY].signature = EVT_SIGNATURE,
 #endif
+
+    [SIG_ENTRY].id = SIG_ENTRY,
+    [SIG_ENTRY].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
     },
-    {(esEvtId_T)SIG_EXIT,
-    EVT_CONST_MASK,
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
-    EVT_SIGNATURE
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_ENTRY].signature = EVT_SIGNATURE,
 #endif
+
+    [SIG_EXIT].id = SIG_EXIT,
+    [SIG_EXIT].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
     },
-    {(esEvtId_T)SIG_INIT,
-    EVT_CONST_MASK,
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
-    EVT_SIGNATURE
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_EXIT].signature = EVT_SIGNATURE,
 #endif
+
+    [SIG_INIT].id = SIG_INIT,
+    [SIG_INIT].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
     },
-    {(esEvtId_T)SIG_SUPER,
-    EVT_CONST_MASK,
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK) || defined(__DOXYGEN__)
-    EVT_SIGNATURE
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_INIT].signature = EVT_SIGNATURE,
 #endif
-    }
+
+    [SIG_SUPER].id = SIG_SUPER,
+    [SIG_SUPER].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
+    },
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_SUPER].signature = EVT_SIGNATURE,
+#endif
 };
 
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
@@ -273,8 +302,7 @@ void smInit (
 #elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
     sm->state = initState;
     sm->stateQBegin = stateQueue;
-    sm->stateQEnd =
-        (esState_T *)((uint8_t *)stateQueue + stateQReqSize(levels)) - 1U;
+    sm->stateQEnd = stateQueue + levels - 1U;
 #else
     sm->state = initState;
 
@@ -285,8 +313,7 @@ void smInit (
     } else {
         sm->dispatch = &hsmDispatch;
         sm->stateQBegin = stateQueue;
-        sm->stateQEnd =
-            (esState_T *)((uint8_t *)stateQueue + stateQReqSize(levels)) - 1U;
+        sm->stateQEnd = stateQueue + levels - 1U;
     }
 #endif
 }
@@ -302,9 +329,10 @@ void smDeInit(
     sm->stateQBegin = (esState_T *)0U;
     sm->stateQEnd = (esState_T *)0U;
 #else
+    sm->dispatch = (esStatus_T (*)(void *, const esEvt_T *))0U;
     sm->state = (esState_T)0U;
     sm->stateQBegin = (esState_T *)0U;
-    sm->stateQEnd = (esState_T *)0U;
+    sm->stateQEnd = (esState_T *)0;
 #endif
 }
 

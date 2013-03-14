@@ -68,14 +68,8 @@ extern "C" {
 C_INLINE void evtUsrAddI_(
     esEvt_T         * evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic)) {                  /* Da li je dogadjaj dinamičan?                             */
-        uint_fast8_t tmpR;
-        uint_fast8_t tmpU;
-
-        tmpR = evt->dynamic & ~EVT_USERS_MASK;
-        tmpU = evt->dynamic & EVT_USERS_MASK;
-        ++tmpU;
-        evt->dynamic = tmpR | tmpU;
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {           /* Da li je dogadjaj dinamičan?                             */
+        ++evt->dynamic.s.counter;
     }
 }
 
@@ -86,14 +80,8 @@ C_INLINE void evtUsrAddI_(
 C_INLINE void evtUsrRmI_(
     esEvt_T         * evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic)) {                  /* Da li je dogadjaj dinamičan?                             */
-        uint_fast8_t tmpR;
-        uint_fast8_t tmpU;
-
-        tmpR = evt->dynamic & ~EVT_USERS_MASK;
-        tmpU = evt->dynamic & EVT_USERS_MASK;
-        --tmpU;
-        evt->dynamic = tmpR | tmpU;
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {           /* Da li je dogadjaj dinamičan?                             */
+        --evt->dynamic.s.counter;
     }
 }
 
