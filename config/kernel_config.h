@@ -297,7 +297,7 @@
  * @note        Podrazumevano podesavanje: uint32_t
  */
 #if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
-# define OPT_EVT_ID_T                   uint32_t
+# define OPT_EVT_ID_T                   uint16_t
 #endif
 
 /**
