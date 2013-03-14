@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,607 +20,581 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Implementacija State Processor modula.
- * ------------------------------------------------------------------------------------------------
- * @addtogroup  sproc_impl
- ****************************************************************************************//** @{ */
+ * @brief       Implementacija State Machine Processor objekta.
+ * @addtogroup  smp_impl
+ *********************************************************************//** @{ */
 
-/*============================================================================  INCLUDE FILES  ==*/
-#define SPROC_PKG_H_VAR
+/*=========================================================  INCLUDE FILES  ==*/
+#define SMP_PKG_H_VAR
 #include "kernel_private.h"
 
-/*============================================================================  LOCAL DEFINES  ==*/
-SP_DBG_DEFINE_MODULE(State Processor);
+/*=========================================================  LOCAL DEFINES  ==*/
+/*=========================================================  LOCAL MACRO's  ==*/
 
-/*============================================================================  LOCAL MACRO's  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Posalji predefinisan dogadjaj @c evt automatu @c hsm.
- * @param       epa                     Pokazivac na strukturu EPA objekta,
+ * @param       sm                      Pokazivac na strukturu EPA objekta,
  * @param       state                   pokazivac na funkciju stanja,
  * @param       evt                     redni broj (enumerator) rezervisanog
  *                                      dogadjaj.
- *//*--------------------------------------------------------------------------------------------*/
-#define EVT_SIGNAL_SEND(epa, state, evt)                                        \
-    (* state)((epa), (esEvtHeader_T *)&evtSignal[evt])
+ */
+#define SM_SIGNAL_SEND(sm, state, evt)                                         \
+    (*state)(((sm) + 1U), (esEvt_T *)&evtSignal[evt])
 
-/*=========================================================================  LOCAL DATA TYPES  ==*/
-/*================================================================  LOCAL FUNCTION PROTOTYPES  ==*/
-/*==========================================================================  LOCAL VARIABLES  ==*/
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
-/*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
-/*-----------------------------------------------------------------------------------------------*/
-void hsmDispatch(
-    esEpaHeader_T       * aEpa,
-    const esEvtHeader_T * aEvt) {
+/**
+ * @brief       Posalji dogadjaj @c evt automatu @c hsm.
+ * @param       sm                      Pokazivac na strukturu EPA objekta,
+ * @param       state                   pokazivac na funkciju stanja,
+ * @param       evt                     redni broj (enumerator) rezervisanog
+ *                                      dogadjaj.
+ */
+#define SM_EVT_SEND(sm, state, evt)                                             \
+    (*state)(((sm) + 1U), (evt))
 
-    esPtrState_T        * srcState;
-    esPtrState_T        * dstState;
-    esState_T           state;
-    uint_fast8_t        srcEnd;
-    uint_fast8_t        dstEnd;
+/*======================================================  LOCAL DATA TYPES  ==*/
 
-    srcState = aEpa->internals.exec.pSrcStates;
-    srcEnd = (uint_fast8_t)0U;
+/**
+ * @brief       Objekat - SM (State Machine)
+ */
+typedef struct smObject {
+
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
+    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
+    || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na klasu memorijskog alokatora
+ */
+    const C_ROM struct esMemClass * memClass;
+#endif
+
+/**
+ * @brief       Instanca automata
+ */
+    struct esSm sm;
+} smObject_T;
+
+/*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
+
+static esState_T * hsmTranFindPath(
+    esSm_T *        sm,
+    esState_T *     exit,
+    esState_T *     entry);
+
+static void hsmTranEnter(
+    esSm_T *        sm,
+    esState_T *     entry);
+
+static void hsmTranExit(
+    esSm_T *        sm,
+    esState_T *     exit);
+
+/*=======================================================  LOCAL VARIABLES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+/**
+ * @brief       Tabela signalnih dogadjaja
+ */
+const C_ROM esEvt_T evtSignal[] = {
+    [SIG_EMPTY].id = SIG_EMPTY,
+    [SIG_EMPTY].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
+    },
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_EMPTY].signature = EVT_SIGNATURE,
+#endif
+
+    [SIG_ENTRY].id = SIG_ENTRY,
+    [SIG_ENTRY].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
+    },
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_ENTRY].signature = EVT_SIGNATURE,
+#endif
+
+    [SIG_EXIT].id = SIG_EXIT,
+    [SIG_EXIT].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
+    },
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_EXIT].signature = EVT_SIGNATURE,
+#endif
+
+    [SIG_INIT].id = SIG_INIT,
+    [SIG_INIT].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
+    },
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_INIT].signature = EVT_SIGNATURE,
+#endif
+
+    [SIG_SUPER].id = SIG_SUPER,
+    [SIG_SUPER].dynamic = {
+        .s = {
+            .counter = 0U,
+            .attrib = EVT_CONST_MASK
+        }
+    },
+#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
+    || defined(__DOXYGEN__)
+    [SIG_SUPER].signature = EVT_SIGNATURE,
+#endif
+};
+#pragma GCC diagnostic pop
+
+/*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
+
+/**
+ * @brief       Pronalazi putanju od izvorista do odredista
+ * @param       [in,out] sm             Pokazivac na automat
+ * @param       [in,out] exit           Pokazivac na pocetak reda stanja za izlaz
+ * @param       [in,out] entry          Pokazivac na kraj reda stanja za ulaz
+ * @return      Pokazivac na pocetak reda stanja za ulaz.
+ * @notapi
+ */
+static esState_T * hsmTranFindPath(
+    esSm_T *        sm,
+    esState_T *     exit,
+    esState_T *     entry) {
+
+    /* tran: a) src ?== dst                                                   */
+    if (*exit == *entry) {
+        *(++exit) = (esState_T)0U;
+
+        return (--entry);
+    }
+    /* tran: b) src ?== super(dst)                                            */
+    (void)SM_SIGNAL_SEND(sm, *entry, SIG_SUPER);
+    *(--entry) = sm->state;                                                    /* super(dst)                                               */
+
+    if (*exit == *entry) {
+        *(++exit) = (esState_T)0U;
+
+        return (entry);
+    }
+    /* tran: c) super(src) ?== super(dst)                                     */
+    (void)SM_SIGNAL_SEND(sm, *exit, SIG_SUPER);
+    *(++exit) = sm->state;                                                     /* super(src)                                               */
+
+    if (*exit == *entry) {
+        *exit = (esState_T)0U;
+
+        return (entry);
+    }
+    /* tran: d) super(src) ?== dst                                            */
+    ++entry;                                                                    /* dst */
+
+    if (*exit == *entry) {
+        *exit = (esState_T)0U;
+
+        return (entry);
+    }
+    /* tran: e) src ?== ...super(super(dst))                                  */
+    --exit;                                                                     /* src                                                      */
+    --entry;                                                                    /* super(dst)                                               */
+
+    while (&esSmTopState != **entry) {
+        (void)SM_SIGNAL_SEND(sm, *entry, SIG_SUPER);
+        *(--entry) = sm->state;
+
+        if (*exit == *entry) {
+            *exit = (esState_T)0U;
+
+            return (entry);
+        }
+    }
+    /* tran: f) super(src) ?== ...super(super(dst))                           */
+    ++exit;                                                                     /* super(src)                                               */
+    entry = sm->stateQEnd - 2U;                                                 /* super(dst)                                               */
+
+    while (&esSmTopState != **entry) {
+
+        if (*exit == *entry) {                                                  /* ...super(super(dst)) */
+            *exit = (esState_T)0U;
+
+            return (entry);
+        }
+        --entry;
+    }
+    /* tran: g) ...super(super(src)) ?== ...super(super(dst))                 */
+    while (TRUE) {
+        (void)SM_SIGNAL_SEND(sm, *exit, SIG_SUPER);
+        *(++exit) = sm->state;
+        entry = sm->stateQEnd;
+
+        while (&esSmTopState != **entry) {
+
+            if (*exit == *entry) {
+                *exit = (esState_T)0U;
+
+                return (entry);
+            }
+            --entry;
+        }
+    }
+
+    return ((esState_T *)0U);
+}
+
+/**
+ * @brief       Ulaz u hijerarhiju
+ * @param       [in] sm                 Pokazivac na konacni automat
+ * @param       [in] entry              Pokazivac na pocetak reda stanja.
+ * @details     Funkcija ulazi u hijerarhiju dok ne stigne do kraja reda za
+ *              stanja.
+ * @notapi
+ */
+static void hsmTranEnter(
+    esSm_T *        sm,
+    esState_T *     entry) {
+
+    while (entry != sm->stateQEnd) {
+        ++entry;
+        (void)SM_SIGNAL_SEND(sm, *entry, SIG_ENTRY);
+    }
+}
+
+/**
+ * @brief       Izlaz iz hijerarhije
+ * @param       [in] sm                 Pokazivac na konacni automat
+ * @param       [in] exit               Pokazivac na pocetak reda stanja
+ * @details     Red stanja je terminisan nulom.
+ * @notapi
+ */
+static void hsmTranExit(
+    esSm_T *        sm,
+    esState_T *     exit) {
+
+    while (*exit != (esState_T)0U) {
+        (void)SM_SIGNAL_SEND(sm, *exit, SIG_EXIT);
+        ++exit;
+    }
+}
+
+/*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+
+/*----------------------------------------------------------------------------*/
+void smInit (
+    esSm_T *        sm,
+    esState_T       initState,
+    esState_T *     stateQueue,
+    size_t          levels) {
+
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
+    sm->state = initState;
+#elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
+    sm->state = initState;
+    sm->stateQBegin = stateQueue;
+    sm->stateQEnd = stateQueue + levels - 1U;
+#else
+    sm->state = initState;
+
+    if (levels == 2) {
+        sm->dispatch = &fsmDispatch;
+        sm->stateQBegin = (esState_T *)0U;
+        sm->stateQEnd = (esState_T *)0U;
+    } else {
+        sm->dispatch = &hsmDispatch;
+        sm->stateQBegin = stateQueue;
+        sm->stateQEnd = stateQueue + levels - 1U;
+    }
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+void smDeInit(
+    esSm_T *        sm) {
+
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
+    sm->state = (esState_T)0U;
+#elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
+    sm->state = (esState_T)0U;
+    sm->stateQBegin = (esState_T *)0U;
+    sm->stateQEnd = (esState_T *)0U;
+#else
+    sm->dispatch = (esStatus_T (*)(struct esSm *, const esEvt_T *))0U;
+    sm->state = (esState_T)0U;
+    sm->stateQBegin = (esState_T *)0U;
+    sm->stateQEnd = (esState_T *)0;
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+size_t stateQReqSize(
+    uint8_t         levels) {
+
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
+
+    return (0U);
+#elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
+    size_t needed;
+
+    needed = levels * 2U * sizeof(esState_T *);
+
+    return (needed);
+#else
+    size_t needed;
+
+    if (levels == 2) {
+
+        needed = 0U;
+    } else {
+        needed = levels * 2U * sizeof(esState_T *);
+    }
+
+    return (needed);
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+esStatus_T hsmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt) {
+
+    esState_T * stateQCurr;
+    esStatus_T status;
+
+    stateQCurr = sm->stateQBegin;
+    *sm->stateQEnd = sm->state;
 
     do {
-        srcState[srcEnd] = aEpa->pState;
-        state = (esState_T)(* srcState[srcEnd])(aEpa, (esEvtHeader_T *)aEvt);
-        ++srcEnd;
-    } while (state == RETN_SUPER);
+        *stateQCurr = sm->state;
+        status = SM_EVT_SEND(sm, *stateQCurr, (esEvt_T *)evt);
+        ++stateQCurr;
+    } while (RETN_SUPER == status);
+    --stateQCurr;
 
-    switch (state) {
-
-        case RETN_TRAN : {
-            dstState = aEpa->internals.exec.pDstStates;
-
-            do {
-                dstState[0] = aEpa->pState;                                     /* sacuvaj destinaciju                                      */
-                dstEnd = (uint_fast8_t)1U;
-
-                if (srcState[srcEnd - 1U] != dstState[0]) {                     /* tran: a) src ?!= dst                                     */
-                    (void)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_SUPER);
-                    dstState[1] = aEpa->pState;
-                    --srcEnd;
-
-                    if (srcState[srcEnd] != dstState[1]) {                 /* tran: b) src ?!= super(dst)                              */
-                        (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
-                        ++srcEnd;
-                        srcState[srcEnd] = aEpa->pState;
-
-                        if (srcState[srcEnd] != dstState[1]) {                  /* tran: c) super(src) ?!= super(dst)                       */
-
-                            if (srcState[srcEnd] == dstState[0]) {              /* tran: d) super(src) ?== dst                              */
-                                dstEnd = (uint_fast8_t)0U;                      /* Ne treba ni da se udje u novu hijerarhiju.               */
-                            } else {                                            /* tran: e) src ?== ...super(super(dst))                    */
-                                --srcEnd;
-
-                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))         */
-                                    (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
-
-                                    if (srcState[srcEnd] == aEpa->pState) {
-                                        goto TRANSITION_EXECUTION;
-                                    }
-                                    ++dstEnd;
-                                    dstState[dstEnd] = aEpa->pState;
-                                }
-                                ++srcEnd;
-                                dstEnd = (uint_fast8_t)1U;
-
-                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))  */
-
-                                    if (srcState[srcEnd] == dstState[dstEnd]) {
-                                        goto TRANSITION_EXECUTION;
-                                    }
-                                    ++dstEnd;
-                                }
-
-                                while (TRUE) {
-                                    (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
-                                    dstEnd = (uint_fast8_t)0U;
-                                    ++srcEnd;
-                                    srcState[srcEnd] = aEpa->pState;
-
-                                    while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))*/
-
-                                        if (srcState[srcEnd] == dstState[dstEnd]) {
-                                            goto TRANSITION_EXECUTION;
-                                        }
-                                        ++dstEnd;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-TRANSITION_EXECUTION:
-                {
-                    uint_fast8_t        stateCnt;
-
-                    stateCnt = (uint_fast8_t)0U;
-
-                    while (stateCnt != srcEnd) {
-#if defined(OPT_KERNEL_DBG_SPROC)
-                        state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
-                        SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
-#else
-                        (void)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
-#endif
-                        ++stateCnt;
-                    }
-                }
-
-                while ((uint_fast8_t)0U != dstEnd) {                            /* Udji u novu hijerarhiju.                                 */
-                    --dstEnd;
-#if defined(OPT_KERNEL_DBG_SPROC)
-                    state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
-                    SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
-#else
-                    (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_ENTRY);
-#endif
-                }
-                state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_INIT);
-                SP_ASSERT((RETN_TRAN == state) || (RETN_SUPER == state));
-                srcState[0] = dstState[0];
-                srcEnd = (uint_fast8_t)1U;
-            } while (RETN_TRAN == state);
-            aEpa->pState = dstState[0];
-
-            return;
-        }
-
-        case RETN_HANDLED : {
-            aEpa->pState = srcState[0];
-
-            return;
-        }
-
-        case RETN_DEFERRED : {
-            aEpa->pState = srcState[0];
-            evtQPut(
-                aEpa,
-                (esEvtHeader_T *)aEvt);
-
-            return;
-        }
-
-        case RETN_IGNORED : {
-            aEpa->pState = srcState[0];
-
-            return;
-        }
-
-        default : {
-
-            return;
-        }
+    while (RETN_TRAN == status) {
+        *sm->stateQEnd = sm->state;
+        stateQCurr = hsmTranFindPath(
+            sm,
+            stateQCurr,
+            sm->stateQEnd);
+        hsmTranExit(
+            sm,
+            sm->stateQBegin);
+        hsmTranEnter(
+            sm,
+            stateQCurr);
+        status = (esStatus_T)SM_SIGNAL_SEND(sm,*sm->stateQEnd, SIG_INIT);
+        stateQCurr = sm->stateQBegin;
+        *sm->stateQBegin = *sm->stateQEnd;
     }
+    sm->state = *sm->stateQEnd;
+
+    return (status);
 }
 
-#if 0 /* Druga verzija dispecera */
-void hsmDispatch(
-    esEpaHeader_T       * aEpa,
-    const esEvtHeader_T * aEvt) {
+/*----------------------------------------------------------------------------*/
+esStatus_T fsmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt) {
 
-    esPtrState_T        * srcState;
-    esPtrState_T        * dstState;
-    esState_T           state;
-    uint_fast8_t        srcEnd;
-    uint_fast8_t        dstEnd;
+    esStatus_T status;
+    esState_T oldState;
+    esState_T newState;
 
-    srcState = aEpa->internals.exec.pSrcStates;
-    srcEnd = (uint_fast8_t)0U;
+    oldState = sm->state;
+    status = SM_EVT_SEND(sm, sm->state, (esEvt_T *)evt);
+    newState = sm->state;
 
-    do {
-        srcState[srcEnd] = aEpa->pState;
-        state = (esState_T)(* srcState[srcEnd])(aEpa, (esEvtHeader_T *)aEvt);
-        ++srcEnd;
-    } while (state == RETN_SUPER);
+    while (RETN_TRAN == status) {
+        (void)SM_SIGNAL_SEND(sm, oldState, SIG_EXIT);
+        (void)SM_SIGNAL_SEND(sm, newState, SIG_ENTRY);
+        status = SM_SIGNAL_SEND(sm, newState, SIG_INIT);
+        oldState = newState;
+        newState = sm->state;
+    }
+    sm->state = oldState;
 
-    switch (state) {
+    return (status);
+}
 
-        case RETN_TRAN : {                                                      /* Da li treba izvrsiti tranziciju?                         */
-            dstState = aEpa->internals.exec.pDstStates;
-            dstState[0] = aEpa->pState;                                         /* sacuvaj destinaciju                                      */
-            dstEnd = (uint_fast8_t)1U;
+/*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
-            if (srcState[srcEnd - 1U] != dstState[0]) {                         /* tran: a) src ?!= dst                                     */
-                (void)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_SUPER);
-                dstState[1] = aEpa->pState;
+/*------------------------------------------------------------------------*//**
+ * @ingroup         smp_intf
+ * @{ *//*--------------------------------------------------------------------*/
 
-                if (srcState[srcEnd - 1U] != dstState[1]) {                     /* tran: b) src ?!= super(dst)                              */
-                    (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd - 1U], SIG_SUPER);
-                    srcState[srcEnd] = aEpa->pState;
+esStatus_T esRetnTransition(
+    void *          sm,
+    esState_T       state) {
 
-                    if (srcState[srcEnd] != dstState[1]) {                      /* tran: c) super(src) ?!= super(dst)                       */
+    ((esSm_T *)sm - 1U)->state = state;
 
-                        if (srcState[srcEnd] == dstState[0]) {                  /* tran: d) super(src) ?== dst                              */
-                            dstEnd = (uint_fast8_t)0U;                          /* Ne treba ni da se udje u novu hijerarhiju.               */
-                        } else {                                                /* tran: e) src ?== ...super(super(dst))                    */
-                            --srcEnd;
+    return (RETN_TRAN);
+}
 
-                            while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: e) src ?== ...super(super(dst))                    */
-                                (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
+esStatus_T esRetnDeferred(
+    void) {
 
-                                if (srcState[srcEnd] == aEpa->pState) {
-                                    goto TRANSITION_EXECUTION;
-                                }
-                                ++dstEnd;
-                                dstState[dstEnd] = aEpa->pState;
-                            }
-                            ++srcEnd;
-                            dstEnd = (uint_fast8_t)1U;
+    return (RETN_DEFERRED);
+}
 
-                            while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
+esStatus_T esRetnHandled(
+    void) {
 
-                                if (srcState[srcEnd] == dstState[dstEnd]) {
-                                    goto TRANSITION_EXECUTION;
-                                }
-                                ++dstEnd;
-                            }
+    return (RETN_HANDLED);
+}
 
-                            while (TRUE) {
-                                (void)EVT_SIGNAL_SEND(aEpa, srcState[srcEnd], SIG_SUPER);
-                                dstEnd = (uint_fast8_t)0U;
-                                ++srcEnd;
-                                srcState[srcEnd] = aEpa->pState;
+esStatus_T esRetnIgnored(
+    void) {
 
-                                while ((esPtrState_T)&esHsmTopState != dstState[dstEnd]) { /* tran: f) super(src) ?== ...super(super(dst))             */
+    return (RETN_IGNORED);
+}
 
-                                    if (srcState[srcEnd] == dstState[dstEnd]) {
-                                        goto TRANSITION_EXECUTION;
-                                    }
-                                    ++dstEnd;
-                                }
-                            }
-                        }
-                    }
-                }
-            } /* tran: a) */
+esStatus_T esRetnSuper(
+    void *          sm,
+    esState_T       state) {
 
-TRANSITION_EXECUTION:
-            {
-                uint_fast8_t        stateCnt;
+    ((esSm_T *)sm - 1U)->state = state;
 
-                stateCnt = (uint_fast8_t)0U;
+    return (RETN_SUPER);
+}
 
-                while (stateCnt != srcEnd) {
-#if defined(OPT_KERNEL_DBG_SPROC)
-                    state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
-                    SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
+/*----------------------------------------------------------------------------*/
+esStatus_T esSmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt) {
+
+    esStatus_T status;
+
+    status = SM_DISPATCH(sm, evt);
+
+    return (status);
+}
+
+/*----------------------------------------------------------------------------*/
+esSm_T * esSmCreate(
+    const C_ROM esMemClass_T *  memClass,
+    const C_ROM esSmDef_T *     definition) {
+
+    smObject_T * newSm;
+    size_t smpSize;
+    size_t stateQSize;
+
+#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
+                                                                                /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
+                                                                                /* radi brzeg pristupa memoriji.                            */
+    smpSize = sizeof(smObject_T);
+    smpSize += ES_ALIGN(
+        definition->smWorkspaceSize,
+        ES_CPU_ATTRIB_ALIGNMENT);
+    stateQSize = ES_ALIGN(
+        stateQReqSize(
+            definition->smLevels),
+        ES_CPU_ATTRIB_ALIGNMENT);
 #else
-                    (void)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+    smpSize = sizeof(smObject_T) + definition->smWorkspaceSize;
+    stateQSize = stateQReqSize(
+        definition->smLevels);
 #endif
-                    ++stateCnt;
-                }
-            }
 
-            while (TRUE) {
+#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+    (void)aMemClass;
+    {
+        ES_CRITICAL_DECL();
 
-                while ((uint_fast8_t)0U != dstEnd) {                                  /* Udji u novu hijerarhiju.                                 */
-                    --dstEnd;
-                    state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_ENTRY);
-                    SP_ASSERT(((RETN_SUPER == state) || (RETN_NOEX == state) || (RETN_HANDLED == state)));
-                }
-
-                if (RETN_NOEX == state) {
-                    evtQPutAhead(
-                        aEpa,
-                        (esEvtHeader_T *)&evtSignal[SIG_NOEX]);
-
-                    break;
-                }
-                state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_INIT);
-                SP_ASSERT((RETN_TRAN == state) || (RETN_SUPER == state));
-
-                if (RETN_TRAN != state) {
-
-                    break;
-                }
-                {
-                    esPtrState_T tmpState;
-
-                    dstEnd = (uint_fast8_t)0U;
-                    tmpState = dstState[0];
-                    dstState[0] = aEpa->pState;
-
-                    while (dstState[dstEnd] != tmpState) {
-                        (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
-                        ++dstEnd;
-                        dstState[dstEnd] = aEpa->pState;
-                    }
-                }
-            }
-            aEpa->pState = dstState[0];
-
-            return;
-        }
-
-        case RETN_HANDLED : {
-            aEpa->pState = srcState[0];
-
-            return;
-        }
-
-        case RETN_NOEX : {
-            aEpa->pState = srcState[0];
-            evtQPutAhead(
-                aEpa,
-                (esEvtHeader_T *)&evtSignal[SIG_NOEX]);
-
-            return;
-        }
-
-        case RETN_DEFERRED : {
-            aEpa->pState = srcState[0];
-            evtQPut(
-                aEpa,
-                (esEvtHeader_T *)aEvt);
-
-            return;
-        }
-
-        case RETN_IGNORED : {
-            aEpa->pState = srcState[0];
-        }
-
-        default : {
-
-            return;
-        }
+        ES_CRITICAL_ENTER(
+            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        newSm = esSmemAllocI(
+            smpSize + stateQSize);
+        ES_CRITICAL_EXIT();
     }
-}
-#endif /* Druga verzija dispecera */
+#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+    (void)memClass;
+    {
+        ES_CRITICAL_DECL();
 
-# if 0 /* Pisem novi dispecer */
-void hsmDispatch (
-    esEpaHeader_T       * aEpa,
-    const esEvtHeader_T * aEvt) {
-
-    esPtrState_T * srcState;                                                    /* Cuvanje adresa izvorista.                                */
-    esPtrState_T * dstState;                                                    /* Cuvanje adresa odredista.                                */
-    esPtrState_T tmpState;
-    esState_T    state;
-    uint_fast8_t srcEnd;
-    uint_fast8_t dstEnd;
-    uint_fast8_t stateCnt;
-
-    srcState = aEpa->internals.exec.pSrcStates;
-    srcEnd = (uint_fast8_t)0U;
-
-    while (TRUE) {                                                              /* Pozivanje f-ja sve dok vracaju SUPER.                    */
-        tmpState = aEpa->pState;
-        state = (esState_T)(*tmpState)(                                         /* Pozovi funkciju stanja:                                  */
-            aEpa,                                                               /* EPA objekat koji se obradjuje.                           */
-            (esEvtHeader_T *)aEvt);                                             /* Dobavi nov dogadjaj.                                     */
-        SP_ASSERT(HSM_VALID_STATE(state));
-
-        if (RETN_SUPER != state) {
-            break;                                                              /* break se koristi zbog brzog izvrsavanja petlje, FIXME: ovo nije tacna tvrdnja! */
-        }
-        srcState[srcEnd] = tmpState;
-        ++srcEnd;
-    };
-
-    if (RETN_TRAN == state) {                                                   /* Da li treba izvrsiti tranziciju?                         */
-        dstState = aEpa->internals.exec.pDstStates;
-        dstState[0] = aEpa->pState;                                             /* sacuvaj destinaciju                                      */
-        dstEnd = (uint_fast8_t)1U;
-
-        if (tmpState == dstState[0]) {                                          /* tran: a) src ?== dst                                     */
-            srcState[srcEnd] = tmpState;
-            ++srcEnd;
-        } else {                                                                /* tran: a) src != dst                                      */
-            (void)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_SUPER);
-            dstState[1] = aEpa->pState;
-
-            if (tmpState != dstState[1]) {                                      /* tran: b) src ?== super(dst)                              */
-                (void)EVT_SIGNAL_SEND(aEpa, tmpState, SIG_SUPER);
-                srcState[srcEnd] = tmpState;
-                tmpState = aEpa->pState;
-                ++srcEnd;
-
-                if (tmpState != dstState[1]) {                                  /* tran: c) super(src) ?== super(dst)                       */
-
-                    if (tmpState == dstState[0]) {                              /* tran: d) super(src) ?== dst                              */
-                        dstEnd = (uint_fast8_t)0U;
-                    } else {
-                        srcState[srcEnd] = tmpState;                            /* tran: e) src ?== ...super(super(dst))                    */
-                        --srcEnd;
-                        dstEnd = (uint_fast8_t)2U;
-                        tmpState = dstState[1];
-
-                        while ((esPtrState_T)&esHsmTopState != tmpState) {      /* dobavi super(dst) i sacuvaj u niz                  */
-                            (void)EVT_SIGNAL_SEND(aEpa, tmpState, SIG_SUPER);
-                            tmpState = aEpa->pState;
-
-                            if (srcState[srcEnd] == tmpState) {
-
-                                goto EXECUTE_PATH;
-
-                            }
-                            dstState[dstEnd] = tmpState;
-                            ++dstEnd;
-                        }
-                        ++srcEnd;
-                        stateCnt = (uint_fast8_t)2U;
-                        tmpState = srcState[srcEnd];
-
-                        while (stateCnt != dstEnd) {                            /* tran: f) super(src) ?== ...super(super(dst))             */
-
-                            if (tmpState == dstState[stateCnt]) {
-                                dstEnd = stateCnt;
-
-                                goto EXECUTE_PATH;
-
-                            }
-                            ++stateCnt;
-                        };
-
-                        while (TRUE) {                                          /* tran: g i h) ...super(super(src) ?== super(super(dst)    */
-                            (void)EVT_SIGNAL_SEND(aEpa, tmpState, SIG_SUPER);
-                            tmpState = aEpa->pState;
-                            ++srcEnd;
-                            stateCnt = (uint_fast8_t)0U;
-
-                            while (stateCnt != dstEnd) {
-
-                                if (tmpState == dstState[stateCnt]) {
-                                    dstEnd = stateCnt;
-
-                                    goto EXECUTE_PATH;
-
-                                }
-                                ++stateCnt;
-                            }
-                            srcState[srcEnd] = tmpState;
-                        }
-                    }
-                }
-            }
-        }
-
-        EXECUTE_PATH:
-
-        stateCnt = (uint_fast8_t)0U;
-
-        while (stateCnt != srcEnd) {                                            /* Izadji iz hijerarhije.                                   */
-
-#if defined(OPT_KERNEL_DBG_SPROC)
-            state = (esState_T)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
-            SP_ASSERT((RETN_SUPER == state) || (RETN_HANDLED == state));
+        ES_CRITICAL_ENTER(
+            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        newSm = esDmemAllocI(
+            smpSize + stateQSize);
+        ES_CRITICAL_EXIT();
+    }
 #else
-            (void)EVT_SIGNAL_SEND(aEpa, srcState[stateCnt], SIG_EXIT);
+    newSm = (* memClass->alloc)(smpSize + stateQSize);
+    newSm->memClass = memClass;
 #endif
-            ++stateCnt;
-        }
+    smInit(
+        &newSm->sm,
+        definition->smInitState,
+        (esState_T *)(newSm + smpSize),
+        definition->smLevels);
 
-        while (TRUE) {
+    return (&newSm->sm);
+}
 
-            while ((uint_fast8_t)0U != dstEnd) {                                  /* Udji u novu hijerarhiju.                                 */
-                --dstEnd;
-                state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_ENTRY);
-                SP_ASSERT(((RETN_SUPER == state) || (RETN_NOEX == state) || (RETN_HANDLED == state)));
-            }
+/*----------------------------------------------------------------------------*/
+void esSmDestroy(
+    esSm_T *        sm) {
 
-            if (RETN_NOEX == state) {
-                aEpa->pState = dstState[0];
-                evtQPutAhead(
-                    aEpa,
-                    (esEvtHeader_T *)&evtSignal[SIG_NOEX]);
+    smDeInit(
+        sm);
 
-                return;
-            }
-            state = (esState_T)EVT_SIGNAL_SEND(aEpa, dstState[0], SIG_INIT);
-            SP_ASSERT((RETN_TRAN == state) || (RETN_SUPER == state));
+#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+    /* Greska! Staticni objekat */
+#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+    {
+        ES_CRITICAL_DECL();
 
-            if (RETN_TRAN != state) {
-
-                break;
-            }
-            dstEnd = (uint_fast8_t)0U;
-            tmpState = dstState[0];
-            dstState[0] = aEpa->pState;
-
-            while (dstState[dstEnd] != tmpState) {
-                (void)EVT_SIGNAL_SEND(aEpa, dstState[dstEnd], SIG_SUPER);
-                ++dstEnd;
-                dstState[dstEnd] = aEpa->pState;
-            }
-        }
-        aEpa->pState = dstState[0];
-
-        return;
-    } else if (RETN_NOEX == state) {                                            /* dst ?== flowchart                                        */
-        evtQPutAhead(
-            aEpa,
-            (esEvtHeader_T *)&evtSignal[SIG_NOEX]);
-
-        return;
-    } else if (RETN_DEFERRED == state) {
-        evtQPut(
-            aEpa,
-            (esEvtHeader_T *)aEvt);
+        ES_CRITICAL_ENTER(
+            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        esDmemDeAllocI(
+            C_CONTAINER_OF(sm, smObject_T, sm));
+        ES_CRITICAL_EXIT();
     }
-    aEpa->pState = srcState[0];                                                 /* Vrati izvorno stanje.                                    */
-}
-#endif /* Pisem novi dispecer */
+#else
+    {
+        smObject_T * smObject;
 
-/*-----------------------------------------------------------------------------------------------*/
-void hsmInit (
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        aInitState,
-    esPtrState_T        * aStateBuff,
-    size_t              aStateDepth) {
-
-    SP_DBG_CHECK((size_t)1U < aStateDepth);                                     /* Provera par: da li je aStateDepth minimalne dubine?      */
-    SP_DBG_CHECK((esPtrState_T)0U != aInitState);                               /* Provera par: da li je aInitState  minimalne dubine?      */
-    aEpa->pState = aInitState;
-    aEpa->internals.exec.pSrcStates = aStateBuff;
-    aEpa->internals.exec.pDstStates = aStateBuff + aStateDepth;
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void hsmDeInit(
-    esEpaHeader_T       * aEpa) {
-
-    aEpa->internals.exec.pSrcStates = (esPtrState_T *)0U;
-    aEpa->internals.exec.pDstStates = (esPtrState_T *)0U;
-}
-
-/*=======================================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @ingroup         sproc_intf
- * @{ *//*---------------------------------------------------------------------------------------*/
-esState_T esHsmTopState (
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt) {
-
-    (void)aEpa;                                                                 /* Ukloni upozorenje o nekoriscenom parametru               */
-    (void)aEvt;
-
-    return SMP_STATE_IGNORED();
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-bool_T esHsmIsInState (
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        aState) {
-
-    ES_CRITICAL_DECL();
-    esPtrState_T tmpState;
-    esPtrState_T savedState;
-    bool_T       ans;
-
-    SP_ASSERT((esPtrState_T)0 != aState);
-
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    savedState = aEpa->pState;                                                  /* sacuvaj trenutno stanje automata                         */
-    (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
-    tmpState = aEpa->pState;
-    ans = FALSE;
-
-    while (&esHsmTopState != tmpState) {
-
-        if (aState == tmpState) {
-            ans = TRUE;
-            break;
-        }
-        (void)EVT_SIGNAL_SEND(aEpa, savedState, SIG_SUPER);
-        tmpState = aEpa->pState;
+        smObject = C_CONTAINER_OF(sm, smObject_T, sm);
+        (* smObject->memClass->deAlloc)(smObject);
     }
-    aEpa->pState = savedState;                                                  /* vrati prethodno stanje automata */
-    ES_CRITICAL_EXIT();
-
-    return (ans);
+#endif
 }
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-/** @endcond *//** @} *//*************************************************************************
- * END of sproc.c
- *************************************************************************************************/
+/*----------------------------------------------------------------------------*/
+void esSmpInit(
+    void) {
+
+    esMemInit();
+}
+
+/*----------------------------------------------------------------------------*/
+esStatus_T esSmTopState (
+    void *          sm,
+    esEvt_T *       evt) {
+
+    (void)sm;                                                                  /* Ukloni upozorenje o nekoriscenom parametru               */
+    (void)evt;
+
+    return (esRetnIgnored());
+}
+
+/** @} *//*-------------------------------------------------------------------*/
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+
+/** @endcond *//** @} *//******************************************************
+ * END of smp.c
+ ******************************************************************************/

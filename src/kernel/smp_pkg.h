@@ -20,191 +20,188 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
- * @author  	Nenad Radulovic
- * @brief       Privatni interfejs State processor podmodul.
- * ------------------------------------------------------------------------------------------------
- * @addtogroup  sproc_impl
+ * @author      Nenad Radulovic
+ * @brief       Privatni interfejs State Machine Processor objekta.
+ * @addtogroup  smp_impl
  ****************************************************************************************//** @{ */
 
 
-#ifndef SPROC_PKG_H_
-#define SPROC_PKG_H_
+#ifndef SMP_PKG_H_
+#define SMP_PKG_H_
 
+/*============================================================================  INCLUDE FILES  ==*/
+/*==================================================================================  DEFINES  ==*/
 
-/*************************************************************************************************
- * INCLUDE FILES
- *************************************************************************************************/
-
-
-/*-----------------------------------------------------------------------------------------------*
- * EXTERNS
- *-----------------------------------------------------------------------------------*//** @cond */
-
-#ifdef SPROC_PKG_H_VAR
-# define SPROC_PKG_H_EXT
+#if (OPT_SMP_SM_TYPES == 1)
+# define SM_DISPATCH(sm, evt)                                                   \
+    fsmDispatch(sm, evt)
+#elif (OPT_SMP_SM_TYPES == 2)
+# define SM_DISPATCH(sm, evt)                                                   \
+    hsmDispatch(sm, evt)
 #else
-# define SPROC_PKG_H_EXT extern
+# define SM_DISPATCH(sm, evt)                                                   \
+    (*(sm)->dispatch)(sm, evt)
 #endif
 
-
-/** @endcond*//***********************************************************************************
- * DEFINES
- *************************************************************************************************/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Definition group
- *
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
-/*************************************************************************************************
- * MACRO's
- *************************************************************************************************/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- * @{ *//*---------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_DBG_SPROC)
-# define SP_ASSERT                      ES_DBG_ASSERT
-# define SP_ASSERT_ALWAYS               ES_DBG_ASSERT_ALWAYS
-# define SP_ASSERT_COMPILE              ES_DBG_COMPILE_ASSERT
-# define SP_DBG_DECL                    ES_DBG_DECL
-# define SP_DBG_DEFINE_MODULE           ES_DBG_DEFINE_MODULE
-# define SP_DBG_MACRO                   ES_DBG_MACRO
-# define SP_DBG_CHECK                   ES_DBG_CHECK
-#else
-# define SP_ASSERT(expr)                ES_DBG_EMPTY_MACRO()
-# define SP_ASSERT_ALWAYS(expr)         ES_DBG_EMPTY_MACRO()
-# define SP_ASSERT_COMPILE(expr)        ES_DBG_EMPTY_DECL()
-# define SP_DBG_DECL(expr)              ES_DBG_EMPTY_DECL()
-# define SP_DBG_DEFINE_MODULE(expr)     ES_DBG_EMPTY_DECL()
-# define SP_DBG_MACRO(expr)             ES_DBG_EMPTY_MACRO()
-# define SP_DBG_CHECK(expr)             ES_DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
-/*-----------------------------------------------------------------------------------------------*
- * C/C++ #ifdef - open
- *-----------------------------------------------------------------------------------------------*/
-
+/*==================================================================================  MACRO's  ==*/
+/*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*===============================================================================  DATA TYPES  ==*/
 
-/*************************************************************************************************
- * DATA TYPES
- *************************************************************************************************/
+/**
+ * @brief       Nabrajanje odgovora state handler funkcije.
+ * @details     State handler funkcija preko ovih nabrajanja govori SMP
+ *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
+ *              dogadjaj.
+ */
+enum smStatus {
+/**
+ * @brief       Treba izvrsiti tranziciju ka drugom stanju.
+ * @details     Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
+ *              drugom stanju.
+ */
+    RETN_TRAN,
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Data types group
- *
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
+/**
+ * @brief       Treba odloziti pristigli dogadjaj.
+ * @details     Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
+ *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
+ */
+    RETN_DEFERRED,
 
+/**
+ * @brief       Ne treba izvrsiti nikakve dalje akcije.
+ * @details     Ovo je odgovor state handler funkcije da je potpuno opsluzila
+ *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
+ */
+    RETN_HANDLED,
 
+/**
+ * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
+ * @details     Obicno se ovakav odgovor u top state-u automata i koristi se u
+ *              svrhe debagiranja sistema. Dogadjaj se brise iz sistema ako nema
+ *              jos korisnika.
+ */
+    RETN_IGNORED,
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+/**
+ * @brief       Vraca se koje je super stanje date state handler funkcije.
+ * @details     Ova vrednost se vraca kada state handler funkcija ne zna da
+ *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
+ *              njeno super stanje.
+ */
+    RETN_SUPER
 
+};
 
-/*************************************************************************************************
- * GLOBAL VARIABLES
- *************************************************************************************************/
+/**
+ * @details     Struktura sadrzi trenutno stanje automata. Ostali clanovi su
+ *              opcioni. Ukoliko se koriste HSM automati koriste se pokazivaci
+ *              na redove cekanja za stanja automata.
+ * @notapi
+ */
+struct esSm {
+/**
+ * @brief       Pokazivac na state handler funkciju.
+ * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
+ *              dogadjaja.
+ */
+    esState_T       state;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Variables group
- *
- * @brief       brief description
- * @{ *//*---------------------------------------------------------------------------------------*/
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_AND_HSM) || defined(__DOXYGEN__)
+/**
+ * @brief       Pokazivac na dispecer funkciju datog automata
+ * @details     Ovaj clan strukture se koristi samo ukoliko se istovremeno
+ *              koriste FSM i HSM automati.
+ */
+    esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
+#endif
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
+/**
+ * @brief       Niz za cuvanje izvornih stanja HSM automata
+ * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
+ */
+    esState_T *     stateQBegin;
 
+/**
+ * @brief       Niz za cuvanje odredisnih stanja HSM automata
+ * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
+ */
+    esState_T *     stateQEnd;
+#endif
+};
 
-/*************************************************************************************************
- * FUNCTION PROTOTYPES
- *************************************************************************************************/
-/*-------------------------------------------------------------------------------------------*//**
+/*=========================================================================  GLOBAL VARIABLES  ==*/
+
+extern const C_ROM esEvt_T evtSignal[];
+
+/*======================================================================  FUNCTION PROTOTYPES  ==*/
+
+/**
  * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
  *              cuvanje bafera stanja.
- * @param       aStateDept              Maksimalna hijerarhijska dubina stanja
+ * @param       levels                  Maksimalna hijerarhijska dubina stanja
  *                                      automata.
  * @return      Potreban memorijski prostor u bajtovima.
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS size_t hsmReqSize_(
-    size_t              aStateDept) {
+ * @notapi
+ */
+size_t stateQReqSize(
+    uint8_t         levels);
 
-    return (aStateDept * (size_t)2U * sizeof(esPtrState_T));
-}
+/**
+ * @brief       Dispecer HSM automata
+ * @param       [in] sm                 Pokazivac na strukturu HSM automata
+ * @param       [in] evt                Dogadjaj koji treba da se obradi
+ * @return      Status obrade dogadjaja.
+ */
+esStatus_T hsmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt);
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Pokrece dati HSM automat.
- * @param       aEpa                    Pokazivac na strukturu HSM automata,
- * @param       aEvt                    podatak/pokazivac na podatak dogadjaja.
- * @details     Ovu funkcija se pokrece nakon zakljucivanja da je dati
- *              automat spreman za rad. Dispecer pokrece stateHandler funkcije i
- *              ispituje njihovu povratnu vrednost. U zavisnosti od povratne
- *              vrednosti funkcije stanja on preduzima dodatne akcije. Kada je
- *              zavrsena obrada dogadjaja, dispecer postavlja prazan signal
- *              (SIG_EMPTY) u pokazivac dogadjaja cime se govori da je zavrsena
- *              obrada prethodnog dogadjaja i da je automat spreman da prihvati
- *              nov dogadjaj.
- * @note        Ukoliko funkcija stanja, u koju se najskorije uslo prilikom
- *              obrade tranzicije, umesto @ref RETN_HANDLED vrati
- *              @ref RETN_NOEX onda se ne izvrsava inicijalizacija vec se vrsi
- *              kreiranje @ref SIG_NOEX dogadjaja. Drugim recima, obrada
- *              flowchart-a ima prioritet u odnosu na inicijalizaciju.
- * @todo        Prvu petlju prebaciti u do...while() i izbaciti iz nje poredjenje.
- * @todo        Iz svih while() petlja izbaci poredjenje.
- * @api
- *//*--------------------------------------------------------------------------------------------*/
-void hsmDispatch(
-    esEpaHeader_T       * aEpa,
-    const esEvtHeader_T * aEvt);
+/**
+ * @brief       Dispecer HSM automata
+ * @param       [in] sm                 Pokazivac na strukturu FSM automata
+ * @param       [in] evt                Dogadjaj koji treba da se obradi
+ * @return      Status obrade dogadjaja.
+ */
+esStatus_T fsmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt);
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Konstruise HSM automat
- * @param       aEpa                    Pokazivac na tek kreiran EPA objekat,
- * @param       aInitState              inicijalno stanje automata,
- * @param       aStateBuff              pokazivac na memorijski bafer za stanja,
- * @param       aStateDepth             maksimalna hijerarhijska dubina stanja
+/**
+ * @brief       Konstruise automat
+ * @param       [out] sm                Pokazivac na tek kreiranu strukturu
+ *                                      automata,
+ * @param       [in] initState          inicijalno stanje automata,
+ * @param       [in] stateQueue         pokazivac na memorijski bafer za stanja,
+ * @param       [in] levels             maksimalna hijerarhijska dubina stanja
  *                                      automata.
- *//*--------------------------------------------------------------------------------------------*/
-void hsmInit(
-    esEpaHeader_T       * aEpa,
-    esPtrState_T        aInitState,
-    esPtrState_T        * aStateBuff,
-    size_t              aStateDepth);
+ */
+void smInit (
+    esSm_T *        sm,
+    esState_T       initState,
+    esState_T *     stateQueue,
+    size_t          levels);
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Dekonstruise HSM automat
- * @param       aEpa                    Pokazivac na kreiran EPA objekat.
- *//*--------------------------------------------------------------------------------------------*/
-void hsmDeInit(
-    esEpaHeader_T       * aEpa);
+/**
+ * @brief       Dekonstruise automat
+ * @param       [out] sm                Pokazivac na kreiran automat.
+ */
+void smDeInit(
+    esSm_T *        sm);
 
-/*-----------------------------------------------------------------------------------------------*
- * C/C++ #endif - close
- *-----------------------------------------------------------------------------------------------*/
-
+/*---------------------------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-
-/*************************************************************************************************
- * CONFIGURATION ERRORS
- *************************************************************************************//** @cond */
-
+/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
  * END of sproc_pkg.h

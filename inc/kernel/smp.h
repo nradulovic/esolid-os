@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,163 +20,242 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief   	Interfejs State Machine Processor (SMP) modula.
- * ------------------------------------------------------------------------------------------------
- * @addtogroup  sproc_intf
- * @brief       Interfejs State Machine Processor (SMP) modula.
- ****************************************************************************************//** @{ */
-
+ * @brief   	Interfejs State Machine Processor (SMP) objekata
+ * @addtogroup  smp_intf
+ *********************************************************************//** @{ */
 
 #ifndef SMP_H_
 #define SMP_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Makroi za tranziciju stanja
- * @{ *//*---------------------------------------------------------------------------------------*/
+/*=========================================================  INCLUDE FILES  ==*/
+#include "kernel/evt.h"
 
-/**
- * @brief       Vraca dispeceru informaciju da treba da se izvrsi tranzicija.
- * @param       epa                     Pokazivac na strukturu HSM automata,
- * @param       state                   naredno stanje automata.
- * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
- *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
- *              tip desnog izraza.
- */
-#define ES_STATE_TRAN(epa, state)                                              \
-    (((esEpaHdr_T *)(epa))->pState = (esPtrState_T)(state), RETN_TRAN)
-
-/**
- * @brief       Vraca dispeceru informaciju o super stanju trenutnog stanja.
- * @param       epa                     Pokazivac na strukturu HSM automata,
- * @param       state                   super stanje trenutnog stanja.
- * @details     Makro koristi binarni operator @a zarez (,) koji grupise izraze
- *              sa leva na desno. Vrednost i tip celokupnog izraza je vrednost i
- *              tip desnog izraza.
- * @note        Koristi se samo kod HSM automata.
- */
-#define ES_STATE_SUPER(epa, state)                                             \
-    (((esEpaHdr_T *)(epa))->pState = (esPtrState_T)(state), RETN_SUPER)
-
-/**
- * @brief       Vraca dispeceru informaciju da treba da se izvrsi inicijalna
- *              tranzicija.
- * @param       epa                     Pokazivac na strukturu HSM automata,
- * @param       state                   naredno stanje automata.
- */
-#define ES_STATE_INIT(epa, state)                                              \
-    (((esEpaHdr_T *)(epa))->pState = (esPtrState_T)(state), RETN_INIT)
-
-/**
- * @brief       Vraca dispeceru informaciju da automat ulazi u flowchart deo
- *              dijagrama stanja.
- * @details     Ovaj makro se koristi kada se zeli tranzicija u sledece stanje
- *              bez dogadjaja. Naime, kada se ovaj makro koristi, dispecer sam
- *              generise @ref SIG_NOEX dogadjaj tako da automat moze da obradi
- *              flowchart bez spoljasnih dogadjaja. Flowchart se pise u odeljku
- *              koji obradjuje SIG_NOEX, dok se u SIG_ENTRY odeljku samo
- *              koristi ovaj makro.
- */
-#define ES_STATE_NOEX()                                                        \
-    (RETN_NOEX)
-
-/**
- * @brief       Vraca dispeceru informaciju da je dogadjaj opsluzen.
- * @details     Ovaj makro samo obavestava dispecer da je dogadjaj opsluzen i ne
- *              treba da se izvrsi promena stanja.
- */
-#define ES_STATE_HANDLED()                                                     \
-    (RETN_HANDLED)
-
-/**
- * @brief       Vraca dispeceru informaciju da je dogadjaj ignorisan.
- * @details     Dogadjaj se ignorise i ne dolazi do promene stanja automata.
- */
-#define ES_STATE_IGNORED()                                                     \
-    (RETN_IGNORED)
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
 
 /**
- * @brief       Nabrajanje odgovora state handler funkcije.
- * @details		State handler funkcija preko ovih nabrajanja govori SM
- *              dispeceru da li treba da se preuzme neka akcija kao odgovor na
- *              dogadjaj.
+ * @brief       Identifikatori predefinisanih dogadjaja
+ * @details     Zadnji predefinisan identifikator je @ref SIG_ID_USR. Nakon ovog
+ *              identifikatora korisnik definise svoje, aplikacione
+ *              identifikatore dogadjaja.
  */
-enum state {
+enum evtId {
 /**
- * @brief       Ne treba izvrsiti nikakve dalje akcije.
- * @details		Ovo je odgovor state handler funkcije da je potpuno opsluzila
- *              dogadjaj i nikakve dodatne akcije ne treba da se preduzmu.
+ * @brief       Signalni dogadjaj - prazan signal.
+ * @note        Ne koristi se.
  */
-    RETN_HANDLED,
+    SIG_EMPTY,
 
 /**
- * @brief       Treba odloziti pristigli dogadjaj.
- * @details		Sistem ce predati dogadjaj vratiti ponovo u red za cekanje za
- *              dogadjaje i poslati ga prilikom sledeceg ciklusa.
+ * @brief       Signalni dogadjaj - zahteva se entry obrada u datom stanju.
  */
-    RETN_DEFERRED,
+    SIG_ENTRY,
 
 /**
- * @brief       Pristigli dogadjaj nije obradjen i ignorisan je.
- * @details		Obicno se ovakav odgovor u top state-u automata i koristi se u
- *              svrhe debagiranja sistema. Dogadjaj se brise iz sistema ako nema
- *              jos korisnika.
+ * @brief       Signalni dogadjaj - zahteva se exit obrada u datom stanju.
  */
-    RETN_IGNORED,
+    SIG_EXIT,
 
 /**
- * @brief       Treba izvrsiti tranziciju ka drugom stanju.
- * @details		Akcija koja je potrebna za odgovor na dogadjaj je tranzicija ka
- *              drugom stanju.
+ * @brief       Signalni dogadjaj - zahteva se inicijalizaciona (init) putanja.
  */
-    RETN_TRAN,
+    SIG_INIT,
 
 /**
- * @brief       Vraca se koje je super stanje date state handler funkcije.
- * @details		Ova vrednost se vraca kada state handler funkcija ne zna da
- *              obradi neki dogadjaj ili je od nje zahtevano da vrati koje je
- *              njeno super stanje.
+ * @brief       Signalni dogadjaj - zahteva se super stanje.
+ * @details     Od funkcije stanja (u aplikaciji) se zahteva koje je njeno
+ *              super stanje. Funkcija stanja mora da vrati pokazivac na njeno
+ *              super stanje.
  */
-    RETN_SUPER
+    SIG_SUPER,
+
+/**
+ * @brief       Domen korisnickih identifikatora dogadjaja.
+ */
+    SIG_ID_USR = 15
 };
 
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
-
 /**
- * @brief       Najvisi nivo u hijerarhiji automata.
- * @param       aEpa                    Pokazivac na strukturu HSM automata,
- * @param       aEvt                    pokazivac/podatak na strukturu dogadjaja.
- * @return      esState_T             status funkcije.
- * @note        Uvek vraca odgovor IGNORED, jer ona ne prihvata nikakav
- *              dogadjaj.
+ * @brief       Status koji state handler funkcije vracaju dispeceru.
+ * @details     Ovo je apstraktni tip koji se koristi za podatke koji vracaju
+ *              odgovor state handler funkcija dispeceru automata. Preko ovog
+ *              podatka state handler funkcije obavestavaju dispecer koje akcije
+ *              automat zeli da preduzme, kao na primer, tranzicija ka drugom
+ *              stanju.
  * @api
  */
-esState_T esSmTopState(
-    esEpaHdr_T       * aEpa,
-    esEvtHdr_T       * aEvt);
+typedef uint_fast8_t esStatus_T;
 
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/**
+ * @brief       Tip state handler funkcija.
+ * @details     State handler funkcije vracaju esStatus_T , a kao parametar
+ *              prihvataju pokazivac (void *) na strukturu podataka i pokazivac
+ *              na dogadjaj.
+ * @api
+ */
+typedef esStatus_T (* esState_T) (void *, esEvt_T *);
+
+/**
+ * @brief       Objekat konacnog automata
+ * @details     Ovo je apstraktni tip koji se koristi za referenciranje SMP
+ *              objekata.
+ * @api
+ */
+typedef struct esSm esSm_T;
+
+/**
+ * @brief       Definiciona struktura koja opisuje jedan SMP objekat
+ * @details     Ova struktura se koristi prilikom kreiranja novog SMP objekta.
+ *              Potrebno je popuniti ovu strukturu sa zeljenim vrednostima, a
+ *              zatim je predati funkciji esSmCreate(). Na osnovu vrednosti u
+ *              ovoj strukturi funkcija ce kreirati automat.
+ * @api
+ */
+typedef struct esSmDef {
+/**
+ * @brief       Potrebna memorija radnog okruzenja za SM objekat
+ */
+    size_t          smWorkspaceSize;
+
+/**
+ * @brief       Inicijalno stanje automata
+ */
+    esState_T       smInitState;
+
+/**
+ * @brief       Maksimalna dubina hijerarhije stanja automata.
+ */
+    uint8_t         smLevels;
+} esSmDef_T;
+
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
+
+/*------------------------------------------------------------------------*//**
+ * @name Funkcije za rad sa konacnim automatom (State Machine)
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Inicijalizuje SMP modul
+ * @details     Pre koriscenja funkcija SMP modula mora se pozvati ova funkcija.
+ * @note        Sa obzirom da SMP modul zahteva funkcije MM modula, ova funkcija
+ *              automatski poziva inicijalnu funkciju MM modula.
+ * @note        Ukoliko se koristi kernel, onda ce ova funkcija biti pozvana od
+ *              strane kernel-a u toku inicijalizacije.
+ * @api
+ */
+void esSmpInit(
+    void);
+
+/**
+ * @brief       Kreira automat
+ * @param       [in] memClass           Memorijska klasa alokatora
+ *  @arg        esMemDynClass           dinamicki alokator
+ *  @arg        esMemStaticClass        staticki alokator
+ * @param       [in] definition         Definiciona struktura SM automata.
+ * @return      Pokazivac na kreirani automat.
+ * @see         esSmDef_T
+ * @api
+ */
+esSm_T * esSmCreate(
+    const C_ROM esMemClass_T *  memClass,
+    const C_ROM esSmDef_T *     definition);
+
+/**
+ * @brief       Unistava automat
+ * @param       [out] sm                Pokazivac na postojeci automat.
+ * @api
+ */
+void esSmDestroy(
+    esSm_T *        sm);
+
+/**
+ * @brief       Pokrece dati HSM automat.
+ * @param       [in] sm                 Pokazivac na strukturu automata,
+ * @param       [in] evt                pokazivac na dogadjaj.
+ * @return      Status obrade dogadjaja.
+ * @details     Ovu funkcija se pokrece nakon zakljucivanja da je dati
+ *              automat spreman za rad. Dispecer pokrece stateHandler funkcije i
+ *              ispituje njihovu povratnu vrednost. U zavisnosti od povratne
+ *              vrednosti funkcije stanja on preduzima dodatne akcije.
+ * @api
+ */
+esStatus_T esSmDispatch(
+    esSm_T *        sm,
+    const esEvt_T * evt);
+
+/**
+ * @brief       Najvisi nivo u hijerarhiji HSM automata.
+ * @param       [in] sm                 Pokazivac na strukturu HSM automata,
+ * @param       [in] evt                pokazivac/podatak na strukturu dogadjaja.
+ * @return      esStatus_T              status funkcije.
+ * @api
+ */
+esStatus_T esSmTopState(
+    void *          sm,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Automat @c sm treba da izvrsi tranziciju ka stanju @c state.
+ * @param       [out] sm                Pokazivac trenutne radne povrsine
+ * @param       [in] state              Pokazivac na sledece stanje automata.
+ * @return      Odgovor dispeceru.
+ * @api
+ */
+esStatus_T esRetnTransition(
+    void *          sm,
+    esState_T       state);
+
+/**
+ * @brief       Automat je odbacio dogadjaj.
+ * @return      Odgovor dispeceru.
+ * @api
+ */
+esStatus_T esRetnDeferred(
+    void);
+
+/**
+ * @brief       Automat je zavrsio sa obradom dogadjaja.
+ * @return      Odgovor dispeceru.
+ */
+esStatus_T esRetnHandled(
+    void);
+
+/**
+ * @brief       Automat je ignorisao dogadjaj. Ne preduzima se nikakva dodatna
+ *              akcija.
+ * @return      Odgovor dispeceru.
+ */
+esStatus_T esRetnIgnored(
+    void);
+
+/**
+ * @brief       Automat vraca informaciju o svom superstanju
+ * @param       [out] sm                Pokazivac trenutne radne povrsine.
+ * @param       [in] state              Pokazivac na superstanje.
+ * @return      Odgovor dispeceru.
+ */
+esStatus_T esRetnSuper(
+    void *          sm,
+    esState_T       state);
+
+/** @} *//*-------------------------------------------------------------------*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of smp.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* SMP_H_ */
