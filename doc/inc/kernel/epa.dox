@@ -1,0 +1,9 @@
+/*********************************************************************************************//**
+@file
+@addtogroup     kernel_intf
+*//** @{ *//**
+@defgroup       epa_intf Event Processing Agent (EPA) 
+@brief          Interfejs Event Processing Agent (EPA) objekata
+@section        epa_doc Event Processing Agent (EPA)
+  
+**//** @} *//*************************************************************************************/

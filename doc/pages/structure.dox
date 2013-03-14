@@ -1,16 +1,10 @@
 /*********************************************************************************************//**
- * @file
- *
- * @brief       Opis strukture eSolid-a
- *
- * @page        page1 Struktura eSolid-a
- *
- *              eSolid se sastoji od sledecih podstruktura:
- *
- * @section     solid_structure
- *
- * @image       html eSolid_structure.png
- *
- *              solidSTATE pruza sledece servise:
- *
- *************************************************************************************************/
+@file
+@brief          Opis strukture eSolid-a
+*//** @{ *//**
+@page           struct Struktura eSolid-a
+
+eSolid se sastoji od sledecih podstruktura:
+
+@image          html eSolid_structure.png
+**//** @} *//*************************************************************************************/

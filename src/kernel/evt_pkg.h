@@ -22,10 +22,9 @@
  * e-mail  :    blueskyniss@gmail.com
  *//******************************************************************************************//**
  * @file
- * @author  	Nenad Radulovic
- * @brief       Privatni interfejs Event Object podsistema.
- * ------------------------------------------------------------------------------------------------
- * @addtogroup  evto_impl
+ * @author      Nenad Radulovic
+ * @brief       Privatni interfejs Event objekta
+ * @addtogroup  evt_impl
  ****************************************************************************************//** @{ */
 
 #ifndef EVT_PKG_H_
@@ -33,172 +32,65 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
+
+/**
+ * @brief       Bit maska za brojac korisnika dogadjaja
+ * @details     Brojac korisnika je 6-bitni, što znači da maksimalan broj
+ *              korisnika dogadjaja u jednom trenutku iznosi 63 EPA objekata.
+ */
+#define EVT_USERS_MASK                  ((uint_fast8_t)0x3F)
+
+/**
+ * @brief       Konstanta za potpis dogadjaja
+ * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
+ *              koje prime dogadjaj bile sigurne da je dogadjaj kreiran
+ *              funkcijom esEvtCreate() i da je i dalje validan. Dogadjaji koji
+ *              se obrisu nemaju ovaj potpis.
+ * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
+ *              omogucena provera pokazivaca.
+ */
+#define EVT_SIGNATURE                   (0xFEED)
+
 /*==================================================================================  MACRO's  ==*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska Event Object podsistema.
- * @brief       Makroi za debug podrsku. Pogledati @ref dbg_intf.
- * @{ *//*---------------------------------------------------------------------------------------*/
-#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
-# define EVT_ASSERT                      ES_DBG_ASSERT
-# define EVT_ASSERT_ALWAYS               ES_DBG_ASSERT_ALWAYS
-# define EVT_ASSERT_COMPILE              ES_DBG_ASSERT_COMPILE
-# define EVT_DBG_DECL                    ES_DBG_DECL
-# define EVT_DBG_DEFINE_MODULE           ES_DBG_DEFINE_MODULE
-# define EVT_DBG_MACRO                   ES_DBG_MACRO
-# define EVT_DBG_CHECK                   ES_DBG_CHECK
-#else
-# define EVT_ASSERT(expr)                ES_DBG_EMPTY_MACRO()
-# define EVT_ASSERT_ALWAYS(expr)         ES_DBG_EMPTY_MACRO()
-# define EVT_ASSERT_COMPILE(expr)        ES_DBG_EMPTY_DECL()
-# define EVT_DBG_DECL(expr)              ES_DBG_EMPTY_DECL()
-# define EVT_DBG_DEFINE_MODULE(expr)     ES_DBG_EMPTY_DECL()
-# define EVT_DBG_MACRO(expr)             ES_DBG_EMPTY_MACRO()
-# define EVT_DBG_CHECK(expr)             ES_DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
-#ifdef __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
-
-extern const C_ROM esEvtHdr_T evtSignal[];
-
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Vraca da li je red cekanja za dogadjaje prazan
- * @param       aEpa                    Pokazivac na EPA objekat
- * @return      Status reda za cekanje.
- *  @retval     TRUE - red za cekanje je prazan.
- *  @retval     FALSE - red za cekanje nije prazan.
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS bool_T evtQIsEmpty_(
-    esEpaHdr_T       	* aEpa) {
+/**
+ * @brief       Povecava broj korisnika koji koriste dogadjaj
+ * @param       evt                     Dogadjaj koji ce se koristiti
+ */
+C_INLINE void evtUsrAddI_(
+    esEvt_T         * evt) {
 
-    return (esQpIsEmpty(&(aEpa->internals.evtQueue.queue)));
-}
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Unistava dogadjaj.
- * @param       aEvt                    Pokazivac na dogadjaj koji treba da se
- *                                      unisti.
- * @details     Ukoliko dati @c aEvt dogadjaj nema vise ni jednog korisnika,
- *              onda ce memorijski prostor koji on zauzima biti recikliran, u
- *              suprotnom, dogadjaj nastavlja da postoji.
- * @iclass
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void evtDestroyI_(
-    esEvtHeader_T       * aEvt) {
-
-    if ((evtDynamic_T)0U == aEvt->internals.dynamic) {
-
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
-        aEvt->internals.signature = 0xDEAD;
-#endif
-        esHmemDeAllocI((void *)aEvt);
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {           /* Da li je dogadjaj dinamičan?                             */
+        ++evt->dynamic.s.counter;
     }
 }
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
- *              cuvanje bafera dogadjaja.
- * @param       aQueueSize              Maksimalna dogadjaja u baferu.
- * @return      Potreban memorijski prostor u bajtovima.
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS size_t evtQReqSize_(
-    size_t              aQueueSize) {
+/**
+ * @brief       Smanjuje broj korisnika koji koriste dogadjaj
+ * @param       evt                     Dogadjaj koji se koristio
+ */
+C_INLINE void evtUsrRmI_(
+    esEvt_T         * evt) {
 
-    return (aQueueSize * sizeof(void *));
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {           /* Da li je dogadjaj dinamičan?                             */
+        --evt->dynamic.s.counter;
+    }
 }
 
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Konstruise red cekanja za dogadjaje.
- * @param       aEpa                    Pokazivac na postojeci EPA objekat
- * @param       aStorage                memorijski prostor za red cekanja,
- * @param       aQueueSize              velicina potrebnog reda cekanja.
- * @details     Inicijalizuje strukturu i rezervise memorijski prostor za red
- *              cekanja za dati @c aEvtQueue red cekanja.
- *//*--------------------------------------------------------------------------------------------*/
-void evtQInit(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       ** aStorage,
-    size_t              aQueueSize);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Dekonstruise red cekanja za dogadjaje
- * @param       aEpa                    Pokazivac na red cekanja koji se
- *                                      dekonstruise.
- * @details     Svi dogadjaji koji su u redu cekanja ce se prikupiti i obrisati.
- *//*--------------------------------------------------------------------------------------------*/
-void evtQDeInit(
-    esEpaHeader_T       * aEpa);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Dobavlja dogadjaj iz reda za cekanje @c aEvtQueue
- * @param       aEpa                    Pokazivac na red za cekanje.
- * @return      Dogadjaj iz reda cekanja.
- * @iclass
- *//*--------------------------------------------------------------------------------------------*/
-esEvtHeader_T * evtQGetI(
-    esEpaHeader_T       * aEpa);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- * @iclass
- *//*--------------------------------------------------------------------------------------------*/
-void evtQPutAheadI(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- *//*--------------------------------------------------------------------------------------------*/
-void evtQPutAhead(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- * @iclass
- *//*--------------------------------------------------------------------------------------------*/
-void evtQPutI(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/*-------------------------------------------------------------------------------------------*//**
- * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
- * @param       aEpa                    Pokazivac na red za cekanje,
- * @param       aEvt                    pokazivac na dogadjaj koji se salje.
- *//*--------------------------------------------------------------------------------------------*/
-void evtQPut(
-    esEpaHeader_T       * aEpa,
-    esEvtHeader_T       * aEvt);
-
-/*-----------------------------------------------------------------------------------------------*
- * C/C++ #endif - close
- *-----------------------------------------------------------------------------------------------*/
-#ifdef __cplusplus
+/*---------------------------------------------------------------------------  C++ extern end  --*/
+#if defined(__cplusplus)
 }
 #endif
 
-
-/*************************************************************************************************
- * CONFIGURATION ERRORS
- *************************************************************************************//** @cond */
-
+/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
  * END of evt_pkg.h

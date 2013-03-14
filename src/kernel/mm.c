@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,45 +20,29 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Implementacija Memory Management modula.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  mm_impl
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
-/*************************************************************************************************
- * INCLUDE FILES
- *************************************************************************************************/
+/*=========================================================  INCLUDE FILES  ==*/
 
 #define MM_PKG_H_VAR
 #include "kernel_private.h"
+#include "primitive/list.h"
 
+/*=========================================================  LOCAL DEFINES  ==*/
 
-/*************************************************************************************************
- * LOCAL DEFINES
- *************************************************************************************************/
-
-/*-----------------------------------------------------------------------------------------------*
- * Local debug defines
- *-----------------------------------------------------------------------------------*//** @cond */
-
-MM_DBG_DEFINE_MODULE(Memory Management);
-
-
-/** @endcond *//*--------------------------------------------------------------------------------*
- * Local user defines
- *-----------------------------------------------------------------------------------------------*/
-
-/*-------------------------------------------------------------------------------------------*//**
+/*------------------------------------------------------------------------*//**
  * @name        Konstante za status blokova
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Maska koja se koristi za definisanje statusa bloka
- * @details		U implementaciji se koristi MSB bit za oznacavanje da li je
+ * @details     U implementaciji se koristi MSB bit za oznacavanje da li je
  *              blok zauzet ili nije. Ukoliko je bit setovan na MSB poziciji
  *              onda je blok zauzet, u suprotnom nije zauzet.
  */
@@ -74,258 +58,359 @@ MM_DBG_DEFINE_MODULE(Memory Management);
  */
 #define BLOCK_IS_FREE                   (size_t)0U
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+/** @} *//*-------------------------------------------------------------------*/
 
+#if (OPT_MM_MANAGED_SIZE == 0U) || defined(__DOXYGEN__)                         /* Koristi se linker skripta.                               */
+/**
+ * @brief       Pocetak heap memorije
+ */
+# define HEAP_BEGIN                     &_sheap
 
-/*************************************************************************************************
- * LOCAL MACRO's
- *************************************************************************************************/
+/**
+ * @brief       Kraj heap memorije
+ */
+# define HEAP_END                       &_eheap
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Makroi za manipulaciju sa statusom blokova
- * @{ *//*---------------------------------------------------------------------------------------*/
+/**
+ * @brief       Velicina heap memorije
+ */
+# define HEAP_SIZE                      (size_t)(&_eheap - &_sheap)
+
+#else
+# define HEAP_BEGIN                     (uint8_t *)&heap
+# define HEAP_END                       (uint8_t *)(HEAP_BEGIN + sizeof(heap))
+# define HEAP_SIZE                      sizeof(heap)
+#endif
+
+/*=========================================================  LOCAL MACRO's  ==*/
 
 /**
  * @brief       Izvlacenje statusa bloka iz @c size clana.
  * @return      status da li je blok slobodan.
  */
-#define BLK_STAT_QUERY(currBlk)                                             \
+#define BLK_STAT_QUERY(currBlk)                                                 \
     ((currBlk)->blk.size & BLOCK_STATUS_MASK)
 
 /**
  * @brief       Vrsi postavljanje statusa bloka da je zauzet.
  */
-#define BLK_STAT_BUSY(currBlk)                                              \
+#define BLK_STAT_BUSY(currBlk)                                                  \
     (currBlk)->blk.size |= BLOCK_STATUS_MASK
 
 /**
  * @brief       Vrsi postavljanje statusa bloka da je slobodan.
  */
-#define BLK_STAT_FREE(currBlk)                                              \
+#define BLK_STAT_FREE(currBlk)                                                  \
     (currBlk)->blk.size &= ~BLOCK_STATUS_MASK
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Makroi za manipulaciju sa listama fizickih blokova
- * @brief       Koristi se posebna implementacija Single Linked list with
+/**
+ * @brief       Makroi za manipulaciju sa listama fizickih blokova
+ * @details     Koristi se posebna implementacija Single Linked list with
  *              Sentinel gde nije potrebno vrsiti skeniranje liste prilikom
  *              dodavanja ili oduzimanja elemenata
- * @{ *//*---------------------------------------------------------------------------------------*/
+ */
+#define PHY_BLK_PREV(currBlk)                                                   \
+    ((dmemBlkHdr_T *)((uint8_t *)(currBlk) + currBlk->blk.size + sizeof(dmemBlk_T)))
 
-#define PHY_BLK_PREV(currBlk)                                               \
-    ((hmemBlkHdr_T *)((uint8_t *)(currBlk) + currBlk->blk.size + sizeof(hmemBlk_T)))
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
-/*************************************************************************************************
- * LOCAL CONSTANTS
- *************************************************************************************************/
-
-
-/*************************************************************************************************
- * LOCAL DATA TYPES
- *************************************************************************************************/
+/*======================================================  LOCAL DATA TYPES  ==*/
 
 /**
  * @brief       Struktura jednog bloka memorije.
  */
-typedef struct hmemBlk {
+typedef struct dmemBlk {
 /**
  * @brief       Velicina ovog bloka memorije u bajtovima.
  */
-    size_t  		size;
+    size_t          size;
 
 /**
  * @brief       Lista fizickih blokova memorije.
  */
-    esSlsList_T    phyList;
-} hmemBlk_T;
+    esSlsList_T     phyList;
+} dmemBlk_T;
 
 /**
- * @extends     hmemBlk_T
+ * @extends     dmemBlk_T
  * @brief       Zaglavlje jedne slobodne oblasti memorije.
  * @details     Ovo zaglavlje postoji samo u slobodnim oblastima memorije.
  */
-typedef struct hmemBlkHdr {
+typedef struct dmemBlkHdr {
 /**
  * @brief       Lista fizickih blokova i zauzece blokova
  */
-    hmemBlk_T       blk;
+    dmemBlk_T       blk;
 
 /**
  * @brief       Lista slobodnih blokova
  */
-    esDlsList_T    freeList;
-} hmemBlkHdr_T;
+    esDlsList_T     freeList;
+} dmemBlkHdr_T;
 
+/*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-/*************************************************************************************************
- * LOCAL TABLES
- *************************************************************************************************/
+C_UNUSED_FUNC static void smemInit(
+    void);
 
+C_UNUSED_FUNC static void dmemInit(
+    uint8_t     * dbegin,
+    uint8_t     * dend);
 
-/*************************************************************************************************
- * SHARED GLOBAL VARIABLES
- *************************************************************************************************/
+C_UNUSED_FUNC static void dummyDeAlloc(
+    void            * aMemory);
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Klase memorijskog alokatora
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Dinamicki memorijski alokator (heap memory)
- */
-const C_ROM esMemClass_T memHeapClass = {
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-};
-
-/**
- * @brief       Skladiste memorije (memory pool)
- */
-const C_ROM esMemClass_T memPoolClass = {
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-};
-
-/**
- * @brief       Staticki memorijski alokator (static memory)
- */
-const C_ROM esMemClass_T memStaticClass = {
-    &esHmemAlloc,
-    &esHmemDeAlloc,
-    &esHmemBlockSize,
-};
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
-/*************************************************************************************************
- * LOCAL GLOBAL VARIABLES
- *************************************************************************************************/
+/*=======================================================  LOCAL VARIABLES  ==*/
 
 /**
  * @brief       Cuvar liste slobodnih blokova
  */
-static hmemBlkHdr_T * heapSentinel;
+static dmemBlkHdr_T * gDmemSentinel;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Promenljive koje se koriste u slucaju da je omoguceno debagovanje MM modula
- * @{ *//*---------------------------------------------------------------------------------------*/
+/**
+ * @brief       Cuvar vrednosti slobodne memorije staticnog alokatora
+ */
+static uint8_t * gSmemSentinel;
 
-#if defined(OPT_DBG_MM) || defined(__DOXYGEN__)
-static void * dbgHeapBegin;
-static void * dbgHeapEnd;
+#if (OPT_MM_MANAGED_SIZE != 0U)
+/*
+ * Provera da li je OPT_MM_MANAGED_SIZE veca od velicine dva blokovska zaglavlja
+ * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
+ * moze predstaviti jednim blokom.
+ */
+static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
 #endif
 
-/** @} *//*--------------------------------------------------------------------------------------*/
+/*======================================================  GLOBAL VARIABLES  ==*/
 
+/*------------------------------------------------------------------------*//**
+* @name        Klase memorijskog alokatora
+* @{ *//*---------------------------------------------------------------------*/
 
-/*************************************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- *************************************************************************************************/
+/**
+ * @brief       Dinamicki memorijski alokator
+ */
+const C_ROM esMemClass_T esMemDynClass = {
+#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+    &esSmemAlloc,
+    &dummyDeAlloc,
+#else
+    &esDmemAlloc,
+    &esDmemDeAlloc,
+#endif
+};
 
+/**
+ * @brief       Staticki memorijski alokator
+ */
+const C_ROM esMemClass_T esMemStaticClass = {
+#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+    &esDmemAlloc,
+    &esDmemDeAlloc,
+#else
+    &esSmemAlloc,
+    &dummyDeAlloc,
+#endif
+};
 
-/*************************************************************************************************
- ***                                I M P L E M E N T A T I O N                                ***
- *************************************************************************************************/
+/** @} *//*-------------------------------------------------------------------*/
 
+/**
+ * @brief       Pocetak heap memorije, definicija je u linker skripti.
+ */
+extern uint8_t _sheap;
 
-/*************************************************************************************************
- * GLOBAL FUNCTION DEFINITIONS
- *************************************************************************************************/
+/**
+ * @brief       Kraj heap memorije, definicija je u linker skripti.
+ */
+extern uint8_t _eheap;
 
-/*-------------------------------------------------------------------------------------------*//**
- * @ingroup         mem_intf
- * @{ *//*---------------------------------------------------------------------------------------*/
+/*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 
-void esHmemInit(
-    void        * aHeap,
-    size_t      aSize) {
+/**
+ * @brief       Inicijalizacija statičnog memorijskog menadzera
+ */
+static void smemInit(
+    void) {
 
-    hmemBlkHdr_T    * freeMemory;
+    gSmemSentinel = HEAP_BEGIN;
+}
 
-    MM_DBG_CHECK((void *)0 != aHeap);
-    MM_DBG_CHECK(aSize > (sizeof(hmemBlkHdr_T) * 2));
-    MM_DBG_CHECK(aSize < (size_t)BLOCK_STATUS_MASK);
-    MM_DBG_CHECK((size_t)0U == (aSize & (C_DATA_ALIGNMENT - 1U)));
-    MM_DBG_CHECK((size_t)0U == ((size_t)aHeap & (C_DATA_ALIGNMENT - 1U)));
-    freeMemory = (hmemBlkHdr_T *)aHeap;
-    freeMemory->blk.size = aSize - sizeof(hmemBlk_T) - sizeof(hmemBlkHdr_T);
-    heapSentinel = (hmemBlkHdr_T *)((uint8_t *)freeMemory + freeMemory->blk.size + sizeof(hmemBlk_T));
-    heapSentinel->blk.size = (size_t)0;
-    esSlsSentinelInit(
-        &(heapSentinel->blk.phyList));
-    esSlsNodeAddHeadI(
-        &(heapSentinel->blk.phyList),
-        &(freeMemory->blk.phyList));
-    esDlsSentinelInit(
-        &(heapSentinel->freeList));
-    esDlsNodeAddHeadI(
-        &(heapSentinel->freeList),
-        &(freeMemory->freeList));
-    BLK_STAT_BUSY(heapSentinel);
-    BLK_STAT_FREE(freeMemory);
+/**
+ * @brief       Inicijalizacija dinamičkog memorijskog menadzera
+ * @param       dbegin                  Početak memorijske oblasti dodeljene za
+ *                                      koriscenje
+ * @param       dend                    kraj memorijske oblasti
+ */
+static void dmemInit(
+    uint8_t *       dbegin,
+    uint8_t *       dend) {
 
-#if defined(OPT_DBG_MM)
-    dbgHeapBegin = aHeap;
-    dbgHeapEnd = (void *)heapSentinel;
+    ((dmemBlkHdr_T *)dbegin)->blk.size =
+        (size_t)(dend - dbegin - sizeof(dmemBlk_T) - sizeof(dmemBlkHdr_T));
+    gDmemSentinel = ((dmemBlkHdr_T *)dend - 1U);
+    gDmemSentinel->blk.size = (size_t)0;
+    esSlsSentinelInit_(
+        &(gDmemSentinel->blk.phyList));
+    esSlsNodeAddHead_(
+        &(gDmemSentinel->blk.phyList),
+        &(((dmemBlkHdr_T *)dbegin)->blk.phyList));
+    esDlsSentinelInit_(
+        &(gDmemSentinel->freeList));
+    esDlsNodeAddHead_(
+        &(gDmemSentinel->freeList),
+        &(((dmemBlkHdr_T *)dbegin)->freeList));
+    BLK_STAT_BUSY(gDmemSentinel);
+    BLK_STAT_FREE((dmemBlkHdr_T *)dbegin);
+}
+
+/**
+ * @brief       Prazna funkcija
+ * @param       aMemory                 Ignorisan parametar
+ */
+static void dummyDeAlloc(
+    void            * aMemory) {
+
+    (void)aMemory;
+}
+
+/*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
+/*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
+
+/*----------------------------------------------------------------------------*/
+void esMemInit(
+    void) {
+
+    esHalInit();
+
+#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+    dmemInit(
+        HEAP_BEGIN,
+        HEAP_END);
+#elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+    smemInit();
+#else
+    void * tmp;
+
+    smemInit();
+    tmp = esSmemAlloc(
+        OPT_MM_DISTRIBUTION);
+    dmemInit(
+        tmp, (tmp + (size_t)OPT_MM_DISTRIBUTION));
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-void * esHmemAlloc(
-    size_t  aSize) {
+/*----------------------------------------------------------------------------*/
+size_t esSmemFreeSpace(
+    void) {
 
-    void * tmpMem;
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
+    size_t freeSpace;
+
+    freeSpace = HEAP_END - gSmemSentinel;
+
+    return (freeSpace);
+#else
+
+    return (0U);
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+void * esSmemAllocI(
+    size_t          size) {
+
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
+    void * tmp;
+
+    if (size <= (HEAP_END - gSmemSentinel)) {
+        tmp = gSmemSentinel;
+        gSmemSentinel += size;
+    } else {
+        tmp = (void *)0;
+    }
+
+    return (tmp);
+#else
+    (void)size;
+
+    return ((void *)0);
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+void * esSmemAlloc(
+    size_t          size) {
+
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
+    void * tmp;
+
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    tmp = esSmemAllocI(size);
+    ES_CRITICAL_EXIT();
+
+    return (tmp);
+#else
+    (void)size;
+
+    return ((void *)0);
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+void * esDmemAlloc(
+    size_t          size) {
+
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+    ES_CRITICAL_DECL();
+    void * tmpMem;
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    tmpMem = esHmemAllocI(
-        aSize);
+    tmpMem = esDmemAllocI(
+        size);
     ES_CRITICAL_EXIT();
 
     return (tmpMem);
+#else
+    (void)size;
+
+    return ((void *)0);
+#endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-void * esHmemAllocI(
-    size_t  aSize) {
+/*----------------------------------------------------------------------------*/
+void * esDmemAllocI(
+    size_t          size) {
 
-    hmemBlkHdr_T * prevPhy;
-    hmemBlkHdr_T * freeBlk;
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+    dmemBlkHdr_T * prevPhy;
+    dmemBlkHdr_T * freeBlk;
 
-    MM_DBG_CHECK(aSize < (size_t)BLOCK_STATUS_MASK);
-    MM_ASSERT((hmemBlkHdr_T *)0 != heapSentinel);
-
-    if (aSize < (sizeof(hmemBlkHdr_T) - sizeof(hmemBlk_T))) {
-        aSize = sizeof(hmemBlkHdr_T) - sizeof(hmemBlk_T);
+    if (size < (sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T))) {
+        size = sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T);
     }
 
-#if (PORT_SUPP_UNALIGNED_ACCESS != PORT_TRUE) || defined(OPT_OPTIMIZE_SPEED)
-    aSize = ES_ALIGN(aSize, C_DATA_ALIGNMENT);
+#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
+    size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
 #endif
     DLS_FOR_EACH_ENTRY(
-        hmemBlkHdr_T,
+        dmemBlkHdr_T,
         freeList,
-        &(heapSentinel->freeList),
+        &(gDmemSentinel->freeList),
         freeBlk) {
 
-        if (freeBlk->blk.size >= aSize) {
+        if (freeBlk->blk.size >= size) {
 
-            if (freeBlk->blk.size >= (aSize + sizeof(hmemBlkHdr_T))) {
-                freeBlk->blk.size -= (aSize + sizeof(hmemBlk_T));
+            if (freeBlk->blk.size >= (size + sizeof(dmemBlkHdr_T))) {
+                freeBlk->blk.size -= (size + sizeof(dmemBlk_T));
                 freeBlk = PHY_BLK_PREV(freeBlk);
-                freeBlk->blk.size = aSize;
+                freeBlk->blk.size = size;
                 prevPhy = PHY_BLK_PREV(freeBlk);
-                esSlsNodeAddAfterI(
+                esSlsNodeAddAfter_(
                     &(prevPhy->blk.phyList),
                     &(freeBlk->blk.phyList));
             } else {
-                esDlsNodeRemoveI(
+                esDlsNodeRemove_(
                     &(freeBlk->freeList));
             }
             BLK_STAT_BUSY(freeBlk);
@@ -333,192 +418,137 @@ void * esHmemAllocI(
             return ((void *)&(freeBlk->freeList));
         }
     }
-    MM_ASSERT_ALWAYS("No free space to allocate.");
 
-    return((void *)0);
+    return ((void *)0);
+#else
+    (void)size;
+
+    return ((void *)0);
+#endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-size_t esHmemBlockSize(
-    void        * aMemory) {
+/*----------------------------------------------------------------------------*/
+size_t esDmemBlockSize(
+    void *          mem) {
 
-    hmemBlkHdr_T * currBlk;
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+    dmemBlkHdr_T * currBlk;
 
-    MM_DBG_CHECK((dbgHeapBegin < aMemory) && (aMemory < dbgHeapEnd));
-    /* currBlk = (hmemBlk_T *)aMemory; */
-    /* --currBlk; */
-    currBlk = C_CONTAINER_OF((esDlsList_T *)aMemory, hmemBlkHdr_T, freeList);
-    MM_DBG_CHECK(BLOCK_IS_BUSY == BLK_STAT_QUERY(currBlk));
+    currBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
 
     return ((size_t)(currBlk->blk.size & ~BLOCK_STATUS_MASK));
+#else
+    (void)mem;
+
+    return (0);
+#endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-void esHmemDeAlloc(
-    void        * aMemory) {
+/*----------------------------------------------------------------------------*/
+void esDmemDeAlloc(
+    void *          mem) {
 
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    esHmemDeAllocI(
-        aMemory);
+    esDmemDeAllocI(
+        mem);
     ES_CRITICAL_EXIT();
+#else
+    (void)mem;
+#endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-void esHmemDeAllocI(
-    void        * aMemory) {
+/*----------------------------------------------------------------------------*/
+void esDmemDeAllocI(
+    void *          mem) {
 
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     size_t blkStat;
-    hmemBlkHdr_T * freeBlk;
-    hmemBlkHdr_T * currPhy;
-    hmemBlkHdr_T * tmpPhy;
+    dmemBlkHdr_T * freeBlk;
+    dmemBlkHdr_T * currPhy;
+    dmemBlkHdr_T * tmpPhy;
 
-    MM_ASSERT((hmemBlkHdr_T *)0 != heapSentinel);
-    MM_DBG_CHECK((dbgHeapBegin < aMemory) && (aMemory < dbgHeapEnd));
-    /* freeBlk = (hmemBlkHdr_T *)((hmemBlk_T *)aMemory - 1U); */
-    freeBlk = C_CONTAINER_OF((esDlsList_T *)aMemory, hmemBlkHdr_T, freeList);
-    MM_DBG_CHECK(BLOCK_IS_BUSY == BLK_STAT_QUERY(freeBlk));
+    freeBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
     currPhy = esSlsNodeEntry(
-        hmemBlkHdr_T,
+        dmemBlkHdr_T,
         blk.phyList,
         freeBlk->blk.phyList.next);
     blkStat = BLK_STAT_QUERY(currPhy);
     BLK_STAT_FREE(freeBlk);
 
     if (BLOCK_IS_FREE == blkStat) {
-        esDlsNodeRemoveI(
+        esDlsNodeRemove_(
             &(currPhy->freeList));
         tmpPhy = PHY_BLK_PREV(freeBlk);
-        esSlsNodeRemoveAfterI(
+        esSlsNodeRemoveAfter_(
             &(tmpPhy->blk.phyList));
-        currPhy->blk.size += freeBlk->blk.size + sizeof(hmemBlk_T);
+        currPhy->blk.size += freeBlk->blk.size + sizeof(dmemBlk_T);
         freeBlk = currPhy;
     }
     currPhy = PHY_BLK_PREV(freeBlk);
     blkStat = BLK_STAT_QUERY(currPhy);
 
     if (BLOCK_IS_FREE == blkStat) {
-        esDlsNodeRemoveI(
+        esDlsNodeRemove_(
             &(currPhy->freeList));
         tmpPhy = PHY_BLK_PREV(currPhy);
-        esSlsNodeRemoveAfterI(
+        esSlsNodeRemoveAfter_(
             &(tmpPhy->blk.phyList));
-        freeBlk->blk.size += currPhy->blk.size + sizeof(hmemBlk_T);
+        freeBlk->blk.size += currPhy->blk.size + sizeof(dmemBlk_T);
     }
-    esDlsNodeAddHeadI(
-        &(heapSentinel->freeList),
+    esDlsNodeAddHead_(
+        &(gDmemSentinel->freeList),
         &(freeBlk->freeList));
+#else
+    (void)mem;
+#endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-size_t esHmemFreeSpace(
+/*----------------------------------------------------------------------------*/
+size_t esDmemFreeSpace(
     void) {
 
-    size_t tmpSize;
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
+    size_t tmpSize;
 
     ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    tmpSize = esHmemFreeSpaceI();
+    tmpSize = esDmemFreeSpaceI();
     ES_CRITICAL_EXIT();
 
     return (tmpSize);
+#else
+    return (0);
+#endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-size_t esHmemFreeSpaceI(
+/*----------------------------------------------------------------------------*/
+size_t esDmemFreeSpaceI(
     void) {
 
-    size_t  free;
-    hmemBlkHdr_T   * currBlk;
+#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+    size_t free;
+    dmemBlkHdr_T * currBlk;
 
-    MM_ASSERT((hmemBlkHdr_T *)0 != heapSentinel);
     free = (size_t)0;
 
     DLS_FOR_EACH_ENTRY(
-        hmemBlkHdr_T,
+        dmemBlkHdr_T,
         freeList,
-        &(heapSentinel->freeList),
+        &(gDmemSentinel->freeList),
         currBlk) {
         free += currBlk->blk.size;
     }
 
     return ((size_t)(free & ~BLOCK_STATUS_MASK));                               /* U slucaju da je samo sentinel prividno dostupan.         */
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-void * esMemCopy(
-    void        * C_RESTRICT aDst,
-    const void  * C_RESTRICT aSrc,
-    size_t      aLength) {
-
-#if !defined(ES_OPTIMIZE_SPEED)
-    uint8_t * dst;
-    uint8_t * src;
-
-    MM_DBG_CHECK((void *)0 != aDst);
-    MM_DBG_CHECK((void *)0 != aSrc);
-    MM_DBG_CHECK(aDst != aSrc);
-    dst = (uint8_t *)aDst;
-    src = (uint8_t *)aSrc;
-
-    while ((size_t)0 != aLength--) {
-        *dst++ = *src++;
-    }
-
-    return (aDst);
 #else
-
-    /*
-     * todo Napisati funkciju optimizovanu za brzinu (kopiranje 4-32 bajta u jednom ciklusu)
-     */
+    return (0);
 #endif
 }
 
-/*-----------------------------------------------------------------------------------------------*/
-void * esMemMove(
-    void        * aDst,
-    const void  * aSrc,
-    size_t      aLength) {
-
-#if !defined(ES_OPTIMIZE_SPEED)
-    uint8_t * dst;
-    uint8_t * src;
-
-    MM_DBG_CHECK((void *)0 != aDst);
-    MM_DBG_CHECK((void *)0 != aSrc);
-    MM_DBG_CHECK(aDst != aSrc);
-    dst = (uint8_t *)aDst;
-    src = (uint8_t *)aSrc;
-
-    while ((size_t)0 != aLength--) {
-        *dst++ = *src++;
-    }
-
-    return (aDst);
-#else
-
-    /*
-     * todo Napisati funkciju optimizovanu za brzinu (kopiranje 4-32 bajta u jednom ciklusu)
-     */
-#endif
-}
-
-/*-----------------------------------------------------------------------------------------------*/
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-
-/*************************************************************************************************
- * LOCAL FUNCTION DEFINITIONS
- *************************************************************************************************/
-
-
-/*************************************************************************************************
- * CONFIGURATION ERRORS
- *************************************************************************************//** @cond */
-
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of mem.c
- *************************************************************************************************/
+ ******************************************************************************/

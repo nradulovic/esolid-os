@@ -20,17 +20,13 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *************************************************************************************************/
-
-
-/*********************************************************************************************//**
+ *//******************************************************************************************//**
  * @file
- * @author  	Nenad Radulovic
+ * @author      Nenad Radulovic
  * @brief       Interfejs/implementacija za manipulaciju sa povezanim listama
  *              (linked list)
  * @details     Povezane liste su inspirisane kodom koji se nalazi u Linux
  *              jezgru.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  list_intf
  ****************************************************************************************//** @{ */
 
@@ -44,35 +40,36 @@
 
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Makroi za Single Linked list with Sentinel, SLS liste
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dobavlja pokazivac na strukturu podataka na koju pokazuje @c ptr
  *              u povezanoj listi
  * @param       ptr                     Pokazivac na clan u povezanoj listi,
  * @param       typeOfData              tip strukture podataka,
  * @param       list                    clan liste u strukturi podataka.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
-#define esSlsNodeEntry(typeOfData, list, ptr)                                  \
+ */
+#define esSlsNodeEntry(typeOfData, list, ptr)                                   \
     ((typeOfData *)((char *)(ptr) - offsetof(typeOfData, list)))
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Kreira @c FOR petlju koja prelazi kroz sve clanove liste
  * @param       sentinel                Pokazivac na cuvara liste,
  * @param       currNode                pokazivac na clanove liste koji se
  *                                      koristi kao brojac.
  * @mseffect
- *//*--------------------------------------------------------------------------------------------*/
+ */
 #define SLS_FOR_EACH(sentinel, currNode)                                        \
     for (                                                                       \
         currNode = (sentinel)->next;                                            \
         currNode != (sentinel);                                                 \
         currNode = (currNode)->next)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Kreira @c FOR petlju koja prelazi kroz sve clanove liste i
  *              izvlaci trenutni clan iz liste radi pristupa
  * @param       typeOfData              Tip strukture podataka koji formiraju
@@ -82,10 +79,10 @@
  * @param       currNode                pokazivac na podatke u povezanoj listi.
  * @details     Pokazivac @c currNode se koristi za pristup zeljenim podacima.
  * @mseffect
- *//*--------------------------------------------------------------------------------------------*/
+ */
 #define SLS_FOR_EACH_ENTRY(typeOfData, list, sentinel, currNode)                \
     for (                                                                       \
-        currNode = esSlsNodeEntry(typeOfData, list, (sentinel)->next);         \
+        currNode = esSlsNodeEntry(typeOfData, list, (sentinel)->next);          \
         &currNode->list != (sentinel);                                          \
         currNode = esSlsNodeEntry(typeOfData, list, currNode->list.next))
 
@@ -94,31 +91,31 @@
  * @name        Makroi za Doubly Linked list with Sentinel, DLS liste
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dobavlja pokazivac na strukturu podataka na koju pokazuje @c ptr
  *              u povezanoj listi
  * @param       ptr                     Pokazivac na clan u povezanoj listi,
  * @param       typeOfData              tip strukture podataka,
  * @param       list                    clan liste u strukturi podataka.
  * @api
- *//*--------------------------------------------------------------------------------------------*/
-#define esDlsNodeEntry(typeOfData, list, ptr)                                  \
+ */
+#define esDlsNodeEntry(typeOfData, list, ptr)                                   \
     ((typeOfData *)((char *)(ptr) - offsetof(typeOfData, list)))
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Kreira @c FOR petlju koja prelazi kroz sve clanove liste
  * @param       sentinel                Pokazivac na cuvara liste,
  * @param       currNode                pokazivac na clanove liste koji se
  *                                      koristi kao brojac.
  * @mseffect
- *//*--------------------------------------------------------------------------------------------*/
+ */
 #define DLS_FOR_EACH(sentinel, currNode)                                        \
     for (                                                                       \
         currNode = (sentinel)->next;                                            \
         currNode != (sentinel);                                                 \
         currNode = (currNode)->next)
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Kreira @c FOR petlju koja prelazi kroz sve clanove liste i
  *              izvlaci trenutni clan iz liste radi pristupa
  * @param       typeOfData              Tip strukture podataka koji formiraju
@@ -128,26 +125,26 @@
  * @param       currNode                pokazivac na podatke u povezanoj listi.
  * @details     Pokazivac @c currNode se koristi za pristup zeljenim podacima.
  * @mseffect
- *//*--------------------------------------------------------------------------------------------*/
+ */
 #define DLS_FOR_EACH_ENTRY(typeOfData, list, sentinel, currNode)                \
     for (                                                                       \
-        currNode = esDlsNodeEntry(typeOfData, list, (sentinel)->next);         \
+        currNode = esDlsNodeEntry(typeOfData, list, (sentinel)->next);          \
         &currNode->list != (sentinel);                                          \
         currNode = esDlsNodeEntry(typeOfData, list, currNode->list.next))
 
 /** @} *//*--------------------------------------------------------------------------------------*/
-
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Tipovi podataka za Single Linked list with Sentinel, SLS liste
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Cuvar/clan SLS liste
  * @details     Ova struktura mora da postoji u strukturi podataka
  *              koji formiraju povezanu listu. Dovoljno je ukljuciti ovu
@@ -156,7 +153,7 @@ extern "C" {
  * @note        Bolje performanse se mogu postici postavljanjem ove strukture
  *              na prvom mestu u strukturi podataka koji formiraju povezanu
  *              listu.
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef struct esSlsList {
 /**
  *  @brief      Sledeci clan u povezanoj listi
@@ -169,7 +166,7 @@ typedef struct esSlsList {
  * @name        Tipovi podataka za Doubly Linked list with Sentinel, DLS liste
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Cuvar/clan DLS liste
  * @details     Ova struktura mora da postoji u strukturi podataka
  *              koji formiraju povezanu listu. Dovoljno je ukljuciti ovu
@@ -178,7 +175,7 @@ typedef struct esSlsList {
  * @note        Bolje performanse se mogu postici postavljanjem ove strukture
  *              na prvom mestu u strukturi podataka koji formiraju povezanu
  *              listu.
- *//*--------------------------------------------------------------------------------------------*/
+ */
 typedef struct esDlsList {
 /**
  * @brief       Sledeci clan u povezanoj listi
@@ -195,39 +192,38 @@ typedef struct esDlsList {
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
+
 /*-------------------------------------------------------------------------------------------*//**
  * @name        Funkcije za Single Linked list with Sentinel, odnosno, SLS liste
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vrsi inicijalizaciju clana SLS liste
  * @param       aNode                   Pokazivac na clan SLS liste.
  * @details     Ova funkcija se najcesce poziva nakon brisanja datog clana iz
  *              neke liste.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsNodeInitI(
+ */
+C_INLINE_ALWAYS void esSlsNodeInit_(
     esSlsList_T    * aNode) {
 
     aNode->next = aNode;
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vrsi inicijalizaciju clana SLS liste
  * @param       aSentinel               Pokazivac na cuvara SLS liste.
  * @details     Ova funkcija se najcesce poziva pre koriscenja SLS liste.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsSentinelInit(
+ */
+C_INLINE_ALWAYS void esSlsSentinelInit_(
     esSlsList_T    * aSentinel) {
 
-    esSlsNodeInitI(
+    esSlsNodeInit_(
         aSentinel);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewBlk izmedju @c aPrevBlk i @c aNextBlk
  * @param       aNewNode                Pokazivac na novi clan koji treba dodati
  *                                      u listu,
@@ -235,10 +231,9 @@ C_INLINE_ALWAYS void esSlsSentinelInit(
  * @param       aNextNode               pokazivac na sledeci clan u listi.
  * @details     Dodaje clan @c aNew u listu kada su poznati prethodni i sledeci
  *              clanovi.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsNodeAddI(
+ */
+C_INLINE_ALWAYS void esSlsNodeAdd_(
     esSlsList_T    * aNewNode,
     esSlsList_T    * aPrevNode,
     esSlsList_T    * aNextNode) {
@@ -247,41 +242,39 @@ C_INLINE_ALWAYS void esSlsNodeAddI(
     aPrevNode->next = aNewNode;
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewNode nakon @c aCurrNode clana.
  * @param       aCurrNode               Pokazivac na trenutno koriscenog clana,
  * @param       aNewNode                pokazivac na clan koji se dodaje.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsNodeAddAfterI(
+ */
+C_INLINE_ALWAYS void esSlsNodeAddAfter_(
     esSlsList_T    * aCurrNode,
     esSlsList_T    * aNewNode) {
 
-    esSlsNodeAddI(
+    esSlsNodeAdd_(
         aNewNode,
         aCurrNode,
         aCurrNode->next);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewNode na pocetak liste koju cuva @c aSentinel.
  * @param       aSentinel               Pokazivac na cuvara liste,
  * @param       aNewNode                pokazivac na clan koji se dodaje.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsNodeAddHeadI(
+ */
+C_INLINE_ALWAYS void esSlsNodeAddHead_(
     esSlsList_T    * aSentinel,
     esSlsList_T    * aNewNode) {
 
-    esSlsNodeAddI(
+    esSlsNodeAdd_(
         aNewNode,
         aSentinel,
         aSentinel->next);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Uklanja @c aOldNode iz povezane lise.
  * @param       aOldNode                Pokazivac na clan koji se uklanja iz
  *                                      liste,
@@ -289,10 +282,9 @@ C_INLINE_ALWAYS void esSlsNodeAddHeadI(
  * @param       aNextNode               pokazivac na sledeci clan u listi.
  * @details     Dodaje clan @c aNew u listu kada su poznati prethodni i sledeci
  *              clanovi.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsNodeRemoveI(
+ */
+C_INLINE_ALWAYS void esSlsNodeRemove_(
     esSlsList_T    * aOldNode,
     esSlsList_T    * aPrevNode,
     esSlsList_T    * aNextNode) {
@@ -301,17 +293,16 @@ C_INLINE_ALWAYS void esSlsNodeRemoveI(
     (void)aOldNode;
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Uklanja clan nakon clana @c aCurrNode iz povezane lise.
  * @param       aCurrNode               Pokazivac na clan u SLS listi nakon
  *                                      kojeg treba ukloniti clan
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esSlsNodeRemoveAfterI(
+ */
+C_INLINE_ALWAYS void esSlsNodeRemoveAfter_(
     esSlsList_T    * aCurrNode) {
 
-    esSlsNodeRemoveI(
+    esSlsNodeRemove_(
         aCurrNode->next,
         aCurrNode,
         aCurrNode->next->next);
@@ -322,34 +313,32 @@ C_INLINE_ALWAYS void esSlsNodeRemoveAfterI(
  * @name        Funkcije za Doubly Linked list with Sentinel, odnosno, DLS liste
  * @{ *//*---------------------------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vrsi inicijalizaciju clana DLS liste
  * @param       aNode                   Pokazivac na clan DLS liste.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeInitI(
+ */
+C_INLINE_ALWAYS void esDlsNodeInit_(
     esDlsList_T    * aNode) {
 
     aNode->next = aNode;
     aNode->prev = aNode;
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Vrsi inicijalizaciju cuvara DLS liste
  * @param       aSentinel               Pokazivac na clan tipa esDlsList_T
  *                                      u strukturi podataka.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsSentinelInit(
+ */
+C_INLINE_ALWAYS void esDlsSentinelInit_(
     esDlsList_T    * aSentinel) {
 
-    esDlsNodeInitI(
+    esDlsNodeInit_(
         aSentinel);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewBlk izmedju @c aPrevBlk i @c aNextBlk
  * @param       aNew                    Pokazivac na novi clan koji treba dodati
  *                                      u listu,
@@ -357,10 +346,9 @@ C_INLINE_ALWAYS void esDlsSentinelInit(
  * @param       aNext                   pokazivac na sledeci clan u listi.
  * @details     Dodaje clan @c aNew u listu kada su poznati prethodni i sledeci
  *              clanovi.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeAddI(
+ */
+C_INLINE_ALWAYS void esDlsNodeAdd_(
     esDlsList_T    * aNew,
     esDlsList_T    * aPrev,
     esDlsList_T    * aNext) {
@@ -371,97 +359,91 @@ C_INLINE_ALWAYS void esDlsNodeAddI(
     aNext->prev = aNew;
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewNode na pocetak liste koju cuva @c aSentinel.
  * @param       aSentinel               Pokazivac na cuvara liste,
  * @param       aNewNode                pokazivac na clan koji se dodaje.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeAddHeadI(
+ */
+C_INLINE_ALWAYS void esDlsNodeAddHead_(
     esDlsList_T    * aSentinel,
     esDlsList_T    * aNewNode) {
 
-    esDlsNodeAddI(
+    esDlsNodeAdd_(
         aNewNode,
         aSentinel,
         aSentinel->next);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewNode na kraj liste koju cuva @c aSentinel.
  * @param       aSentinel               Pokazivac na cuvara liste,
  * @param       aNewNode                pokazivac na clan koji se dodaje.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeAddTailI(
+ */
+C_INLINE_ALWAYS void esDlsNodeAddTail_(
     esDlsList_T    * aSentinel,
     esDlsList_T    * aNewNode) {
 
-    esDlsNodeAddI(
+    esDlsNodeAdd_(
         aNewNode,
         aSentinel->prev,
         aSentinel);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewNode pre @c aCurrNode clana.
  * @param       aCurrNode               Pokazivac na trenutno koriscenog clana,
  * @param       aNewNode                pokazivac na clan koji se dodaje.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeAddBeforeI(
+ */
+C_INLINE_ALWAYS void esDlsNodeAddBefore_(
     esDlsList_T    * aCurrNode,
     esDlsList_T    * aNewNode) {
 
-    esDlsNodeAddI(
+    esDlsNodeAdd_(
         aNewNode,
         aCurrNode->prev,
         aCurrNode);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Dodaje @c aNewNode nakon @c aCurrNode clana.
  * @param       aCurrNode               Pokazivac na trenutno koriscenog clana,
  * @param       aNewNode                pokazivac na clan koji se dodaje.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeAddAfterI(
+ */
+C_INLINE_ALWAYS void esDlsNodeAddAfter_(
     esDlsList_T    * aCurrNode,
     esDlsList_T    * aNewNode) {
 
-    esDlsNodeAddI(
+    esDlsNodeAdd_(
         aNewNode,
         aCurrNode,
         aCurrNode->next);
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Uklanja @c aOldNode iz povezane lise.
  * @param       aOldNode                Pokazivac na clan koji se uklanja.
- * @iclass
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS void esDlsNodeRemoveI(
+ */
+C_INLINE_ALWAYS void esDlsNodeRemove_(
     esDlsList_T    * aOldNode) {
 
     aOldNode->next->prev = aOldNode->prev;
     aOldNode->prev->next = aOldNode->next;
 }
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
  * @brief       Ispituje da li je lista prazna.
  * @param       aSentinel               Pokazivac na cuvara liste.
  * @return      Stanje liste
  *  @retval     TRUE - lista je prazna
  *  @retval     FALSE - lista nije prazna
- * @api
  * @inline
- *//*--------------------------------------------------------------------------------------------*/
-C_INLINE_ALWAYS bool_T esDlsIsEmpty(
+ */
+C_INLINE_ALWAYS bool_T esDlsIsEmpty_(
     esDlsList_T     * aSentinel) {
 
     if (aSentinel->next != aSentinel) {

@@ -1,0 +1,9 @@
+/*********************************************************************************************//**
+@file
+@addtogroup     kernel_intf
+*//** @{ *//**
+@defgroup       tem_intf Time Event Management (TEM)
+@brief          Menadzment vremenskih dogadjaja
+@section        tem_doc Time Event Management (TEM)
+**//** @} *//*************************************************************************************/
+ 

@@ -24,7 +24,6 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Privatni objekti kernel-a.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  kernel_impl
  ****************************************************************************************//** @{ */
 
@@ -32,14 +31,14 @@
 #define KERNEL_PRIVATE_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
-
 #include "kernel/kernel.h"
-#include "primitive/list.h"
-#include "primitive/queue.h"
+#include "stp_messages.h"
 #include "mm_pkg.h"
 #include "evt_pkg.h"
 #include "smp_pkg.h"
-#include "core_pkg.h"
+#include "evtq_pkg.h"
+#include "epa_pkg.h"
+#include "sched_pkg.h"
 
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/

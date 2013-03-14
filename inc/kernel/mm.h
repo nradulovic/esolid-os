@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,62 +20,75 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Menadzment memorije
- * ------------------------------------------------------------------------------------------------
+ * @details     This file is not meant to be included in application code
+ *              directly but through the inclusion of "kernel.h" file.
  * @addtogroup  mm_intf
- * @brief       Menadzment memorije
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
 #ifndef MM_H_
 #define MM_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*=========================================================  INCLUDE FILES  ==*/
+#include "hal/hal.h"
+#include "../config/kernel_config.h"
+
+/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
-/*=========================================================================  GLOBAL VARIABLES  ==*/
+/*============================================================  DATA TYPES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/**
+ * @brief       Memorijska klasa alokatora
+ */
+typedef struct esMemClass esMemClass_T;
+
+/*======================================================  GLOBAL VARIABLES  ==*/
+
+/*------------------------------------------------------------------------*//**
  * @name        Klase memorijskog alokatora
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Dinamicki memorijski alokator (heap memory)
  */
-extern const C_ROM esMemClass_T memHeapClass;
-
-/**
- * @brief       Skladiste memorije (memory pool)
- */
-extern const C_ROM esMemClass_T memPoolClass;
+extern const C_ROM esMemClass_T esMemDynClass;
 
 /**
  * @brief       Staticki memorijski alokator (static memory)
  */
-extern const C_ROM esMemClass_T memStaticClass;
-/** @} *//*--------------------------------------------------------------------------------------*/
+extern const C_ROM esMemClass_T esMemStaticClass;
 
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
-
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Funkcije statickog memorijskog alokatora
- * @{ *//*---------------------------------------------------------------------------------------*/
+/** @} *//*-------------------------------------------------------------------*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
- * @brief       Dodeljuje memorijski prostor velicine @c aSize
- * @param       aSize                   Velicina zahtevanog memorijskog prostora
+ * @brief       Inicijalizuje memorijske alokatore
+ * @details     Ova funkcija se mora pozvati pre koriscenja funkcija memorijskih
+ *              alokatora.
+ * @note        U slucaju da se MM modul koristi od strane SMP ili Kernel-a ova
+ *              funkcija se automatski poziva.
+ */
+void esMemInit(
+    void);
+
+/*------------------------------------------------------------------------*//**
+ * @name        Funkcije statickog memorijskog alokatora
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Dodeljuje memorijski prostor velicine @c size
+ * @param       size                    Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
- * @pre         Najpre treba inicijalizovati MM modul pozivom
- *              @ref ES_MEMORY_DEFINE makroa.
+ * @return      Pokazivac na rezervisani memorijski blok.
  * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
  *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
  *              standardna implementacija @c malloc C funkcije. Ukoliko se
@@ -85,15 +98,14 @@ extern const C_ROM esMemClass_T memStaticClass;
  * @api
  */
 void * esSmemAlloc(
-    size_t      aSize);
+    size_t          size);
 
 /**
- * @brief       Dodeljuje memorijski prostor velicine @c aSize
- * @param       aSize                   Velicina zahtevanog memorijskog prostora
+ * @brief       Dodeljuje memorijski prostor velicine @c size
+ * @param       size                    Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
- * @pre         Najpre treba inicijalizovati MM modul pozivom
- *              @ref ES_MEMORY_DEFINE makroa.
- * @details		U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
+ * @return      Pokazivac na rezervisani memorijski blok.
+ * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
  *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
  *              standardna implementacija @c malloc C funkcije. Ukoliko se
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
@@ -102,160 +114,122 @@ void * esSmemAlloc(
  * @iclass
  */
 void * esSmemAllocI(
-    size_t      aSize);
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Funkcije dinamickog memorijskog alokatora
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Dodeljuje memorijski prostor velicine @c aSize
- * @param       aSize                   Velicina zahtevanog memorijskog prostora
- *                                      u bajtovima.
- * @pre         Najpre treba inicijalizovati MM modul pozivom
- *              @ref ES_MEMORY_DEFINE makroa.
- * @details		U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
- *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
- *              standardna implementacija @c malloc C funkcije. Ukoliko se
- *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
- *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
- *              standardom.
- * @api
- */
-void * esHmemAlloc(
-    size_t      aSize);
-
-/**
- * @brief       Dodeljuje memorijski prostor velicine @c aSize
- * @param       aSize                   Velicina zahtevanog memorijskog prostora
- *                                      u bajtovima.
- * @pre         Najpre treba inicijalizovati MM modul pozivom
- *              @ref ES_MEMORY_DEFINE makroa.
- * @details		U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
- *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
- *              standardna implementacija @c malloc C funkcije. Ukoliko se
- *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
- *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
- *              standardom.
- * @iclass
- */
-void * esHmemAllocI(
-    size_t      aSize);
-
-/**
- * @brief       Reciklira memorijski prostor na koji pokazije @c aMemory
- *              pokazivac
- * @param       aMemory                 Pokazivac na prethodno dodeljen
- * 										memorijski prostor.
- * @api
- */
-void esHmemDeAlloc(
-    void        * aMemory);
-
-/**
- * @brief       Reciklira memorijski prostor na koji pokazije @c aMemory
- *              pokazivac
- * @param       aMemory                 Pokazivac na prethodno dodeljen
- *                                      memorijski prostor.
- * @iclass
- */
-void esHmemDeAllocI(
-    void        * aMemory);
+    size_t          size);
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
  * @return      Velicina slobodne memorije u bajtovima.
- * @pre         Najpre treba inicijalizovati MM modul pozivom
- *              @ref ES_MEMORY_DEFINE makroa.
- * @details		Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
- *              za first fir algoritam, moze se desiti da postoji dovoljno
- *              slobodne memorije, ali ne i bloka zahtevane velicine. U tom
- *              slucaju ce memorijski alokator pasti.
  * @api
  */
-size_t esHmemFreeSpace(
+size_t esSmemFreeSpace(
+    void);
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Funkcije dinamickog memorijskog alokatora
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Dodeljuje memorijski prostor velicine @c size
+ * @param       size                    Velicina zahtevanog memorijskog prostora
+ *                                      u bajtovima.
+ * @return      Pokazivac na rezervisani memorijski blok.
+ * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
+ *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
+ *              standardna implementacija @c malloc C funkcije. Ukoliko se
+ *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
+ *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
+ *              standardom.
+ * @api
+ */
+void * esDmemAlloc(
+    size_t          size);
+
+/**
+ * @brief       Dodeljuje memorijski prostor velicine @c size
+ * @param       size                    Velicina zahtevanog memorijskog prostora
+ *                                      u bajtovima.
+ * @return      Pokazivac na rezervisani memorijski blok.
+ * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
+ *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
+ *              standardna implementacija @c malloc C funkcije. Ukoliko se
+ *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
+ *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
+ *              standardom.
+ * @iclass
+ */
+void * esDmemAllocI(
+    size_t          size);
+
+/**
+ * @brief       Reciklira memorijski prostor na koji pokazije @c mem
+ *              pokazivac
+ * @param       mem                     Pokazivac na prethodno dodeljen
+ * 										memorijski prostor.
+ * @api
+ */
+void esDmemDeAlloc(
+    void *          mem);
+
+/**
+ * @brief       Reciklira memorijski prostor na koji pokazije @c mem
+ *              pokazivac
+ * @param       mem                     Pokazivac na prethodno dodeljen
+ *                                      memorijski prostor.
+ * @iclass
+ */
+void esDmemDeAllocI(
+    void *          mem);
+
+/**
+ * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
+ * @return      Velicina slobodne memorije u bajtovima.
+ * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
+ *              za first fit algoritam, moze se desiti da postoji dovoljno
+ *              slobodne memorije, ali ne i za blok zahtevane velicine. U tom
+ *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
+ *              zahtev.
+ * @api
+ */
+size_t esDmemFreeSpace(
     void);
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
  * @return      Velicina slobodne memorije u bajtovima.
- * @pre         Najpre treba inicijalizovati MM modul pozivom
- *              @ref ES_MEMORY_DEFINE makroa.
- * @iclass
- *
- *              Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
+ * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
  *              za first fir algoritam, moze se desiti da postoji dovoljno
  *              slobodne memorije, ali ne i bloka zahtevane velicine. U tom
- *              slucaju ce memorijski alokator pasti.
+ *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
+ *              zahtev.
+ * @iclass
  */
-size_t esHmemFreeSpaceI(
+size_t esDmemFreeSpaceI(
     void);
 
 /**
  * @brief		Vraca velicinu dodeljene memorije
- * @param 		aMemory					Pokazivac na prethodno dodeljen
+ * @param 		mem					    Pokazivac na prethodno dodeljen
  * 										memorijski prostor.
  * @return		Velicina dodeljenog memorijskog prostora.
- * @api
- *
- *              Sa obzirom da alokatori koriste granulaciju i/ili imaju
+ * @details     Sa obzirom da alokatori koriste granulaciju i/ili imaju
  *              implementaciono ogranicenje, prilikom dodeljivanja memorije moze
  *              se dodeliti veca memorija od zahtevane. Ova funkcija se moze
  *              koristiti ukoliko je potrebna informacija o stvarnoj velicini
  *              dodeljenog bloka.
- */
-size_t esHmemBlockSize(
-	void 		* aMemory);
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Ostale operacije sa memorijom
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Vrsi kopiranje @c aLength bajtova sa izvorne adrese @c aSrc na
- *              odredisnu adresu @c aDst.
- * @param       aDst                    Pokazivac na odredisnu adresu,
- * @param       aSrc                    pokazivac na izvorisnu adresu,
- * @param       aLength                 broj bajtova koje treba kopirati.
- * @warning     Zbog primena optimizacionih tehnika ova funkcija moze da radi
- *              samo sa blokovima koji se ne preklapaju, odnosno, adrese blokova
- *              izvorista i odredista ne smeju da se preklapaju jer je u tom
- *              slucaju ponasanje funkcije nedefinisano. Ukoliko je potrebno
- *              kopirati blokove cije se adrese preklapaju treba koristiti
- *              funkciju esMemMove().
  * @api
  */
-void * esMemCopy(
-    void        * C_RESTRICT aDst,
-    const void  * C_RESTRICT aSrc,
-    size_t      aLength);
+size_t esDmemBlockSize(
+	void *          mem);
 
-/**
- * @brief       Vrsi kopiranje @c aLength bajtova sa izvorne adrese @c aSrc na
- *              odredisnu adresu @c aDst.
- * @param       aDst                    Pokazivac na odredisnu adresu,
- * @param       aSrc                    pokazivac na izvorisnu adresu,
- * @param       aLength                 broj bajtova koje treba kopirati.
- * @note        Za razliku od esMemMove() ova funkcija moze se koristiti u svim
- *              slucajevima, jer se ne primenjuju optimizacione tehnike.
- * @api
- */
-void * esMemMove(
-    void        * aDst,
-    const void  * aSrc,
-    size_t      aLength);
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-------------------------------------------------------------------*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of mem.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* MM_H_ */

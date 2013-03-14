@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,89 +20,142 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Interfejs eSolid operativnog sistema.
- * ------------------------------------------------------------------------------------------------
+ * @details     Product description:
+ *              - MM - Memory Management
+ *              - SMP - State Machine Processor
+ *              - KERNEL - Kernel
+ *
+ *              Text Editor Settings:
+ *              - TAB: 4 spaces
+ *              - Print Margin Columnt: 80 characters
+ *              - Encoding: UTF-8
+ *
+ *              Development Environment:
+ *              - Eclipse v4.2.1 + CDT v8.1.0
+ *              - GNU make v3.8.2
+ *
+ *              Compiler make and version:
+ *              - arm-none-eabi-gcc v4.6.3 (Sourcery CodeBench Lite 2012.03-56)
+ *
+ *              Libraries:
+ *              - esolid-hal
+ *              - esolid-ett
+ *
+ *              Configuraion:
+ *              - config/kernel_config.h
+ *
+ *              CPU configuration:
+ *              - independent
+ *
+ *              Include paths:
+ *              - ./esolid-kernel/inc
+ *              - ./esolid-hal/inc (and port defined paths)
+ *              - ./esolid-ett/inc
  * @addtogroup  kernel_intf
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
 #ifndef KERNEL_H_
 #define KERNEL_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-#include "hal/hal.h"
-#include "../config/kernel_config.h"
+/*=========================================================  INCLUDE FILES  ==*/
+#include "kernel/epa.h"
 
-/*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  DEFINES  ==*/
+
+/**
+ * @brief       Znakovna konstanta koja pokazuje puno ime i verziju eSolid-a.
+ */
+#define ES_KERNEL_ID                    "eSolid v1.0"
+
+/**
+ * @brief       Numericka vrednost major verzije eSolid-a.
+ */
+#define ES_KERNEL_VERSION_MAJOR         1U
+
+/**
+ * @brief       Numericka vrednost minor verzije eSolid-a.
+ */
+#define ES_KERNEL_VERSION_MINOR         0U
+
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Deklaracije unapred
- * @{ *//*---------------------------------------------------------------------------------------*/
+/*============================================================  DATA TYPES  ==*/
 
 /**
- * @brief		Moguca stanja kernela
+ * @brief       Stanje kernel-a
  */
-typedef enum esKernelStatus esKernelStatus_T;
+typedef enum esKernelStatus {
+/**
+ * @brief       Kernel se ne izvrsava
+ */
+    KERNEL_STOPPED,
 
 /**
- * @brief		Povratni tip funkcija stanja
+ * @brief       Kernel se izvrsava
  */
-typedef enum state esState_T;
+    KERNEL_RUNNING
+} esKernelStatus_T;
+
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
+
+/*------------------------------------------------------------------------*//**
+ * @name        Osnovne funkcije kernel-a
+ * @brief       Ove funkcije se koriste za upravljanjem kernel-om
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Memorijska klasa alokatora
+ * @brief       Inicijalizuje kernel.
+ * @details     Najpre vrsi inicijalizaciju HAL-a, zatim memorijskog menadzera,
+ *              SMP modula i prelazi na inicijalizaciju samog kernela.
+ * @api
  */
-typedef struct esMemClass esMemClass_T;
+void esKernelInit(
+    void);
 
 /**
- * @brief       Zaglavlje dogadjaja
+ * @brief       Pokrece izvrsavanje jezgra
+ * @details     Pokrecu se svi prethodno kreirani EPA objekti.
+ * @api
  */
-typedef struct esEvtHdr esEvtHdr_T;
+void esKernelStart(
+    void);
 
 /**
- * @brief       Zaglavlje Event Processing Agent objekta
+ * @brief       Vraca odgovor da li trenutno radi kernel
+ * @return      Status izvrsavanja kernel-a.
+ *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
+ *  @retval     KERNEL_RUNNING - kernel se izvrsava,
+ * @api
  */
-typedef struct esEpaHdr esEpaHdr_T;
+esKernelStatus_T esKernelStatus(
+    void);
 
 /**
- * @brief		Definiciona struktura EPA objekta
+ * @brief       Vraca Id pokazivac EPA objekta.
+ * @return      Id pokazivac trenutnog EPA objekta koji se izvrsava.
+ * @api
  */
-typedef struct esEpaDef esEpaDef_T;
+esEpa_T * esKernelEpaGet(
+    void);
 
-/**
- * @brief       Tip pokazivaca na state handler funkcije.
- * @details		Funkcije vracaju esState_T , a kao parametar prihvataju
- *              pokazivac na strukturu izvrsne jedinice i pokazivac na
- *              dogadjaj.
- */
-typedef esState_T (* esPtrState_T) (esEpaHdr_T *, esEvtHdr_T *);
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-#include "kernel/core.h"
-#include "kernel/smp.h"
-#include "kernel/evt.h"
-#include "kernel/mm.h"
-
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-------------------------------------------------------------------*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of kernel.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* KERNEL_H_ */

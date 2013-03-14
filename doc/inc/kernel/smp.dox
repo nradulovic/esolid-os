@@ -1,0 +1,85 @@
+/*********************************************************************************************//**
+@file
+@addtogroup     kernel_intf
+*//** @{ *//**
+@defgroup       smp_intf State Machine Processor (SMP)
+@brief          Interfejs State Machine Processor (SMP) objekata
+@section        smp_doc State Machine Processor (SMP)
+@image          html    eSolid_SMP.png
+SMP modul moze konkurentno da izvrsava razlicite tipove automata i korisnicke 
+funkcije.
+    
+@section        smp_types Tipovi izvrsnih jedinica
+@image          html    EPAs.png
+@subsection     smp_rtcf_type Run-to-completion functions
+
+Run-to-completion is an execution model in which each task runs until it either 
+finishes, or explicitly yields control back to the scheduler. Every function
+that fits the given definition can be used as an EPA object.
+
+@subsection     smp_fsm_type Finite State Machine
+
+The Run-To-Completion execution model is inherented in state machine design. The 
+finite state machine is in only one state at a time; the state it is in at any 
+given time is called the current state. It can change from one state to another 
+when initiated by a triggering event or condition; this is called a 
+@c transition. 
+
+In a conventional finite state machine, the transition is associated with a set 
+of input Boolean conditions and a set of output Boolean functions. In an 
+extended finite state machine (EFSM) model, the transition can be expressed by 
+an “if statement” consisting of a set of trigger conditions. If trigger 
+conditions are all satisfied, the transition is fired, bringing the machine from 
+the current state to the next state and performing the specified data operations.
+In control applications, two types are distinguished:
+
+- Moore machine: The FSM uses only entry actions, i.e., output depends only on 
+    the state. The advantage of the Moore model is a simplification of the 
+    behavior.
+- Mealy machine: The FSM uses only input actions, i.e., output depends on input 
+    and state. The use of a Mealy FSM leads often to a reduction of the number 
+    of states. 
+    
+@subsection   	smp_hsm_type Hierarchical State Machine
+
+Hierarchical state machines overcome the limitations of traditional finite state 
+machines while retaining their main benefits. Hierarchical state machines 
+introduce the new concepts of hierarchically nested states and orthogonal 
+regions, while extending the notion of actions. Hierarchical state machines have 
+the characteristics of both Mealy machines and Moore machines. They support 
+actions that depend on both the state of the system and the triggering event, as 
+in Mealy machines, as well as entry and exit actions, which are associated with 
+states rather than transitions, as in Moore machines.
+
+@section        smp_usage Koriscenje SMP modula
+
+Najpre je potrebno izvrsiti inicijalizaciju SMP modula. U inicijalizaciji se 
+vrsi definisanje unapred rezervisanih dogadjaja koji su potrebni za rad HSM 
+i FSM automata. Inicijalizacija date izvrsne jedinice se vrsi pozivanjem 
+funkcije koja je zaduzena za dati tip izvrsne jedinice, odnosno, poziva se 
+hsmInit() ili fsmInit(), zavisno od tipa upotrebljenog automata. 
+Funkciji se predaje pokazivac na automat, @c aHSM i adresa inicijalne 
+funkcije stanja. Nakon sto su izvrsene pomenute inicijalizacije moze se 
+pozivati dispecer funkcija. Naravno sve navedene akcije se automatski 
+preduzimaju od strane sistema i korisnik nema potrebe da vodi racuna o tome.
+
+@subsection     smp_writiing Pisanje automata
+
+Svakom stanju automata odgovara jedna funkcija u kodu. Dakle, granulacija 
+automata je na nivou stanja. Funkcije koje opisuju jedno stanje se nazivaju
+@c funkcije @c stanja. Bez obzira da li se koristi RTCF, FSM ili HSM automat 
+pisanje funkcija stanja je uvek isto.
+
+Prototip funkcije stanja je sledeci:
+
+@code
+esStatus_T imeStanja(
+    esEpaHeader_T       * Epa,
+    esEvtHeader_T       * Evt);
+@endcode
+
+Dakle, svaka funkcija stanja dobija pokazivac na strukturu koja opisuje EPA 
+objekat i cuva korisnicke podatke i pokazivac na dogadjaj koji treba obraditi.
+ 
+**//** @} *//*************************************************************************************/
+ 

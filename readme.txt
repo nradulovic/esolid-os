@@ -4,18 +4,17 @@
 
 --{root}                - eSolid directory.
   +--readme.txt         - This file.
-  +--documentation.html - Shortcut to the web documentation page.
   +--todo.txt           - Current plan (development/unstable versions only).
   +--license.txt        - GPL license text.
   +--doc/               - Documentation.
   |  +--html/           - Local HTML documentation (after rebuild).
-  |  +--inc/            - Documentation source include files (required for rebuild).
-  |  +--img/            - Documentation image files (required for rebuild).
-  |  +--example/        - Documentation example files (required for rebuild).
-  |  +--index.html      - Local documentation access (after rebuild).
+  |  +--inc/            - Documentation source include files
+  |  +--img/            - Documentation image files
+  |  +--example/        - Documentation example files
+  |  +--index.html      - Local documentation access
   +--inc/               - eSolid include files.
   |  +--kernel/         - eSolid kernel include files.
-  |  +--port/           - eSolid kernel module port include files.
+  |  +--primitive/      - eSolid primitive data structures.
   +--src/               - eSolid source files.
      +--kernel/         - eSolid kernel source files.
 

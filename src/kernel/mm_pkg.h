@@ -24,7 +24,6 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Privatni interfejs Memory Management podmodula.
- * ------------------------------------------------------------------------------------------------
  * @addtogroup  mm_impl
  ****************************************************************************************//** @{ */
 
@@ -35,54 +34,27 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Debug podrska
- * @brief       Makroi za debug podrsku
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-#if defined(OPT_KERNEL_DBG_MM) || defined(__DOXYGEN__)
-# define MM_ASSERT                      ES_DBG_ASSERT
-# define MM_ASSERT_ALWAYS               ES_DBG_ASSERT_ALWAYS
-# define MM_ASSERT_COMPILE              ES_DBG_ASSERT_COMPILE
-# define MM_DBG_DECL                    ES_DBG_DECL
-# define MM_DBG_DEFINE_MODULE           ES_DBG_DEFINE_MODULE
-# define MM_DBG_MACRO                   ES_DBG_MACRO
-# define MM_DBG_CHECK                   ES_DBG_CHECK
-#else
-# define MM_ASSERT(expr)                ES_DBG_EMPTY_MACRO()
-# define MM_ASSERT_ALWAYS(expr)         ES_DBG_EMPTY_MACRO()
-# define MM_ASSERT_COMPILE(expr)        ES_DBG_EMPTY_DECL()
-# define MM_DBG_DECL(expr)              ES_DBG_EMPTY_DECL()
-# define MM_DBG_DEFINE_MODULE(expr)     ES_DBG_EMPTY_DECL()
-# define MM_DBG_MACRO(expr)             ES_DBG_EMPTY_MACRO()
-# define MM_DBG_CHECK(expr)             ES_DBG_EMPTY_MACRO()
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*===============================================================================  DATA TYPES  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+
+/**
  * @brief       Klasa memorije
- *//*--------------------------------------------------------------------------------------------*/
+ */
 struct esMemClass {
 /**
  * @brief       Memorijski alokator
  */
-    void * (*pAlloc)(size_t);
+    void * (*alloc)(size_t);
 
 /**
  * @brief       Memorijski dealokator
  */
-    void (*pDeAlloc)(void *);
+    void (*deAlloc)(void *);
 
-/**
- * @brief       Velicina alocirane memorijske oblasti
- */
-    size_t (*pBlockSize)(void *);
 };
 
 /*=========================================================================  GLOBAL VARIABLES  ==*/

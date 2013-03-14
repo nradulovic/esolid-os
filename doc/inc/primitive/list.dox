@@ -1,18 +1,10 @@
 /*********************************************************************************************//**
- *
  * @file
- *
- * ------------------------------------------------------------------------------------------------
- *
  * @addtogroup  prim_intf
- *
  ****************************************************************************************//** @{ */
 /**
- * @defgroup    list_intf Povezane liste (Linked List)
- *
- * @brief       Interfejs za povezane liste
- *
- *************************************************************************************************
+@defgroup       list_intf Povezane liste (Linked List)
+@brief          Interfejs za povezane liste
 
 @section		prim_lists Povezane liste za opstu upotrebu
 
