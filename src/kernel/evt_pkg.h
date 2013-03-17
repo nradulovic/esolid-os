@@ -35,10 +35,10 @@
 
 /**
  * @brief       Bit maska za brojac korisnika dogadjaja
- * @details     Brojac korisnika je 6-bitni, što znači da maksimalan broj
- *              korisnika dogadjaja u jednom trenutku iznosi 63 EPA objekata.
+ * @details     Brojac korisnika je 8-bitni, što znači da maksimalan broj
+ *              korisnika dogadjaja u jednom trenutku iznosi 255 EPA objekata.
  */
-#define EVT_USERS_MASK                  ((uint_fast8_t)0x3F)
+#define EVT_USERS_MASK                  (0x3FU)
 
 /**
  * @brief       Konstanta za potpis dogadjaja
@@ -49,7 +49,7 @@
  * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
  *              omogucena provera pokazivaca.
  */
-#define EVT_SIGNATURE                   (0xFEED)
+#define EVT_SIGNATURE                   (0xFEEDU)
 
 /*==================================================================================  MACRO's  ==*/
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
@@ -68,7 +68,7 @@ extern "C" {
 C_INLINE void evtUsrAddI_(
     esEvt_T         * evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {           /* Da li je dogadjaj dinamičan?                             */
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
         ++evt->dynamic.s.counter;
     }
 }
@@ -80,7 +80,7 @@ C_INLINE void evtUsrAddI_(
 C_INLINE void evtUsrRmI_(
     esEvt_T         * evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {           /* Da li je dogadjaj dinamičan?                             */
+    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
         --evt->dynamic.s.counter;
     }
 }
