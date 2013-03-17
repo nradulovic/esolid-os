@@ -39,10 +39,7 @@
 /*==========================================================================  LOCAL VARIABLES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /* STP_FILT_EPA_STATUS 0 */
-const char C_ROM * C_ROM_VAR const txtEpaCreate =
-    "EPA: create name: %s (size: %uB, prio: %u)";                               /* ime, velicina, prio                                      */
-const char C_ROM * C_ROM_VAR const txtEpaCreateMemNeeded =
-    " - mem required: %uB";                                                     /* velicina memorije                                        */
+
 const char C_ROM * C_ROM_VAR const txtEpaCreateMemAddr =
     " - mem addr: %p";                                                          /* adresa EPA header-a                                      */
 const char C_ROM * C_ROM_VAR const txtEpaDestroy =
@@ -137,6 +134,37 @@ const char C_ROM * C_ROM_VAR const txtMemHeapAllocated =
     "mem heap: allocated addr: %p";
 const char C_ROM * C_ROM_VAR const txtMemHeapDeAlloc =
     "mem heap: deallocate %p";
+
+#define EXPAND_AS_ENUMERATOR(a,b) a,
+#define EXPAND_AS_TEXT(a,b) [a] = b,
+#define EXPAND_AS_SIZE(a,b) sizeof(b),
+#define TEXT_TABLE(ENTRY)                                                       \
+    ENTRY(LOG_EPA_CREATE,"EPA: create:")                                        \
+    ENTRY(LOG_EPA__MEM," mem [B]: %x")                                          \
+    ENTRY(LOG_EPA__ID, " id: %x")                                               \
+    ENTRY(LOG_EPA__SIZE, " size [B]: %x")                                       \
+    ENTRY(LOG_EPA__PRIO, " prio: %x")                                           \
+    ENTRY(LOG_EPA_PRIOSET, "EPA: prioSet:")                                     \
+    ENTRY(LOG_EPA_PRIOGET, "EPA: prioGet:")                                     \
+    ENTRY(LOG_EPA_DESTROY, "EPA: destroy:")                                     \
+    ENTRY(LOG_EPA_DISPATCH, "EPA: dispatch:")                                   \
+    ENTRY(LOG_EPA_EVTPOST, "EPA: evtPost:")                                     \
+    ENTRY(LOG_EPA_EVTPOSTA, "EPA: evtPostAhead:")                               \
+    ENTRY(LOG_EPA_EVTFETCH, "EPA: evtFetch:")                                   \
+    ENTRY(LOG_EPA_EVTPUSHBACK, "EPA: evtPushBack")
+
+enum logMsgIndex {
+    TEXT_TABLE(EXPAND_AS_ENUMERATOR)
+    LOG_LAST_ENTRY
+};
+
+const char C_ROM * C_ROM_VAR const logMsgText[LOG_LAST_ENTRY] = {
+    TEXT_TABLE(EXPAND_AS_TEXT)
+};
+
+const size_t logMsgSize[LOG_LAST_ENTRY] = {
+    TEXT_TABLE(EXPAND_AS_SIZE)
+};
 
 /*===============================================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*======================================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
