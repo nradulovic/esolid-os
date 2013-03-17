@@ -102,10 +102,10 @@ C_INLINE_ALWAYS void evtInit_(
 C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
+    evt->dynamic.u = ~EVT_SIGNATURE;
+
 #if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
     evt->signature = ~EVT_SIGNATURE;                                            /* Postavljanje loseg potpisa                               */
-#else
-    (void)evt;
 #endif
 }
 
