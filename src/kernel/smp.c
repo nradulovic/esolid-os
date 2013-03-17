@@ -305,7 +305,7 @@ void smInit (
 #elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
     sm->state = initState;
     sm->stateQBegin = stateQueue;
-    sm->stateQEnd = stateQueue + levels - 1U;
+    sm->stateQEnd = stateQueue + (levels * 2U) - 1U;
 #else
     sm->state = initState;
 
@@ -316,7 +316,7 @@ void smInit (
     } else {
         sm->dispatch = &hsmDispatch;
         sm->stateQBegin = stateQueue;
-        sm->stateQEnd = stateQueue + levels - 1U;
+        sm->stateQEnd = stateQueue + (levels * 2U) - 1U;
     }
 #endif
 }
