@@ -23,7 +23,7 @@
  *//******************************************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Privatni interfejs Memory Management podmodula.
+ * @brief       Privatni interfejs Memory Management modula.
  * @addtogroup  mm_impl
  ****************************************************************************************//** @{ */
 
