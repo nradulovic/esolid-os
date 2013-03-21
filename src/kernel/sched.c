@@ -88,9 +88,11 @@ C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
 #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
-    esEpa_T *epa;
+    esEpa_T * epa;
+    uint_fast8_t prio;
 
-    epa = gRdyBitmap.list[ES_CPU_FLS(gRdyBitmap.bit[0])];
+    prio = esCpuFindLastSet(gRdyBitmap.bit[0]);
+    epa = gRdyBitmap.list[prio];
 
     return (epa);
 #else
@@ -98,8 +100,8 @@ C_INLINE esEpa_T * schedRdyGetEpaI_(
     unative_T indx;
     esEpa_T * epa;
 
-    indxGroup = ES_CPU_FLS(gRdyBitmap.bitGroup);
-    indx = ES_CPU_FLS(gRdyBitmap.bit[indxGroup]);
+    indxGroup = esCpuFindLastSet(gRdyBitmap.bitGroup);
+    indx = esCpuFindLastSet(gRdyBitmap.bit[indxGroup]);
     epa = gRdyBitmap.list[indx | (indxGroup << PRIO_INDX_PWR)];
 
     return (epa);
@@ -119,6 +121,12 @@ void schedInit(
 void schedRdyRegI(
     const esEpa_T * epa,
     uint_fast8_t    prio) {
+
+    KERN_ASSERT(
+        (0U == gRdyBitmap.list[prio]),
+        gKernelLog,
+        LOG_SCHED_REG_FAIL,
+        ES_ERR_USAGE_FAILURE);
 
     gRdyBitmap.list[prio] = (esEpa_T *)epa;
 }
@@ -198,7 +206,10 @@ void sched(
             }
         }
         gRdyBitmap.current = (esEpa_T *)0U;
-        /* ES_CPU_SLEEP(); */
+
+#if (OPT_KERNEL_ENABLE_SLEEP == 1U)
+        esCpuSleep();
+#endif
         ES_CRITICAL_EXIT();
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
