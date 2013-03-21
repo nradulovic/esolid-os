@@ -130,8 +130,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
         }               s;                                                      /**< @brief     Struktura atributa                          */
     }               dynamic;                                                    /**< @brief     Dinamicki atributi dogadjaja                */
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
+#if (OPT_KERNEL_ENABLE_LOG == 1U) || defined(__DOXYGEN__)
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
  */
