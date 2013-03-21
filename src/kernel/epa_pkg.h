@@ -35,6 +35,9 @@
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
 
+/**
+ * @brief       Dispecer EPA objekta
+ */
 #define EPA_DISPATCH(epa, evt)                                                  \
     SM_DISPATCH(&epa->sm, evt)
 
@@ -56,8 +59,7 @@ struct esEpa {
  */
     struct evtQueue evtQueue;
 
-#if defined(OPT_KERNEL_DBG_EPA) && defined(OPT_DBG_USE_CHECK)                  \
-    || defined(__DOXYGEN__)
+#if (OPT_KERNEL_ENABLE_LOG == 1U) || defined(__DOXYGEN__)
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
