@@ -58,7 +58,7 @@ typedef struct esMemClass esMemClass_T;
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Dinamicki memorijski alokator (heap memory)
+ * @brief       Dinamicki memorijski alokator (dynamic memory)
  */
 extern const C_ROM esMemClass_T esMemDynClass;
 
