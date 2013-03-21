@@ -69,80 +69,7 @@
 #define ES_SMP_FSM_AND_HSM              3
 
 /** @} *//*-------------------------------------------------------------------*/
-/* Ovde se pisu podesavanja projekta -----------------------------------------*/
-
-
 /*==============================================================  SETTINGS  ==*/
-/*------------------------------------------------------------------------*//**
- * @name        Debagiranje Kernel-a
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Debug podrska Kernel-a
- * @details     Ukoliko je ova opcija:
- *                  - definisana: omoguceno je debagiranje kernela,
- *                  - nedefinisana: nije omoguceno debagiranje kernela.
- *
- * @note        Ova opcija mora biti definisana ukoliko se zeli debagiranje
- *              pojedinih modula.
- */
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG
-#endif
-
-/**
- * @brief       Debug podrska State Machine Processor (SMP) modula
- * @details     Ukoliko je ova opcija:
- *                  - definisana: omoguceno je debagiranje modula,
- *                  - nedefinisana: nije omoguceno debagiranje modula.
- *
- * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
- *              opcija @ref OPT_KERNEL_DBG.
- */
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG_SMP
-#endif
-
-/**
- * @brief       Debug podrska Event Processing Agent (EPA) modula
- * @details     Ukoliko je ova opcija:
- *                  - definisana: omoguceno je debagiranje modula,
- *                  - nedefinisana: nije omoguceno debagiranje modula.
- *
- * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
- *              opcija @ref OPT_KERNEL_DBG.
- */
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG_EPA
-#endif
-
-/**
- * @brief       Debug podrska Event Management (EVT) modula
- * @details     Ukoliko je ova opcija:
- *                  - definisana: omoguceno je debagiranje modula,
- *                  - nedefinisana: nije omoguceno debagiranje modula.
- *
- * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
- *              opcija @ref OPT_KERNEL_DBG.
- */
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG_EVT
-#endif
-
-/**
- * @brief       Debug podrska Memory Management (MM) modula
- * @details     Ukoliko je ova opcija:
- *                  - definisana: omoguceno je debagiranje modula,
- *                  - nedefinisana: nije omoguceno debagiranje modula.
- *
- * @pre         Da bi ova opcija bila aktivna mora se prethodno ukljuciti
- *              opcija @ref OPT_KERNEL_DBG.
- */
-#if defined(__DOXYGEN__)
-# define OPT_KERNEL_DBG_MM
-#endif
-
-/** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        Podesavanje Kernel-a
  * @{ *//*--------------------------------------------------------------------*/
@@ -171,6 +98,18 @@
 # define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
 #endif
 
+/**
+ * @brief       Ukljucivanje LOG sistema za kernel
+ * @details     Opcije:
+ *              - OU - LOG sistem nije omogucen
+ *              - 1U - LOG sistem je omogucen
+ * @note        Podrazumevano podesavanje: 1U
+ * @pre         LOG sistem mora biti ukljucen
+ */
+#if !defined(OPT_KERNEL_ENABLE_LOG) || defined(__DOXYGEN__)
+# define OPT_KERNEL_ENABLE_LOG          0U
+#endif
+
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        Podesavanje Memory Management (MM) modula
@@ -194,7 +133,7 @@
  * @brief       Distribution of static and dynamic memory
  * @details     Size of the RAM area that is given to the dynamic memory manager.
  *              Here you can specify how much memory is given to dynamic memory
- *              manager.
+ *              manager and to the static memory manager.
  *
  *              If dynamic memory size value is set to zero the dynamic memory
  *              manager will use all static memory effectively disabling static
@@ -214,7 +153,7 @@
  * @note        DEFAULT: ES_MM_DYNAMIC_ONLY (Only dynamic memory manager is
  *              enabled)
  */
-#if !defined(OPT_MM_STATIC_SIZE) || defined(__DOXYGEN__)
+#if !defined(OPT_MM_DISTRIBUTION) || defined(__DOXYGEN__)
 # define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
 #endif
 
@@ -226,12 +165,12 @@
 /**
  * @brief       Omogucavanje vise tipova automata
  * @details     Ovom opcijom se definisu moguci tipovi automata u aplikaciji:
- *              - 1 - omoguceni su samo FSM automati
- *              - 2 - omoguceni su samo HSM automati
- *              - 3 - omogucena su oba tipa automata, selekcija dispecera se
- *              vrsi dinamicki.
+ *              - @ref ES_SMP_FSM_ONLY - omoguceni su samo FSM automati
+ *              - @ref ES_SMP_HSM_ONLY - omoguceni su samo HSM automati
+ *              - @ref ES_SMP_FSM_AND_HSM - omogucena su oba tipa automata,
+ *              selekcija dispecera se vrsi dinamicki.
  *
- * @note        Podrazumevano podesavanje: 3 (Omogucena su oba tipa automata)
+ * @note        Podrazumevano podesavanje: @ref ES_SMP_FSM_AND_HSM
  */
 #if !defined(OPT_SMP_SM_TYPES) || defined(__DOXYGEN__)
 # define OPT_SMP_SM_TYPES               ES_SMP_FSM_AND_HSM
