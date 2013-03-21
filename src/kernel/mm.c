@@ -82,6 +82,11 @@
 # define HEAP_SIZE                      sizeof(heap)
 #endif
 
+/**
+ * @brief       Cuvar liste slobodnih blokova
+ */
+#define DMEM_SENTINEL                   ((dmemBlkHdr_T *)HEAP_END - 1U)
+
 /*=========================================================  LOCAL MACRO's  ==*/
 
 /**
@@ -152,18 +157,13 @@ C_UNUSED_FUNC static void smemInit(
     void);
 
 C_UNUSED_FUNC static void dmemInit(
-    uint8_t     * dbegin,
+    uint8_t     * boundary,
     uint8_t     * dend);
 
 C_UNUSED_FUNC static void dummyDeAlloc(
     void            * aMemory);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
-
-/**
- * @brief       Cuvar liste slobodnih blokova
- */
-static dmemBlkHdr_T * gDmemSentinel;
 
 /**
  * @brief       Cuvar vrednosti slobodne memorije staticnog alokatora
@@ -241,25 +241,23 @@ static void smemInit(
  * @param       dend                    kraj memorijske oblasti
  */
 static void dmemInit(
-    uint8_t *       dbegin,
-    uint8_t *       dend) {
+    uint8_t *       boundary) {
 
-    ((dmemBlkHdr_T *)dbegin)->blk.size =
-        (size_t)(dend - dbegin - sizeof(dmemBlk_T) - sizeof(dmemBlkHdr_T));
-    gDmemSentinel = ((dmemBlkHdr_T *)dend - 1U);
-    gDmemSentinel->blk.size = (size_t)0;
+    ((dmemBlkHdr_T *)boundary)->blk.size =
+        (size_t)(HEAP_END - boundary - sizeof(dmemBlk_T) - sizeof(dmemBlkHdr_T));
+    DMEM_SENTINEL->blk.size = (size_t)0;
     esSlsSentinelInit_(
-        &(gDmemSentinel->blk.phyList));
+        &(DMEM_SENTINEL->blk.phyList));
     esSlsNodeAddHead_(
-        &(gDmemSentinel->blk.phyList),
-        &(((dmemBlkHdr_T *)dbegin)->blk.phyList));
+        &(DMEM_SENTINEL->blk.phyList),
+        &(((dmemBlkHdr_T *)boundary)->blk.phyList));
     esDlsSentinelInit_(
-        &(gDmemSentinel->freeList));
+        &(DMEM_SENTINEL->freeList));
     esDlsNodeAddHead_(
-        &(gDmemSentinel->freeList),
-        &(((dmemBlkHdr_T *)dbegin)->freeList));
-    BLK_STAT_BUSY(gDmemSentinel);
-    BLK_STAT_FREE((dmemBlkHdr_T *)dbegin);
+        &(DMEM_SENTINEL->freeList),
+        &(((dmemBlkHdr_T *)boundary)->freeList));
+    BLK_STAT_BUSY(DMEM_SENTINEL);
+    BLK_STAT_FREE((dmemBlkHdr_T *)boundary);
 }
 
 /**
@@ -283,18 +281,17 @@ void esMemInit(
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     dmemInit(
-        HEAP_BEGIN,
-        HEAP_END);
+        HEAP_BEGIN);
 #elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     smemInit();
 #else
-    void * tmp;
+    void * boundary;
 
     smemInit();
-    tmp = esSmemAlloc(
+    boundary = esSmemAlloc(
         OPT_MM_DISTRIBUTION);
     dmemInit(
-        tmp, (tmp + (size_t)OPT_MM_DISTRIBUTION));
+        boundary);
 #endif
 }
 
@@ -369,7 +366,8 @@ void * esDmemAlloc(
     ES_CRITICAL_DECL();
     void * tmpMem;
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpMem = esDmemAllocI(
         size);
     ES_CRITICAL_EXIT();
@@ -400,7 +398,7 @@ void * esDmemAllocI(
     DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,
-        &(gDmemSentinel->freeList),
+        &(DMEM_SENTINEL->freeList),
         freeBlk) {
 
         if (freeBlk->blk.size >= size) {
@@ -455,7 +453,8 @@ void esDmemDeAlloc(
 #if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     esDmemDeAllocI(
         mem);
     ES_CRITICAL_EXIT();
@@ -503,7 +502,7 @@ void esDmemDeAllocI(
         freeBlk->blk.size += currPhy->blk.size + sizeof(dmemBlk_T);
     }
     esDlsNodeAddHead_(
-        &(gDmemSentinel->freeList),
+        &(DMEM_SENTINEL->freeList),
         &(freeBlk->freeList));
 #else
     (void)mem;
@@ -518,7 +517,8 @@ size_t esDmemFreeSpace(
     ES_CRITICAL_DECL();
     size_t tmpSize;
 
-    ES_CRITICAL_ENTER(OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(
+        OPT_KERNEL_INTERRUPT_PRIO_MAX);
     tmpSize = esDmemFreeSpaceI();
     ES_CRITICAL_EXIT();
 
@@ -541,7 +541,7 @@ size_t esDmemFreeSpaceI(
     DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,
-        &(gDmemSentinel->freeList),
+        &(DMEM_SENTINEL->freeList),
         currBlk) {
         free += currBlk->blk.size;
     }
