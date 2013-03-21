@@ -62,6 +62,7 @@ typedef struct esEpaDef {
 
 /**
  * @brief       Prioritet EPA objekta
+ * @details     Opseg vrednosti: 0 do @ref OPT_KERNEL_EPA_PRIO_MAX
  */
     uint8_t         epaPrio;
 
@@ -72,6 +73,7 @@ typedef struct esEpaDef {
 
 /**
  * @brief       Velicina reda za cekanje za dogadjaje
+ * @details     Opseg vrednosti: minimalno 1
  */
     size_t          evtQueueDepth;
 
@@ -82,6 +84,7 @@ typedef struct esEpaDef {
 
 /**
  * @brief       Maksimalna dubina hijerarhije stanja automata.
+ * @details     Opseg vrednosti: minimalno 2
  */
     uint8_t         smLevels;
 } esEpaDef_T;
@@ -171,6 +174,12 @@ void esEvtPostAheadI(
  *              funkcija vrsi inicijalizaciju EPA objekta sa odgovarajucim 
  * 				parametrima.
  * @api
+ * @error
+ *              - @ref ES_ERR_ARG_NULL, jedan od argumenata je NULL pokazivac
+ *              - @ref ES_ERR_ARG_NOT_VALID, argument memorijske klase nije
+ *                  ispravan. Pogledati @ref esMemClass.
+ *              - @ref ES_ERR_ARG_OUT_OF_RANGE, argumenti predati funkciji su
+ *                  van moguceg opsega. Pogledati @ref esEpaDef_T.
  */
 esEpa_T * esEpaCreate(
     const C_ROM esMemClass_T *  memClass,
@@ -182,6 +191,12 @@ esEpa_T * esEpaCreate(
  * @details     Vrsi se oslobadjanje memorije ukoliko je EPA objekat koristio
  *              dinamicki memorijski alokator.
  * @api
+ * @error
+ *              - @ref ES_ERR_ARG_NULL
+ *              - @ref ES_ERR_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
+ *                  drugi objekat ili na EPA objekat koji je vec unisten.
+ *              - @ref ES_ERR_USAGE_FAILURE - pokusaj brisanja EPA objekta koji
+ *                  je statican.
  */
 void esEpaDestroy(
     esEpa_T *       epa);
@@ -191,6 +206,10 @@ void esEpaDestroy(
  * @param       [in] epa                Pokazivac na EPA objekat
  * @return      Trenutni prioritet EPA objekta.
  * @api
+ * @error
+ *              - @ref ES_ERR_ARG_NULL
+ *              - @ref ES_ERR_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
+ *                  drugi objekat ili na EPA objekat koji je vec unisten.
  */
 uint8_t esEpaPrioGet(
     const esEpa_T * epa);
@@ -199,9 +218,15 @@ uint8_t esEpaPrioGet(
  * @brief       Postavlja nov prioritet EPA objekta.
  * @param       [out] epa               Pokazivac na EPA objekat,
  * @param       [in] newPrio            nov prioritet EPA objekta.
- * @warning     Ukoliko je zahtevani prioritet vec zauzet javice se assert
- *              obavestenje.
  * @api
+ * @error
+ *              - @ref ES_ERR_ARG_NULL
+ *              - @ref ES_ERR_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
+ *                  drugi objekat ili na EPA objekat koji je vec unisten.
+ *              - @ref ES_ERR_ARG_OUT_OF_RANGE - argument @c newPrio je van
+ *                  dozvoljenog opsega. (@ref OPT_KERNEL_EPA_PRIO_MAX)
+ *              - @ref ES_ERR_USAGE_FAILURE - vec postoji EPA objekat sa datim
+ *                  @c newPrio prioritetom.
  */
 void esEpaPrioSet(
     esEpa_T *       epa,
