@@ -46,6 +46,13 @@
 #endif
 
 /*==================================================================================  MACRO's  ==*/
+
+#define SM_RANGE_LEVELS(levels)                                           \
+    ((levels) >= 2)
+
+#define SM_RANGE_INIT_STATE(state)                                              \
+    (0U != (state))
+
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
