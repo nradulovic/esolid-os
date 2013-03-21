@@ -105,6 +105,37 @@ typedef enum esKernelStatus {
     KERNEL_RUNNING
 } esKernelStatus_T;
 
+/**
+ * @brief       Listing kodova gresaka koje se generisu kada je LOG sistem
+ *              ukljucen
+ */
+enum esErrorCodes {
+/**
+ * @brief       Argument nije ispravan, pokazuje na nesto drugo od ocekivanog.
+ */
+    ES_ERR_ARG_NOT_VALID = 0x100UL,
+
+/**
+ * @brief       Vrednost argumenta je van opsega dozvoljenih vrednosti.
+ */
+    ES_ERR_ARG_OUT_OF_RANGE,
+
+/**
+ * @brief       Pokazivac je NULL, a ocekuje se konkretna vrednost.
+ */
+    ES_ERR_ARG_NULL,
+
+/**
+ * @brief       Nema dovoljno memorije za alociranje.
+ */
+    ES_ERR_NOT_ENOUGH_MEM,
+
+/**
+ * @brief       Funkcija/objekat se koristi na nepravilan nacin
+ */
+    ES_ERR_USAGE_FAILURE
+};
+
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
