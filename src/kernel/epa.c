@@ -108,6 +108,10 @@ C_INLINE void epaInit_(
     schedRdyInsertI_(
         epa->prio);
     ES_CRITICAL_EXIT();
+
+#if (OPT_KERNEL_ENABLE_LOG == 1U)
+    epa->signature = EPA_SIGNATURE;
+#endif
 }
 
 /**
@@ -139,6 +143,10 @@ C_INLINE void epaDeInit_(
             evt);
         ES_CRITICAL_EXIT();
     }
+
+#if (OPT_KERNEL_ENABLE_LOG == 1U)
+    epa->signature = ~EPA_SIGNATURE;
+#endif
 }
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -198,6 +206,17 @@ void esEvtPost(
 void esEvtPostI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
+
+    KERN_ASSERT(
+        ((0U != epa) && (0U != evt)),
+        gKernelLog,
+        LOG_EPA_EVTPOST,
+        ES_ERR_ARG_NULL);
+    KERN_ASSERT(
+        ((EPA_SIGNATURE == epa->signature) && EVT_VALIDATE(evt)),
+        gKernelLog,
+        LOG_EPA_EVTPOST,
+        ES_ERR_ARG_NOT_VALID);
 
     if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         evtUsrAddI_(
@@ -265,12 +284,32 @@ esEpa_T * esEpaCreate(
     size_t stateQSize;
     size_t evtQSize;
 
+    KERN_ASSERT(
+        (0U != memClass) && (0U != definition),
+        gKernelLog,
+        LOG_EPA_CREATE,
+        ES_ERR_ARG_NULL);
+    KERN_ASSERT(
+        MM_VALIDATE_CLASS(memClass),
+        gKernelLog,
+        LOG_EPA_CREATE,
+        ES_ERR_ARG_NOT_VALID);
+    KERN_ASSERT(
+        (definition->epaPrio <= OPT_KERNEL_EPA_PRIO_MAX) &&
+        EVTQ_RANGE_SIZE(definition->evtQueueDepth) &&
+        SM_RANGE_INIT_STATE(definition->smInitState) &&
+        SM_RANGE_LEVELS(definition->smLevels),
+        gKernelLog,
+        LOG_EPA_CREATE,
+        ES_ERR_ARG_OUT_OF_RANGE);
+
 #if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     coreSize = sizeof(epaObject_T);
     coreSize += ES_ALIGN(
-        definition->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
+        definition->epaWorkspaceSize,
+        ES_CPU_ATTRIB_ALIGNMENT);
     stateQSize = ES_ALIGN(
         stateQReqSize(
             definition->smLevels),
@@ -335,9 +374,24 @@ void esEpaDestroy(
     esEpa_T *       epa) {
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    /* Greska! Statican objekat */
+    KERN_ASSERT(
+        FALSE,
+        gKernelLog,
+        LOG_EPA_DESTROY,
+        ES_ERR_USAGE_FAILURE);
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
+
+    KERN_ASSERT(
+        (0U != epa),
+        gKernelLog,
+        LOG_EPA_DESTROY,
+        ES_ERR_ARG_NULL);
+    KERN_ASSERT(
+        (EPA_SIGNATURE == epa->signature),
+        gKernelLog,
+        LOG_EPA_DESTROY,
+        ES_ERR_ARG_NOT_VALID);
 
     epaDeInit_(
         epa);
@@ -366,6 +420,17 @@ void esEpaDestroy(
 uint8_t esEpaPrioGet(
     const esEpa_T * epa) {
 
+    KERN_ASSERT(
+        (0U != epa),
+        gKernelLog,
+        LOG_EPA_PRIOGET,
+        ES_ERR_ARG_NULL);
+    KERN_ASSERT(
+        (EPA_SIGNATURE == epa->signature),
+        gKernelLog,
+        LOG_EPA_PRIOGET,
+        ES_ERR_ARG_NOT_VALID);
+
     return (epa->prio);
 }
 
@@ -376,6 +441,22 @@ void esEpaPrioSet(
 
     ES_CRITICAL_DECL();
     bool_T status;
+
+    KERN_ASSERT(
+        (0U != epa),
+        gKernelLog,
+        LOG_EPA_PRIOSET,
+        ES_ERR_ARG_NULL);
+    KERN_ASSERT(
+        (EPA_SIGNATURE == epa->signature),
+        gKernelLog,
+        LOG_EPA_PRIOSET,
+        ES_ERR_ARG_NOT_VALID);
+    KERN_ASSERT(
+        (OPT_KERNEL_EPA_PRIO_MAX >= newPrio),
+        gKernelLog,
+        LOG_EPA_PRIOSET,
+        ES_ERR_ARG_OUT_OF_RANGE);
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
