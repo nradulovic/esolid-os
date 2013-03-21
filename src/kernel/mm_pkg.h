@@ -34,6 +34,13 @@
 /*============================================================================  INCLUDE FILES  ==*/
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
+
+/**
+ * @brief       Utvrdjuje validnost memorijske klase
+ */
+#define MM_VALIDATE_CLASS(memClass)                                                \
+    ((&esMemDynClass == memClass) || (&esMemStaticClass == memClass))
+
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {

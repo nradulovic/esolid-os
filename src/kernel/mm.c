@@ -321,6 +321,10 @@ void * esSmemAllocI(
 #if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     void * tmp;
 
+#if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
+    size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
+#endif
+
     if (size <= (HEAP_END - gSmemSentinel)) {
         tmp = gSmemSentinel;
         gSmemSentinel += size;
@@ -390,7 +394,7 @@ void * esDmemAllocI(
         size = sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T);
     }
 
-#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
+#if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
     size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
 #endif
     DLS_FOR_EACH_ENTRY(
