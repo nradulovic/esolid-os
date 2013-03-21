@@ -157,8 +157,7 @@ C_UNUSED_FUNC static void smemInit(
     void);
 
 C_UNUSED_FUNC static void dmemInit(
-    uint8_t     * boundary,
-    uint8_t     * dend);
+    uint8_t     * boundary);
 
 C_UNUSED_FUNC static void dummyDeAlloc(
     void            * aMemory);
@@ -236,9 +235,8 @@ static void smemInit(
 
 /**
  * @brief       Inicijalizacija dinamičkog memorijskog menadzera
- * @param       dbegin                  Početak memorijske oblasti dodeljene za
- *                                      koriscenje
- * @param       dend                    kraj memorijske oblasti
+ * @param       boundary                Početak/granica memorijske oblasti
+ *                                      dodeljene za koriscenje dinamickom MM
  */
 static void dmemInit(
     uint8_t *       boundary) {
