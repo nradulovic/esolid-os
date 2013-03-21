@@ -35,6 +35,13 @@
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
+
+/**
+ * @brief       Proverava da li je velicina reda za cekanje validna.
+ */
+#define EVTQ_RANGE_SIZE(size)                                                   \
+    ((size) >= 1)
+
 /*------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)
 extern "C" {
