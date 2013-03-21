@@ -53,7 +53,6 @@ C_INLINE_ALWAYS void evtDeInit_(
  * @param       evt                     Pokazivac na dogadjaj koji se konstruise,
  * @param       size                    velicina dogadjaja,
  * @param       id                      identifikator dogadjaja.
- * @notapi
  * @inline
  */
 C_INLINE_ALWAYS void evtInit_(
@@ -68,7 +67,7 @@ C_INLINE_ALWAYS void evtInit_(
     evt->timestamp = uTimestampGet();
 #endif
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
+#if (OPT_KERNEL_ENABLE_LOG == 1U)
     evt->signature = EVT_SIGNATURE;
 #endif
 
@@ -96,15 +95,14 @@ C_INLINE_ALWAYS void evtInit_(
  * @brief       DeInicijalizator funkcija dogadjaja
  * @param       [in] evt                Pokazivac na EPA objekat koji se
  *                                      unistava.
- * @notapi
  * @inline
  */
 C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
-    evt->dynamic.u = ~EVT_SIGNATURE;
+    evt->dynamic.u = (uint16_t)~EVT_SIGNATURE;
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
+#if (OPT_KERNEL_ENABLE_LOG == 1U)
     evt->signature = ~EVT_SIGNATURE;                                            /* Postavljanje loseg potpisa                               */
 #endif
 }

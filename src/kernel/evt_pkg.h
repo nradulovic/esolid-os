@@ -49,9 +49,16 @@
  * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
  *              omogucena provera pokazivaca.
  */
-#define EVT_SIGNATURE                   (0xFEEDU)
+#define EVT_SIGNATURE                   (UINT16_C(0xFEED))
 
 /*==================================================================================  MACRO's  ==*/
+
+/**
+ * @brief       Proverava da li je objekat dogadjaj
+ */
+#define EVT_VALIDATE(evt)                                                       \
+    (EVT_SIGNATURE == (evt)->signature)
+
 /*-------------------------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)
 extern "C" {
