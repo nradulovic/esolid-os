@@ -141,7 +141,7 @@ void schedRdyUnRegI(
  *              objekata na izvrsenje.
  * @inline
  */
-C_INLINE void schedRdyInsertI_(
+static C_INLINE void schedRdyInsertI_(
     uint_fast8_t    prio) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -162,7 +162,7 @@ C_INLINE void schedRdyInsertI_(
  * @param       [in] prio               Prioritet EPA objekata
  * @inline
  */
-C_INLINE void schedRdyRmI_(
+static C_INLINE void schedRdyRmI_(
     uint_fast8_t    prio) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -196,7 +196,7 @@ bool_T schedEpaIsRdyI(
  * @return      Vraca pokazivac na trenutno izvrsavan EPA objekat
  * @inline
  */
-C_INLINE esEpa_T * schedEpaGetCurrent_(
+static C_INLINE esEpa_T * schedEpaGetCurrent_(
     void) {
 
     return (gRdyBitmap.current);

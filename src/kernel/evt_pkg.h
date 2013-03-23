@@ -72,7 +72,7 @@ extern "C" {
  * @brief       Povecava broj korisnika koji koriste dogadjaj
  * @param       evt                     Dogadjaj koji ce se koristiti
  */
-C_INLINE void evtUsrAddI_(
+static C_INLINE void evtUsrAddI_(
     esEvt_T         * evt) {
 
     if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
@@ -84,7 +84,7 @@ C_INLINE void evtUsrAddI_(
  * @brief       Smanjuje broj korisnika koji koriste dogadjaj
  * @param       evt                     Dogadjaj koji se koristio
  */
-C_INLINE void evtUsrRmI_(
+static C_INLINE void evtUsrRmI_(
     esEvt_T         * evt) {
 
     if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */

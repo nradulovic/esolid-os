@@ -204,7 +204,7 @@ typedef struct esDlsList {
  *              neke liste.
  * @inline
  */
-C_INLINE_ALWAYS void esSlsNodeInit_(
+static C_INLINE_ALWAYS void esSlsNodeInit_(
     esSlsList_T    * aNode) {
 
     aNode->next = aNode;
@@ -216,7 +216,7 @@ C_INLINE_ALWAYS void esSlsNodeInit_(
  * @details     Ova funkcija se najcesce poziva pre koriscenja SLS liste.
  * @inline
  */
-C_INLINE_ALWAYS void esSlsSentinelInit_(
+static C_INLINE_ALWAYS void esSlsSentinelInit_(
     esSlsList_T    * aSentinel) {
 
     esSlsNodeInit_(
@@ -233,7 +233,7 @@ C_INLINE_ALWAYS void esSlsSentinelInit_(
  *              clanovi.
  * @inline
  */
-C_INLINE_ALWAYS void esSlsNodeAdd_(
+static C_INLINE_ALWAYS void esSlsNodeAdd_(
     esSlsList_T    * aNewNode,
     esSlsList_T    * aPrevNode,
     esSlsList_T    * aNextNode) {
@@ -248,7 +248,7 @@ C_INLINE_ALWAYS void esSlsNodeAdd_(
  * @param       aNewNode                pokazivac na clan koji se dodaje.
  * @inline
  */
-C_INLINE_ALWAYS void esSlsNodeAddAfter_(
+static C_INLINE_ALWAYS void esSlsNodeAddAfter_(
     esSlsList_T    * aCurrNode,
     esSlsList_T    * aNewNode) {
 
@@ -264,7 +264,7 @@ C_INLINE_ALWAYS void esSlsNodeAddAfter_(
  * @param       aNewNode                pokazivac na clan koji se dodaje.
  * @inline
  */
-C_INLINE_ALWAYS void esSlsNodeAddHead_(
+static C_INLINE_ALWAYS void esSlsNodeAddHead_(
     esSlsList_T    * aSentinel,
     esSlsList_T    * aNewNode) {
 
@@ -284,7 +284,7 @@ C_INLINE_ALWAYS void esSlsNodeAddHead_(
  *              clanovi.
  * @inline
  */
-C_INLINE_ALWAYS void esSlsNodeRemove_(
+static C_INLINE_ALWAYS void esSlsNodeRemove_(
     esSlsList_T    * aOldNode,
     esSlsList_T    * aPrevNode,
     esSlsList_T    * aNextNode) {
@@ -299,7 +299,7 @@ C_INLINE_ALWAYS void esSlsNodeRemove_(
  *                                      kojeg treba ukloniti clan
  * @inline
  */
-C_INLINE_ALWAYS void esSlsNodeRemoveAfter_(
+static C_INLINE_ALWAYS void esSlsNodeRemoveAfter_(
     esSlsList_T    * aCurrNode) {
 
     esSlsNodeRemove_(
@@ -318,7 +318,7 @@ C_INLINE_ALWAYS void esSlsNodeRemoveAfter_(
  * @param       aNode                   Pokazivac na clan DLS liste.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeInit_(
+static C_INLINE_ALWAYS void esDlsNodeInit_(
     esDlsList_T    * aNode) {
 
     aNode->next = aNode;
@@ -331,7 +331,7 @@ C_INLINE_ALWAYS void esDlsNodeInit_(
  *                                      u strukturi podataka.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsSentinelInit_(
+static C_INLINE_ALWAYS void esDlsSentinelInit_(
     esDlsList_T    * aSentinel) {
 
     esDlsNodeInit_(
@@ -348,7 +348,7 @@ C_INLINE_ALWAYS void esDlsSentinelInit_(
  *              clanovi.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeAdd_(
+static C_INLINE_ALWAYS void esDlsNodeAdd_(
     esDlsList_T    * aNew,
     esDlsList_T    * aPrev,
     esDlsList_T    * aNext) {
@@ -365,7 +365,7 @@ C_INLINE_ALWAYS void esDlsNodeAdd_(
  * @param       aNewNode                pokazivac na clan koji se dodaje.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeAddHead_(
+static C_INLINE_ALWAYS void esDlsNodeAddHead_(
     esDlsList_T    * aSentinel,
     esDlsList_T    * aNewNode) {
 
@@ -381,7 +381,7 @@ C_INLINE_ALWAYS void esDlsNodeAddHead_(
  * @param       aNewNode                pokazivac na clan koji se dodaje.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeAddTail_(
+static C_INLINE_ALWAYS void esDlsNodeAddTail_(
     esDlsList_T    * aSentinel,
     esDlsList_T    * aNewNode) {
 
@@ -397,7 +397,7 @@ C_INLINE_ALWAYS void esDlsNodeAddTail_(
  * @param       aNewNode                pokazivac na clan koji se dodaje.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeAddBefore_(
+static C_INLINE_ALWAYS void esDlsNodeAddBefore_(
     esDlsList_T    * aCurrNode,
     esDlsList_T    * aNewNode) {
 
@@ -413,7 +413,7 @@ C_INLINE_ALWAYS void esDlsNodeAddBefore_(
  * @param       aNewNode                pokazivac na clan koji se dodaje.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeAddAfter_(
+static C_INLINE_ALWAYS void esDlsNodeAddAfter_(
     esDlsList_T    * aCurrNode,
     esDlsList_T    * aNewNode) {
 
@@ -428,7 +428,7 @@ C_INLINE_ALWAYS void esDlsNodeAddAfter_(
  * @param       aOldNode                Pokazivac na clan koji se uklanja.
  * @inline
  */
-C_INLINE_ALWAYS void esDlsNodeRemove_(
+static C_INLINE_ALWAYS void esDlsNodeRemove_(
     esDlsList_T    * aOldNode) {
 
     aOldNode->next->prev = aOldNode->prev;
@@ -443,7 +443,7 @@ C_INLINE_ALWAYS void esDlsNodeRemove_(
  *  @retval     FALSE - lista nije prazna
  * @inline
  */
-C_INLINE_ALWAYS bool_T esDlsIsEmpty_(
+static C_INLINE_ALWAYS bool_T esDlsIsEmpty_(
     esDlsList_T     * aSentinel) {
 
     if (aSentinel->next != aSentinel) {

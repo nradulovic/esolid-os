@@ -38,10 +38,10 @@
 /*======================================================  LOCAL DATA TYPES  ==*/
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE bool_T schedRdyIsEmpty_(
+static C_INLINE bool_T schedRdyIsEmpty_(
     void);
 
-C_INLINE esEpa_T * schedRdyGetEpaI_(
+static C_INLINE esEpa_T * schedRdyGetEpaI_(
     void);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -54,7 +54,7 @@ C_INLINE esEpa_T * schedRdyGetEpaI_(
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
  *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
  */
-C_INLINE bool_T schedRdyIsEmpty_(
+static C_INLINE bool_T schedRdyIsEmpty_(
     void) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -84,7 +84,7 @@ C_INLINE bool_T schedRdyIsEmpty_(
  * @brief       Vraca pokazivac na sledeci EPA objekat sa najvecim prioritetom.
  * @return      EPA objekat sa najvecim prioritetom koji ceka na izvrsenje.
  */
-C_INLINE esEpa_T * schedRdyGetEpaI_(
+static C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
 #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)

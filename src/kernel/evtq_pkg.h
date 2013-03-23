@@ -98,7 +98,7 @@ typedef struct evtQueue {
  * @param       [in] evtQ               Pokazivac na red cekanja.
  * @return      Status popunjenosti reda za cekanje dogadjaja.
  */
-C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
+static C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsEmpty_(&evtQ->queue));
@@ -109,7 +109,7 @@ C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
  * @param       [in] evtQ               Pokazivac na red cekanja.
  * @return      Status popunjenosti reda za cekanje dogadjaja.
  */
-C_INLINE_ALWAYS bool_T evtQIsFullI_(
+static C_INLINE_ALWAYS bool_T evtQIsFullI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsFull_(&evtQ->queue));
@@ -120,7 +120,7 @@ C_INLINE_ALWAYS bool_T evtQIsFullI_(
  * @param       [in] evtQ               Pokazivac na red cekanja.
  * @return      Dogadjaj sa pocetka reda za cekanje.
  */
-C_INLINE_ALWAYS esEvt_T * evtQGetI_(
+static C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     evtQueue_T *    evtQ) {
 
     esEvt_T * evt;
@@ -141,7 +141,7 @@ C_INLINE_ALWAYS esEvt_T * evtQGetI_(
  * @param       [in] evt                Pokazivac na dogadjaj koji treba da se
  *                                      ubaci u red za cekanje.
  */
-C_INLINE_ALWAYS void evtQPutAheadI_(
+static C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
 
@@ -163,7 +163,7 @@ C_INLINE_ALWAYS void evtQPutAheadI_(
  * @param       [in] evt                Pokazivac na dogadjaj koji treba da se
  *                                      ubaci u red za cekanje.
  */
-C_INLINE_ALWAYS void evtQPutI_(
+static C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
 

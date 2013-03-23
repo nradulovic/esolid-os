@@ -36,12 +36,12 @@
 /*======================================================  LOCAL DATA TYPES  ==*/
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE_ALWAYS void evtInit_(
+static C_INLINE_ALWAYS void evtInit_(
     esEvt_T *       evt,
     size_t          size,
     esEvtId_T       id);
 
-C_INLINE_ALWAYS void evtDeInit_(
+static C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -55,7 +55,7 @@ C_INLINE_ALWAYS void evtDeInit_(
  * @param       id                      identifikator dogadjaja.
  * @inline
  */
-C_INLINE_ALWAYS void evtInit_(
+static C_INLINE_ALWAYS void evtInit_(
     esEvt_T *       evt,
     size_t          size,
     esEvtId_T       id) {
@@ -97,7 +97,7 @@ C_INLINE_ALWAYS void evtInit_(
  *                                      unistava.
  * @inline
  */
-C_INLINE_ALWAYS void evtDeInit_(
+static C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
     evt->dynamic.u = (uint16_t)~EVT_SIGNATURE;

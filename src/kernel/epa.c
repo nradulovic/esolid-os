@@ -67,11 +67,11 @@ typedef struct epaObject {
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE void epaInit_(
+static C_INLINE void epaInit_(
     esEpa_T *       epa,
     const C_ROM esEpaDef_T * definition);
 
-C_INLINE void epaDeInit_(
+static C_INLINE void epaDeInit_(
     esEpa_T *       epa);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -89,7 +89,7 @@ C_INLINE void epaDeInit_(
  *                                      objekta.
  * @notapi
  */
-C_INLINE void epaInit_(
+static C_INLINE void epaInit_(
     esEpa_T *       epa,
     const C_ROM esEpaDef_T * definition) {
 
@@ -119,7 +119,7 @@ C_INLINE void epaInit_(
  * @param       [out] epa               Pokazivac na strukturu EPA objekta.
  * @notapi
  */
-C_INLINE void epaDeInit_(
+static C_INLINE void epaDeInit_(
     esEpa_T *       epa) {
 
     ES_CRITICAL_DECL();
