@@ -24,8 +24,7 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Konfiguracija eSolid Kernel-a
- * @defgroup    kernel_cfg Kernel configuration
- * @brief       Konfiguracija eSolid Kernel-a
+ * @addtogroup  kernel_cfg
  *********************************************************************//** @{ */
 
 #ifndef KERNEL_CONFIG_H_
@@ -293,10 +292,12 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-#if (OPT_MM_MANAGED_SIZE != 0U)
-# if (OPT_MM_HEAP_SIZE > OPT_MM_MANAGED_SIZE)
-#  error "eSolid->kernel: MM module: Heap Memory size cannot be bigger than Managed Managed size"
-# endif
+#if !defined(ES_HAL_ENABLE_CPU)
+# error "HAL Config error: enable CPU module with option: OPT_HAL_CPU"
+#endif
+
+#if !defined(ES_HAL_ENABLE_INTERRUPT)
+# error "HAL Config error: enable Interrupt module with option: OPT_HAL_INTERRUPT"
 #endif
 
 /** @endcond *//** @} *//******************************************************
