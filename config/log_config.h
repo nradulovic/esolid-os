@@ -23,9 +23,8 @@
  *//***********************************************************************//**
  * @file
  * @author  	Nenad Radulovic
- * @brief       Konfiguracija LOG sistema
+ * @brief       Konfiguracija LOGer sistema
  * @addtogroup  log_cfg
- * @brief       Konfiguracija LOG sistema
  *********************************************************************//** @{ */
 
 #ifndef LOG_CONFIG_H_

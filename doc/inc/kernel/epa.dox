@@ -1,9 +1,10 @@
-/*********************************************************************************************//**
+/**************************************************************************//**
 @file
 @addtogroup     kernel_intf
 *//** @{ *//**
 @defgroup       epa_intf Event Processing Agent (EPA) 
-@brief          Interfejs Event Processing Agent (EPA) objekata
+@brief          Interfejs Event Processing Agent (EPA) objekata,  konkuretan rad 
+                razlicitih tipova agenta
 @section        epa_doc Event Processing Agent (EPA)
   
-**//** @} *//*************************************************************************************/
+**//** @} *//******************************************************************/

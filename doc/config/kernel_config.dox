@@ -2,8 +2,8 @@
 @file
 @addtogroup  kernel
 *//** @{ *//**
-@defgroup    kernel_impl Kernel Implementation
-@brief       Kernel implementacija
+@defgroup    kernel_cfg Kernel configuration
+@brief       Konfiguracija eSolid Kernel-a
 
 
 **//** @} *//******************************************************************/

@@ -24,7 +24,7 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Skup LOG poruka
- * @addtogroup  log_messages
+ * @addtogroup  logm
  *********************************************************************//** @{ */
 
 

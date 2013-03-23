@@ -1,0 +1,29 @@
+/**************************************************************************//**
+@file
+@addtogroup     kernel
+*//** @{ *//**
+@defgroup       log LOGger
+@brief          LOGger - evidentiranje poruka
+@section        log_index Sadrzaj
+    - @ref log_intro
+    - @ref log_organization
+    - @ref log_usage
+    
+@section        log_intro Uvod
+
+- Nazad na @ref log_index
+
+@section        log_organization Organizacija
+
+- Nazad na @ref log_index
+
+@section        log_usage Upotreba
+
+- Nazad na @ref log_index
+
+@author         Nenad Radulović
+
+Contact information:
+    - web site:  http://blueskynet.dyndns-server.com
+    - e-mail:    blueskyniss@gmail.com
+**//** @} *//******************************************************************/

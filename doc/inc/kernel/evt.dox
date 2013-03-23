@@ -3,7 +3,8 @@
 @addtogroup  kernel_intf
 *//** @{ *//**
 @defgroup       evt_intf Event (EVT)
-@brief          Interfejs Event (EVT) objekata
+@brief          Interfejs Event (EVT) objekata, definisanje dogadjaja i osnovne 
+                manipulacije nad dogadjajima
 @section        evt_doc Event (EVT)
 @image          html    eSolid_EVT.png
 Event (u daljem tekstu EVT) modul vrsi definisanje objekta dogadjaja. Objekat
@@ -14,8 +15,6 @@ podataka, kopiranje celih dogadjaja postaje izuzetno neefikasan proces. Zbog
 toga se koristi <i>zero-copy</i> politika, gde se ne kopiraju podaci dogadjaja 
 vec samo pokazivaci prema njima. Na ovaj nacin se postize vrlo velika propusnost 
 sistema.
-    
-@note           Dogadjaj koji poseduje samo identifikator zove se @a signal.
 
 Dogadjaji poseduju zaglavlje koje definise eSolid i telo koje definise sam
 korisnik. Zaglavlje nosi osnovne informacije o samom dogadjaju kao sto su 

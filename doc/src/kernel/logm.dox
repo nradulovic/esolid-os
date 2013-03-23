@@ -1,9 +1,8 @@
 /**************************************************************************//**
 @file
-@addtogroup  kernel
+@addtogroup     kernel_impl
 *//** @{ *//**
-@defgroup    kernel_impl Kernel Implementation
-@brief       Kernel implementacija
-
+@defgroup       logm Kernel LOG messages
+@brief          Kernel LOG messages
 
 **//** @} *//******************************************************************/

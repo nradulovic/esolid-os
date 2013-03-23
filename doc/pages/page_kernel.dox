@@ -1,9 +1,19 @@
-/*********************************************************************************************//**
+/**************************************************************************//**
 @file
-@brief          Tekst glavne stranice
+@brief          Kernel (jezgro) komponenta
 *//** @{ *//**
-@mainpage       eSolid - Event Based System (UNDER CONSTRUCTION)
-@section        intro_sec Introduction
+@defgroup       kernel eSolid Kernel
+@brief          Kernel (jezgro)
+@section        kernel_index Sadrzaj
+    - @ref kernel_intro
+    - @ref kernel_concepts
+        - @ref kernel_events
+        - @ref kernel_sm
+        - @ref kernel_epa
+    - @ref kernel_organization
+    - @ref kernel_usage
+    
+@section        kernel_intro Uvod
 
 Conventional RTOS implies a certain programming paradigm, which leads to
 particularly brittle designs. Blocking is the main concept envolving into using
@@ -62,29 +72,6 @@ koji se koriste u tradicionalnim real time operativnim sistemima. Umesto toga,
 programeri mogu da razmisljaju na visem nivou abstrakcije i na taj način se 
 usredsrede na rešavanju postavljenih problema. 
 
-@section        main_howItBegan Kako je sve pocelo?
-
-U toku rada na aplikaciji od posebnog znacaja, koju razvijam sa prijateljem i 
-kolegama, javila se potreba za konkurentnim izvrsavanjem vise zadataka u nasem 
-sistemu. U tom trenutku nismo bili za ideju da se u sistem implementira jedan od 
-gotovih real time operativnih sistema jer su pocetna istrazivanja pokazala da bi 
-njihova implementacija oduzela poprilicnu kolicinu resursa sa kojima smo 
-raspolagali u vrlo ogranicenom mikrokontroleru po pitanju velicine RAM i FLASH 
-memorije. Zbog toga se pribeglo ideji da se koriste konacni automati za svaki 
-proces i na taj nacin ostvari privid konkurentnog izvrsavanja. Kako je vreme
-odmicalo ideje za implementaciju konacnih automata su se menjale dok se nismo 
-zadrzali na implementaciji automata koju koristi QP(TM) framework firme 
-<c>Quantum Leaps</c> (http://www.state-machine.com). QP framework se izdaje pod 
-GPLv2 licencom i inicijalna ideja eSolid projekta je da se QP framework 
-prilagodi potrebama nase aplikacije. Medjutim, kako je razvoj aplikacije 
-napredovao, zahtevi aplikacije su se progresivno povecali i dosli smo do 
-trenutka  kada QP framework nije mogao da zadovolji sve postavljene zahteve. 
-Tada su prekinute dalje aktivnosti prilagodjenja QP frameworka i krenulo se sa 
-istrazivanjem u cilju razvoja operativnog sistema koji bi u potpunosti 
-zadovoljio postavljene zahteve aplikacije.
-
-@section        main_EDA_system Sistem pogonjen dogadjajima
-
 Razvoj eSolid operativnog sistema je vodjen idejama i konceptima koji su 
 publikovani od strane: IBM-a (sistemi za procesiranje dogadjaja), konceptima 
 koje propagira <c>The Event Processing Technical Society</c> drustvo i raznih 
@@ -92,9 +79,12 @@ autora. Iako su njihovi koncepti pre svega namenjeni za velike, distribuirane
 sisteme, gde ne postoji deficit procesnih mogucnosti i memorijskih kapaciteta, 
 preuzeto je dosta ideja i termina iz njihovih publikacija.
 
-@section        main_events Dogadjaji
+- Nazad na @ref kernel_index
 
-@subsection     main_whatIsEvt Sta je dogadjaj?
+@section        kernel_concepts Koncepti jezgra
+@subsection     kernel_events Dogadjaji
+
+@par            Sta je dogadjaj?
 
 Dogadjaj je stvar od posebne vaznosti koja se desila ili se desava. Dogadjaj se 
 desava u potpunosti ili se uopste ne desava, a znacajan je zbog toga sto moze da 
@@ -103,20 +93,19 @@ kada se javi tranzicija entiteta u stvarnom svetu. Pojam dogadjaj se cesto
 istovremeno koristi za opis specifikacije (definiciju) dogadjaja i 
 individualnu pojavu (instancu) dogadjaja.
 
-@subsection     main_whatIsInEvt Sta je u dogadjaju?
+@par            Sta je u dogadjaju?
 
 Svaka instanca dogadjaja poseduje zaglavlje dogadjaja i telo dogadjaja.
     - Zaglavlje sadrzi elemente koji opisuju instancu dogadjaja, kao sto su 
     identifikator dogadjaja, tip dogadjaja, ime dogadjaja, vremenski marker 
     nastanka dogadjaja, broj instance dogadjaja i generator dogadjaja. Zaglavlje 
     je isto za sve dogadjaje koji se javljaju u sistemu. Ukoliko dogadjaj sadrzi 
-    samo zaglavlje, tada se takav dogadjaj zove @a signal. eSolid definise 
-    nekoliko razlicitih zaglavlja dogadjaja. Pogledati @ref evt_list.
+    samo zaglavlje, tada se takav dogadjaj zove @a signal.
     - Telo dogadjaja opisuje sta se dogodilo. Telo dogadjaja mora da bude 
     potpuno opisano tako da bilo koje trece lice koje zanima ovaj dogadjaj, 
     takodje, moze da ga razume.
 
-@subsection     main_evt_lifecycle Zivotni ciklus dogadjaja
+@par            Zivotni ciklus dogadjaja
 
 Zivotni ciklus dogadjaja se sastoji od:
     - kreiranje dogadjaja. Kreiranje dogadjaja obavljaju generatori ili 
@@ -136,7 +125,7 @@ Zivotni ciklus dogadjaja se sastoji od:
     operativni sistem kada je detektovano da su svi agenti za obradu 
     dogadjaja zavrsili sa njegovom obradom.
 
-@subsection     main_evt_proc_types Tipovi obrade dogadjaja
+@par            Tipovi obrade dogadjaja
 
 Funkcije obrade dogadjaja se mogu svrstati u dve grupe:
     - Jednostavna obrada dogadjaja (Simple Event Processing): dogadjaji koji ne 
@@ -147,40 +136,46 @@ Funkcije obrade dogadjaja se mogu svrstati u dve grupe:
     kompleksni dogadjaj je dogadjaj koji predstavlja ili oznacava drugi skup 
     dogadjaja.
 
-@section        main_epe Agenti za obradu dogadjaja
+@subsection     kernel_sm Konacni automati
+@subsection     kernel_epa Agenti za obradu dogadjaja
 
 Agenti za obradu dogadjaja su opisani u odeljku @ref smp_doc.
 
-@section        main_sections Sastavni delovi eSolid jezgra (kernel)
-    
-Jezgro eSolid operativnog sistema se sastoji od sledecih delova:
-- @ref evt_doc@n
-objašnjenje tipova dogadjaja, njihovo definisanje i osnovne manipulacije nad 
-dogadjajima,
-- @ref smp_doc@n
-koncept izvrsne jedinice, tipovi izvrsne jedinice i njihovo pokretanje,
-- @ref epa_doc@n
-koncept agenta za obradu dogadjaja, konkuretan rad razlicitih tipova agenta,
-- @ref epn_doc@n
-formiranje povezane mreže EPA objekata i transfer dogadjaja izmedju objekata,
-- @ref tem_doc@n
-menadzment i generisanje dogadjaja u tacno definisanim vremenskim trenucima,
-- @ref mm_doc@n
-menadzment memorijskog prostora, ovaj modul koriste svi ostali moduli za
-potrebe rezervisanja memorije,
- 
-@image       html eSolid_small.png
-@ref struct
+- Nazad na @ref kernel_index
 
-@ref usage
+@section        kernel_organization Organizacija
 
-@ref lit
+Jezgro eSolid sistema je organizovano na sledeci nacin:
+    - @ref kernel_intf - Interfejs jezgra. U ovim datotekama se nalaze sve 
+        informacije koje su potrebne korisniku za koriscenje jezgra. Datoteke
+        definisu tipove podataka, makroe i funkcije koje korisnik poziva da
+        ostvari neku funkciju. 
+    - @ref kernel_impl - Datoteke opisuju nacin na koji je Kernel realizovan. 
+        Ovaj odeljak je namenjen za naprednije korisnike koje zele da imaju uvid 
+        u rad sistema.
+    - @ref kernel_cfg - Konfiguracija Kernela. Ovaj odeljak opisuje kako se
+        kernel konfigurise i kako opcije uticu na rad i ponasanje sistema. Ovaj
+        odeljak treba neizbezno pogledati pre pocetka rada na aplikaciji.
+    - @ref log - eSolid LOGger je nezavisan modul Kernela. On omogucava kernelu
+        da stampa poruke o greskama, razne informacije o izvrsavanju i drugo. Sa
+        druge strane korisnik moze da koristi ovaj modul u svojoj aplikaciji 
+        kada zeli da stampa poruke o greskama ili izvrsavanju programa.
+    - @ref prim_intf - Osnovne strukture podataka. Ovaj modul je samo skup 
+        header datoteka koje definisu interfejs i implementaciju za strukture
+        podataka koje se cesto koriste. Korisnik moze po zelji koristiti ovaj
+        modul u svojoj aplikaciji.
+        
+Za vise informacija o svakoj celini ponaosob pogledati zasebne module. 
 
-@ref licence
+- Nazad na @ref kernel_index
+
+@section        kernel_usage Upotreba
+
+- Nazad na @ref kernel_index
 
 @author         Nenad Radulović
 
 Contact information:
     - web site:  http://blueskynet.dyndns-server.com
     - e-mail:    blueskyniss@gmail.com
-**//** @} *//*************************************************************************************/
+**//** @} *//******************************************************************/

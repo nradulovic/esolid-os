@@ -3,7 +3,7 @@
 @addtogroup     kernel_intf
 *//** @{ *//**
 @defgroup       mm_intf Memory Management (MM)
-@brief          Jednostavan alokator memorije za potrebe eSolid-a
+@brief          Jednostavan menadzment memorije
 @section        mm_doc Memory Management (MM)
 
 @image          html    eSolid_MM.png

@@ -1,0 +1,29 @@
+/**************************************************************************//**
+@file
+@addtogroup     kernel
+*//** @{ *//**
+@defgroup       prim_intf Primitive data structures 
+@brief          Osnovne strukture podataka
+@section        prim_index Sadrzaj
+    - @ref prim_intro
+    - @ref prim_organization
+    - @ref prim_usage
+    
+@section        prim_intro Uvod
+
+- Nazad na @ref prim_index
+
+@section        prim_organization Organizacija
+
+- Nazad na @ref prim_index
+
+@section        prim_usage Upotreba
+
+- Nazad na @ref prim_index
+
+@author         Nenad Radulović
+
+Contact information:
+    - web site:  http://blueskynet.dyndns-server.com
+    - e-mail:    blueskyniss@gmail.com
+**//** @} *//******************************************************************/

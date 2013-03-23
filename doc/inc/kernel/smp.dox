@@ -3,7 +3,8 @@
 @addtogroup     kernel_intf
 *//** @{ *//**
 @defgroup       smp_intf State Machine Processor (SMP)
-@brief          Interfejs State Machine Processor (SMP) objekata
+@brief          Interfejs State Machine Processor (SMP) objekata, tipovi 
+                izvrsnih jedinica i njihovo pokretanje
 @section        smp_doc State Machine Processor (SMP)
 @image          html    eSolid_SMP.png
 SMP modul moze konkurentno da izvrsava razlicite tipove automata i korisnicke 
@@ -63,7 +64,7 @@ funkcije stanja. Nakon sto su izvrsene pomenute inicijalizacije moze se
 pozivati dispecer funkcija. Naravno sve navedene akcije se automatski 
 preduzimaju od strane sistema i korisnik nema potrebe da vodi racuna o tome.
 
-@subsection     smp_writiing Pisanje automata
+@subsection     smp_writing Pisanje automata
 
 Svakom stanju automata odgovara jedna funkcija u kodu. Dakle, granulacija 
 automata je na nivou stanja. Funkcije koje opisuju jedno stanje se nazivaju
