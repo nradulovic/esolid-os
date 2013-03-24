@@ -145,15 +145,6 @@ enum esErrorCodes {
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Inicijalizuje kernel.
- * @details     Najpre vrsi inicijalizaciju HAL-a, zatim memorijskog menadzera,
- *              SMP modula i prelazi na inicijalizaciju samog kernela.
- * @api
- */
-void esKernelInit(
-    void);
-
-/**
  * @brief       Pokrece izvrsavanje jezgra
  * @details     Pokrecu se svi prethodno kreirani EPA objekti.
  * @api

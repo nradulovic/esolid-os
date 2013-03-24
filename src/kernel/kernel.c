@@ -55,7 +55,7 @@ esEpa_T * esKernelEpaGet(
 }
 
 /*----------------------------------------------------------------------------*/
-void esKernelInit(
+void kernelInit(
     void) {
 
     esSmpInit();

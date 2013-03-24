@@ -46,6 +46,16 @@
 /*===============================================================================  DATA TYPES  ==*/
 /*=========================================================================  GLOBAL VARIABLES  ==*/
 /*======================================================================  FUNCTION PROTOTYPES  ==*/
+
+/**
+ * @brief       Inicijalizuje kernel.
+ * @details     Najpre vrsi inicijalizaciju HAL-a, zatim memorijskog menadzera,
+ *              SMP modula i prelazi na inicijalizaciju samog kernela.
+ * @notapi
+ */
+void kernelInit(
+    void);
+
 /*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 /** @endcond *//** @} *//*************************************************************************
