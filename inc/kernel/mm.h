@@ -24,8 +24,6 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Menadzment memorije
- * @details     This file is not meant to be included in application code
- *              directly but through the inclusion of "kernel.h" file.
  * @addtogroup  mm_intf
  *********************************************************************//** @{ */
 
@@ -39,6 +37,17 @@
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
+
+/**
+ * @brief       Definise memorijski alokator za staticko cuvanje podataka
+ */
+#define ES_STATIC_STORAGE               &esMemStaticClass
+
+/**
+ * @brief       Definise memorijski alokator za dinamicko cuvanje podataka
+ */
+#define ES_DYNAMIC_OBJECT               &esMemDynClass
+
 /*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
