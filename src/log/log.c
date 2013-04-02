@@ -61,6 +61,7 @@ void logSetSwitches(
 /*----------------------------------------------------------------------------*/
 void logMsg(
     const esLog_T * log,
+    logType_T     type,
     uint32_t        msg,
     uint32_t        val) {
 

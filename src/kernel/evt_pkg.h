@@ -75,6 +75,7 @@ extern "C" {
 static C_INLINE void evtUsrAddI_(
     esEvt_T         * evt) {
 
+
     if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
         ++evt->dynamic.s.counter;
     }

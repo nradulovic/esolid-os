@@ -60,44 +60,42 @@
  * @brief       Tekst tabela
  */
 #define TEXT_TABLE(ENTRY)                                                       \
-    ENTRY(LOG_EPA_CREATE,"EPA: create")                                         \
-    ENTRY(LOG_EPA__MEM," mem [B]")                                              \
-    ENTRY(LOG_EPA__ID, " id")                                                   \
-    ENTRY(LOG_EPA__SIZE, " size [B]")                                           \
-    ENTRY(LOG_EPA__PRIO, " prio")                                               \
-    ENTRY(LOG_EPA_PRIOSET, "EPA: prioSet")                                      \
-    ENTRY(LOG_EPA_PRIOGET, "EPA: prioGet")                                      \
-    ENTRY(LOG_EPA_DESTROY, "EPA: destroy")                                      \
-    ENTRY(LOG_EPA_DISPATCH, "EPA: dispatch")                                    \
-    ENTRY(LOG_EPA_EVTPOST, "EPA: evtPost")                                      \
-    ENTRY(LOG_EPA_EVTPOSTA, "EPA: evtPostAhead")                                \
-    ENTRY(LOG_EPA_EVTFETCH, "EPA: evtFetch")                                    \
-    ENTRY(LOG_EPA_EVTPUSHBACK, "EPA: evtPushBack")                              \
-    ENTRY(LOG_SCHED_REG_FAIL, "scheduler: cannot register new EPA object: prio level is already occupied.") \
+    ENTRY(LOG_MEM," memory [B]")                                                \
+    ENTRY(LOG_ID, " id")                                                        \
+    ENTRY(LOG_SIZE, " size [B]")                                                \
+    ENTRY(LOG_PRIO, " priority")                                                \
+    ENTRY(LOG_ARGUMENT, " argument")                                            \
+    ENTRY(LOG_EPA_CREATE,"EPA: create(memClass, definition)")                   \
+    ENTRY(LOG_EPA_PRIOSET, "EPA: prioSet(epa, newPrio)")                        \
+    ENTRY(LOG_EPA_PRIOGET, "EPA: prio prioGet(epa)")                            \
+    ENTRY(LOG_EPA_DESTROY, "EPA: destroy(epa)")                                 \
+    ENTRY(LOG_EPA_DISPATCH, "EPA: dispatch(epa, evt)")                          \
+    ENTRY(LOG_EPA_EVTPOST, "EPA: evtPost(epa, evt)")                            \
+    ENTRY(LOG_EPA_EVTPOSTA, "EPA: evtPostAhead(epa, evt)")                      \
+    ENTRY(LOG_EPA_EVTFETCH, "EPA: evt evtFetch(epa)")                           \
+    ENTRY(LOG_EPA_EVTPUSHBACK, "EPA: evtPushBack(epa, evt)")                    \
+    ENTRY(LOG_EPA_INIT, " EPA: initialization")                                 \
+    ENTRY(LOG_SCHED_REG, "scheduler EPA registration")                          \
     ENTRY(LOG_EVTQ_FULL, "evtq: cannot insert evt into evtq: evtq is full.")
 
 /*===============================================================  MACRO's  ==*/
 
-#if (OPT_KERNEL_ENABLE_LOG == 1U)
-# define KERN_ASSERT(condition, log, msg, value)                                \
-    ES_LOG_ASSERT(condition, log, msg, value)
-# define KERN_LOG_ERR(log, package, msg, value)                                 \
-    ES_LOG_ERR(log, package, msg, value)
-# define KERN_LOG_WARN(log, package, msg, value)                                \
-    ES_LOG_WARN(log, package, msg, value)
-# define KERN_LOG_INFO(log, package, msg, value)                                \
-    ES_LOG_INFO(log, package, msg, value)
-# define KERN_LOG_DBG(log, package, msg, value)                                 \
-    ES_LOG_DBG(log, package, msg, value)
-# define KERN_LOG_TRACE(log, package, msg, value)                               \
-    ES_LOG_TRACE(log, package, msg, value)
+#if (OPT_KERNEL_ENABLE_LOG != LOG_DISABLED)
+# define LOG_FILT_EPA                   (1UL << 0)
+# define LOG_FILT_EVT                   (1UL << 1)
+# define LOG_FILT_MM                    (1UL << 2)
+# define LOG_FILT_SMP                   (1UL << 3)
+# define LOG_FILT_KERNEL                (1UL << 4)
+# define LOG_FILE_EVTQ                  (1UL << 5)
+# define LOG_FILT_SCHED                 (1UL << 6)
 #else
-# define KERN_ASSERT(condition, log, msg, value)
-# define KERN_LOG_ERR(log, package, msg, value)
-# define KERN_LOG_WARN(log, package, msg, value)
-# define KERN_LOG_INFO(log, package, msg, value)
-# define KERN_LOG_DBG(log, package, msg, value)
-# define KERN_LOG_TRACE(log, package, msg, value)
+# define LOG_FILT_EPA                   0UL
+# define LOG_FILT_EVT                   0UL
+# define LOG_FILT_MM                    0UL
+# define LOG_FILT_SMP                   0UL
+# define LOG_FILT_KERNEL                0UL
+# define LOG_FILE_EVTQ                  0UL
+# define LOG_FILT_SCHED                 0UL
 #endif
 
 /*------------------------------------------------------  C++ extern begin  --*/
