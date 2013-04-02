@@ -68,6 +68,8 @@
  */
 #define LOG_TRACE                       1U
 
+#define LOG_DISABLED                    6U
+
 /**
  * @brief       Koristi se za opciju @ref OPT_LOG_MSG_TYPE : LOG sistem salje
  *              poruke u vidu teksta
@@ -98,7 +100,8 @@
  *              - @ref LOG_WARN
  *              - @ref LOG_INFO
  *              - @ref LOG_DBG
- *              - @ref LOG_DBG
+ *              - @ref LOG_TRACE
+ *              - @ref LOG_DISABLED
  * @note        Podrazumevano podesavanje: @ref LOG_TRACE
  */
 #if !defined(OPT_LOG_LEVEL) || defined(__DOXYGEN__)
