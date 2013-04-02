@@ -31,6 +31,8 @@
 #define KERNEL_CONFIG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+#include "log_config.h"
+
 /*===============================================================  DEFINES  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -100,13 +102,17 @@
 /**
  * @brief       Ukljucivanje LOG sistema za kernel
  * @details     Opcije:
- *              - OU - LOG sistem nije omogucen
- *              - 1U - LOG sistem je omogucen
+ *              - @ref LOG_ERR
+ *              - @ref LOG_WARN
+ *              - @ref LOG_INFO
+ *              - @ref LOG_DBG
+ *              - @ref LOG_TRACE
+ *              - @ref LOG_DISABLED
  * @note        Podrazumevano podesavanje: 1U
  * @pre         LOG sistem mora biti ukljucen
  */
 #if !defined(OPT_KERNEL_ENABLE_LOG) || defined(__DOXYGEN__)
-# define OPT_KERNEL_ENABLE_LOG          0U
+# define OPT_KERNEL_ENABLE_LOG          LOG_TRACE
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -293,11 +299,11 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 #if !defined(ES_HAL_ENABLE_CPU)
-# error "HAL Config error: enable CPU module with option: OPT_HAL_CPU"
+# error "Kernel precondition is not satisfied: enable CPU module with option: OPT_HAL_CPU"
 #endif
 
 #if !defined(ES_HAL_ENABLE_INTERRUPT)
-# error "HAL Config error: enable Interrupt module with option: OPT_HAL_INTERRUPT"
+# error "Kernel precondition is not satisfied: enable Interrupt module with option: OPT_HAL_INTERRUPT"
 #endif
 
 /** @endcond *//** @} *//******************************************************
