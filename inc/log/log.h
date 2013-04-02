@@ -35,6 +35,9 @@
 #include "../config/log_config.h"
 
 /*===============================================================  DEFINES  ==*/
+
+#define ES_LOG_ALWAYS_COND              FALSE
+
 /*===============================================================  MACRO's  ==*/
 /*------------------------------------------------------------------------*//**
  * @name        Makroi koji se koriste prilikom generisanja tabela
@@ -57,92 +60,96 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 
+#define ES_LOG_IS_INVALID(exp)                                                    \
+    !(exp)
+
 #if (OPT_LOG_LEVEL <= LOG_ERR)
 /**
  * @brief       Obelezava greske u sistemu
  */
-# define ES_LOG_ERR(log, package, msg, value)                                   \
-    do {                                                                        \
-        if (log.switches & ((package) | (1UL << (LOG_ERR + 24)))) {             \
-            logMsg(&log, msg, value);                                           \
-        }                                                                       \
-    } while (0UL);
+# define ES_LOG_IS_ERR(log, filter)                                             \
+    ((log)->switches & (1UL << (LOG_ERR + 24)) & (filter))
 
-/**
- * @brief       Osigurava istinitost uslova @c condition
- */
-# define ES_LOG_ASSERT(condition, log, msg, value)                              \
-    do {                                                                        \
-        if (!(condition)) {                                                     \
-            logMsg(&log, msg, value);                                           \
-        }                                                                       \
-        ES_CPU_STOP();                                                          \
-    } while (0UL);
+# define ES_LOG_ERR(log, msg, var)                                              \
+    logMsg(log, LOG_TYPE_ERR, msg, var)
+
 #else
-# define ES_LOG_ERR(log, package, msg, value)
+# define ES_LOG_IS_ERR(log, filter)
+# define ES_LOG_ERR(log, msg, var)
 #endif
 
 /**
  * @brief       Obelezava upozorenja
  */
 #if (OPT_LOG_LEVEL <= LOG_WARN)
-# define ES_LOG_WARN(log, package, msg, value)                                  \
-    do {                                                                        \
-        if (log.switches & ((package) | (1UL << (LOG_WARN + 24)))) {            \
-            logMsg(&log, msg, value);                                           \
-        }                                                                       \
-    } while (0UL);
+# define ES_LOG_IS_WARN(log, filter)                                            \
+    ((log)->switches & (1UL << (LOG_WARN + 24)) & (filter))
+
+# define ES_LOG_WARN(log, msg, var)                                             \
+    logMsg(log, LOG_TYPE_WARN, msg, var)
 #else
-# define ES_LOG_WARN(log, package, msg, value)
+# define ES_LOG_IS_WARN(log, filter)
+# define ES_LOG_WARN(log, msg, var)
 #endif
 
 /**
  * @brief       Obelezava informativne dogadjaje
  */
 #if (OPT_LOG_LEVEL <= LOG_INFO)
-# define ES_LOG_INFO(log, package, msg, value)                                  \
-    do {                                                                        \
-        if (log.switches & ((package) | (1UL << (LOG_INFO + 24)))) {            \
-            logMsg(&log, msg, value);                                           \
-        }                                                                       \
-    } while (0UL);
+# define ES_LOG_IS_INFO(log, filter)                                            \
+    ((log)->switches & (1UL << (LOG_INFO + 24)) & (filter))
+
+# define ES_LOG_INFO(log, msg, var)                                             \
+    logMsg(log, LOG_TYPE_INFO, msg, var)
+
 #else
-# define ES_LOG_INFO(log, package, msg, value)
+# define ES_LOG_IS_INFO(log, filter)
+# define ES_LOG_INFO(log, msg, var)
 #endif
 
 /**
  * @brief       Obelezava dogadjaje sa informacijama o greskama
  */
 #if (OPT_LOG_LEVEL <= LOG_DBG)
-# define ES_LOG_DBG(log, package, msg, value)                                   \
-    do {                                                                        \
-        if (log.switches & ((package) | (1UL << (LOG_DBG + 24)))) {             \
-            logMsg(&log, msg, value);                                           \
-        }                                                                       \
-    } while (0UL);
+# define ES_LOG_IS_DBG(log, filter)                                             \
+    ((log)->switches & (1UL << (LOG_DBG + 24)) & (filter))
+
+# define ES_LOG_DBG(log, msg, var)                                              \
+    logMsg(log, LOG_TYPE_DBG, msg, var)
 #else
-# define ES_LOG_DBG(log, package, msg, value)
+# define ES_LOG_IS_DBG(log, filter)
+# define ES_LOG_DBG(log, msg, var)
 #endif
 
 /**
  * @brief       Obelezava dogadjaje izvrsenja koda
  */
-#if (OPT_LOG_LEVEL <= LOG_DBG)
-# define ES_LOG_DBG(log, package, msg, value)                                   \
-    do {                                                                        \
-        if (log.switches & ((package) | (1UL << (LOG_DBG + 24)))) {             \
-            logMsg(&log, msg, value);                                           \
-        }                                                                       \
-    } while (0UL);
+#if (OPT_LOG_LEVEL <= LOG_TRACE)
+# define ES_LOG_IS_TRACE(log, filter)                                           \
+    ((log)->switches & (1UL << (LOG_TRACE + 24)) & (filter))
+
+# define ES_LOG_TRACE(log, msg, var)                                            \
+    logMsg(log, LOG_TYPE_TRACE, msg, var)
 #else
-# define ES_LOG_DBG(log, package, msg, value)
+# define ES_LOG_IS_TRACE(log, filter)
+# define ES_LOG_TRACE(log, msg, var)
 #endif
+
 /*------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 /*============================================================  DATA TYPES  ==*/
+
+typedef enum logType {
+    LOG_TYPE_RECORD,
+    LOG_TYPE_TRACE = LOG_TRACE,
+    LOG_TYPE_DBG = LOG_DBG,
+    LOG_TYPE_INFO = LOG_INFO,
+    LOG_TYPE_WARN = LOG_WARN,
+    LOG_TYPE_ERR = LOG_ERR,
+} logType_T;
 
 /**
  * @brief       Struktura koja opisuje jedan LOG
@@ -215,6 +222,7 @@ void logSetSwitches(
  */
 void logMsg(
     const esLog_T * log,
+    logType_T     type,
     uint32_t        msg,
     uint32_t        val);
 
