@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,31 +20,29 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Interfejs za rad sa redovima za cekanje (queue).
  * @details     Postoje dva skupa funkcija: funkcije za rad sa 8-bitnim redovima
  *              i funkcije za redove sa pokazivacima.
  * @addtogroup  queue_intf
- ****************************************************************************************//** @{ */
-
+ *********************************************************************//** @{ */
 
 #ifndef QUEUE_H_
 #define QUEUE_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
 
-
-/*==================================================================================  DEFINES  ==*/
-/*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
 
 /**
  * @brief       Struktura zaglavlja indirektnog reda za cekanje
@@ -53,23 +51,23 @@ typedef struct esQueuePtr {
 /**
  * @brief       Pocetak reda za cekanje
  */
-    void            ** head;
+    void **         head;
 
 /**
  * @brief       Kraj reda za cekanje
  */
-    void            ** tail;
+    void **         tail;
 
 /**
  * @brief       Pocetak bafera reda za cekanje
  */
-    void            ** begin;
+    void **         begin;
 
 /**
  * @brief       Kraj bafera reda za cekanje + jedna pozicija
  */
-    void            ** end;
-} esQueuePtr_T;
+    void **         end;
+} esQp_T;
 
 /**
  * @brief       Struktura zaglavlja direktnog reda za cekanje
@@ -78,185 +76,189 @@ typedef struct esQueue {
 /**
  * @brief       Pocetak reda za cekanje
  */
-    uint8_t         * head;
+    uint8_t *       head;
 
 /**
  * @brief       Kraj reda za cekanje
  */
-    uint8_t         * tail;
+    uint8_t *       tail;
 
 /**
  * @brief       Pocetak bafera reda za cekanje
  */
-    uint8_t         * begin;
+    uint8_t *       begin;
 
 /**
  * @brief       Kraj bafera reda za cekanje + jedna pozicija
  */
-    uint8_t         * end;
-} esQueue_T;
+    uint8_t *       end;
+} esQ_T;
 
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
-/*-------------------------------------------------------------------------------------------*//**
+/*------------------------------------------------------------------------*//**
  * @name        Manipilacija sa redovima cekanja sa pokazivacima
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Vrsi inicijalizaciju strukture za red za cekanje
- * @param       aQueue                  Pokazivac na tek kreirani red cekanja,
- * @param       aMemBuffer              memorijska oblast koja se koristi,
- * @param       aQueueSize              velicina potrebnog reda cekanja izrazena
+ * @param       queue                   Pokazivac na tek kreirani red cekanja,
+ * @param       memBuff                 memorijska oblast koja se koristi,
+ * @param       size                    velicina potrebnog reda cekanja izrazena
  *                                      u broju elemenata u redu za cekanje.
  * @inline
  */
 static C_INLINE_ALWAYS void esQpInit_(
-    esQueuePtr_T   * aQueue,
-    void            ** aMemBuffer,
-    size_t          aQueueSize) {
+    esQp_T *        queue,
+    void **         memBuff,
+    size_t          size) {
 
-    aQueue->head = aMemBuffer;
-    aQueue->tail = aMemBuffer;
-    aQueue->begin = aMemBuffer;
-    aQueue->end = aMemBuffer + (aQueueSize - 1U);
+    queue->head = memBuff;
+    queue->tail = memBuff;
+    queue->begin = memBuff;
+    queue->end = memBuff + (size - 1U);
 }
 
 /**
  * @brief       Destruktor funkcija za red za cekanje
- * @param       aQueue                  Red za cekanje koji treba da se unisti.
+ * @param       queue                   Red za cekanje koji treba da se unisti.
+ * @return      Pocetak reda za cekanje.
  * @inline
  */
 static C_INLINE_ALWAYS void * esQpDeInit_(
-    esQueuePtr_T   * aQueue) {
+    esQp_T *        queue) {
 
-    aQueue->head = (void **)0U;
-    aQueue->tail = (void **)0U;
-    aQueue->begin = (void **)0U;
-    aQueue->end = (void **)0U;
+    queue->head = (void **)0U;
+    queue->tail = (void **)0U;
+    queue->begin = (void **)0U;
+    queue->end = (void **)0U;
 
-    return ((void *)(aQueue->begin));
+    return ((void *)(queue->begin));
 }
 
 /**
- * @brief       Postavlja element @b na @b kraju reda (tail) za cekanje (FIFO metod)
- * @param       aQueue                  Red cekanja gde treba postaviti dogadjaj,
- * @param       aItem                   element koji treba postaviti u red za
+ * @brief       Postavlja element @b na @b kraju reda (tail) za cekanje (FIFO
+ *              metod)
+ * @param       queue                   Red cekanja gde treba postaviti dogadjaj,
+ * @param       item                    element koji treba postaviti u red za
  *                                      cekanje.
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
 static C_INLINE_ALWAYS void esQpPut_(
-    esQueuePtr_T   * aQueue,
-    void            * aItem) {
+    esQp_T *        queue,
+    void *          item) {
 
-    *(aQueue->tail) = aItem;
+    *(queue->tail) = item;
 
-    if (aQueue->tail != aQueue->end) {
-        ++aQueue->tail;
+    if (queue->tail != queue->end) {
+        ++queue->tail;
     } else {
-        aQueue->tail = aQueue->begin;
+        queue->tail = queue->begin;
     }
 }
 
 /**
- * @brief       Postavlja dogadjaj @b na pocetku @b reda (head) za cekanje (LIFO metod)
- * @param       aQueue                  Red cekanja gde treba postaviti dogadjaj,
- * @param       aItem                   element koji treba postaviti u red za
+ * @brief       Postavlja dogadjaj @b na pocetku @b reda (head) za cekanje (LIFO
+ *              metod)
+ * @param       queue                   Red cekanja gde treba postaviti dogadjaj,
+ * @param       item                    element koji treba postaviti u red za
  *                                      cekanje.
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
 static C_INLINE_ALWAYS void esQpPutAhead_(
-    esQueuePtr_T   * aQueue,
-    void            * aItem) {
+    esQp_T *        queue,
+    void *          item) {
 
-    if (aQueue->head != aQueue->begin) {
-        --aQueue->head;
+    if (queue->head != queue->begin) {
+        --queue->head;
     } else {
-        aQueue->head = aQueue->end;
+        queue->head = queue->end;
     }
-    *(aQueue->head) = aItem;
+    *(queue->head) = item;
 }
 
 /**
  * @brief       Dobavlja element sa pocetka reda (head) za cekanje
- * @param       aQueue                  Red za cekanje odakle treba dobaviti
+ * @param       queue                   Red za cekanje odakle treba dobaviti
  *                                      element.
  * @return      Element iz reda za cekanje.
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
 static C_INLINE_ALWAYS void * esQpGet_(
-    esQueuePtr_T   * aQueue) {
+    esQp_T *        queue) {
 
-    void * tmpPtr;
+    void * tmp;
 
-    tmpPtr = *(aQueue->head);
+    tmp = *(queue->head);
 
-    if (aQueue->head != aQueue->end) {
-        ++aQueue->head;
+    if (queue->head != queue->end) {
+        ++queue->head;
     } else {
-        aQueue->head = aQueue->begin;
+        queue->head = queue->begin;
     }
 
-    return (tmpPtr);
+    return (tmp);
 }
 
 /**
- * @brief       Dobavlja koliko maksimalno elemenata moze da stane u red za cekanje
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @brief       Dobavlja koliko maksimalno elemenata moze da stane u red za
+ *              cekanje
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Maksimalan broj elemenata koji mogu da stanu u red za cekanje
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
 static C_INLINE_ALWAYS size_t esQpSize_(
-    const esQueuePtr_T * aQueue) {
+    const esQp_T *  queue) {
 
-    return ((size_t)(aQueue->end - aQueue->begin + 1U));
+    return ((size_t)(queue->end - queue->begin + 1U));
 }
 
 /**
  * @brief       Dobavlja velicinu reda za cekanje
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Trenutni broj elemenata u redu za cekanje.
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
 static C_INLINE_ALWAYS size_t esQpOccupied_(
-    const esQueuePtr_T * aQueue) {
+    const esQp_T *  queue) {
 
-    if (aQueue->head < aQueue->tail) {
+    if (queue->head < queue->tail) {
 
-        return ((size_t)(aQueue->tail - aQueue->head));
+        return ((size_t)(queue->tail - queue->head));
     } else {
 
-        return ((size_t)(esQpSize_(aQueue) - (aQueue->head - aQueue->tail)));
+        return ((size_t)(esQpSize_(queue) - (queue->head - queue->tail)));
     }
 }
 
 /**
  * @brief       Dobavlja koliko jos elemenata moze da se smesti u red za cekanje
- * @param       aQueue                  Red za cekanje koji se ispituje
+ * @param       queue                   Red za cekanje koji se ispituje
  * @return      Koliko slobodnog prostora je preostalo.
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
 static C_INLINE_ALWAYS size_t esQpFreeSpace_(
-    const esQueuePtr_T * aQueue) {
+    const esQp_T *  queue) {
 
-    if (aQueue->head < aQueue->tail) {
+    if (queue->head < queue->tail) {
 
-        return ((size_t)(esQpSize_(aQueue) - (aQueue->tail - aQueue->head)));
+        return ((size_t)(esQpSize_(queue) - (queue->tail - queue->head)));
     } else {
 
-        return ((size_t)(aQueue->head - aQueue->tail));
+        return ((size_t)(queue->head - queue->tail));
     }
 }
 
 /**
  * @brief       Vraca da li je red za cekanje pun
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Da li je red za cekanje pun?
  *  @retval     TRUE - red za cekanje je pun
  *  @retval     FALSE - red za cekanje nije pun
@@ -264,10 +266,10 @@ static C_INLINE_ALWAYS size_t esQpFreeSpace_(
  * @inline
  */
 static C_INLINE_ALWAYS bool_T esQpIsFull_ (
-    const esQueuePtr_T * aQueue) {
+    const esQp_T *  queue) {
 
-    if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
-        (aQueue->tail == (aQueue->head - 1U))) {
+    if (((queue->head == queue->begin) && (queue->tail == queue->end)) ||
+        (queue->tail == (queue->head - 1U))) {
 
         return (TRUE);
     } else {
@@ -278,7 +280,7 @@ static C_INLINE_ALWAYS bool_T esQpIsFull_ (
 
 /**
  * @brief       Vraca da li je red za cekanje prazan
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Da li je red za cekanje prazan?
  *  @retval     TRUE - red cekanja je prazan
  *  @retval     FALSE - red cekanaj nije prazan
@@ -286,9 +288,9 @@ static C_INLINE_ALWAYS bool_T esQpIsFull_ (
  * @inline
  */
 static C_INLINE_ALWAYS bool_T esQpIsEmpty_(
-    const esQueuePtr_T * aQueue) {
+    const esQp_T *  queue) {
 
-    if (aQueue->head == aQueue->tail) {
+    if (queue->head == queue->tail) {
 
         return (TRUE);
     } else {
@@ -297,178 +299,181 @@ static C_INLINE_ALWAYS bool_T esQpIsEmpty_(
     }
 }
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
  * @name        Manipilacija sa redovima cekanja sa podacima
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Vrsi inicijalizaciju strukture za red za cekanje
- * @param       aQueue                  Pokazivac na tek kreirani red cekanja,
- * @param       aMemBuffer              memorijska oblast koja se koristi,
- * @param       aQueueSize              velicina potrebnog reda cekanja izrazena
+ * @param       queue                   Pokazivac na tek kreirani red cekanja,
+ * @param       memBuff                 memorijska oblast koja se koristi,
+ * @param       size                    velicina potrebnog reda cekanja izrazena
  *                                      u broju elemenata u redu za cekanje.
  * @inline
  */
 static C_INLINE_ALWAYS void esQInit_(
-    esQueue_T      * aQueue,
-    uint8_t         * aMemBuffer,
-    size_t          aQueueSize) {
+    esQ_T *         queue,
+    uint8_t *       memBuff,
+    size_t          size) {
 
-    aQueue->head = aMemBuffer;
-    aQueue->tail = aMemBuffer;
-    aQueue->begin = aMemBuffer;
-    aQueue->end = aMemBuffer + (aQueueSize - 1U);
+    queue->head = memBuff;
+    queue->tail = memBuff;
+    queue->begin = memBuff;
+    queue->end = memBuff + (size - 1U);
 }
 
 /**
  * @brief       Destruktor funkcija za red za cekanje
- * @param       aQueue                  Red za cekanje koji treba da se unisti.
+ * @param       queue                   Red za cekanje koji treba da se unisti.
  * @inline
  */
 static C_INLINE_ALWAYS void * esQDeInit_(
-    esQueue_T      * aQueue) {
+    esQ_T *         queue) {
 
-    aQueue->head = (uint8_t *)0U;
-    aQueue->tail = (uint8_t *)0U;
-    aQueue->begin = (uint8_t *)0U;
-    aQueue->end = (uint8_t *)0U;
+    queue->head = (uint8_t *)0U;
+    queue->tail = (uint8_t *)0U;
+    queue->begin = (uint8_t *)0U;
+    queue->end = (uint8_t *)0U;
 
-    return ((void *)(aQueue->begin));
+    return ((void *)(queue->begin));
 }
 
 /**
- * @brief       Postavlja element @b na @b kraju reda (tail) za cekanje (FIFO metod)
- * @param       aQueue                  Red cekanja gde treba postaviti dogadjaj,
- * @param       aItem                   element koji treba postaviti u red za
+ * @brief       Postavlja element @b na @b kraju reda (tail) za cekanje (FIFO
+ *              metod)
+ * @param       queue                   Red cekanja gde treba postaviti dogadjaj,
+ * @param       item                    element koji treba postaviti u red za
  *                                      cekanje.
- * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
+ * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS void esQPut_(
-    esQueue_T      * aQueue,
-    uint8_t         aItem) {
+    esQ_T      * queue,
+    uint8_t         item) {
 
-    *(aQueue->tail) = aItem;
+    *(queue->tail) = item;
 
-    if (aQueue->tail != aQueue->end) {
-        ++aQueue->tail;
+    if (queue->tail != queue->end) {
+        ++queue->tail;
     } else {
-        aQueue->tail = aQueue->begin;
+        queue->tail = queue->begin;
     }
 }
 
 /**
- * @brief       Postavlja dogadjaj @b na @b pocetku reda (head) za cekanje (LIFO metod)
- * @param       aQueue                  Red cekanja gde treba postaviti dogadjaj,
- * @param       aItem                   element koji treba postaviti u red za
+ * @brief       Postavlja dogadjaj @b na @b pocetku reda (head) za cekanje (LIFO
+ *              metod)
+ * @param       queue                   Red cekanja gde treba postaviti dogadjaj,
+ * @param       item                    element koji treba postaviti u red za
  *                                      cekanje.
- * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
+ * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS void esQPutAhead_(
-    esQueue_T   * aQueue,
-    uint8_t      aItem) {
+    esQ_T   * queue,
+    uint8_t      item) {
 
-    if (aQueue->head != aQueue->begin) {
-        --aQueue->head;
+    if (queue->head != queue->begin) {
+        --queue->head;
     } else {
-        aQueue->head = aQueue->end;
+        queue->head = queue->end;
     }
-    *(aQueue->head) = aItem;
+    *(queue->head) = item;
 }
 
 /**
  * @brief       Dobavlja element sa pocetka reda (head) za cekanje
- * @param       aQueue                  Red za cekanje odakle treba dobaviti
+ * @param       queue                   Red za cekanje odakle treba dobaviti
  *                                      element.
  * @return      Element iz reda za cekanje.
- * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
+ * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS uint8_t esQGet_(
-    esQueue_T   * aQueue) {
+    esQ_T   * queue) {
 
     uint8_t tmp;
 
-    tmp = *(aQueue->head);
+    tmp = *(queue->head);
 
-    if (aQueue->head != aQueue->end) {
-        ++aQueue->head;
+    if (queue->head != queue->end) {
+        ++queue->head;
     } else {
-        aQueue->head = aQueue->begin;
+        queue->head = queue->begin;
     }
 
     return (tmp);
 }
 
 /**
- * @brief       Dobavlja koliko maksimalno elemenata moze da stane u red za cekanje
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @brief       Dobavlja koliko maksimalno elemenata moze da stane u red za
+ *              cekanje
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Maksimalan broj elemenata koji mogu da stanu u red za cekanje
- * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
+ * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS size_t esQSize_(
-    const esQueue_T    * aQueue) {
+    const esQ_T    * queue) {
 
-    return ((size_t)(aQueue->end - aQueue->begin + 1U));
+    return ((size_t)(queue->end - queue->begin + 1U));
 }
 
 /**
  * @brief       Dobavlja velicinu reda za cekanje
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Trenutni broj elemenata u redu za cekanje.
- * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
+ * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS size_t esQOccupied_(
-    const esQueue_T    * aQueue) {
+    const esQ_T    * queue) {
 
-    if (aQueue->head < aQueue->tail) {
+    if (queue->head < queue->tail) {
 
-        return ((size_t)(aQueue->tail - aQueue->head));
+        return ((size_t)(queue->tail - queue->head));
     } else {
 
-        return ((size_t)(esQSize_(aQueue) - (aQueue->head - aQueue->tail)));
+        return ((size_t)(esQSize_(queue) - (queue->head - queue->tail)));
     }
 }
 
 /**
  * @brief       Dobavlja koliko jos elemenata moze da se smesti u red za cekanje
- * @param       aQueue                  Red za cekanje koji se ispituje
+ * @param       queue                   Red za cekanje koji se ispituje
  * @return      Koliko slobodnog prostora je preostalo.
  * @pre         Red za cekanje je prethodno kreiran init funkcijom
- *              esQpInit_().
+ *              esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS size_t esQFreeSpace_(
-    const esQueue_T    * aQueue) {
+    const esQ_T    * queue) {
 
-    if (aQueue->head < aQueue->tail) {
+    if (queue->head < queue->tail) {
 
-        return ((size_t)(esQSize_(aQueue) - (aQueue->tail - aQueue->head)));
+        return ((size_t)(esQSize_(queue) - (queue->tail - queue->head)));
     } else {
 
-        return ((size_t)(aQueue->head - aQueue->tail));
+        return ((size_t)(queue->head - queue->tail));
     }
 }
 
 /**
  * @brief       Vraca da li je red za cekanje pun
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Da li je red za cekanje pun?
  *  @retval     TRUE - red za cekanje je pun
  *  @retval     FALSE - red za cekanje nije pun
  * @pre         Red za cekanje je prethodno kreiran init funkcijom
- *              eS_qCtor().
+ *              esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS bool_T esQIsFull_(
-    const esQueue_T    * aQueue) {
+    const esQ_T *   queue) {
 
-    if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
-        (aQueue->tail == (aQueue->head - 1U))) {
+    if (((queue->head == queue->begin) && (queue->tail == queue->end)) ||
+        (queue->tail == (queue->head - 1U))) {
 
         return (TRUE);
     } else {
@@ -479,17 +484,17 @@ static C_INLINE_ALWAYS bool_T esQIsFull_(
 
 /**
  * @brief       Vraca da li je red za cekanje prazan
- * @param       aQueue                  Red za cekanje koji se ispituje.
+ * @param       queue                   Red za cekanje koji se ispituje.
  * @return      Da li je red za cekanje prazan?
  *  @retval     TRUE - red cekanja je prazan
  *  @retval     FALSE - red cekanaj nije prazan
- * @pre         Red za cekanje je prethodno kreiran init funkcijom eS_qCtor().
+ * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
 static C_INLINE_ALWAYS bool_T esQIsEmpty_(
-    const esQueue_T    * aQueue) {
+    const esQ_T *   queue) {
 
-    if (aQueue->head == aQueue->tail) {
+    if (queue->head == queue->tail) {
 
         return (TRUE);
     } else {
@@ -498,16 +503,14 @@ static C_INLINE_ALWAYS bool_T esQIsEmpty_(
     }
 }
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-------------------------------------------------------------------*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of queue.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* QUEUE_H_ */
