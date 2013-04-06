@@ -97,7 +97,7 @@ typedef enum esKernelStatus {
 /**
  * @brief       Kernel se ne izvrsava
  */
-    KERNEL_STOPPED,
+    KERNEL_STOPPED = 1UL,
 
 /**
  * @brief       Kernel se izvrsava
@@ -110,6 +110,8 @@ typedef enum esKernelStatus {
  *              ukljucen
  */
 enum esErrorCodes {
+    ES_NO_ERROR,
+
 /**
  * @brief       Argument nije ispravan, pokazuje na nesto drugo od ocekivanog.
  */
