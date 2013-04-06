@@ -59,11 +59,11 @@ struct esEpa {
  */
     struct evtQueue evtQueue;
 
-#if (OPT_LOG_LEVEL <= LOG_DBG) || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
-    uint32_t        signature;
+    uint16_t        signature;
 #endif
 
 /**

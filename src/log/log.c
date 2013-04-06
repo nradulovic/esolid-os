@@ -52,7 +52,7 @@ struct logMsg {
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
 /*----------------------------------------------------------------------------*/
-void logInit(esLog_T * log,
+void esLogInit(esLog_T * log,
     const C_ROM esLogDescriptor_T * C_ROM_VAR logDescriptor) {
 
     (void)log;
@@ -60,12 +60,11 @@ void logInit(esLog_T * log,
 }
 
 /*----------------------------------------------------------------------------*/
-void logSwitchesSet(
+void esLogSwitchSetOn(
     esLog_T *       log,
     uint32_t        switches) {
 
-    (void)log;
-    (void)switches;
+    log->switches |= switches;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -75,10 +74,29 @@ uint16_t logMsg(
     uint32_t        msg,
     uint32_t        val) {
 
-    (void)log;
-    (void)msg;
-    (void)val;
-    (void)type;
+    const C_ROM char * text;
+    size_t size;
+
+    if (msg <= log->logDescriptor->entries) {
+        text = log->logDescriptor->textTable[msg];
+        size = log->logDescriptor->sizeTable[msg];
+    } else {
+        text = "UNKNOWN TEXT";
+    }
+
+    switch (type) {
+        case LOG_TYPE_ERR :
+        case LOG_TYPE_DBG : {
+
+            esCpuStop();
+            break;
+        }
+
+        default : {
+
+            break;
+        }
+    }
 
     return (0U);
 }

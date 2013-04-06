@@ -129,7 +129,7 @@ static C_INLINE void epaDeInit_(
     }
 
 #if (OPT_LOG_LEVEL <= LOG_DBG)
-    epa->signature = ~EPA_SIGNATURE;
+    epa->signature = (uint16_t)~EPA_SIGNATURE;
 #endif
 }
 

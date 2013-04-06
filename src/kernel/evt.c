@@ -103,7 +103,7 @@ static C_INLINE_ALWAYS void evtDeInit_(
     evt->dynamic.u = (uint16_t)~EVT_SIGNATURE;
 
 #if (OPT_LOG_LEVEL <= LOG_DBG)
-    evt->signature = ~EVT_SIGNATURE;                                            /* Postavljanje loseg potpisa                               */
+    evt->signature = (uint16_t)~EVT_SIGNATURE;                                  /* Postavljanje loseg potpisa                               */
 #endif
 }
 

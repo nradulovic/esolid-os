@@ -134,7 +134,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
  */
-    uint32_t        signature;
+    uint16_t        signature;
 #endif
 
 #if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)

@@ -41,7 +41,7 @@
  * @pre         Opcija @ref OPT_KERNEL_DBG mora da bude aktivna kako bi bila
  *              omogucena provera pokazivaca.
  */
-#define SM_SIGNATURE                   (0xDAAF)
+#define SM_SIGNATURE                   UINT16_C(0xDAAF)
 
 /*=========================================================  LOCAL MACRO's  ==*/
 
@@ -97,8 +97,7 @@ const C_ROM esEvt_T evtSignal[] = {
             .attrib = EVT_CONST_MASK
         }
     },
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     [SIG_EMPTY].signature = EVT_SIGNATURE,
 #endif
 
@@ -109,8 +108,7 @@ const C_ROM esEvt_T evtSignal[] = {
             .attrib = EVT_CONST_MASK
         }
     },
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     [SIG_ENTRY].signature = EVT_SIGNATURE,
 #endif
 
@@ -121,8 +119,7 @@ const C_ROM esEvt_T evtSignal[] = {
             .attrib = EVT_CONST_MASK
         }
     },
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     [SIG_EXIT].signature = EVT_SIGNATURE,
 #endif
 
@@ -133,8 +130,7 @@ const C_ROM esEvt_T evtSignal[] = {
             .attrib = EVT_CONST_MASK
         }
     },
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     [SIG_INIT].signature = EVT_SIGNATURE,
 #endif
 
@@ -145,8 +141,7 @@ const C_ROM esEvt_T evtSignal[] = {
             .attrib = EVT_CONST_MASK
         }
     },
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     [SIG_SUPER].signature = EVT_SIGNATURE,
 #endif
 };
@@ -333,7 +328,7 @@ void smDeInit(
 #endif
 
 #if (OPT_LOG_LEVEL <= LOG_DBG)
-    sm->signature = ~SM_SIGNATURE;
+    sm->signature = (uint16_t)~SM_SIGNATURE;
 #endif
 }
 
@@ -439,8 +434,8 @@ esStatus_T esRetnTransition(
     esState_T       state) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != sm, LOG_SM_RETN_TRAN, ES_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == ((esSm_T *)sm)->signature, LOG_SM_RETN_TRAN, ES_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != sm, LOG_SM_RETN_TRAN, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == ((esSm_T *)sm - 1U)->signature, LOG_SM_RETN_TRAN, ES_ARG_NOT_VALID);
     }
 
     ((esSm_T *)sm - 1U)->state = state;
@@ -471,8 +466,8 @@ esStatus_T esRetnSuper(
     esState_T       state) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != sm, LOG_SM_RETN_SUPER, ES_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == ((esSm_T *)sm)->signature, LOG_SM_RETN_SUPER, ES_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != sm, LOG_SM_RETN_SUPER, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == ((esSm_T *)sm - 1U)->signature, LOG_SM_RETN_SUPER, ES_ARG_NOT_VALID);
     }
 
     ((esSm_T *)sm - 1U)->state = state;

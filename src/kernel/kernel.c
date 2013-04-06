@@ -53,8 +53,14 @@ void kernelInit(
     esSmpInit();
     schedInit();
 
-#if defined(OPT_STP_ENABLE)
-    esStpInit();
+#if (OPT_LOG_LEVEL != LOG_DISABLED)
+    esLogInit(
+        &gKernelLog,
+        &gKernelLogDescriptor);
+    esLogSwitchSetOn(
+        &gKernelLog,
+        LOG_FILT_SMP | LOG_FILT_SCHED | LOG_FILT_MM | LOG_FILT_KERNEL |
+        LOG_FILT_EVT | LOG_FILT_EPA | LOG_FILE_EVTQ);
 #endif
     gKernelStatus = KERNEL_STOPPED;
 }

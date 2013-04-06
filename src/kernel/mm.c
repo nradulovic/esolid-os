@@ -159,7 +159,7 @@ C_UNUSED_FUNC static void smemInit(
 C_UNUSED_FUNC static void dmemInit(
     uint8_t     * boundary);
 
-C_UNUSED_FUNC static void dummyDeAlloc(
+C_UNUSED_FUNC static void SmemDeAlloc(
     void            * aMemory);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -188,26 +188,16 @@ static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(OPT_MM_MANAGED_S
  * @brief       Dinamicki memorijski alokator
  */
 const C_ROM esMemClass_T esMemDynClass = {
-#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    &esSmemAlloc,
-    &dummyDeAlloc,
-#else
     &esDmemAlloc,
     &esDmemDeAlloc,
-#endif
 };
 
 /**
  * @brief       Staticki memorijski alokator
  */
 const C_ROM esMemClass_T esMemStaticClass = {
-#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
-    &esDmemAlloc,
-    &esDmemDeAlloc,
-#else
     &esSmemAlloc,
-    &dummyDeAlloc,
-#endif
+    &SmemDeAlloc,
 };
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -261,11 +251,13 @@ static void dmemInit(
 /**
  * @brief       Prazna funkcija
  * @param       aMemory                 Ignorisan parametar
+ * @notapi
  */
-static void dummyDeAlloc(
+static void SmemDeAlloc(
     void            * aMemory) {
 
     (void)aMemory;
+    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_SDALLOC, ES_USAGE_FAILURE);
 }
 
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
@@ -322,12 +314,14 @@ void * esSmemAllocI(
         tmp = gSmemSentinel;
         gSmemSentinel += size;
     } else {
+        ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_SALLOC, ES_NOT_ENOUGH_MEM);
         tmp = (void *)0;
     }
 
     return (tmp);
 #else
     (void)size;
+    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_SALLOC, ES_USAGE_FAILURE);
 
     return ((void *)0);
 #endif
@@ -337,21 +331,16 @@ void * esSmemAllocI(
 void * esSmemAlloc(
     size_t          size) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
     void * tmp;
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    tmp = esSmemAllocI(size);
+    tmp = esSmemAllocI(
+        size);
     ES_CRITICAL_EXIT();
 
     return (tmp);
-#else
-    (void)size;
-
-    return ((void *)0);
-#endif
 }
 
 /*----------------------------------------------------------------------------*/

@@ -133,7 +133,7 @@ struct esSm {
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
-    uint32_t        signature;
+    uint16_t        signature;
 #endif
 
 #if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)

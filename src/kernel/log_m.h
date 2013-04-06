@@ -53,33 +53,35 @@
     ENTRY(LOG_PRIO, " priority")                                                \
     ENTRY(LOG_NAME, " name")                                                    \
     ENTRY(LOG_ARGUMENT, " argument")                                            \
-    ENTRY(LOG_EPA_CREATE,"EPA: create(memClass, definition)")                   \
-    ENTRY(LOG_EPA_PRIOSET, "EPA: prioSet(epa, newPrio)")                        \
-    ENTRY(LOG_EPA_PRIOGET, "EPA: prio prioGet(epa)")                            \
-    ENTRY(LOG_EPA_DESTROY, "EPA: destroy(epa)")                                 \
-    ENTRY(LOG_EPA_DISPATCH, "EPA: dispatch(epa, evt)")                          \
-    ENTRY(LOG_EPA_EVTPOST, "EPA: evtPost(epa, evt)")                            \
-    ENTRY(LOG_EPA_EVTPOSTA, "EPA: evtPostAhead(epa, evt)")                      \
-    ENTRY(LOG_EPA_EVTFETCH, "EPA: evt evtFetch(epa)")                           \
-    ENTRY(LOG_EPA_EVTPUSHBACK, "EPA: evtPushBack(epa, evt)")                    \
     ENTRY(LOG_EPA_INIT, "EPA internal: initialization")                         \
-    ENTRY(LOG_MM_CREATEO, "MM internal: create object")                         \
-    ENTRY(LOG_MM_DESTROYO, "MM internal: destroy object")                       \
-    ENTRY(LOG_MM_DALLOC, "MM: dMemAlloc(size)")                                 \
-    ENTRY(LOG_MM_DDALLOC, "MM: dMemDeAlloc(mem)")                               \
+    ENTRY(LOG_EPA_DISPATCH, "EPA internal: dispatch EPA")                       \
+    ENTRY(LOG_EPA_EVTFETCH, "EPA internal: fetch an event for EPA")             \
+    ENTRY(LOG_EPA_EVTPUSHBACK, "EPA internal: push back an event")              \
     ENTRY(LOG_SCHED_REG, "EPA internal: scheduler EPA registration")            \
-    ENTRY(LOG_SM_DISPATCH, "SM: dispatch(sm, evt)")                             \
-    ENTRY(LOG_SM_CREATE, "SM: create(memClass, definition)")                    \
-    ENTRY(LOG_SM_DESTROY, "SM: destroy(sm)")                                    \
+    ENTRY(LOG_EPA_CREATE,"EPA: create EPA, esEpaCreate(memClass, definition)")  \
+    ENTRY(LOG_EPA_PRIOSET, "EPA: set EPA priority, esEpaPrioSet(epa, newPrio)") \
+    ENTRY(LOG_EPA_PRIOGET, "EPA: get EPA priority, esEpaPrioGet(epa)")          \
+    ENTRY(LOG_EPA_DESTROY, "EPA: destroy EPA, esEpaDestroy(epa)")               \
+    ENTRY(LOG_EPA_EVTPOST, "EPA: post an event to EPA, esEvtPost(epa, evt)")    \
+    ENTRY(LOG_EPA_EVTPOSTA, "EPA: post ahead an event to EPA, esEvtPostAhead(epa, evt)")\
+    ENTRY(LOG_MM_CREATEO, "MM internal: create mem object")                     \
+    ENTRY(LOG_MM_DESTROYO, "MM internal: destroy mem object")                   \
+    ENTRY(LOG_MM_SDALLOC, "MM internal: static memory deallocate")              \
+    ENTRY(LOG_MM_DALLOC, "MM: dynamic memory allocate, esDmemAlloc(size)")      \
+    ENTRY(LOG_MM_DDALLOC, "MM: dynamic memory deallocate, esDmemDeAlloc(mem)")  \
+    ENTRY(LOG_MM_SALLOC, "MM: static memory allocate, esSmemAlloc(size)")       \
+    ENTRY(LOG_SM_DISPATCH, "SM: state machine dispatch, esSmDispatch(sm, evt)") \
+    ENTRY(LOG_SM_CREATE, "SM: create a state machine, esSmCreate(memClass, definition)")\
+    ENTRY(LOG_SM_DESTROY, "SM: destroy a state machine, esSmDestroy(sm)")       \
     ENTRY(LOG_SM_RETN_SUPER, "SM: retnSuper(sm, state)")                        \
     ENTRY(LOG_SM_RETN_TRAN, "SM: retnTransition(sm, state)")                    \
     ENTRY(LOG_KERN_START, "KERNEL: kernelStart()")                              \
     ENTRY(LOG_KERN_EPA_GET, "KERNEL: kernelEpaGet()")                           \
-    ENTRY(LOG_EVT_USRADD, "EVT internal: adding evt users")                     \
-    ENTRY(LOG_EVT_CREATE, "EVT: evtCreate(size, id)")                           \
-    ENTRY(LOG_EVT_DESTROY, "EVT: evtDestroy(evt)")                              \
-    ENTRY(LOG_EVT_RESERVE, "EVT: evtReserve(evt)")                              \
-    ENTRY(LOG_EVT_UNRESERVE, "EVT: evtUnReserve(evt)")                          \
+    ENTRY(LOG_EVT_USRADD, "EVT internal: adding event users")                   \
+    ENTRY(LOG_EVT_CREATE, "EVT: event create, esEvtCreate(size, id)")           \
+    ENTRY(LOG_EVT_DESTROY, "EVT: event destroy, esEvtDestroy(evt)")             \
+    ENTRY(LOG_EVT_RESERVE, "EVT: event reserve, esEvtReserve(evt)")             \
+    ENTRY(LOG_EVT_UNRESERVE, "EVT: event unreserve, esEvtUnReserve(evt)")       \
     ENTRY(LOG_EVTQ_INIT, "EPA internal: Event queue level is too small. Increase event queue level")
 
 /*===============================================================  MACRO's  ==*/

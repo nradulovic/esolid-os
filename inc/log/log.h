@@ -62,7 +62,7 @@
  * @brief       Obelezava greske u sistemu
  */
 # define ES_LOG_IS_ERR(log, filter)                                             \
-    ((log)->switches & (1UL << (LOG_ERR + 24)) & (filter))
+    ((log)->switches & (filter))
 
 # define ES_LOG_ERR_START(log, msg, var)                                        \
     uint16_t logHandle_ = logMsg(log, LOG_TYPE_ERR, msg, (uint32_t)var)
@@ -104,7 +104,7 @@
  */
 #if (OPT_LOG_LEVEL <= LOG_WARN)
 # define ES_LOG_IS_WARN(log, filter)                                            \
-    ((log)->switches & (1UL << (LOG_WARN + 24)) & (filter))
+    ((log)->switches & (filter))
 
 # define ES_LOG_WARN_START(log, msg, var)                                       \
     uint16_t logHandle_ = logMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var)
@@ -162,7 +162,7 @@
  */
 #if (OPT_LOG_LEVEL <= LOG_INFO)
 # define ES_LOG_IS_INFO(log, filter)                                            \
-    ((log)->switches & (1UL << (LOG_INFO + 24)) & (filter))
+    ((log)->switches & (filter))
 
 # define ES_LOG_INFO_START(log, msg, var)                                       \
     uint16_t logHandle_ = logMsg(log, LOG_TYPE_INFO, msg, (uint32_t)var)
@@ -205,7 +205,7 @@
  */
 #if (OPT_LOG_LEVEL <= LOG_DBG)
 # define ES_LOG_IS_DBG(log, filter)                                             \
-    ((log)->switches & (1UL << (LOG_DBG + 24)) & (filter))
+    ((log)->switches & (filter))
 
 # define ES_LOG_DBG_START(log, msg, var)                                        \
     uint16_t logHandle_ = logMsg(log, LOG_TYPE_DBG, msg, (uint32_t)var)
@@ -263,7 +263,7 @@
  */
 #if (OPT_LOG_LEVEL <= LOG_TRACE)
 # define ES_LOG_IS_TRACE(log, filter)                                           \
-    ((log)->switches & (1UL << (LOG_TRACE + 24)) & (filter))
+    ((log)->switches & (filter))
 
 # define ES_LOG_TRACE_START(log, msg, var)                                      \
     uint16_t logHandle_ = logMsg(log, LOG_TYPE_TRACE, msg, (uint32_t)var)
@@ -402,11 +402,11 @@ typedef struct esLog {
  * @brief       Inicijalizuje LOG sa deskriptor strukturom
  * @note        Ova funkcija se mora prva pozvati
  */
-void logInit(
+void esLogInit(
     esLog_T *       log,
     const C_ROM esLogDescriptor_T * C_ROM_VAR logDescriptor);
 
-void logSwitchesSet(
+void esLogSwitchSetOn(
     esLog_T *       log,
     uint32_t        switches);
 
