@@ -49,7 +49,7 @@
  * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
  *              omogucena provera pokazivaca.
  */
-#define EVT_SIGNATURE                   (UINT16_C(0xFEED))
+#define EVT_SIGNATURE                   0xFEEDUL
 
 /*==================================================================================  MACRO's  ==*/
 
@@ -75,6 +75,9 @@ extern "C" {
 static C_INLINE void evtUsrAddI_(
     esEvt_T         * evt) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_USRADD, ES_ERR_ARG_NOT_VALID);
+    }
 
     if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
         ++evt->dynamic.s.counter;
@@ -93,14 +96,13 @@ static C_INLINE void evtUsrRmI_(
     }
 }
 
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #if defined(__cplusplus)
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
  * END of evt_pkg.h
  *************************************************************************************************/
 #endif /* EVT_PKG_H_ */

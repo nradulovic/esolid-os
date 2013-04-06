@@ -45,26 +45,6 @@
 
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
-
-/**
- * @brief       Objekat - EPA
- */
-typedef struct epaObject {
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
-    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Pokazivac na klasu memorijskog alokatora
- */
-    const C_ROM struct esMemClass * memClass;
-#endif
-
-/**
- * @brief       Instanca EPA
- */
-    struct esEpa    epa;
-} epaObject_T;
-
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
 static C_INLINE void epaInit_(
@@ -95,12 +75,10 @@ static C_INLINE void epaInit_(
 
     ES_CRITICAL_DECL();
     
-    KERN_LOG_DBG(
-        (definition->epaPrio <= OPT_KERNEL_EPA_PRIO_MAX),
-        gKernelLog,
-        LOG_FILT_EPA,
-        LOG_EPA_INIT,
-        ES_ERR_ARG_OUT_OF_RANGE);
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, definition->epaPrio <= OPT_KERNEL_EPA_PRIO_MAX, LOG_EPA_INIT, ES_ERR_ARG_OUT_OF_RANGE);
+    }
+
     epa->prio = definition->epaPrio;
     epa->name = definition->epaName;
     ES_CRITICAL_ENTER(
@@ -115,7 +93,7 @@ static C_INLINE void epaInit_(
         epa->prio);
     ES_CRITICAL_EXIT();
 
-#if (OPT_KERNEL_ENABLE_LOG <= LOG_DBG)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     epa->signature = EPA_SIGNATURE;
 #endif
 }
@@ -150,7 +128,7 @@ static C_INLINE void epaDeInit_(
         ES_CRITICAL_EXIT();
     }
 
-#if (OPT_KERNEL_ENABLE_LOG <= LOG_DBG)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     epa->signature = ~EPA_SIGNATURE;
 #endif
 }
@@ -214,21 +192,9 @@ void esEvtPostI(
     esEvt_T *       evt) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-
-        if (ES_LOG_IS_INVALID((0U != epa) && (0U != evt))) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_EVTPOST,
-                ES_ERR_ARG_NULL);
-        }
-
-        if (ES_LOG_IS_INVALID(EPA_SIGNATURE == epa->signature)) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_EVTPOST,
-                ES_ERR_ARG_NOT_VALID);
-        }
-    } /* ES_LOG_IS_DBG */
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0U != epa) && (0U != evt), LOG_EPA_EVTPOST, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOST, ES_ERR_ARG_NOT_VALID);
+    }
 
     if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         evtUsrAddI_(
@@ -245,7 +211,7 @@ void esEvtPostI(
             &epa->evtQueue,
             evt);
     } else {
-        /* Greska! Red je pun. */
+        ES_LOG_IF_WARN(&gKernelLog, LOG_FILT_EPA, LOG_EPA_EVTPOST, ES_ERR_NOT_ENOUGH_MEM);
         esEvtDestroyI(
             evt);
     }
@@ -272,21 +238,9 @@ void esEvtPostAheadI(
     esEvt_T *       evt) {
     
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-
-        if (ES_LOG_IS_INVALID((0U != epa) && (0U != evt))) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_EVTPOSTA,
-                ES_ERR_ARG_NULL);
-        }
-
-        if (ES_LOG_IS_INVALID(EPA_SIGNATURE == epa->signature)) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_EVTPOSTA,
-                ES_ERR_ARG_NOT_VALID);
-        }
-    } /* ES_LOG_IS_DBG */
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0U != epa) && (0U != evt), LOG_EPA_EVTPOSTA, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOSTA, ES_ERR_ARG_NOT_VALID);
+    }
 
     if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
         evtUsrAddI_(
@@ -297,7 +251,7 @@ void esEvtPostAheadI(
         schedRdyInsertI_(
             epa->prio);
     } else {
-        /* Greska! Red je pun. */
+        ES_LOG_IF_WARN(&gKernelLog, LOG_FILT_EPA, LOG_EPA_EVTPOSTA, ES_ERR_NOT_ENOUGH_MEM);
         esEvtDestroyI(
             evt);
     }
@@ -308,25 +262,19 @@ esEpa_T * esEpaCreate(
     const C_ROM esMemClass_T *  memClass,
     const C_ROM esEpaDef_T *    definition) {
 
-    epaObject_T * newEpa;
+    esEpa_T * newEpa;
     size_t coreSize;
     size_t stateQSize;
     size_t evtQSize;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0UL != memClass) && (0UL != definition), LOG_EPA_CREATE, ES_ERR_ARG_NULL);
+    }
 
-        if (ES_LOG_IS_INVALID((0UL != memClass) && (0UL != definition))) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_CREATE,
-                ES_ERR_ARG_NULL);
-        }
-    } /* ES_LOG_IS_DBG */
-
-#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
+#if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
-    coreSize = sizeof(epaObject_T);
+    coreSize = sizeof(esEpa_T);
     coreSize += ES_ALIGN(
         definition->epaWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
@@ -336,89 +284,42 @@ esEpa_T * esEpaCreate(
         ES_CPU_ATTRIB_ALIGNMENT);
     evtQSize = ES_ALIGN(
         evtQReqSize(
-            definition->evtQueueDepth),
+            definition->evtQueueLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    coreSize = sizeof(epaObject_T);
+    coreSize = sizeof(esEpa_T);
     coreSize += definition->epaWorkspaceSize;
     stateQSize = stateQReqSize(
         definition->smLevels);
     evtQSize = evtQReqSize(
-        definition->evtQueueDepth
+        definition->evtQueueLevels);
 #endif
-
-#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
-    {
-        ES_CRITICAL_DECL();
-
-        (void)memClass;
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        newEpa = esDmemAllocI(
-            coreSize + stateQSize + evtQSize);
-        ES_CRITICAL_EXIT();
-    }
-#elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    {
-        ES_CRITICAL_DECL();
-
-        (void)memClass;
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        newEpa = esSmemAllocI(
-            coreSize + stateQSize + evtQSize);
-        ES_CRITICAL_EXIT();
-    }
-#else
-    newEpa = (* memClass->alloc)(coreSize + stateQSize + evtQSize);
-    newEpa->memClass = memClass;
-#endif
+    newEpa = mmCreateObject(
+        memClass,
+        coreSize + stateQSize + evtQSize);
     smInit(
-        &newEpa->epa.sm,
+        &newEpa->sm,
         definition->smInitState,
         (esState_T *)((uint8_t *)newEpa + coreSize),
         definition->smLevels);
     evtQInit(
-        &newEpa->epa.evtQueue,
+        &newEpa->evtQueue,
         (esEvt_T **)((uint8_t *)newEpa + coreSize + stateQSize),
-        evtQSize / sizeof(esEvt_T **));
+        definition->evtQueueLevels);
     epaInit_(
-        &newEpa->epa,
+        newEpa,
         definition);
 
-    return (&newEpa->epa);
+    return (newEpa);
 }
 
 /*----------------------------------------------------------------------------*/
 void esEpaDestroy(
     esEpa_T *       epa) {
 
-#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG(
-            &gKernelLog,
-            LOG_EPA_DESTROY,
-            ES_ERR_USAGE_FAILURE);
-    }
-#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
-    ES_CRITICAL_DECL();
-
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-
-        if (ES_LOG_IS_INVALID(0UL != epa)) {
-            ES_LOG_DBG(
-                gKernelLog,
-                LOG_EPA_DESTROY,
-                ES_ERR_ARG_NULL);
-        }
-
-        if (ES_LOG_IS_INVALID(EPA_SIGNATURE == epa->signature)) {
-            ES_LOG_DBG(
-                gKernelLog,
-                LOG_EPA_DESTROY,
-                ES_ERR_ARG_NOT_VALID);
-        }
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != epa, LOG_EPA_DESTROY, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_DESTROY, ES_ERR_ARG_NOT_VALID);
     }
 
     epaDeInit_(
@@ -427,52 +328,18 @@ void esEpaDestroy(
         &epa->evtQueue);
     smDeInit(
         &epa->sm);
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    esDmemDeAllocI(
-        C_CONTAINER_OF(epa, epaObject_T, epa));
-    ES_CRITICAL_EXIT();
-#else
-    {
-        epaObject_T * epaObject;
-        
-        KERN_LOG_DBG(
-            (0U != epa),
-            gKernelLog,
-            LOG_FILT_EPA,
-            LOG_EPA_DESTROY,
-            ES_ERR_ARG_NULL);
-        KERN_LOG_DBG(
-            (EPA_SIGNATURE == epa->signature),
-            gKernelLog,
-            LOG_FILT_EPA,
-            LOG_EPA_DESTROY,
-            ES_ERR_ARG_NOT_VALID);
-
-        epaDeInit_(
-            epa);
-        epaObject = C_CONTAINER_OF(epa, epaObject_T, epa);
-        (* epaObject->memClass->deAlloc)(epaObject);
-    }
-#endif
+    mmDestroyObject(
+        epa);
 }
 
 /*----------------------------------------------------------------------------*/
 uint8_t esEpaPrioGet(
     const esEpa_T * epa) {
 
-    KERN_LOG_DBG(
-        (0U != epa),
-        gKernelLog,
-        LOG_FILT_EPA,
-        LOG_EPA_PRIOGET,
-        ES_ERR_ARG_NULL);
-    KERN_LOG_DBG(
-        (EPA_SIGNATURE == epa->signature),
-        gKernelLog,
-        LOG_FILT_EPA,
-        LOG_EPA_PRIOGET,
-        ES_ERR_ARG_NOT_VALID);
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != epa, LOG_EPA_PRIOGET, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_PRIOGET, ES_ERR_ARG_NOT_VALID);
+    }
 
     return (epa->prio);
 }
@@ -486,20 +353,8 @@ void esEpaPrioSet(
     bool_T status;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-
-        if (ES_LOG_IS_INVALID(0UL != epa)) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_PRIOSET,
-                ES_ERR_ARG_NULL);
-        }
-
-        if (ES_LOG_IS_INVALID(EPA_SIGNATURE == epa->signature)) {
-            ES_LOG_DBG(
-                &gKernelLog,
-                LOG_EPA_PRIOSET,
-                ES_ERR_ARG_NOT_VALID);
-        }
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != epa, LOG_EPA_PRIOGET, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_PRIOGET, ES_ERR_ARG_NOT_VALID);
     }
 
     ES_CRITICAL_ENTER(

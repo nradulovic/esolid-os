@@ -51,6 +51,10 @@ static esKernelStatus_T gKernelStatus;
 esEpa_T * esKernelEpaGet(
     void) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == KERNEL_RUNNING, LOG_KERN_EPA_GET, ES_ERR_USAGE_FAILURE);
+    }
+
     return (schedEpaGetCurrent_());
 }
 
@@ -70,6 +74,10 @@ void kernelInit(
 /*----------------------------------------------------------------------------*/
 C_NAKED void esKernelStart(
     void) {
+
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == KERNEL_STOPPED, LOG_KERN_START, ES_ERR_USAGE_FAILURE);
+    }
 
     gKernelStatus = KERNEL_RUNNING;
 

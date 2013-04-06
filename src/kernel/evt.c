@@ -67,7 +67,7 @@ static C_INLINE_ALWAYS void evtInit_(
     evt->timestamp = uTimestampGet();
 #endif
 
-#if (OPT_KERNEL_ENABLE_LOG == 1U)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     evt->signature = EVT_SIGNATURE;
 #endif
 
@@ -102,7 +102,7 @@ static C_INLINE_ALWAYS void evtDeInit_(
 
     evt->dynamic.u = (uint16_t)~EVT_SIGNATURE;
 
-#if (OPT_KERNEL_ENABLE_LOG == 1U)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
     evt->signature = ~EVT_SIGNATURE;                                            /* Postavljanje loseg potpisa                               */
 #endif
 }
@@ -140,6 +140,10 @@ esEvt_T * esEvtCreateI(
 
     esEvt_T * newEvt;
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= sizeof(esEvt_T), LOG_EVT_CREATE, ES_ERR_ARG_OUT_OF_RANGE);
+    }
+
     newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
@@ -153,12 +157,22 @@ esEvt_T * esEvtCreateI(
 void esEvtReserve(
     esEvt_T *       evt) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != evt, LOG_EVT_RESERVE, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_RESERVE, ES_ERR_ARG_NOT_VALID);
+    }
+
     evt->dynamic.s.attrib |= EVT_RESERVED_MASK;
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtUnReserve(
     esEvt_T *       evt) {
+
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != evt, LOG_EVT_UNRESERVE, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_UNRESERVE, ES_ERR_ARG_NOT_VALID);
+    }
 
     evt->dynamic.s.attrib &= ~EVT_RESERVED_MASK;
 }
@@ -179,6 +193,11 @@ void esEvtDestroy(
 /*----------------------------------------------------------------------------*/
 void esEvtDestroyI(
     esEvt_T *       evt) {
+
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != evt, LOG_EVT_DESTROY, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_DESTROY, ES_ERR_ARG_NOT_VALID);
+    }
 
     if ((uint_fast8_t)0U == evt->dynamic.u) {
         evtDeInit_(

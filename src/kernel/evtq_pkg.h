@@ -74,9 +74,9 @@ typedef struct evtQueue {
 /**
  * @brief       Instanca reda za cekanje opste namene
  */
-    esQueuePtr_T    queue;
+    esQp_T          queue;
 
-#if defined(OPT_KERNEL_DBG_EVT) || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
 /**
  * @brief       Trenutni broj slobodnih lokacija u redu za cekanje
  */
@@ -128,8 +128,8 @@ static C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     evt = esQpGet_(
         &evtQ->queue);
 
-#if defined(OPT_KERNEL_DBG_EVT)
-    ++(epa->evtQueue.free);
+#if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
+    ++evtQ->free;
 #endif
 
     return (evt);
@@ -149,8 +149,8 @@ static C_INLINE_ALWAYS void evtQPutAheadI_(
         &evtQ->queue,
         evt);
 
-#if defined(OPT_KERNEL_DBG_EVT)
-    --(evtQ->free);
+#if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
+    --evtQ->free;
     if (evtQ->free < evtQ->freeMin) {
         evtQ->freeMin = evtQ->free;
     }
@@ -171,8 +171,8 @@ static C_INLINE_ALWAYS void evtQPutI_(
         &evtQ->queue,
         evt);
 
-#if defined(OPT_KERNEL_DBG_EVT)
-    --(evtQ->free);
+#if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
+    --evtQ->free;
     if (evtQ->free < evtQ->freeMin) {
         evtQ->freeMin = evtQ->free;
     }

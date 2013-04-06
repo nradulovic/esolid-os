@@ -54,12 +54,16 @@ void evtQInit(
     esEvt_T **      evtQBuff,
     uint8_t         size) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= 1UL, LOG_EVTQ_INIT, ES_ERR_ARG_OUT_OF_RANGE);
+    }
+
     esQpInit_(
         &evtQ->queue,
         (void **)evtQBuff,
         size);
 
-#if defined(OPT_KERNEL_DBG_EVT)
+#if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
     evtQ->free = esQpFreeSpace_(
         &evtQ->queue);
     evtQ->freeMin = evtQ->free;
@@ -73,8 +77,8 @@ void evtQDeInit(
     esQpDeInit_(
         &evtQ->queue);
 
-#if defined(OPT_KERNEL_DBG_EVT)
-    epa->evtQueue.freeMin = epa->evtQueue.free = 0U;
+#if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
+    evtQ->freeMin = evtQ->free = 0U;
 #endif
 }
 

@@ -32,6 +32,17 @@
 #include "kernel_private.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
+
+/**
+ * @brief       Konstanta za potpis SM objekta
+ * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
+ *              koje prihvate pokazivac na SM objekat bile sigurne da je SM
+ *              objekat validan. SM objekti koji su obrisani nemaju ovaj potpis.
+ * @pre         Opcija @ref OPT_KERNEL_DBG mora da bude aktivna kako bi bila
+ *              omogucena provera pokazivaca.
+ */
+#define SM_SIGNATURE                   (0xDAAF)
+
 /*=========================================================  LOCAL MACRO's  ==*/
 
 /**
@@ -55,27 +66,6 @@
     (*state)(((sm) + 1U), (evt))
 
 /*======================================================  LOCAL DATA TYPES  ==*/
-
-/**
- * @brief       Objekat - SM (State Machine)
- */
-typedef struct smObject {
-
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
-    && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Pokazivac na klasu memorijskog alokatora
- */
-    const C_ROM struct esMemClass * memClass;
-#endif
-
-/**
- * @brief       Instanca automata
- */
-    struct esSm sm;
-} smObject_T;
-
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
 static esState_T * hsmTranFindPath(
@@ -319,6 +309,10 @@ void smInit (
         sm->stateQEnd = stateQueue + (levels * 2U) - 1U;
     }
 #endif
+
+#if (OPT_LOG_LEVEL <= LOG_DBG)
+    sm->signature = SM_SIGNATURE;
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -336,6 +330,10 @@ void smDeInit(
     sm->state = (esState_T)0U;
     sm->stateQBegin = (esState_T *)0U;
     sm->stateQEnd = (esState_T *)0;
+#endif
+
+#if (OPT_LOG_LEVEL <= LOG_DBG)
+    sm->signature = ~SM_SIGNATURE;
 #endif
 }
 
@@ -440,6 +438,11 @@ esStatus_T esRetnTransition(
     void *          sm,
     esState_T       state) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != sm, LOG_SM_RETN_TRAN, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == ((esSm_T *)sm)->signature, LOG_SM_RETN_TRAN, ES_ERR_ARG_NOT_VALID);
+    }
+
     ((esSm_T *)sm - 1U)->state = state;
 
     return (RETN_TRAN);
@@ -467,6 +470,11 @@ esStatus_T esRetnSuper(
     void *          sm,
     esState_T       state) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != sm, LOG_SM_RETN_SUPER, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == ((esSm_T *)sm)->signature, LOG_SM_RETN_SUPER, ES_ERR_ARG_NOT_VALID);
+    }
+
     ((esSm_T *)sm - 1U)->state = state;
 
     return (RETN_SUPER);
@@ -479,6 +487,11 @@ esStatus_T esSmDispatch(
 
     esStatus_T status;
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0UL != sm) && (0UL != evt), LOG_SM_DISPATCH, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == sm->signature, LOG_SM_DISPATCH, ES_ERR_ARG_NOT_VALID);
+    }
+
     status = SM_DISPATCH(sm, evt);
 
     return (status);
@@ -489,14 +502,18 @@ esSm_T * esSmCreate(
     const C_ROM esMemClass_T *  memClass,
     const C_ROM esSmDef_T *     definition) {
 
-    smObject_T * newSm;
+    esSm_T * newSm;
     size_t smpSize;
     size_t stateQSize;
 
-#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0UL != memClass) && (0UL != definition), LOG_SM_CREATE, ES_ERR_ARG_NULL);
+    }
+
+#if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)     /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
-    smpSize = sizeof(smObject_T);
+    smpSize = sizeof(esSm_T);
     smpSize += ES_ALIGN(
         definition->smWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
@@ -505,73 +522,36 @@ esSm_T * esSmCreate(
             definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
 #else
-    smpSize = sizeof(smObject_T) + definition->smWorkspaceSize;
+    smpSize = sizeof(esSm_T);
+    smpSize += definition->smWorkspaceSize;
     stateQSize = stateQReqSize(
         definition->smLevels);
 #endif
-
-#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    (void)aMemClass;
-    {
-        ES_CRITICAL_DECL();
-
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        newSm = esSmemAllocI(
-            smpSize + stateQSize);
-        ES_CRITICAL_EXIT();
-    }
-#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
-    (void)memClass;
-    {
-        ES_CRITICAL_DECL();
-
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        newSm = esDmemAllocI(
-            smpSize + stateQSize);
-        ES_CRITICAL_EXIT();
-    }
-#else
-    newSm = (* memClass->alloc)(smpSize + stateQSize);
-    newSm->memClass = memClass;
-#endif
+    newSm = mmCreateObject(
+        memClass,
+        smpSize + stateQSize);
     smInit(
-        &newSm->sm,
+        newSm,
         definition->smInitState,
         (esState_T *)(newSm + smpSize),
         definition->smLevels);
 
-    return (&newSm->sm);
+    return (newSm);
 }
 
 /*----------------------------------------------------------------------------*/
 void esSmDestroy(
     esSm_T *        sm) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != sm, LOG_SM_DESTROY, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == sm->signature, LOG_SM_DESTROY, ES_ERR_ARG_NOT_VALID);
+    }
+
     smDeInit(
         sm);
-
-#if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    /* Greska! Staticni objekat */
-#elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
-    {
-        ES_CRITICAL_DECL();
-
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        esDmemDeAllocI(
-            C_CONTAINER_OF(sm, smObject_T, sm));
-        ES_CRITICAL_EXIT();
-    }
-#else
-    {
-        smObject_T * smObject;
-
-        smObject = C_CONTAINER_OF(sm, smObject_T, sm);
-        (* smObject->memClass->deAlloc)(smObject);
-    }
-#endif
+    mmDestroyObject(
+        sm);
 }
 
 /*----------------------------------------------------------------------------*/

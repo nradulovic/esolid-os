@@ -391,7 +391,7 @@ void * esDmemAllocI(
 #if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
     size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
 #endif
-    DLS_FOR_EACH_ENTRY(
+    ES_DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,
         &(DMEM_SENTINEL->freeList),
@@ -408,7 +408,7 @@ void * esDmemAllocI(
                     &(prevPhy->blk.phyList),
                     &(freeBlk->blk.phyList));
             } else {
-                esDlsNodeRemove_(
+                esDlsNodeRm_(
                     &(freeBlk->freeList));
             }
             BLK_STAT_BUSY(freeBlk);
@@ -470,7 +470,7 @@ void esDmemDeAllocI(
     dmemBlkHdr_T * tmpPhy;
 
     freeBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
-    currPhy = esSlsNodeEntry(
+    currPhy = ES_SLS_NODE_ENTRY(
         dmemBlkHdr_T,
         blk.phyList,
         freeBlk->blk.phyList.next);
@@ -478,10 +478,10 @@ void esDmemDeAllocI(
     BLK_STAT_FREE(freeBlk);
 
     if (BLOCK_IS_FREE == blkStat) {
-        esDlsNodeRemove_(
+        esDlsNodeRm_(
             &(currPhy->freeList));
         tmpPhy = PHY_BLK_PREV(freeBlk);
-        esSlsNodeRemoveAfter_(
+        esSlsNodeRmAfter_(
             &(tmpPhy->blk.phyList));
         currPhy->blk.size += freeBlk->blk.size + sizeof(dmemBlk_T);
         freeBlk = currPhy;
@@ -490,10 +490,10 @@ void esDmemDeAllocI(
     blkStat = BLK_STAT_QUERY(currPhy);
 
     if (BLOCK_IS_FREE == blkStat) {
-        esDlsNodeRemove_(
+        esDlsNodeRm_(
             &(currPhy->freeList));
         tmpPhy = PHY_BLK_PREV(currPhy);
-        esSlsNodeRemoveAfter_(
+        esSlsNodeRmAfter_(
             &(tmpPhy->blk.phyList));
         freeBlk->blk.size += currPhy->blk.size + sizeof(dmemBlk_T);
     }
@@ -534,7 +534,7 @@ size_t esDmemFreeSpaceI(
 
     free = (size_t)0;
 
-    DLS_FOR_EACH_ENTRY(
+    ES_DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,
         &(DMEM_SENTINEL->freeList),

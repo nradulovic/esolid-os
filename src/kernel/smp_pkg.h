@@ -120,7 +120,7 @@ struct esSm {
  */
     esState_T       state;
 
-#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_AND_HSM) || defined(__DOXYGEN__)
+#if (OPT_SMP_SM_TYPES == ES_SMP_FSM_AND_HSM)
 /**
  * @brief       Pokazivac na dispecer funkciju datog automata
  * @details     Ovaj clan strukture se koristi samo ukoliko se istovremeno
@@ -129,7 +129,14 @@ struct esSm {
     esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
 #endif
 
-#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
+#if (OPT_LOG_LEVEL <= LOG_DBG)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
+ */
+    uint32_t        signature;
+#endif
+
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
 /**
  * @brief       Niz za cuvanje izvornih stanja HSM automata
  * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
