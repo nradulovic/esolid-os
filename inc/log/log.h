@@ -35,9 +35,6 @@
 #include "../config/log_config.h"
 
 /*===============================================================  DEFINES  ==*/
-
-#define ES_LOG_ALWAYS_COND              FALSE
-
 /*===============================================================  MACRO's  ==*/
 /*------------------------------------------------------------------------*//**
  * @name        Makroi koji se koriste prilikom generisanja tabela
@@ -60,9 +57,6 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 
-#define ES_LOG_IS_INVALID(exp)                                                    \
-    !(exp)
-
 #if (OPT_LOG_LEVEL <= LOG_ERR)
 /**
  * @brief       Obelezava greske u sistemu
@@ -70,12 +64,39 @@
 # define ES_LOG_IS_ERR(log, filter)                                             \
     ((log)->switches & (1UL << (LOG_ERR + 24)) & (filter))
 
-# define ES_LOG_ERR(log, msg, var)                                              \
-    logMsg(log, LOG_TYPE_ERR, msg, var)
+# define ES_LOG_ERR_START(log, msg, var)                                        \
+    uint16_t logHandle_ = logMsg(log, LOG_TYPE_ERR, msg, (uint32_t)var)
 
+# define ES_LOG_ERR_APPEND(log, msg, var)                                       \
+    logMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOG_IF_ERR(log, filter, msg, var)                                   \
+    do {                                                                        \
+        if (ES_LOG_IS_ERR(log, filter)) {                                       \
+            (void)logMsg(log, LOG_TYPE_ERR, msg, (uint32_t)var);                \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_ERR_START(log, msg, var)                                       \
+    uint16_t logHandle_ = logXMsg(log, LOG_TYPE_ERR, msg, (uint32_t)var)
+
+# define ES_LOGX_ERR_APPEND(log, msg, var)                                      \
+    logXMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOGX_IF_ERR(log, filter, msg, var)                                  \
+    do {                                                                        \
+        if (ES_LOG_IS_ERR(log, filter)) {                                       \
+            (void)logXMsg(log, LOG_TYPE_ERR, msg, (uint32_t)var);               \
+        }                                                                       \
+    } while (0UL)
 #else
-# define ES_LOG_IS_ERR(log, filter)
-# define ES_LOG_ERR(log, msg, var)
+# define ES_LOG_IS_ERR(log, filter)     FALSE
+# define ES_LOG_ERR_START(log, msg, var)
+# define ES_LOG_ERR_APPEND(log, msg, var)
+# define ES_LOG_IF_ERR(log, filter, msg, var)
+# define ES_LOGX_ERR_START(log, msg, var)
+# define ES_LOGX_ERR_APPEND(log, msg, var)
+# define ES_LOGX_IF_ERR(log, filter, msg, var)
 #endif
 
 /**
@@ -85,11 +106,55 @@
 # define ES_LOG_IS_WARN(log, filter)                                            \
     ((log)->switches & (1UL << (LOG_WARN + 24)) & (filter))
 
-# define ES_LOG_WARN(log, msg, var)                                             \
-    logMsg(log, LOG_TYPE_WARN, msg, var)
+# define ES_LOG_WARN_START(log, msg, var)                                       \
+    uint16_t logHandle_ = logMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var)
+
+# define ES_LOG_WARN_APPEND(log, msg, var)                                      \
+    logMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOG_IF_WARN(log, filter, msg, var)                                  \
+    do {                                                                        \
+        if (ES_LOG_IS_WARN(log, filter)) {                                      \
+            (void)logMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var);               \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOG_WARN_IF_INVALID(log, condition, msg, var)                       \
+    do {                                                                        \
+        if (!(condition)) {                                                     \
+            (void)logMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var);               \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_WARN_START(log, msg, var)                                      \
+    uint16_t logHandle_ = logXMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var)
+
+# define ES_LOGX_WARN_APPEND(log, msg, var)                                     \
+    logXMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOGX_IF_WARN(log, filter, msg, var)                                 \
+    do {                                                                        \
+        if (ES_LOG_IS_WARN(log, filter)) {                                      \
+            (void)logXMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var);              \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_WARN_IF_INVALID(log, condition, msg, var)                      \
+    do {                                                                        \
+        if (!(condition)) {                                                     \
+            (void)logXMsg(log, LOG_TYPE_WARN, msg, (uint32_t)var);              \
+        }                                                                       \
+    } while (0UL)
 #else
-# define ES_LOG_IS_WARN(log, filter)
-# define ES_LOG_WARN(log, msg, var)
+# define ES_LOG_IS_WARN(log, filter)    FALSE
+# define ES_LOG_WARN_START(log, msg, var)
+# define ES_LOG_WARN_APPEND(log, msg, var)
+# define ES_LOG_IF_WARN(log, filter, msg, var)
+# define ES_LOG_WARN_IF_INVALID(log, condition, msg, var)
+# define ES_LOGX_WARN_START(log, msg, var)
+# define ES_LOGX_WARN_APPEND(log, msg, var)
+# define ES_LOGX_IF_WARN(log, filter, msg, var)
+# define ES_LOGX_WARN_IF_INVALID(log, condition, msg, var)
 #endif
 
 /**
@@ -99,12 +164,40 @@
 # define ES_LOG_IS_INFO(log, filter)                                            \
     ((log)->switches & (1UL << (LOG_INFO + 24)) & (filter))
 
-# define ES_LOG_INFO(log, msg, var)                                             \
-    logMsg(log, LOG_TYPE_INFO, msg, var)
+# define ES_LOG_INFO_START(log, msg, var)                                       \
+    uint16_t logHandle_ = logMsg(log, LOG_TYPE_INFO, msg, (uint32_t)var)
+
+# define ES_LOG_INFO_APPEND(log, msg, var)                                      \
+    logMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOG_IF_INFO(log, filter, msg, var)                                  \
+    do {                                                                        \
+        if (ES_LOG_IS_INFO(log, filter)) {                                      \
+            (void)logMsg(log, LOG_TYPE_INFO, msg, (uint32_t)var);               \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_INFO_START(log, msg, var)                                      \
+    uint16_t logHandle_ = logXMsg(log, LOG_TYPE_INFO, msg, (uint32_t)var)
+
+# define ES_LOGX_INFO_APPEND(log, msg, var)                                     \
+    logXMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOGX_IF_INFO(log, filter, msg, var)                                 \
+    do {                                                                        \
+        if (ES_LOG_IS_INFO(log, filter)) {                                      \
+            (void)logXMsg(log, LOG_TYPE_INFO, msg, (uint32_t)var);              \
+        }                                                                       \
+    } while (0UL)
 
 #else
-# define ES_LOG_IS_INFO(log, filter)
-# define ES_LOG_INFO(log, msg, var)
+# define ES_LOG_IS_INFO(log, filter)    FALSE
+# define ES_LOG_INFO_START(log, msg, var)
+# define ES_LOG_INFO_APPEND(log, msg, var)
+# define ES_LOG_IF_INFO(log, filter, msg, var)
+# define ES_LOGX_INFO_START(log, msg, var)
+# define ES_LOGX_INFO_APPEND(log, msg, var)
+# define ES_LOGX_IF_INFO(log, filter, msg, var)
 #endif
 
 /**
@@ -114,11 +207,55 @@
 # define ES_LOG_IS_DBG(log, filter)                                             \
     ((log)->switches & (1UL << (LOG_DBG + 24)) & (filter))
 
-# define ES_LOG_DBG(log, msg, var)                                              \
-    logMsg(log, LOG_TYPE_DBG, msg, var)
+# define ES_LOG_DBG_START(log, msg, var)                                        \
+    uint16_t logHandle_ = logMsg(log, LOG_TYPE_DBG, msg, (uint32_t)var)
+
+# define ES_LOG_DBG_APPEND(log, msg, var)                                       \
+    logMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOG_IF_DBG(log, filter, msg, var)                                   \
+    do {                                                                        \
+        if (ES_LOG_IS_DBG(log, filter)) {                                       \
+            (void)logMsg(log, LOG_TYPE_DBG, msg, var);                          \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOG_DBG_IF_INVALID(log, condition, msg, var)                        \
+    do {                                                                        \
+        if (!(condition)) {                                                     \
+            (void)logMsg(log, LOG_TYPE_DBG, msg, var);                          \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_DBG_START(log, msg, var)                                       \
+    uint16_t logHandle_ = logXMsg(log, LOG_TYPE_DBG, msg, (uint32_t)var)
+
+# define ES_LOGX_DBG_APPEND(log, msg, var)                                      \
+    logXMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOGX_IF_DBG(log, filter, msg, var)                                  \
+    do {                                                                        \
+        if (ES_LOG_IS_DBG(log, filter)) {                                       \
+            (void)logXMsg(log, LOG_TYPE_DBG, msg, var);                         \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_DBG_IF_INVALID(log, condition, msg, var)                       \
+    do {                                                                        \
+        if (!(condition)) {                                                     \
+            (void)logXMsg(log, LOG_TYPE_DBG, msg, var);                         \
+        }                                                                       \
+    } while (0UL)
 #else
-# define ES_LOG_IS_DBG(log, filter)
-# define ES_LOG_DBG(log, msg, var)
+# define ES_LOG_IS_DBG(log, filter)     FALSE
+# define ES_LOG_DBG_START(log, msg, var)
+# define ES_LOG_DBG_APPEND(log, msg, var)
+# define ES_LOG_IF_DBG(log, filter, msg, var)
+# define ES_LOG_DBG_IF_INVALID(log, condition, msg, var)
+# define ES_LOGX_DBG_START(log, msg, var)
+# define ES_LOGX_DBG_APPEND(log, msg, var)
+# define ES_LOGX_IF_DBG(log, filter, msg, var)
+# define ES_LOGX_DBG_IF_INVALID(log, condition, msg, var)
 #endif
 
 /**
@@ -128,11 +265,40 @@
 # define ES_LOG_IS_TRACE(log, filter)                                           \
     ((log)->switches & (1UL << (LOG_TRACE + 24)) & (filter))
 
-# define ES_LOG_TRACE(log, msg, var)                                            \
-    logMsg(log, LOG_TYPE_TRACE, msg, var)
+# define ES_LOG_TRACE_START(log, msg, var)                                      \
+    uint16_t logHandle_ = logMsg(log, LOG_TYPE_TRACE, msg, (uint32_t)var)
+
+# define ES_LOG_TRACE_APPEND(log, msg, var)                                     \
+    logMsgAppend(log, logHandle_, msg, (uint32_t)var)
+
+# define ES_LOG_IF_TRACE(log, filter, msg, var)                                 \
+    do {                                                                        \
+        if (ES_LOG_IS_TRACE(log, filter)) {                                     \
+            (void)logMsg(log, LOG_TYPE_TRACE, msg, (uint32_t)var);              \
+        }                                                                       \
+    } while (0UL)
+
+# define ES_LOGX_TRACE_START(log, msg, var)                                     \
+    uint16_t logHandle_ = logXMsg(log, LOG_TYPE_TRACE, msg, (uint32_t)var)
+
+# define ES_LOGX_TRACE_APPEND(log, msg, var)                                    \
+    logXMsgAppend(log, logHandle_, msg, var)
+
+# define ES_LOGX_IF_TRACE(log, filter, msg, var)                                \
+    do {                                                                        \
+        if (ES_LOG_IS_TRACE(log, filter)) {                                     \
+            (void)logXMsg(log, LOG_TYPE_TRACE, msg, (uint32_t)var);             \
+        }                                                                       \
+    } while (0UL)
+
 #else
-# define ES_LOG_IS_TRACE(log, filter)
-# define ES_LOG_TRACE(log, msg, var)
+# define ES_LOG_IS_TRACE(log, filter)   FALSE
+# define ES_LOG_TRACE_START(log, msg, var)
+# define ES_LOG_TRACE_APPEND(log, msg, var)
+# define ES_LOG_IF_TRACE(log, filter, msg, var)
+# define ES_LOGX_TRACE_START(log, msg, var)
+# define ES_LOGX_TRACE_APPEND(log, msg, var)
+# define ES_LOGX_IF_TRACE(log, filter, msg, var)
 #endif
 
 /*------------------------------------------------------  C++ extern begin  --*/
@@ -142,13 +308,42 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
+/**
+ * @brief       Tipovi LOG poruka
+ */
 typedef enum logType {
+/**
+ * @brief       Record, salje se kada server zatrazi spisak svih poruka u sistemu
+ */
     LOG_TYPE_RECORD,
-    LOG_TYPE_TRACE = LOG_TRACE,
-    LOG_TYPE_DBG = LOG_DBG,
-    LOG_TYPE_INFO = LOG_INFO,
-    LOG_TYPE_WARN = LOG_WARN,
-    LOG_TYPE_ERR = LOG_ERR,
+
+/**
+ * @brief       Zapis rada sistema
+ */
+    LOG_TYPE_TRACE,
+
+/**
+ * @brief       Poruke o greskama
+ */
+    LOG_TYPE_DBG,
+
+/**
+ * @brief       Poruke koje pruzaju informacije o radu sistema, njegovom stanju
+ *              i slicno
+ */
+    LOG_TYPE_INFO,
+
+/**
+ * @brief       Nastala je greska u sistemu koja nije kriticna za dalji rad
+ */
+    LOG_TYPE_WARN,
+
+/**
+ * @brief       Nastala je greska u sistemu, ne moze se nastaviti sa daljim
+ *              radom
+ */
+    LOG_TYPE_ERR,
+
 } logType_T;
 
 /**
@@ -207,24 +402,40 @@ typedef struct esLog {
  * @brief       Inicijalizuje LOG sa deskriptor strukturom
  * @note        Ova funkcija se mora prva pozvati
  */
-void logInit(esLog_T * log,
+void logInit(
+    esLog_T *       log,
     const C_ROM esLogDescriptor_T * C_ROM_VAR logDescriptor);
 
-void logSetSwitches(
+void logSwitchesSet(
     esLog_T *       log,
     uint32_t        switches);
 
-/**
- * @brief       Upisuje poruku u baffer
- * @param       log                     LOG sa kojim se trenutno radi
- * @param       msg                     redni broj poruke koji se salje
- * @param       val                     vrednost parametara koji ide uz poruku
- */
-void logMsg(
+uint32_t logSwitchesGet(
+    esLog_T *       log);
+
+uint16_t logMsg(
     const esLog_T * log,
-    logType_T     type,
+    logType_T       type,
     uint32_t        msg,
     uint32_t        val);
+
+uint16_t logXMsg(
+    const esLog_T * log,
+    logType_T       type,
+    uint32_t        msg,
+    const C_ROM char * val);
+
+void logMsgAppend(
+    const esLog_T * log,
+    uint16_t        handle,
+    uint32_t        msg,
+    uint32_t        val);
+
+void logXMsgAppend(
+    const esLog_T * log,
+    uint16_t        handle,
+    uint32_t        msg,
+    const C_ROM char * val);
 
 /*--------------------------------------------------------  C++ extern end  --*/
 #if defined(__cplusplus)
