@@ -104,7 +104,7 @@
  *              - @ref LOG_DISABLED
  * @note        Podrazumevano podesavanje: @ref LOG_TRACE
  */
-#if !defined(OPT_LOG_LEVEL) || defined(__DOXYGEN__)
+#if !defined(OPT_LOG_LEVEL)
 # define OPT_LOG_LEVEL                  LOG_TRACE
 #endif
 
@@ -120,7 +120,7 @@
  *              - @ref LOG_MSG_IS_ENUM - poruke su nabrojanog tipa.
  * @note        Podrazumevano podesavanje: @ref LOG_MSG_IS_TEXT
  */
-#if !defined(OPT_LOG_MSG_TYPE) || defined(__DOXYGEN__)
+#if !defined(OPT_LOG_MSG_TYPE)
 # define OPT_LOG_MSG_TYPE               LOG_MSG_IS_TEXT
 #endif
 
