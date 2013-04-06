@@ -55,19 +55,19 @@
  * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su samo
  *              FSM tipovi automata
  */
-#define ES_SMP_FSM_ONLY                 1
+#define ES_SMP_FSM_ONLY                 1U
 
 /**
  * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su samo
  *              HSM tipovi automata
  */
-#define ES_SMP_HSM_ONLY                 2
+#define ES_SMP_HSM_ONLY                 2U
 
 /**
  * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su FSM i
  *              HSM tipovi automata
  */
-#define ES_SMP_FSM_AND_HSM              3
+#define ES_SMP_FSM_AND_HSM              3U
 
 /** @} *//*-------------------------------------------------------------------*/
 /*==============================================================  SETTINGS  ==*/
