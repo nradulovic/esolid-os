@@ -123,8 +123,8 @@ void schedRdyRegI(
     uint_fast8_t    prio) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SCHED)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, OPT_KERNEL_EPA_PRIO_MAX >= prio, LOG_SCHED_REG, ES_ERR_ARG_OUT_OF_RANGE);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL == gRdyBitmap.list[prio], LOG_SCHED_REG, ES_ERR_USAGE_FAILURE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, OPT_KERNEL_EPA_PRIO_MAX >= prio, LOG_SCHED_REG, ES_ARG_OUT_OF_RANGE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL == gRdyBitmap.list[prio], LOG_SCHED_REG, ES_USAGE_FAILURE);
     }
 
     gRdyBitmap.list[prio] = (esEpa_T *)epa;

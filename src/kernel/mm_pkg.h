@@ -76,7 +76,7 @@ static C_INLINE_ALWAYS void * mmCreateObject(
     void * mmObject;
 
     if (ES_LOG_IS_WARN(&gKernelLog, LOG_FILT_MM)) {                             /* Upozori ako je zahtevan drugi alokator                   */
-        ES_LOG_WARN_IF_INVALID(&gKernelLog, &esMemDynClass == memClass, LOG_MM_CREATEO, ES_ERR_ARG_OUT_OF_RANGE);
+        ES_LOG_WARN_IF_INVALID(&gKernelLog, &esMemDynClass == memClass, LOG_MM_CREATEO, ES_ARG_OUT_OF_RANGE);
     } else {
         (void)memClass;
     }
@@ -93,7 +93,7 @@ static C_INLINE_ALWAYS void * mmCreateObject(
     void * mmObject;
 
     if (ES_LOG_IS_WARN(&gKernelLog, LOG_FILT_MM)) {                             /* Upozori ako je zahtevan drugi alokator                   */
-        ES_LOG_WARN_IF_INVALID(&gKernelLog, esMemSClass == memClass, LOG_MM_CREATEO, ES_ERR_ARG_OUT_OF_RANGE);
+        ES_LOG_WARN_IF_INVALID(&gKernelLog, esMemSClass == memClass, LOG_MM_CREATEO, ES_ARG_OUT_OF_RANGE);
     } else {
         (void)memClass;
     }

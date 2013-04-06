@@ -76,7 +76,7 @@ static C_INLINE void epaInit_(
     ES_CRITICAL_DECL();
     
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, definition->epaPrio <= OPT_KERNEL_EPA_PRIO_MAX, LOG_EPA_INIT, ES_ERR_ARG_OUT_OF_RANGE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, definition->epaPrio <= OPT_KERNEL_EPA_PRIO_MAX, LOG_EPA_INIT, ES_ARG_OUT_OF_RANGE);
     }
 
     epa->prio = definition->epaPrio;
@@ -192,8 +192,8 @@ void esEvtPostI(
     esEvt_T *       evt) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0U != epa) && (0U != evt), LOG_EPA_EVTPOST, ES_ERR_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOST, ES_ERR_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (NULL != epa) && (0U != evt), LOG_EPA_EVTPOST, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOST, ES_ARG_NOT_VALID);
     }
 
     if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
@@ -211,7 +211,7 @@ void esEvtPostI(
             &epa->evtQueue,
             evt);
     } else {
-        ES_LOG_IF_WARN(&gKernelLog, LOG_FILT_EPA, LOG_EPA_EVTPOST, ES_ERR_NOT_ENOUGH_MEM);
+        ES_LOG_IF_WARN(&gKernelLog, LOG_FILT_EPA, LOG_EPA_EVTPOST, ES_NOT_ENOUGH_MEM);
         esEvtDestroyI(
             evt);
     }
@@ -238,8 +238,8 @@ void esEvtPostAheadI(
     esEvt_T *       evt) {
     
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0U != epa) && (0U != evt), LOG_EPA_EVTPOSTA, ES_ERR_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOSTA, ES_ERR_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (NULL != epa) && (NULL != evt), LOG_EPA_EVTPOSTA, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOSTA, ES_ARG_NOT_VALID);
     }
 
     if (FALSE == evtQIsFullI_(&epa->evtQueue)) {
@@ -251,7 +251,7 @@ void esEvtPostAheadI(
         schedRdyInsertI_(
             epa->prio);
     } else {
-        ES_LOG_IF_WARN(&gKernelLog, LOG_FILT_EPA, LOG_EPA_EVTPOSTA, ES_ERR_NOT_ENOUGH_MEM);
+        ES_LOG_IF_WARN(&gKernelLog, LOG_FILT_EPA, LOG_EPA_EVTPOSTA, ES_NOT_ENOUGH_MEM);
         esEvtDestroyI(
             evt);
     }
@@ -268,7 +268,7 @@ esEpa_T * esEpaCreate(
     size_t evtQSize;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0UL != memClass) && (0UL != definition), LOG_EPA_CREATE, ES_ERR_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (NULL != memClass) && (NULL != definition), LOG_EPA_CREATE, ES_ARG_NULL);
     }
 
 #if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
@@ -318,8 +318,8 @@ void esEpaDestroy(
     esEpa_T *       epa) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != epa, LOG_EPA_DESTROY, ES_ERR_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_DESTROY, ES_ERR_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != epa, LOG_EPA_DESTROY, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_DESTROY, ES_ARG_NOT_VALID);
     }
 
     epaDeInit_(
@@ -337,8 +337,8 @@ uint8_t esEpaPrioGet(
     const esEpa_T * epa) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != epa, LOG_EPA_PRIOGET, ES_ERR_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_PRIOGET, ES_ERR_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != epa, LOG_EPA_PRIOGET, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_PRIOGET, ES_ARG_NOT_VALID);
     }
 
     return (epa->prio);
@@ -353,8 +353,8 @@ void esEpaPrioSet(
     bool_T status;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != epa, LOG_EPA_PRIOGET, ES_ERR_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_PRIOGET, ES_ERR_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != epa, LOG_EPA_PRIOGET, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_PRIOGET, ES_ARG_NOT_VALID);
     }
 
     ES_CRITICAL_ENTER(

@@ -55,7 +55,7 @@ void evtQInit(
     uint8_t         size) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= 1UL, LOG_EVTQ_INIT, ES_ERR_ARG_OUT_OF_RANGE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= 1UL, LOG_EVTQ_INIT, ES_ARG_OUT_OF_RANGE);
     }
 
     esQpInit_(

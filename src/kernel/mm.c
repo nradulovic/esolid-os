@@ -384,6 +384,10 @@ void * esDmemAllocI(
     dmemBlkHdr_T * prevPhy;
     dmemBlkHdr_T * freeBlk;
 
+    if (ES_LOG_IS_WARN(&gKernelLog, LOG_FILT_MM)) {
+        ES_LOG_WARN_IF_INVALID(&gKernelLog, size >= sizeof(dmemBlkHdr_T), LOG_MM_DALLOC, ES_ARG_OUT_OF_RANGE);
+    }
+
     if (size < (sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T))) {
         size = sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T);
     }
@@ -416,6 +420,7 @@ void * esDmemAllocI(
             return ((void *)&(freeBlk->freeList));
         }
     }
+    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DALLOC, ES_NOT_ENOUGH_MEM);
 
     return ((void *)0);
 #else
@@ -468,6 +473,10 @@ void esDmemDeAllocI(
     dmemBlkHdr_T * freeBlk;
     dmemBlkHdr_T * currPhy;
     dmemBlkHdr_T * tmpPhy;
+
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_MM)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (mem >= HEAP_BEGIN) && (mem <= HEAP_END), LOG_MM_DDALLOC, ES_ARG_OUT_OF_RANGE);
+    }
 
     freeBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
     currPhy = ES_SLS_NODE_ENTRY(

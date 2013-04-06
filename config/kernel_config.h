@@ -142,8 +142,23 @@
  * @note        DEFAULT: ES_MM_DYNAMIC_ONLY (Only dynamic memory manager is
  *              enabled)
  */
-#if !defined(OPT_MM_DISTRIBUTION) || defined(__DOXYGEN__)
+#if !defined(OPT_MM_DISTRIBUTION)
 # define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
+#endif
+
+/**
+ * @brief       Static memory allocator override
+ */
+#if defined(__DOXYGEN__)
+# define OPT_MM_STATIC_ALLOC
+#endif
+
+/**
+ * @brief       Dynamic memory allocator override
+ */
+#if defined(__DOXYGEN__)
+# define OPT_MM_DYNAMIC_ALLOC
+# define OPT_MM_DYNAMIC_DEALLOC
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -161,7 +176,7 @@
  *
  * @note        Podrazumevano podesavanje: @ref ES_SMP_FSM_AND_HSM
  */
-#if !defined(OPT_SMP_SM_TYPES) || defined(__DOXYGEN__)
+#if !defined(OPT_SMP_SM_TYPES)
 # define OPT_SMP_SM_TYPES               ES_SMP_FSM_AND_HSM
 #endif
 

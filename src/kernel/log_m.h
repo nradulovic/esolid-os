@@ -64,6 +64,8 @@
     ENTRY(LOG_EPA_EVTPUSHBACK, "EPA: evtPushBack(epa, evt)")                    \
     ENTRY(LOG_EPA_INIT, "EPA internal: initialization")                         \
     ENTRY(LOG_MM_CREATEO, "MM internal: create object")                         \
+    ENTRY(LOG_MM_DALLOC, "MM: dMemAlloc(size)")                                 \
+    ENTRY(LOG_MM_DDALLOC, "MM: dMemDeAlloc(mem)")                               \
     ENTRY(LOG_SCHED_REG, "EPA internal: scheduler EPA registration")            \
     ENTRY(LOG_SM_DISPATCH, "SM: dispatch(sm, evt)")                             \
     ENTRY(LOG_SM_CREATE, "SM: create(memClass, definition)")                    \

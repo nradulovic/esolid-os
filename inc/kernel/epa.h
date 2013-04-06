@@ -175,10 +175,10 @@ void esEvtPostAheadI(
  * 				parametrima.
  * @api
  * @error
- *              - @ref ES_ERR_ARG_NULL, jedan od argumenata je NULL pokazivac
- *              - @ref ES_ERR_ARG_NOT_VALID, argument memorijske klase nije
+ *              - @ref ES_ARG_NULL, jedan od argumenata je NULL pokazivac
+ *              - @ref ES_ARG_NOT_VALID, argument memorijske klase nije
  *                  ispravan. Pogledati @ref esMemClass.
- *              - @ref ES_ERR_ARG_OUT_OF_RANGE, argumenti predati funkciji su
+ *              - @ref ES_ARG_OUT_OF_RANGE, argumenti predati funkciji su
  *                  van moguceg opsega. Pogledati @ref esEpaDef_T.
  */
 esEpa_T * esEpaCreate(
@@ -192,10 +192,10 @@ esEpa_T * esEpaCreate(
  *              dinamicki memorijski alokator.
  * @api
  * @error
- *              - @ref ES_ERR_ARG_NULL
- *              - @ref ES_ERR_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
+ *              - @ref ES_ARG_NULL
+ *              - @ref ES_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
  *                  drugi objekat ili na EPA objekat koji je vec unisten.
- *              - @ref ES_ERR_USAGE_FAILURE - pokusaj brisanja EPA objekta koji
+ *              - @ref ES_USAGE_FAILURE - pokusaj brisanja EPA objekta koji
  *                  je statican.
  */
 void esEpaDestroy(
@@ -207,8 +207,8 @@ void esEpaDestroy(
  * @return      Trenutni prioritet EPA objekta.
  * @api
  * @error
- *              - @ref ES_ERR_ARG_NULL
- *              - @ref ES_ERR_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
+ *              - @ref ES_ARG_NULL
+ *              - @ref ES_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
  *                  drugi objekat ili na EPA objekat koji je vec unisten.
  */
 uint8_t esEpaPrioGet(
@@ -220,12 +220,12 @@ uint8_t esEpaPrioGet(
  * @param       [in] newPrio            nov prioritet EPA objekta.
  * @api
  * @error
- *              - @ref ES_ERR_ARG_NULL
- *              - @ref ES_ERR_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
+ *              - @ref ES_ARG_NULL
+ *              - @ref ES_ARG_NOT_VALID - pokazivac @c epa pokazuje na neki
  *                  drugi objekat ili na EPA objekat koji je vec unisten.
- *              - @ref ES_ERR_ARG_OUT_OF_RANGE - argument @c newPrio je van
+ *              - @ref ES_ARG_OUT_OF_RANGE - argument @c newPrio je van
  *                  dozvoljenog opsega. (@ref OPT_KERNEL_EPA_PRIO_MAX)
- *              - @ref ES_ERR_USAGE_FAILURE - vec postoji EPA objekat sa datim
+ *              - @ref ES_USAGE_FAILURE - vec postoji EPA objekat sa datim
  *                  @c newPrio prioritetom.
  */
 void esEpaPrioSet(

@@ -76,7 +76,7 @@ static C_INLINE void evtUsrAddI_(
     esEvt_T         * evt) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_USRADD, ES_ERR_ARG_NOT_VALID);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_USRADD, ES_ARG_NOT_VALID);
     }
 
     if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
