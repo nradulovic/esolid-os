@@ -175,7 +175,7 @@ static uint8_t * gSmemSentinel;
  * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
  * moze predstaviti jednim blokom.
  */
-static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT)]
+static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(OPT_MM_MANAGED_SIZE, ES_CPU_ATTRIB_ALIGNMENT)];
 #endif
 
 /*======================================================  GLOBAL VARIABLES  ==*/

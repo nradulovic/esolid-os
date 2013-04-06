@@ -146,6 +146,18 @@ enum esErrorCodes {
  * @brief       Ove funkcije se koriste za upravljanjem kernel-om
  * @{ *//*--------------------------------------------------------------------*/
 
+#if !defined(ES_HAL_ENABLE_STARTUP)
+/**
+ * @brief       Vrsi inicijalizaciju eSolid Kernel sistema
+ * @details     Poziva se samo kada se ne koristi podrazumevani HAL start-up kod.
+ *              U slučaju kada se ne koristi HAL start-up kod korisnik mora da
+ *              explicitno pozove ovu funkciju pre pozivanja bilo koje funkcije
+ *              iz eSolid Kernel sistema.
+ */
+void esKernelInit(
+    void);
+#endif
+
 /**
  * @brief       Pokrece izvrsavanje jezgra
  * @details     Pokrecu se svi prethodno kreirani EPA objekti.

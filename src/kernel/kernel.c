@@ -45,18 +45,6 @@ static esKernelStatus_T gKernelStatus;
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
-/*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
-
-/*----------------------------------------------------------------------------*/
-esEpa_T * esKernelEpaGet(
-    void) {
-
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == KERNEL_RUNNING, LOG_KERN_EPA_GET, ES_ERR_USAGE_FAILURE);
-    }
-
-    return (schedEpaGetCurrent_());
-}
 
 /*----------------------------------------------------------------------------*/
 void kernelInit(
@@ -70,6 +58,28 @@ void kernelInit(
 #endif
     gKernelStatus = KERNEL_STOPPED;
 }
+
+/*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
+
+/*----------------------------------------------------------------------------*/
+esEpa_T * esKernelEpaGet(
+    void) {
+
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == KERNEL_RUNNING, LOG_KERN_EPA_GET, ES_ERR_USAGE_FAILURE);
+    }
+
+    return (schedEpaGetCurrent_());
+}
+
+#if !defined(ES_HAL_ENABLE_STARTUP)
+/*----------------------------------------------------------------------------*/
+void esKernelInit(
+    void) {
+
+    kernelInit();
+}
+#endif
 
 /*----------------------------------------------------------------------------*/
 C_NAKED void esKernelStart(
