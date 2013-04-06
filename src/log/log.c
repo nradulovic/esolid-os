@@ -34,6 +34,16 @@
 /*===============================================================  DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
+
+struct logMsg {
+    uint16_t        rid;
+    uint8_t         type;
+    uint8_t         size;
+    uint32_t        timestamp;
+    uint32_t        var;
+};
+
+
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 /*=======================================================  LOCAL VARIABLES  ==*/
 /*======================================================  GLOBAL VARIABLES  ==*/
@@ -50,7 +60,7 @@ void logInit(esLog_T * log,
 }
 
 /*----------------------------------------------------------------------------*/
-void logSetSwitches(
+void logSwitchesSet(
     esLog_T *       log,
     uint32_t        switches) {
 
@@ -59,15 +69,18 @@ void logSetSwitches(
 }
 
 /*----------------------------------------------------------------------------*/
-void logMsg(
+uint16_t logMsg(
     const esLog_T * log,
-    logType_T     type,
+    logType_T       type,
     uint32_t        msg,
     uint32_t        val) {
 
     (void)log;
     (void)msg;
     (void)val;
+    (void)type;
+
+    return (0U);
 }
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
