@@ -57,6 +57,9 @@ struct esMemClass {
 
 };
 
+/**
+ * @brief       Generalizovani oblik objekta
+ */
 struct mmObject {
 /**
  * @brief       Pokazivac na klasu memorijskog alokatora
@@ -93,7 +96,7 @@ static C_INLINE_ALWAYS void * mmCreateObject(
     void * mmObject;
 
     if (ES_LOG_IS_WARN(&gKernelLog, LOG_FILT_MM)) {                             /* Upozori ako je zahtevan drugi alokator                   */
-        ES_LOG_WARN_IF_INVALID(&gKernelLog, esMemSClass == memClass, LOG_MM_CREATEO, ES_ARG_OUT_OF_RANGE);
+        ES_LOG_WARN_IF_INVALID(&gKernelLog, &esMemStaticClass == memClass, LOG_MM_CREATEO, ES_ARG_OUT_OF_RANGE);
     } else {
         (void)memClass;
     }
@@ -106,9 +109,9 @@ static C_INLINE_ALWAYS void * mmCreateObject(
 
     return (mmObject);
 #else
-    struct mmObject mmObject;
+    struct mmObject * mmObject;
 
-    mmObject = (* memClass->alloc)(sizeof(struct memObject) + size);
+    mmObject = (* memClass->alloc)(sizeof(struct mmObject) + size);
     mmObject->memClass = memClass;
 
     return ((void *)(mmObject + 1UL));
@@ -122,9 +125,10 @@ static C_INLINE_ALWAYS void mmDestroyObject(
     esDmemDeAllocI(
         object);
 #elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    /* Greska! Ne moze da se izbrise statican objekat */
+    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DESTROYO, ES_USAGE_FAILURE);
+    (void)object;
 #else
-    struct mmObject mmObject;
+    struct mmObject * mmObject;
 
     mmObject = (struct mmObject *)object - 1UL;
     (* mmObject->memClass->deAlloc)(object);

@@ -318,7 +318,7 @@ void * esSmemAllocI(
     size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
 #endif
 
-    if (size <= (HEAP_END - gSmemSentinel)) {
+    if (size <= (size_t)(HEAP_END - gSmemSentinel)) {
         tmp = gSmemSentinel;
         gSmemSentinel += size;
     } else {
@@ -358,7 +358,6 @@ void * esSmemAlloc(
 void * esDmemAlloc(
     size_t          size) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
     void * tmpMem;
 
@@ -369,11 +368,6 @@ void * esDmemAlloc(
     ES_CRITICAL_EXIT();
 
     return (tmpMem);
-#else
-    (void)size;
-
-    return ((void *)0);
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -425,6 +419,7 @@ void * esDmemAllocI(
     return ((void *)0);
 #else
     (void)size;
+    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DALLOC, ES_USAGE_FAILURE);
 
     return ((void *)0);
 #endif
@@ -451,7 +446,6 @@ size_t esDmemBlockSize(
 void esDmemDeAlloc(
     void *          mem) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
@@ -459,9 +453,6 @@ void esDmemDeAlloc(
     esDmemDeAllocI(
         mem);
     ES_CRITICAL_EXIT();
-#else
-    (void)mem;
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -475,7 +466,7 @@ void esDmemDeAllocI(
     dmemBlkHdr_T * tmpPhy;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_MM)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, (mem >= HEAP_BEGIN) && (mem <= HEAP_END), LOG_MM_DDALLOC, ES_ARG_OUT_OF_RANGE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (mem >= (void *)HEAP_BEGIN) && (mem <= (void *)HEAP_END), LOG_MM_DDALLOC, ES_ARG_OUT_OF_RANGE);
     }
 
     freeBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
@@ -511,6 +502,8 @@ void esDmemDeAllocI(
         &(freeBlk->freeList));
 #else
     (void)mem;
+    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DDALLOC, ES_USAGE_FAILURE);
+
 #endif
 }
 
@@ -518,7 +511,6 @@ void esDmemDeAllocI(
 size_t esDmemFreeSpace(
     void) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
     size_t tmpSize;
 
@@ -528,9 +520,6 @@ size_t esDmemFreeSpace(
     ES_CRITICAL_EXIT();
 
     return (tmpSize);
-#else
-    return (0);
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
