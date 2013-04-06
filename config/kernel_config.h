@@ -99,22 +99,6 @@
 # define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
 #endif
 
-/**
- * @brief       Ukljucivanje LOG sistema za kernel
- * @details     Opcije:
- *              - @ref LOG_ERR
- *              - @ref LOG_WARN
- *              - @ref LOG_INFO
- *              - @ref LOG_DBG
- *              - @ref LOG_TRACE
- *              - @ref LOG_DISABLED
- * @note        Podrazumevano podesavanje: 1U
- * @pre         LOG sistem mora biti ukljucen
- */
-#if !defined(OPT_KERNEL_ENABLE_LOG) || defined(__DOXYGEN__)
-# define OPT_KERNEL_ENABLE_LOG          LOG_TRACE
-#endif
-
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        Podesavanje Memory Management (MM) modula
