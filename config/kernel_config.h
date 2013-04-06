@@ -110,7 +110,7 @@
  *              then the whole available RAM is used. The core memory is made
  *              available to the heap allocator and/or can be used directly
  *              through the simplified core memory allocator.
- * @note        In order to let the OS manage the whole RAM the linker script
+ * @pre         In order to let the OS manage the whole RAM the linker script
  *              must provide the @p _sheap and @p _eheap symbols.
  * @note        DEFAULT: 0 (All memory)
  */
@@ -281,6 +281,12 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+
+#if !defined(ES_HAL_ENABLE_STARTUP)
+# if (OPT_MM_MANAGED_SIZE == 0UL)
+#  error "Kernel precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MM_MANAGED_SIZE"
+# endif
+#endif
 
 #if !defined(ES_HAL_ENABLE_CPU)
 # error "Kernel precondition is not satisfied: enable CPU module with option: OPT_HAL_CPU"
