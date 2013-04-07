@@ -106,6 +106,14 @@ extern "C" {
  * @api
  */
 typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
+
+#if (OPT_LOG_LEVEL <= LOG_DBG) || defined(__DOXYGEN__)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
+ */
+    uint16_t        signature;
+#endif
+
 /**
  * @brief       Identifikator dogadjaja
  * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_ID_T.
@@ -117,25 +125,18 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @details     Koristi se samo za brz pristup clanovima
  */
     union udynamic {
-        uint16_t        u;                                                      /**< @brief     Unija atributa                              */
+        uint16_t    u;                                                          /**< @brief     Unija atributa                              */
 
         /**
          * @brief       Struktura atributa
          */
         struct sdynamic {
-            uint8_t         counter;                                            /**< @brief     Brojac korisnika dogadjaja                  */
-            uint8_t         attrib;                                             /**< @brief     Kvalifikatori dogadjaja.
+            uint8_t counter;                                                    /**< @brief     Brojac korisnika dogadjaja                  */
+            uint8_t attrib;                                                     /**< @brief     Kvalifikatori dogadjaja.
                                                                                      @see       EVT_RESERVED_MASK
                                                                                      @see       EVT_CONST_MASK                              */
-        }               s;                                                      /**< @brief     Struktura atributa                          */
+        }           s;                                                          /**< @brief     Struktura atributa                          */
     }               dynamic;                                                    /**< @brief     Dinamicki atributi dogadjaja                */
-
-#if (OPT_LOG_LEVEL <= LOG_DBG) || defined(__DOXYGEN__)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
- */
-    uint16_t        signature;
-#endif
 
 #if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
 /**
@@ -270,40 +271,6 @@ void esEvtReserve(
  */
 void esEvtUnReserve(
     esEvt_T *       evt);
-
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Korisnicke callback funkcije
- * @{ *//*--------------------------------------------------------------------*/
-
-#if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-/**
- * @brief       Korisnicka callback funkcija: generise timestamp prilikom slanja
- *              dogadjaja.
- * @return      timestamp informacija koja se ugradjuje u dogadjaj.
- * @details     Poziva se prilikom slanja dogadjaja odredišnom EPA objektu (
- *              funkcije esEvtPost() i esEvtPostAhead()).
- * @see         @ref OPT_EVT_USE_TIMESTAMP
- * @see         @ref OPT_EVT_TIMESTAMP_T
- */
-extern esEvtTimestamp_T uTimestampGet(
-    void);
-#endif
-
-#if defined(OPT_EVT_USE_GENERATOR) && (OPT_KERNEL_API_LEVEL < 2)                \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Korisnicka callback funkcija: generise pokazivac na generatora
- *              dogadjaja.
- * @return      Pokazivac ka generatoru dogadjaja.
- * @details     Poziva se u toku kreiranja dogadjaja. Ukoliko je API kernel nivo
- *              jednak 2 (ukljucen je ceo kernel API) onda sistem sam generise
- *              pokazivac na dogadjaj i ova funkcija se ne poziva.
- * @see         @ref OPT_EVT_USE_GENERATOR
- */
-extern void * uGeneratorGet(
-    void);
-#endif
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/

@@ -213,6 +213,19 @@
 #endif
 
 /**
+ * @brief       Generiše ko je proizvodžač događaja
+ * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
+ *              @ref OPT_EVT_USE_GENERATOR. Tada je potrebno tek kreirani
+ *              događaj popuniti identifikatorom (pokazivač) proizvodžača
+ *              događaja.
+ *
+ * @note        Podrazumevano podesavanje: poziva se kernel funkcija
+ */
+#if !defined(OPT_EVT_GENERATOR_CALLBACK)
+# define OPT_EVT_GENERATOR_CALLBACK()   esKernelEpaGet()
+#endif
+
+/**
  * @brief       Koristi se vremenski marker dogadjaja.
  * @details     Moguce vrednosti:
  *              - nedefinisano - vrem. marker se ne koristi
@@ -224,6 +237,18 @@
  */
 #if defined(__DOXYGEN__)
 # define OPT_EVT_USE_TIMESTAMP
+#endif
+
+/**
+ * @brief       Generiše vremenski marker događaja
+ * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
+ *              @ref OPT_EVT_USE_TIMESTAMP. Tada je potrebno tek kreirani
+ *              događaj popuniti vremenskim markerom nastanka događaja.
+ *
+ * @note        Podrazumevano podesavanje: FIXME
+ */
+#if !defined(OPT_EVT_TIMESTAMP_CALLBACK)
+# define OPT_EVT_TIMESTAMP_CALLBACK()   0UL
 #endif
 
 /**
@@ -264,10 +289,10 @@
  *              pakovanja podataka unutar strukture dogadjaja.
  *              Ovom promenljivom se moze definisati koja direktiva ce se
  *              koristiti za strukture dogadjaja (poravnjanje, pakovanje).
- * @note        Podrazumevano podesavanje: /
+ * @note        Podrazumevano podesavanje: @ref C_PACKED - pakovana struktrua
  */
 #if !defined(OPT_EVT_STRUCT_ATTRIB) || defined(__DOXYGEN__)
-# define OPT_EVT_STRUCT_ATTRIB
+# define OPT_EVT_STRUCT_ATTRIB          C_PACKED
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
