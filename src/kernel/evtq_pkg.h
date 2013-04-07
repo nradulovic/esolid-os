@@ -89,7 +89,6 @@ typedef struct evtQueue {
 #endif
 } evtQueue_T;
 
-
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 

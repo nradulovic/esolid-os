@@ -122,7 +122,7 @@
 /**
  * @brief       Struktura jednog bloka memorije.
  */
-typedef struct dmemBlk {
+typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dmemBlk {
 /**
  * @brief       Velicina ovog bloka memorije u bajtovima.
  */
@@ -139,7 +139,7 @@ typedef struct dmemBlk {
  * @brief       Zaglavlje jedne slobodne oblasti memorije.
  * @details     Ovo zaglavlje postoji samo u slobodnim oblastima memorije.
  */
-typedef struct dmemBlkHdr {
+typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dmemBlkHdr {
 /**
  * @brief       Lista fizickih blokova i zauzece blokova
  */
@@ -306,9 +306,16 @@ void * esSmemAllocI(
 #if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     void * tmp;
 
+    if (0UL == size) {
+        size = ES_CPU_ATTRIB_ALIGNMENT;
+    } else {
+
 #if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
-    size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
+        size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
+#else
+        ;
 #endif
+    }
 
     if (size <= (size_t)(HEAP_END - gSmemSentinel)) {
         tmp = gSmemSentinel;
@@ -371,13 +378,17 @@ void * esDmemAllocI(
         ES_LOG_WARN_IF_INVALID(&gKernelLog, size >= sizeof(dmemBlkHdr_T), LOG_MM_DALLOC, ES_ARG_OUT_OF_RANGE);
     }
 
-    if (size < (sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T))) {
-        size = sizeof(dmemBlkHdr_T) - sizeof(dmemBlk_T);
-    }
+    if (0UL == size) {
+        size = ES_CPU_ATTRIB_ALIGNMENT;
+    } else {
 
 #if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
-    size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
+        size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
+#else
+        ;
 #endif
+    }
+
     ES_DLS_FOR_EACH_ENTRY(
         dmemBlkHdr_T,
         freeList,

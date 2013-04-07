@@ -64,9 +64,8 @@ void evtQInit(
         size);
 
 #if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
-    evtQ->free = esQpFreeSpace_(
+    evtQ->freeMin = evtQ->free = esQpFreeSpace_(
         &evtQ->queue);
-    evtQ->freeMin = evtQ->free;
 #endif
 }
 
