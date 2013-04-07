@@ -31,7 +31,6 @@
 #define EVTQ_PKG_H_VAR
 #include "kernel_private.h"
 
-
 /*===============================================================  DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
@@ -64,8 +63,7 @@ void evtQInit(
         size);
 
 #if (OPT_LOG_LEVEL <= LOG_INFO) || defined(__DOXYGEN__)
-    evtQ->freeMin = evtQ->free = esQpFreeSpace_(
-        &evtQ->queue);
+    evtQ->freeMin = evtQ->free = size;
 #endif
 }
 
