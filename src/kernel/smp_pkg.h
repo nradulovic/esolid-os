@@ -96,7 +96,6 @@ enum smStatus {
  *              njeno super stanje.
  */
     RETN_SUPER
-
 };
 
 /**
@@ -146,9 +145,6 @@ struct esSm {
 };
 
 /*======================================================  GLOBAL VARIABLES  ==*/
-
-extern const C_ROM esEvt_T evtSignal[];
-
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /**

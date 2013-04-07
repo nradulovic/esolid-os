@@ -53,7 +53,7 @@
  *                                      dogadjaj.
  */
 #define SM_SIGNAL_SEND(sm, state, evt)                                         \
-    (*state)(((sm) + 1U), (esEvt_T *)&evtSignal[evt])
+    (*state)(((sm) + 1U), (esEvt_T *)&esEvtSignal[evt])
 
 /**
  * @brief       Posalji dogadjaj @c evt automatu @c hsm.
@@ -89,7 +89,7 @@ static void hsmTranExit(
 /**
  * @brief       Tabela signalnih dogadjaja
  */
-const C_ROM esEvt_T evtSignal[] = {
+const C_ROM esEvt_T esEvtSignal[] = {
     [SIG_EMPTY].id = SIG_EMPTY,
     [SIG_EMPTY].dynamic = {
         .s = {
@@ -487,7 +487,7 @@ esStatus_T esSmDispatch(
     esStatus_T status;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0UL != sm) && (0UL != evt), LOG_SM_DISPATCH, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (NULL != sm) && (NULL != evt), LOG_SM_DISPATCH, ES_ARG_NULL);
         ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == sm->signature, LOG_SM_DISPATCH, ES_ARG_NOT_VALID);
     }
 
@@ -506,7 +506,7 @@ esSm_T * esSmCreate(
     size_t stateQSize;
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, (0UL != memClass) && (0UL != definition), LOG_SM_CREATE, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, (NULL != memClass) && (NULL != definition), LOG_SM_CREATE, ES_ARG_NULL);
     }
 
 #if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)     /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
@@ -543,7 +543,7 @@ void esSmDestroy(
     esSm_T *        sm) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, 0UL != sm, LOG_SM_DESTROY, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != sm, LOG_SM_DESTROY, ES_ARG_NULL);
         ES_LOG_DBG_IF_INVALID(&gKernelLog, SM_SIGNATURE == sm->signature, LOG_SM_DESTROY, ES_ARG_NOT_VALID);
     }
 
@@ -565,7 +565,7 @@ esStatus_T esSmTopState (
     void *          sm,
     esEvt_T *       evt) {
 
-    (void)sm;                                                                  /* Ukloni upozorenje o nekoriscenom parametru               */
+    (void)sm;                                                                   /* Ukloni upozorenje o nekoriscenom parametru               */
     (void)evt;
 
     return (esRetnIgnored());

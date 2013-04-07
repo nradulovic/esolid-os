@@ -62,7 +62,7 @@ void kernelInit(
         LOG_FILT_SMP | LOG_FILT_SCHED | LOG_FILT_MM | LOG_FILT_KERNEL |
         LOG_FILT_EVT | LOG_FILT_EPA | LOG_FILE_EVTQ);
 #endif
-    gKernelStatus = KERNEL_STOPPED;
+    gKernelStatus = ES_KERNEL_STOPPED;
 }
 
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
@@ -72,7 +72,7 @@ esEpa_T * esKernelEpaGet(
     void) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == KERNEL_RUNNING, LOG_KERN_EPA_GET, ES_USAGE_FAILURE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == ES_KERNEL_RUNNING, LOG_KERN_EPA_GET, ES_USAGE_FAILURE);
     }
 
     return (schedEpaGetCurrent_());
@@ -92,10 +92,10 @@ C_NAKED void esKernelStart(
     void) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == KERNEL_STOPPED, LOG_KERN_START, ES_USAGE_FAILURE);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, gKernelStatus == ES_KERNEL_STOPPED, LOG_KERN_START, ES_USAGE_FAILURE);
     }
 
-    gKernelStatus = KERNEL_RUNNING;
+    gKernelStatus = ES_KERNEL_RUNNING;
 
     sched();
 }

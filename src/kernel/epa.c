@@ -85,7 +85,7 @@ static C_INLINE void epaInit_(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
     evtQPutI_(
         &epa->evtQueue,
-        (esEvt_T *)&evtSignal[SIG_INIT]);                                       /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
+        (esEvt_T *)&esEvtSignal[SIG_INIT]);                                       /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
     schedRdyRegI(
         epa,
         epa->prio);
