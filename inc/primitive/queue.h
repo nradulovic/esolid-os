@@ -247,7 +247,7 @@ static C_INLINE_ALWAYS size_t esQpOccupied_(
 static C_INLINE_ALWAYS size_t esQpFreeSpace_(
     const esQp_T *  queue) {
 
-    if (queue->head < queue->tail) {
+    if (queue->head <= queue->tail) {
 
         return ((size_t)(esQpSize_(queue) - (queue->tail - queue->head)));
     } else {
