@@ -64,7 +64,7 @@ static C_INLINE_ALWAYS void evtInit_(
     evt->dynamic.u = 0U;                                                        /* Dogadjaj je dinamican, sa 0 korisnika.                   */
 
 #if defined(OPT_EVT_USE_TIMESTAMP)
-    evt->timestamp = uTimestampGet();
+    evt->timestamp = OPT_EVT_TIMESTAMP_CALLBACK();
 #endif
 
 #if (OPT_LOG_LEVEL <= LOG_DBG)
@@ -72,16 +72,7 @@ static C_INLINE_ALWAYS void evtInit_(
 #endif
 
 #if defined(OPT_EVT_USE_GENERATOR)
-
-# if (OPT_KERNEL_API_LEVEL < 2)
-    /**
-     * @todo Sta i kako sa ovim??? Kada da se koristi callback funkcija, a kada
-     *       scheduler funkcija
-     */
-    evt->generator = uGeneratorGet();
-# else
-    evt->generator = schedEpaGetCurrent_();
-# endif
+    evt->generator = OPT_EVT_GENERATOR_CALLBACK();
 #endif
 
 #if defined(OPT_EVT_USE_SIZE)
@@ -121,9 +112,14 @@ esEvt_T * esEvtCreate(
     ES_CRITICAL_DECL();
     esEvt_T * newEvt;
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= sizeof(esEvt_T), LOG_EVT_CREATE, ES_ARG_OUT_OF_RANGE);
+    }
+
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(
+        size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
     evtInit_(
         newEvt,
@@ -144,7 +140,8 @@ esEvt_T * esEvtCreateI(
         ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= sizeof(esEvt_T), LOG_EVT_CREATE, ES_ARG_OUT_OF_RANGE);
     }
 
-    newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(
+        size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
         size,
@@ -199,7 +196,7 @@ void esEvtDestroyI(
         ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_DESTROY, ES_ARG_NOT_VALID);
     }
 
-    if ((uint_fast8_t)0U == evt->dynamic.u) {
+    if (0U == evt->dynamic.u) {
         evtDeInit_(
             evt);
         esDmemDeAllocI(

@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,18 +20,18 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Privatni interfejs Event objekta
  * @addtogroup  evt_impl
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 #ifndef EVT_PKG_H_
 #define EVT_PKG_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
+/*===============================================================  DEFINES  ==*/
 
 /**
  * @brief       Bit maska za brojac korisnika dogadjaja
@@ -51,29 +51,22 @@
  */
 #define EVT_SIGNATURE                   0xFEEDUL
 
-/*==================================================================================  MACRO's  ==*/
-
-/**
- * @brief       Proverava da li je objekat dogadjaj
- */
-#define EVT_VALIDATE(evt)                                                       \
-    (EVT_SIGNATURE == (evt)->signature)
-
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
  * @brief       Povecava broj korisnika koji koriste dogadjaj
  * @param       evt                     Dogadjaj koji ce se koristiti
  */
-static C_INLINE void evtUsrAddI_(
-    esEvt_T         * evt) {
+static C_INLINE_ALWAYS void evtUsrAddI_(
+    esEvt_T *       evt) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
         ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_USRADD, ES_ARG_NOT_VALID);
@@ -88,8 +81,8 @@ static C_INLINE void evtUsrAddI_(
  * @brief       Smanjuje broj korisnika koji koriste dogadjaj
  * @param       evt                     Dogadjaj koji se koristio
  */
-static C_INLINE void evtUsrRmI_(
-    esEvt_T         * evt) {
+static C_INLINE_ALWAYS void evtUsrRmI_(
+    esEvt_T *       evt) {
 
     if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
         --evt->dynamic.s.counter;
@@ -104,5 +97,5 @@ static C_INLINE void evtUsrRmI_(
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
  * END of evt_pkg.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* EVT_PKG_H_ */
