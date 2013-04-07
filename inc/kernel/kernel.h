@@ -97,12 +97,12 @@ typedef enum esKernelStatus {
 /**
  * @brief       Kernel se ne izvrsava
  */
-    KERNEL_STOPPED = 1UL,
+    ES_KERNEL_STOPPED = 1UL,
 
 /**
  * @brief       Kernel se izvrsava
  */
-    KERNEL_RUNNING
+    ES_KERNEL_RUNNING
 } esKernelStatus_T;
 
 /**
@@ -169,8 +169,8 @@ void esKernelStart(
 /**
  * @brief       Vraca odgovor da li trenutno radi kernel
  * @return      Status izvrsavanja kernel-a.
- *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
- *  @retval     KERNEL_RUNNING - kernel se izvrsava,
+ *  @retval     ES_KERNEL_STOPPED - kernel se ne izvrsava,
+ *  @retval     ES_KERNEL_RUNNING - kernel se izvrsava,
  * @api
  */
 esKernelStatus_T esKernelStatus(
