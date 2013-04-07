@@ -285,6 +285,11 @@ void smInit (
     esState_T *     stateQueue,
     size_t          levels) {
 
+    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_SMP)) {
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != initState, LOG_SM_INIT, ES_ARG_NULL);
+        ES_LOG_DBG_IF_INVALID(&gKernelLog, levels >= 2U, LOG_SM_INIT, ES_ARG_OUT_OF_RANGE);
+    }
+
 #if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
     sm->state = initState;
 #elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
@@ -294,7 +299,7 @@ void smInit (
 #else
     sm->state = initState;
 
-    if (levels == 2) {
+    if (2U == levels) {
         sm->dispatch = &fsmDispatch;
         sm->stateQBegin = (esState_T *)0U;
         sm->stateQEnd = (esState_T *)0U;
@@ -348,8 +353,7 @@ size_t stateQReqSize(
 #else
     size_t needed;
 
-    if (levels == 2) {
-
+    if (2U == levels) {
         needed = 0U;
     } else {
         needed = levels * 2U * sizeof(esState_T *);

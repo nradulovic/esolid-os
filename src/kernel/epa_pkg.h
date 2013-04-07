@@ -54,17 +54,16 @@ extern "C" {
  * @notapi
  */
 struct esEpa {
-/**
- * @brief       Red cekanja za dogadjaje.
- */
-    struct evtQueue evtQueue;
-
 #if (OPT_LOG_LEVEL <= LOG_DBG)
 /**
  * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
     uint16_t        signature;
 #endif
+/**
+ * @brief       Red cekanja za dogadjaje.
+ */
+    struct evtQueue evtQueue;
 
 /**
  * @brief       Prioritet EPA objekta.

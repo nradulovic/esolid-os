@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/******************************************************************************
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,19 +20,19 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Privatni interfejs State Machine Processor objekta.
  * @addtogroup  smp_impl
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
 #ifndef SMP_PKG_H_
 #define SMP_PKG_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
+/*===============================================================  DEFINES  ==*/
 
 #if (OPT_SMP_SM_TYPES == 1)
 # define SM_DISPATCH(sm, evt)                                                   \
@@ -45,20 +45,13 @@
     (*(sm)->dispatch)(sm, evt)
 #endif
 
-/*==================================================================================  MACRO's  ==*/
-
-#define SM_RANGE_LEVELS(levels)                                           \
-    ((levels) >= 2)
-
-#define SM_RANGE_INIT_STATE(state)                                              \
-    (0U != (state))
-
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
 
 /**
  * @brief       Nabrajanje odgovora state handler funkcije.
@@ -113,6 +106,14 @@ enum smStatus {
  * @notapi
  */
 struct esSm {
+
+#if (OPT_LOG_LEVEL <= LOG_DBG)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista SM objekat.
+ */
+    uint16_t        signature;
+#endif
+
 /**
  * @brief       Pokazivac na state handler funkciju.
  * @details     Ovaj pokazivac pokazuje na funkciju stanja koja vrsi obradu
@@ -127,13 +128,6 @@ struct esSm {
  *              koriste FSM i HSM automati.
  */
     esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
-#endif
-
-#if (OPT_LOG_LEVEL <= LOG_DBG)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
- */
-    uint16_t        signature;
 #endif
 
 #if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
@@ -151,11 +145,11 @@ struct esSm {
 #endif
 };
 
-/*=========================================================================  GLOBAL VARIABLES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
 
 extern const C_ROM esEvt_T evtSignal[];
 
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
  * @brief       Vraca kolika je potrebna velicina memorijskog prostora za
@@ -210,14 +204,13 @@ void smInit (
 void smDeInit(
     esSm_T *        sm);
 
-/*---------------------------------------------------------------------------  C++ extern end  --*/
+/*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-/** @endcond *//** @} *//*************************************************************************
- * END of sproc_pkg.h
- *************************************************************************************************/
-#endif /* SPROC_PKG_H_ */
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/** @endcond *//** @} *//******************************************************
+ * END of smp_pkg.h
+ ******************************************************************************/
+#endif /* SMP_PKG_H_ */

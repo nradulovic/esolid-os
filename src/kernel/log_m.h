@@ -70,6 +70,7 @@
     ENTRY(LOG_MM_DALLOC, "MM: dynamic memory allocate, esDmemAlloc(size)")      \
     ENTRY(LOG_MM_DDALLOC, "MM: dynamic memory deallocate, esDmemDeAlloc(mem)")  \
     ENTRY(LOG_MM_SALLOC, "MM: static memory allocate, esSmemAlloc(size)")       \
+    ENTRY(LOG_SM_INIT, "SM internal: initialization")                           \
     ENTRY(LOG_SM_DISPATCH, "SM: state machine dispatch, esSmDispatch(sm, evt)") \
     ENTRY(LOG_SM_CREATE, "SM: create a state machine, esSmCreate(memClass, definition)")\
     ENTRY(LOG_SM_DESTROY, "SM: destroy a state machine, esSmDestroy(sm)")       \
