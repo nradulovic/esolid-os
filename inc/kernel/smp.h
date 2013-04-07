@@ -48,7 +48,7 @@ extern "C" {
  *              identifikatora korisnik definise svoje, aplikacione
  *              identifikatore dogadjaja.
  */
-enum esEvtId {
+enum esEvtSignalId {
 /**
  * @brief       Signalni dogadjaj - prazan signal.
  * @note        Ne koristi se.
@@ -138,6 +138,13 @@ typedef struct esSmDef {
 } esSmDef_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+/**
+ * @brief       Signalni događaji koji se koriste prilikom izvršavanja automata
+ * @details     Identifikatori događaja su navedeni u @ref esEvtSignalId
+ */
+extern const C_ROM esEvt_T esEvtSignal[];
+
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
