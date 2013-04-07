@@ -87,7 +87,7 @@ static C_INLINE bool_T schedRdyIsEmpty_(
 static C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
-#if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+#if (OPT_KERNEL_INTERRUPT_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
     esEpa_T * epa;
     uint_fast8_t prio;
 
