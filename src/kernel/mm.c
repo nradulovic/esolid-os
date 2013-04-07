@@ -157,9 +157,9 @@ C_UNUSED_FUNC static void smemInit(
     void);
 
 C_UNUSED_FUNC static void dmemInit(
-    uint8_t     * boundary);
+    uint8_t         * boundary);
 
-C_UNUSED_FUNC static void SmemDeAlloc(
+C_UNUSED_FUNC static void smemDeAlloc(
     void            * aMemory);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -197,7 +197,7 @@ const C_ROM esMemClass_T esMemDynClass = {
  */
 const C_ROM esMemClass_T esMemStaticClass = {
     &esSmemAlloc,
-    &SmemDeAlloc,
+    &smemDeAlloc,
 };
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -253,7 +253,7 @@ static void dmemInit(
  * @param       aMemory                 Ignorisan parametar
  * @notapi
  */
-static void SmemDeAlloc(
+static void smemDeAlloc(
     void            * aMemory) {
 
     (void)aMemory;
@@ -417,7 +417,7 @@ void * esDmemAllocI(
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DALLOC, ES_NOT_ENOUGH_MEM);
 
     return ((void *)0);
-#else
+#else /* OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY */
     (void)size;
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DALLOC, ES_USAGE_FAILURE);
 
@@ -500,7 +500,7 @@ void esDmemDeAllocI(
     esDlsNodeAddHead_(
         &(DMEM_SENTINEL->freeList),
         &(freeBlk->freeList));
-#else
+#else /* OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY */
     (void)mem;
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DDALLOC, ES_USAGE_FAILURE);
 
