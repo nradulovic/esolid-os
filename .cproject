@@ -72,9 +72,9 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
 				<externalSettings containerId="esolid-hal;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="includePath" name="/esolid-hal/inc"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/dbg-STM32F10x_md_vl-o0-csgcc"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/linker-scripts/gcc/variant/STM32F100xBxx"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/esolid-hal/inc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/dbg-STM32L1xx_md-o0-csgcc"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/esolid-hal/linker-scripts/gcc/variant/STM32L15xxBxx"/>
 						<entry flags="" kind="libraryFile" name="esolid-hal" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>

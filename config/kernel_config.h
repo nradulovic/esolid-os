@@ -245,7 +245,7 @@
  *              @ref OPT_EVT_USE_TIMESTAMP. Tada je potrebno tek kreirani
  *              događaj popuniti vremenskim markerom nastanka događaja.
  *
- * @note        Podrazumevano podesavanje: FIXME
+ * @note        Podrazumevano podesavanje: 0UL (Ne poziva se funkcija)
  */
 #if !defined(OPT_EVT_TIMESTAMP_CALLBACK)
 # define OPT_EVT_TIMESTAMP_CALLBACK()   0UL
