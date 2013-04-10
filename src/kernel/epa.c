@@ -294,7 +294,7 @@ esEpa_T * esEpaCreate(
     evtQSize = evtQReqSize(
         definition->evtQueueLevels);
 #endif
-    newEpa = mmCreateObject(
+    newEpa = mmObjCreate(
         memClass,
         coreSize + stateQSize + evtQSize);
     smInit(
@@ -328,7 +328,7 @@ void esEpaDestroy(
         &epa->evtQueue);
     smDeInit(
         &epa->sm);
-    mmDestroyObject(
+    mmObjDestroy(
         epa);
 }
 

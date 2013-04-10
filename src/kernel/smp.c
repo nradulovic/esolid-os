@@ -526,7 +526,7 @@ esSm_T * esSmCreate(
     stateQSize = stateQReqSize(
         definition->smLevels);
 #endif
-    newSm = mmCreateObject(
+    newSm = mmObjCreate(
         memClass,
         smpSize + stateQSize);
     smInit(
@@ -549,7 +549,7 @@ void esSmDestroy(
 
     smDeInit(
         sm);
-    mmDestroyObject(
+    mmObjDestroy(
         sm);
 }
 

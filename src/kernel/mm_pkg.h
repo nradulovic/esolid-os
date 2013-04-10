@@ -70,7 +70,7 @@ struct mmObject {
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
-static C_INLINE_ALWAYS void * mmCreateObject(
+static C_INLINE_ALWAYS void * mmObjCreate(
     const C_ROM esMemClass_T *  memClass,
     size_t          size) {
 
@@ -118,7 +118,7 @@ static C_INLINE_ALWAYS void * mmCreateObject(
 #endif
 }
 
-static C_INLINE_ALWAYS void mmDestroyObject(
+static C_INLINE_ALWAYS void mmObjDestroy(
     void *          object) {
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
