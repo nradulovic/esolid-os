@@ -129,7 +129,7 @@ struct esSm {
     esStatus_T (* dispatch)(struct esSm *, const esEvt_T *);
 #endif
 
-#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY) || defined(__DOXYGEN__)
 /**
  * @brief       Niz za cuvanje izvornih stanja HSM automata
  * @details     Ovaj clan se koristi samo ukoliko se koriste HSM automati.
