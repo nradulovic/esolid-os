@@ -11,7 +11,8 @@ docs : docs_clean
 	
 docs_clean :
 	@echo 'Cleaning up documentation'
-	rm -rfv ../doc/html/*
-	rm -rfv ../doc/latex/*
+	rm -rf ../doc/html/*
+	rm -rf ../doc/latex/*
+	rm -rf ../doc/man/*
 	@echo 'Finished Cleaning up documentation'
 	@echo ' '
