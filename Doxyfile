@@ -26,13 +26,13 @@ DOXYFILE_ENCODING      = UTF-8
 # identify the project. Note that if you do not use Doxywizard you need
 # to put quotes around the project name if it contains spaces.
 
-PROJECT_NAME           = "eSolid"
+PROJECT_NAME           = "eSolid - Kernel"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = 1.0Beta Rev01
+PROJECT_NUMBER         = 1.0Beta R01
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -670,11 +670,7 @@ WARN_LOGFILE           =
 INPUT                  = ../esolid-kernel/inc                                   \
                          ../esolid-kernel/src                                   \
                          ../esolid-kernel/doc/                                  \
-                         ../esolid-kernel/config                                \
-                         ../esolid-hal/inc                                      \
-                         ../esolid-hal/src                                      \
-                         ../esolid-hal/doc                                      \
-                         ../esolid-hal/config
+                         ../esolid-kernel/config                                
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -739,8 +735,7 @@ EXCLUDE_SYMBOLS        =
 # directories that contain example code fragments that are included (see
 # the \include command).
 
-EXAMPLE_PATH           = ../esolid-kernel/doc/example                           \
-                         ../esolid-hal/doc/example
+EXAMPLE_PATH           = ../esolid-kernel/doc/example
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp
@@ -760,8 +755,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see
 # the \image command).
 
-IMAGE_PATH             = ../esolid-kernel/doc/img                               \
-                         ../esolid-hal/doc/img
+IMAGE_PATH             = ../esolid-kernel/doc/img
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1518,8 +1512,7 @@ SEARCH_INCLUDES        = YES
 # contain include files that are not input files but should be processed by
 # the preprocessor.
 
-INCLUDE_PATH           = ../esolid-kernel/inc                                   \
-                         ../esolid-hal/inc
+INCLUDE_PATH           = ../esolid-kernel/inc
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
@@ -1681,7 +1674,7 @@ GROUP_GRAPHS           = YES
 # collaboration diagrams in a style similar to the OMG's Unified Modeling
 # Language.
 
-UML_LOOK               = NO
+UML_LOOK               = YES
 
 # If the UML_LOOK tag is enabled, the fields and methods are shown inside
 # the class node. If there are many fields or methods and many nodes the
