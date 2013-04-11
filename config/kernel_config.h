@@ -40,18 +40,6 @@
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Koristi se za opciju @ref OPT_MM_DISTRIBUTION : Ukljucen je samo
- *              dinamicki alokator
- */
-#define ES_MM_DYNAMIC_ONLY              0
-
-/**
- * @brief       Koristi se za opciju @ref OPT_MM_DISTRIBUTION : Ukljucen je samo
- *              staticki alokator
- */
-#define ES_MM_STATIC_ONLY               -1
-
-/**
  * @brief       Koristi se za opciju @ref OPT_SMP_SM_TYPES : Omoguceni su samo
  *              FSM tipovi automata
  */
@@ -85,80 +73,6 @@
  */
 #if !defined(OPT_KERNEL_EPA_PRIO_MAX) || defined(__DOXYGEN__)
 # define OPT_KERNEL_EPA_PRIO_MAX        8U
-#endif
-
-/**
- * @brief       Maksimalan prioritet prekidnih rutina kernela
- * @details     Ovim se ogranicava prioritet prekidnih rutina koje jezgro
- *              koristi. Ovo podesavanje je izuzetno korisno kada postoji
- *              potreba da se pojedini hardverski prekidi ne prekidaju od strane
- *              jezgra.
- * @note        Podrazumevano podesavanje: ES_PRIO_REALTIME
- */
-#if !defined(OPT_KERNEL_INTERRUPT_PRIO_MAX) || defined(__DOXYGEN__)
-# define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
-#endif
-
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Podesavanje Memory Management (MM) modula
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Managed RAM size.
- * @details     Size of the RAM area to be managed by the eSolid. If set to zero
- *              then the whole available RAM is used. The core memory is made
- *              available to the heap allocator and/or can be used directly
- *              through the simplified core memory allocator.
- * @pre         In order to let the OS manage the whole RAM the linker script
- *              must provide the @p _sheap and @p _eheap symbols.
- * @note        DEFAULT: 0 (All memory)
- */
-#if !defined(OPT_MM_MANAGED) || defined(__DOXYGEN__)
-# define OPT_MM_MANAGED_SIZE            0U
-#endif
-
-/**
- * @brief       Distribution of static and dynamic memory
- * @details     Size of the RAM area that is given to the dynamic memory manager.
- *              Here you can specify how much memory is given to dynamic memory
- *              manager and to the static memory manager.
- *
- *              If dynamic memory size value is set to zero the dynamic memory
- *              manager will use all static memory effectively disabling static
- *              memory manager. All calls to static memory manager will be
- *              redirected to dynamic memory manager.
- *
- *              If you wish to disable dynamic memory manager and use only
- *              static memory manager enter here -1.
- *
- *              Options:
- *              - @ref ES_MM_STATIC_ONLY - Only static memory management is
- *              enabled
- *              - @ref ES_MM_DYNAMIC_ONLY - Only dynamic memory management is
- *              enabled
- *              - any other value - both memory managers are enabled.
- *
- * @note        DEFAULT: ES_MM_DYNAMIC_ONLY (Only dynamic memory manager is
- *              enabled)
- */
-#if !defined(OPT_MM_DISTRIBUTION)
-# define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
-#endif
-
-/**
- * @brief       Static memory allocator override
- */
-#if defined(__DOXYGEN__)
-# define OPT_MM_STATIC_ALLOC
-#endif
-
-/**
- * @brief       Dynamic memory allocator override
- */
-#if defined(__DOXYGEN__)
-# define OPT_MM_DYNAMIC_ALLOC
-# define OPT_MM_DYNAMIC_DEALLOC
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -321,12 +235,6 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-#if !defined(ES_HAL_ENABLE_STARTUP)
-# if (OPT_MM_MANAGED_SIZE == 0UL)
-#  error "Kernel precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MM_MANAGED_SIZE"
-# endif
-#endif
 
 #if !defined(ES_HAL_ENABLE_CPU)
 # error "Kernel precondition is not satisfied: enable CPU module with option: OPT_HAL_CPU"

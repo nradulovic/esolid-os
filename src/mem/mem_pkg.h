@@ -32,6 +32,16 @@
 #define MM_PKG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+#include "mem/mem.h"
+
+#if defined(OPT_SYS_ENABLE_LOG)
+#include "log/log.h"
+/* FIXME: gde staviti enumeratore greške?? Nije im mesto u kernel.h */
+#include "kernel/kernel.h"
+#include "../src/log/log_m.h"
+#endif
+
+
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
 /*------------------------------------------------------  C++ extern begin  --*/
@@ -74,7 +84,7 @@ static C_INLINE_ALWAYS void * mmObjCreate(
     const C_ROM esMemClass_T *  memClass,
     size_t          size) {
 
-#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE == ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
     void * mmObject;
 
@@ -85,13 +95,13 @@ static C_INLINE_ALWAYS void * mmObjCreate(
     }
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     mmObject = esDmemAllocI(
         size);
     ES_CRITICAL_EXIT();
 
     return (mmObject);
-#elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+#elif (OPT_MEM_HEAP_SIZE == ES_MM_STATIC_ONLY)
     ES_CRITICAL_DECL();
     void * mmObject;
 
@@ -102,7 +112,7 @@ static C_INLINE_ALWAYS void * mmObjCreate(
     }
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     mmObject = esSmemAllocI(
         size);
     ES_CRITICAL_EXIT();
@@ -121,10 +131,10 @@ static C_INLINE_ALWAYS void * mmObjCreate(
 static C_INLINE_ALWAYS void mmObjDestroy(
     void *          object) {
 
-#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE == ES_MM_DYNAMIC_ONLY)
     esDmemDeAllocI(
         object);
-#elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+#elif (OPT_MEM_HEAP_SIZE == ES_MM_STATIC_ONLY)
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DESTROYO, ES_USAGE_FAILURE);
     (void)object;
 #else

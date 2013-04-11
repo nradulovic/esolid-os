@@ -24,18 +24,17 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Menadzment memorije
- * @addtogroup  mm_intf
+ * @addtogroup  mem_intf
  *********************************************************************//** @{ */
 
 
-#ifndef MM_H_
-#define MM_H_
+#ifndef MEM_H_
+#define MEM_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
-#include "../config/kernel_config.h"
+#include "../config/sys_config.h"
 
-/*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
 
 /**
@@ -241,4 +240,4 @@ size_t esDmemBlockSize(
 /** @endcond *//** @} *//******************************************************
  * END of mem.h
  ******************************************************************************/
-#endif /* MM_H_ */
+#endif /* MEM_H_ */

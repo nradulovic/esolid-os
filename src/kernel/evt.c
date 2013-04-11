@@ -117,7 +117,7 @@ esEvt_T * esEvtCreate(
     }
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     newEvt = esDmemAllocI(
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
@@ -181,7 +181,7 @@ void esEvtDestroy(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     esEvtDestroyI(
         evt);
     ES_CRITICAL_EXIT();

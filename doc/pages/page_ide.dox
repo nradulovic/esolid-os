@@ -1,0 +1,131 @@
+/**************************************************************************//**
+@file
+@brief          Integrated development environment
+*//** @{ *//**
+@page           ide Integrated development environment
+@brief          How to set-up free and feature packed Integrated development environment
+@section        ide_index Index
+    - @ref ide_intro
+    - @ref ide_concepts
+    - @ref ide_organization
+    
+@section        ide_intro Uvod
+Integrisano razvojno okruženje poznato i kao IDE (engl. Integrated Development 
+Environment) je softver koji programerima pruža širok skup objekata za razvoj 
+softvera.
+
+Razvojna okruženja su projektovana kako bi se povećala produktivnost programera 
+pružajući paletu komponenata sa sličnim korisničkim interfejsom. Razvojno 
+okruženje obično pruža mnoge mogućnosti za authoring, modificiranje, 
+sastavljanje, implementaciju i ispravljanje grešaka u softveru.
+
+Jedan cilj je smanjiti konfiguraciju potrebnu kada se spojaju više razvojnih 
+alatki. Smanjenje vremena za konfiguraciju može povećati produktivnost 
+projektanta. Dublja integracija svih razvojnih alata ima za potencijal da 
+poboljšaju ukupnu produktivnost. Na primer, programski kod se može kontinuirano 
+analizirati u toku uređovanja, čime se pruža trenutna povratna informacija kada 
+kada je uvedena sintaksna greška. To može ubrzati učenje novog programskog 
+jezika i njegove pridružene biblioteke.
+
+- Nazad na @ref ide_index
+
+@section        ide_concepts Koncepti razvojnog okruženja
+Razvojno okruženje se uobičajeno sastoji od:
+
+- editora izvornog koda
+- kompajlera, odnosno interpretera
+- alata za automatsko kompajliranje
+- dibagera
+
+@dot
+digraph G {
+node [shape=box];
+doc             [fillcolor=lightblue,style=filled,label="Documentation"];
+firmware        [fillcolor=lightblue,style=filled,label="Firmware"];
+svn             [fillcolor=orange,style=filled,label="Source Version\n Control"];
+src             [fillcolor=green,style=filled,label="Source files"];
+hardware        [fillcolor=red,style=filled,label="Hardware"];
+src     -> doc;
+src     -> firmware;
+src     -> svn
+firmware -> hardware;
+}
+@enddot
+
+- Nazad na @ref ide_index
+
+@section        ide_organization Organizacija
+@dot
+digraph G {
+node [shape=box];
+eclipse         [fillcolor=yellow,style=filled,label="Eclipse"];
+eclox           [fillcolor=lightblue,style=filled,label="eclox"];
+gnuarm          [fillcolor=lightblue,style=filled,label="GNUARM,\nAVRGCC, ..."];
+cdt             [fillcolor=lightblue,style=filled,label="CDT"];
+subclipse       [fillcolor=lightblue,style=filled,label="Subclipse,\nEGit, ..."];
+src             [fillcolor=green,style=filled,label="Source files"];
+doxygen         [fillcolor=yellow,style=filled,label="Doxygen"];
+svn             [fillcolor=yellow,style=filled,label="Source Version\n Control"];
+gcc             [fillcolor=yellow,style=filled,label="Compiler and debuger\ntoolchain"];
+server          [fillcolor=orange,style=filled,label="SVC server"];
+gdbserver       [fillcolor=yellow,style=filled,label="Debug server"];
+loader          [fillcolor=yellow,style=filled,label="Loader"];
+hardware        [fillcolor=red,style=filled,label="Hardware"];
+eclipse -> eclox;
+eclipse -> gnuarm;
+eclipse -> cdt;
+eclipse -> subclipse;
+cdt     -> src;
+gnuarm  -> gcc;
+src     -> gcc;
+subclipse -> svn;
+svn     -> src;
+src     -> svn;
+svn     -> server;
+eclox   -> doxygen;
+src     -> doxygen;
+doxygen -> html;
+doxygen -> pdf;
+doxygen -> man;
+gcc     -> firmware;
+gcc     -> gdbserver;
+firmware  -> gdbserver;
+firmware  -> loader;
+gdbserver -> hardware;
+loader    -> hardware;
+}
+@enddot
+
+Opšte Komponente:
+- Eclipse Platform, version: 3.8.2 or 4.2.2
+- Eclipse plugin:
+    - C/C++ Development Tools, org.eclipse.cdt.feature.group, Eclipse CDT
+    - C/C++ GDB Hardware Debugging, org.eclipse.cdt.debug.gdbjtag.feature.group, Eclipse CDT
+    - C/C++ Memory View Enhancements, org.eclipse.cdt.debug.ui.memory.feature.group, Eclipse CDT
+    - Eclox Hot, org.gna.eclox.hot.feature.group, Guillaume Brocker
+    - Workspace Mechanic, com.google.eclipse.mechanic.feature.group, Google, Inc.
+- Doxygen, above version 1.6.x
+
+
+Subversion verzioniranje projekata:
+- Eclipse plugin:
+    - Subclipse, org.tigris.subversion.subclipse.feature.group, tigris.org
+    - Subversion Client Adapter, org.tigris.subversion.clientadapter.feature.feature.group, tigris.org
+    - Subversion JavaHL Native Library Adapter, org.tigris.subversion.clientadapter.javahl.feature.feature.group, tigris.org
+    - Subversion Revision Graph, org.tigris.subversion.subclipse.graph.feature.feature.group, tigris.org
+- Subversion command-line client, above version 1.6.x.
+
+Port komponente ARM Cortem-M3:
+- Eclipse plugin:
+    - GNU ARM C/C++ Development Support, org.eclipse.cdt.cross.arm.gnu.feature.group, SourceForge Project
+- Compiler toolchain: arm-none-eabi
+- GDB server
+
+- Nazad na @ref ide_index
+
+@author         Nenad Radulović
+
+Contact information:
+    - web site:  http://blueskynet.dyndns-server.com
+    - e-mail:    blueskyniss@gmail.com
+**//** @} *//******************************************************************/

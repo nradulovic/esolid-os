@@ -27,11 +27,12 @@
  * @addtogroup  mm_impl
  *********************************************************************//** @{ */
 
-
 /*=========================================================  INCLUDE FILES  ==*/
 
-#define MM_PKG_H_VAR
-#include "kernel_private.h"
+#define MEM_PKG_H_VAR
+#include "mem_pkg.h"
+
+#if defined(OPT_SYS_ENABLE_MEM)
 #include "primitive/list.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
@@ -60,7 +61,7 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 
-#if (OPT_MM_MANAGED_SIZE == 0U) || defined(__DOXYGEN__)                         /* Koristi se linker skripta.                               */
+#if (OPT_MEM_CORE_SIZE == 0U) || defined(__DOXYGEN__)                         /* Koristi se linker skripta.                               */
 /**
  * @brief       Pocetak heap memorije
  */
@@ -91,21 +92,21 @@
 
 /**
  * @brief       Izvlacenje statusa bloka iz @c size clana.
- * @return      status da li je blok slobodan.
+ * @return      stanje da li je blok slobodan.
  */
-#define BLK_STAT_QUERY(currBlk)                                                 \
+#define BLOCK_GET_STATUS(currBlk)                                                 \
     ((currBlk)->blk.size & BLOCK_STATUS_MASK)
 
 /**
  * @brief       Vrsi postavljanje statusa bloka da je zauzet.
  */
-#define BLK_STAT_BUSY(currBlk)                                                  \
+#define BLOCK_SET_BUSY(currBlk)                                                  \
     (currBlk)->blk.size |= BLOCK_STATUS_MASK
 
 /**
  * @brief       Vrsi postavljanje statusa bloka da je slobodan.
  */
-#define BLK_STAT_FREE(currBlk)                                                  \
+#define BLOCK_SET_FREE(currBlk)                                                  \
     (currBlk)->blk.size &= ~BLOCK_STATUS_MASK
 
 /**
@@ -135,7 +136,6 @@ typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dmemBlk {
 } dmemBlk_T;
 
 /**
- * @extends     dmemBlk_T
  * @brief       Zaglavlje jedne slobodne oblasti memorije.
  * @details     Ovo zaglavlje postoji samo u slobodnim oblastima memorije.
  */
@@ -169,13 +169,13 @@ C_UNUSED_FUNC static void smemDeAlloc(
  */
 static uint8_t * gSmemSentinel;
 
-#if (OPT_MM_MANAGED_SIZE != 0U)
+#if (OPT_MEM_CORE_SIZE != 0U)
 /*
- * Provera da li je OPT_MM_MANAGED_SIZE veca od velicine dva blokovska zaglavlja
- * i da li je OPT_MM_MANAGED_SIZE manja od maksimalne velicine bloka koja se
+ * Provera da li je OPT_MEM_CORE_SIZE veca od velicine dva blokovska zaglavlja
+ * i da li je OPT_MEM_CORE_SIZE manja od maksimalne velicine bloka koja se
  * moze predstaviti jednim blokom.
  */
-static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(OPT_MM_MANAGED_SIZE, ES_CPU_ATTRIB_ALIGNMENT)];
+static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(OPT_MEM_CORE_SIZE, ES_CPU_ATTRIB_ALIGNMENT)];
 #endif
 
 /*======================================================  GLOBAL VARIABLES  ==*/
@@ -244,8 +244,8 @@ static void dmemInit(
     esDlsNodeAddHead_(
         &(DMEM_SENTINEL->freeList),
         &(((dmemBlkHdr_T *)boundary)->freeList));
-    BLK_STAT_BUSY(DMEM_SENTINEL);
-    BLK_STAT_FREE((dmemBlkHdr_T *)boundary);
+    BLOCK_SET_BUSY(DMEM_SENTINEL);
+    BLOCK_SET_FREE((dmemBlkHdr_T *)boundary);
 }
 
 /**
@@ -267,17 +267,17 @@ static void smemDeAlloc(
 void esMemInit(
     void) {
 
-#if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE == ES_MM_DYNAMIC_ONLY)
     dmemInit(
         HEAP_BEGIN);
-#elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
+#elif (OPT_MEM_HEAP_SIZE == ES_MM_STATIC_ONLY)
     smemInit();
 #else
     void * boundary;
 
     smemInit();
     boundary = esSmemAlloc(
-        OPT_MM_DISTRIBUTION);
+        OPT_MEM_HEAP_SIZE);
     dmemInit(
         boundary);
 #endif
@@ -287,7 +287,7 @@ void esMemInit(
 size_t esSmemFreeSpace(
     void) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE != ES_MM_DYNAMIC_ONLY)
     size_t freeSpace;
 
     freeSpace = HEAP_END - gSmemSentinel;
@@ -303,7 +303,7 @@ size_t esSmemFreeSpace(
 void * esSmemAllocI(
     size_t          size) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE != ES_MM_DYNAMIC_ONLY)
     void * tmp;
 
     if (0UL == size) {
@@ -342,7 +342,7 @@ void * esSmemAlloc(
     void * tmp;
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     tmp = esSmemAllocI(
         size);
     ES_CRITICAL_EXIT();
@@ -358,7 +358,7 @@ void * esDmemAlloc(
     void * tmpMem;
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     tmpMem = esDmemAllocI(
         size);
     ES_CRITICAL_EXIT();
@@ -370,13 +370,9 @@ void * esDmemAlloc(
 void * esDmemAllocI(
     size_t          size) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE != ES_MM_STATIC_ONLY)
     dmemBlkHdr_T * prevPhy;
     dmemBlkHdr_T * freeBlk;
-
-    if (ES_LOG_IS_WARN(&gKernelLog, LOG_FILT_MM)) {
-        ES_LOG_WARN_IF_INVALID(&gKernelLog, size >= sizeof(dmemBlkHdr_T), LOG_MM_DALLOC, ES_ARG_OUT_OF_RANGE);
-    }
 
     if (0UL == size) {
         size = ES_CPU_ATTRIB_ALIGNMENT;
@@ -409,7 +405,7 @@ void * esDmemAllocI(
                 esDlsNodeRm_(
                     &(freeBlk->freeList));
             }
-            BLK_STAT_BUSY(freeBlk);
+            BLOCK_SET_BUSY(freeBlk);
 
             return ((void *)&(freeBlk->freeList));
         }
@@ -417,7 +413,7 @@ void * esDmemAllocI(
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DALLOC, ES_NOT_ENOUGH_MEM);
 
     return ((void *)0);
-#else /* OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY */
+#else /* OPT_MEM_HEAP_SIZE != ES_MM_STATIC_ONLY */
     (void)size;
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DALLOC, ES_USAGE_FAILURE);
 
@@ -429,7 +425,7 @@ void * esDmemAllocI(
 size_t esDmemBlockSize(
     void *          mem) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE != ES_MM_STATIC_ONLY)
     dmemBlkHdr_T * currBlk;
 
     currBlk = C_CONTAINER_OF((esDlsList_T *)mem, dmemBlkHdr_T, freeList);
@@ -449,7 +445,7 @@ void esDmemDeAlloc(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     esDmemDeAllocI(
         mem);
     ES_CRITICAL_EXIT();
@@ -459,7 +455,7 @@ void esDmemDeAlloc(
 void esDmemDeAllocI(
     void *          mem) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE != ES_MM_STATIC_ONLY)
     size_t blkStat;
     dmemBlkHdr_T * freeBlk;
     dmemBlkHdr_T * currPhy;
@@ -474,8 +470,8 @@ void esDmemDeAllocI(
         dmemBlkHdr_T,
         blk.phyList,
         freeBlk->blk.phyList.next);
-    blkStat = BLK_STAT_QUERY(currPhy);
-    BLK_STAT_FREE(freeBlk);
+    blkStat = BLOCK_GET_STATUS(currPhy);
+    BLOCK_SET_FREE(freeBlk);
 
     if (BLOCK_IS_FREE == blkStat) {
         esDlsNodeRm_(
@@ -487,7 +483,7 @@ void esDmemDeAllocI(
         freeBlk = currPhy;
     }
     currPhy = PHY_BLK_PREV(freeBlk);
-    blkStat = BLK_STAT_QUERY(currPhy);
+    blkStat = BLOCK_GET_STATUS(currPhy);
 
     if (BLOCK_IS_FREE == blkStat) {
         esDlsNodeRm_(
@@ -500,7 +496,7 @@ void esDmemDeAllocI(
     esDlsNodeAddHead_(
         &(DMEM_SENTINEL->freeList),
         &(freeBlk->freeList));
-#else /* OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY */
+#else /* OPT_MEM_HEAP_SIZE != ES_MM_STATIC_ONLY */
     (void)mem;
     ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_DDALLOC, ES_USAGE_FAILURE);
 
@@ -515,7 +511,7 @@ size_t esDmemFreeSpace(
     size_t tmpSize;
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     tmpSize = esDmemFreeSpaceI();
     ES_CRITICAL_EXIT();
 
@@ -526,7 +522,7 @@ size_t esDmemFreeSpace(
 size_t esDmemFreeSpaceI(
     void) {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)
+#if (OPT_MEM_HEAP_SIZE != ES_MM_STATIC_ONLY)
     size_t free;
     dmemBlkHdr_T * currBlk;
 
@@ -550,3 +546,4 @@ size_t esDmemFreeSpaceI(
 /** @endcond *//** @} *//******************************************************
  * END of mem.c
  ******************************************************************************/
+#endif /* defined(OPT_SYS_ENABLE_MEM) */

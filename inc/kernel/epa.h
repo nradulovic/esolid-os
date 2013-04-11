@@ -34,7 +34,7 @@
 #define EPA_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/smp.h"
+#include "smp/smp.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -171,7 +171,7 @@ void esEvtPostAheadI(
  * @return      Pokazivac na strukturu zaglavlja EPA objekta.
  * @see         esEpaDef_T
  * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
- *              funkcija vrsi inicijalizaciju EPA objekta sa odgovarajucim 
+ *              funkcija vrsi inicijalizaciju EPA objekta sa odgovarajucim
  * 				parametrima.
  * @api
  * @error

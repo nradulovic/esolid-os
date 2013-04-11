@@ -32,7 +32,7 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
-#include "../config/log_config.h"
+#include "../config/sys_config.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -57,7 +57,7 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 
-#if (OPT_LOG_LEVEL <= LOG_ERR)
+#if (OPT_LOG_LEVEL <= LOG_ERR) && defined(OPT_SYS_ENABLE_LOG)
 /**
  * @brief       Obelezava greske u sistemu
  */
@@ -102,7 +102,7 @@
 /**
  * @brief       Obelezava upozorenja
  */
-#if (OPT_LOG_LEVEL <= LOG_WARN)
+#if (OPT_LOG_LEVEL <= LOG_WARN) && defined(OPT_SYS_ENABLE_LOG)
 # define ES_LOG_IS_WARN(log, filter)                                            \
     ((log)->switches & (filter))
 
@@ -160,7 +160,7 @@
 /**
  * @brief       Obelezava informativne dogadjaje
  */
-#if (OPT_LOG_LEVEL <= LOG_INFO)
+#if (OPT_LOG_LEVEL <= LOG_INFO) && defined(OPT_SYS_ENABLE_LOG)
 # define ES_LOG_IS_INFO(log, filter)                                            \
     ((log)->switches & (filter))
 
@@ -203,7 +203,7 @@
 /**
  * @brief       Obelezava dogadjaje sa informacijama o greskama
  */
-#if (OPT_LOG_LEVEL <= LOG_DBG)
+#if (OPT_LOG_LEVEL <= LOG_DBG) && defined(OPT_SYS_ENABLE_LOG)
 # define ES_LOG_IS_DBG(log, filter)                                             \
     ((log)->switches & (filter))
 
@@ -261,7 +261,7 @@
 /**
  * @brief       Obelezava dogadjaje izvrsenja koda
  */
-#if (OPT_LOG_LEVEL <= LOG_TRACE)
+#if (OPT_LOG_LEVEL <= LOG_TRACE) && defined(OPT_SYS_ENABLE_LOG)
 # define ES_LOG_IS_TRACE(log, filter)                                           \
     ((log)->switches & (filter))
 

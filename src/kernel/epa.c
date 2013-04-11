@@ -82,7 +82,7 @@ static C_INLINE void epaInit_(
     epa->prio = definition->epaPrio;
     epa->name = definition->epaName;
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     evtQPutI_(
         &epa->evtQueue,
         (esEvt_T *)&esEvtSignal[SIG_INIT]);                                       /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
@@ -109,7 +109,7 @@ static C_INLINE void epaDeInit_(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     schedRdyRmI_(
         epa->prio);
     schedRdyUnRegI(
@@ -122,7 +122,7 @@ static C_INLINE void epaDeInit_(
         evt = evtQGetI_(
             &epa->evtQueue);
         ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            OPT_SYS_INTERRUPT_PRIO_MAX);
         esEvtDestroyI(
             evt);
         ES_CRITICAL_EXIT();
@@ -179,7 +179,7 @@ void esEvtPost(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     esEvtPostI(
        epa,
        evt);
@@ -225,7 +225,7 @@ void esEvtPostAhead(
     ES_CRITICAL_DECL();
     
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     esEvtPostAheadI(
         epa,
         evt);
@@ -358,7 +358,7 @@ void esEpaPrioSet(
     }
 
     ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        OPT_SYS_INTERRUPT_PRIO_MAX);
     status = schedEpaIsRdyI(
         epa->prio);
     schedRdyRmI_(

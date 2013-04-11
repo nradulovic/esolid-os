@@ -87,7 +87,7 @@ static C_INLINE bool_T schedRdyIsEmpty_(
 static C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
-#if (OPT_KERNEL_INTERRUPT_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+#if (OPT_SYS_INTERRUPT_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
     esEpa_T * epa;
     uint_fast8_t prio;
 
@@ -176,7 +176,7 @@ void sched(
     ES_CRITICAL_DECL();
 
     ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            OPT_SYS_INTERRUPT_PRIO_MAX);
 
     while (TRUE) {
 
@@ -193,7 +193,7 @@ void sched(
                 epa,
                 evt);
             ES_CRITICAL_ENTER(
-                OPT_KERNEL_INTERRUPT_PRIO_MAX);
+                OPT_SYS_INTERRUPT_PRIO_MAX);
 
             if (RETN_DEFERRED == status) {
                 evtPushBackI(
@@ -211,7 +211,7 @@ void sched(
 #endif
         ES_CRITICAL_EXIT();
         ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            OPT_SYS_INTERRUPT_PRIO_MAX);
     }
 }
 
