@@ -513,10 +513,10 @@ esSm_T * esSmCreate(
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     smpSize = sizeof(esSm_T);
-    smpSize += ES_ALIGN(
+    smpSize += ES_ALIGN_UP(
         definition->smWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
-    stateQSize = ES_ALIGN(
+    stateQSize = ES_ALIGN_UP(
         stateQReqSize(
             definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);

@@ -36,17 +36,6 @@
 #include "../config/sys_config.h"
 
 /*===============================================================  MACRO's  ==*/
-
-/**
- * @brief       Definise memorijski alokator za staticko cuvanje podataka
- */
-#define ES_STATIC_STORAGE               &esMemStaticClass
-
-/**
- * @brief       Definise memorijski alokator za dinamicko cuvanje podataka
- */
-#define ES_DYNAMIC_OBJECT               &esMemDynClass
-
 /*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
@@ -54,43 +43,22 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
-/**
- * @brief       Memorijska klasa alokatora
- */
-typedef struct esMemClass esMemClass_T;
+typedef struct dMemSentinel esDmemDesc_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
-
-/*------------------------------------------------------------------------*//**
- * @name        Klase memorijskog alokatora
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Dinamicki memorijski alokator (dynamic memory)
- */
-extern const C_ROM esMemClass_T esMemDynClass;
-
-/**
- * @brief       Staticki memorijski alokator (static memory)
- */
-extern const C_ROM esMemClass_T esMemStaticClass;
-
-/** @} *//*-------------------------------------------------------------------*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
-
-/**
- * @brief       Inicijalizuje memorijske alokatore
- * @details     Ova funkcija se mora pozvati pre koriscenja funkcija memorijskih
- *              alokatora.
- * @note        U slucaju da se MM modul koristi od strane SMP ili Kernel-a ova
- *              funkcija se automatski poziva.
- */
-void esMemInit(
-    void);
 
 /*------------------------------------------------------------------------*//**
  * @name        Funkcije statickog memorijskog alokatora
  * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Inicijalizuje staticni memorijski alokator
+ * @details     Ova funkcija se mora pozvati pre koriscenja funkcija staticnog
+ *              memorijskog alokatora.
+ */
+void esSmemInit(
+    void);
 
 /**
  * @brief       Dodeljuje memorijski prostor velicine @c size
@@ -138,6 +106,14 @@ size_t esSmemFreeSpace(
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
+ * @brief       Inicijalizuje dinamican memorijski alokator
+ * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
+ *              memorijskog alokatora.
+ */
+esDmemDesc_T * esDmemCreate(
+    size_t          size);
+
+/**
  * @brief       Dodeljuje memorijski prostor velicine @c size
  * @param       size                    Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
@@ -151,6 +127,7 @@ size_t esSmemFreeSpace(
  * @api
  */
 void * esDmemAlloc(
+    esDmemDesc_T *  desc,
     size_t          size);
 
 /**
@@ -167,6 +144,7 @@ void * esDmemAlloc(
  * @iclass
  */
 void * esDmemAllocI(
+    esDmemDesc_T *  desc,
     size_t          size);
 
 /**
@@ -177,6 +155,7 @@ void * esDmemAllocI(
  * @api
  */
 void esDmemDeAlloc(
+    esDmemDesc_T *  desc,
     void *          mem);
 
 /**
@@ -187,6 +166,7 @@ void esDmemDeAlloc(
  * @iclass
  */
 void esDmemDeAllocI(
+    esDmemDesc_T *  desc,
     void *          mem);
 
 /**
@@ -200,7 +180,7 @@ void esDmemDeAllocI(
  * @api
  */
 size_t esDmemFreeSpace(
-    void);
+    esDmemDesc_T *  desc);
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
@@ -213,22 +193,7 @@ size_t esDmemFreeSpace(
  * @iclass
  */
 size_t esDmemFreeSpaceI(
-    void);
-
-/**
- * @brief		Vraca velicinu dodeljene memorije
- * @param 		mem					    Pokazivac na prethodno dodeljen
- * 										memorijski prostor.
- * @return		Velicina dodeljenog memorijskog prostora.
- * @details     Sa obzirom da alokatori koriste granulaciju i/ili imaju
- *              implementaciono ogranicenje, prilikom dodeljivanja memorije moze
- *              se dodeliti veca memorija od zahtevane. Ova funkcija se moze
- *              koristiti ukoliko je potrebna informacija o stvarnoj velicini
- *              dodeljenog bloka.
- * @api
- */
-size_t esDmemBlockSize(
-	void *          mem);
+    esDmemDesc_T *  desc);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/

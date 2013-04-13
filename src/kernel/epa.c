@@ -275,14 +275,14 @@ esEpa_T * esEpaCreate(
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     coreSize = sizeof(esEpa_T);
-    coreSize += ES_ALIGN(
+    coreSize += ES_ALIGN_UP(
         definition->epaWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
-    stateQSize = ES_ALIGN(
+    stateQSize = ES_ALIGN_UP(
         stateQReqSize(
             definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
-    evtQSize = ES_ALIGN(
+    evtQSize = ES_ALIGN_UP(
         evtQReqSize(
             definition->evtQueueLevels),
         ES_CPU_ATTRIB_ALIGNMENT);

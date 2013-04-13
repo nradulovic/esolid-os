@@ -31,8 +31,6 @@
 
 #define MEM_PKG_H_VAR
 #include "mem_pkg.h"
-
-#if defined(OPT_SYS_ENABLE_MEM)
 #include "primitive/list.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
@@ -152,76 +150,18 @@ typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dmemBlkHdr {
 } dmemBlkHdr_T;
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
-
-C_UNUSED_FUNC static void smemInit(
-    void);
-
-C_UNUSED_FUNC static void dmemInit(
-    uint8_t         * boundary);
-
-C_UNUSED_FUNC static void smemDeAlloc(
-    void            * aMemory);
-
 /*=======================================================  LOCAL VARIABLES  ==*/
 
 /**
  * @brief       Cuvar vrednosti slobodne memorije staticnog alokatora
  */
-static uint8_t * gSmemSentinel;
-
-#if (OPT_MEM_CORE_SIZE != 0U)
-/*
- * Provera da li je OPT_MEM_CORE_SIZE veca od velicine dva blokovska zaglavlja
- * i da li je OPT_MEM_CORE_SIZE manja od maksimalne velicine bloka koja se
- * moze predstaviti jednim blokom.
- */
-static C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) uint8_t heap[ES_ALIGN(OPT_MEM_CORE_SIZE, ES_CPU_ATTRIB_ALIGNMENT)];
-#endif
+static struct sMemSentinel {
+    unative_T *     begin;
+    unative_T       current;
+} gSMemSentinel;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
-
-/*------------------------------------------------------------------------*//**
-* @name        Klase memorijskog alokatora
-* @{ *//*---------------------------------------------------------------------*/
-
-/**
- * @brief       Dinamicki memorijski alokator
- */
-const C_ROM esMemClass_T esMemDynClass = {
-    &esDmemAlloc,
-    &esDmemDeAlloc,
-};
-
-/**
- * @brief       Staticki memorijski alokator
- */
-const C_ROM esMemClass_T esMemStaticClass = {
-    &esSmemAlloc,
-    &smemDeAlloc,
-};
-
-/** @} *//*-------------------------------------------------------------------*/
-
-/**
- * @brief       Pocetak heap memorije, definicija je u linker skripti.
- */
-extern uint8_t _sheap;
-
-/**
- * @brief       Kraj heap memorije, definicija je u linker skripti.
- */
-extern uint8_t _eheap;
-
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
-
-/**
- * @brief       Inicijalizacija statičnog memorijskog menadzera
- */
-static void smemInit(
-    void) {
-
-    gSmemSentinel = HEAP_BEGIN;
-}
 
 /**
  * @brief       Inicijalizacija dinamičkog memorijskog menadzera
@@ -264,22 +204,23 @@ static void smemDeAlloc(
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
 /*----------------------------------------------------------------------------*/
-void esMemInit(
+void esSmemInit(
     void) {
 
-#if (OPT_MEM_HEAP_SIZE == ES_MM_DYNAMIC_ONLY)
-    dmemInit(
-        HEAP_BEGIN);
-#elif (OPT_MEM_HEAP_SIZE == ES_MM_STATIC_ONLY)
-    smemInit();
-#else
-    void * boundary;
+#if (OPT_MEM_CORE_SIZE != 0U)
+    static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_CORE_SIZE, sizeof(unative_T))];
 
-    smemInit();
-    boundary = esSmemAlloc(
-        OPT_MEM_HEAP_SIZE);
-    dmemInit(
-        boundary);
+    gSMemSentinel.begin = &sMemBuffer;
+    gSMemSentinel.current = ES_DIMENSION(sMemBuffer);
+#else
+
+    extern uint8_t _sheap;
+    extern uint8_t _eheap;
+
+    gSMemSentinel.begin = (unative_T *)ES_ALIGN_UP(
+        &_sheap,
+        sizeof(unative_T));
+    gSMemSentinel.current = (&_eheap - gSMemSentinel.begin) / sizeof(unative_T);
 #endif
 }
 
@@ -287,51 +228,25 @@ void esMemInit(
 size_t esSmemFreeSpace(
     void) {
 
-#if (OPT_MEM_HEAP_SIZE != ES_MM_DYNAMIC_ONLY)
-    size_t freeSpace;
-
-    freeSpace = HEAP_END - gSmemSentinel;
-
-    return (freeSpace);
-#else
-
-    return (0U);
-#endif
+    return (gSMemSentinel.current);
 }
 
 /*----------------------------------------------------------------------------*/
 void * esSmemAllocI(
     size_t          size) {
 
-#if (OPT_MEM_HEAP_SIZE != ES_MM_DYNAMIC_ONLY)
-    void * tmp;
+    void * mem;
 
-    if (0UL == size) {
-        size = ES_CPU_ATTRIB_ALIGNMENT;
+    size = ES_DIV_ROUNDUP(size, sizeof(unative_T));
+
+    if (size <= gSMemSentinel.current) {
+        gSMemSentinel.current -= size;
+        mem = (void *)&gSMemSentinel.begin[gSMemSentinel.current];
     } else {
-
-#if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
-        size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
-#else
-        ;
-#endif
+        mem = NULL;
     }
 
-    if (size <= (size_t)(HEAP_END - gSmemSentinel)) {
-        tmp = gSmemSentinel;
-        gSmemSentinel += size;
-    } else {
-        ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_SALLOC, ES_NOT_ENOUGH_MEM);
-        tmp = (void *)0;
-    }
-
-    return (tmp);
-#else
-    (void)size;
-    ES_LOG_IF_ERR(&gKernelLog, LOG_FILT_MM, LOG_MM_SALLOC, ES_USAGE_FAILURE);
-
-    return ((void *)0);
-#endif
+    return (mem);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -379,7 +294,7 @@ void * esDmemAllocI(
     } else {
 
 #if !defined(ES_CPU_ATTRIB_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)
-        size = ES_ALIGN(size, ES_CPU_ATTRIB_ALIGNMENT);
+        size = ES_ALIGN_UP(size, ES_CPU_ATTRIB_ALIGNMENT);
 #else
         ;
 #endif
@@ -546,4 +461,3 @@ size_t esDmemFreeSpaceI(
 /** @endcond *//** @} *//******************************************************
  * END of mem.c
  ******************************************************************************/
-#endif /* defined(OPT_SYS_ENABLE_MEM) */

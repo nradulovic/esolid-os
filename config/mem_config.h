@@ -32,7 +32,6 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 /*===============================================================  DEFINES  ==*/
-#define ES_MM_DYNAMIC_ONLY 1
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -51,34 +50,6 @@
  */
 #if !defined(OPT_MEM_CORE_SIZE) || defined(__DOXYGEN__)
 # define OPT_MEM_CORE_SIZE              0U
-#endif
-
-/**
- * @brief       Distribution of static and dynamic memory
- * @details     Size of the RAM area that is given to the dynamic memory manager.
- *              Here you can specify how much memory is given to dynamic memory
- *              manager and to the static memory manager.
- *
- *              If dynamic memory size value is set to zero the dynamic memory
- *              manager will use all static memory effectively disabling static
- *              memory manager. All calls to static memory manager will be
- *              redirected to dynamic memory manager.
- *
- *              If you wish to disable dynamic memory manager and use only
- *              static memory manager enter here -1.
- *
- *              Options:
- *              - @ref ES_MM_STATIC_ONLY - Only static memory management is
- *              enabled
- *              - @ref ES_MM_DYNAMIC_ONLY - Only dynamic memory management is
- *              enabled
- *              - any other value - both memory managers are enabled.
- *
- * @note        DEFAULT: ES_MM_DYNAMIC_ONLY (Only dynamic memory manager is
- *              enabled)
- */
-#if !defined(OPT_MEM_HEAP_SIZE)
-# define OPT_MEM_HEAP_SIZE              ES_MM_DYNAMIC_ONLY
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
