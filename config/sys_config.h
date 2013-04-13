@@ -69,6 +69,7 @@
 
 #include "mem_config.h"
 #include "log_config.h"
+#include "kernel_config.h"
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************

@@ -32,15 +32,7 @@
 #define MM_PKG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "mem/mem.h"
-
-#if defined(OPT_SYS_ENABLE_LOG)
-#include "log/log.h"
-/* FIXME: gde staviti enumeratore greške?? Nije im mesto u kernel.h */
-#include "kernel/kernel.h"
-#include "../src/log/log_m.h"
-#endif
-
+#include "kernel_private.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/

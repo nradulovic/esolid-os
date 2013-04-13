@@ -32,9 +32,9 @@
 
 /*============================================================================  INCLUDE FILES  ==*/
 #include "kernel/kernel.h"
-#include "log/log.h"
-#include "../src/log/log_m.h"
-#include "../src/mem/mem_pkg.h"
+#include "kernel/log.h"
+#include "log_m.h"
+#include "mem_pkg.h"
 #include "evt_pkg.h"
 #include "smp_pkg.h"
 #include "evtq_pkg.h"

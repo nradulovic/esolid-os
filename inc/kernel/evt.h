@@ -33,9 +33,7 @@
 #define EVT_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "mem/mem.h"
-#include "hal/hal.h"
-#include "../config/kernel_config.h"
+#include "mem.h"
 
 /*===============================================================  DEFINES  ==*/
 

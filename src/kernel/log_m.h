@@ -31,6 +31,8 @@
 #define STP_MESSAGES_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+#include "kernel_private.h"
+
 /*---------------------------------------------------------------  EXTERNS  --*/
 /** @cond */
 #ifdef LOG_M_H_VAR
