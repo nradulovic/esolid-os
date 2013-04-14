@@ -43,7 +43,7 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
-typedef struct dMemSentinel esDmemDesc_T;
+typedef struct esDmemDesc esDmemDesc_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
@@ -110,7 +110,8 @@ size_t esSmemFreeSpace(
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
  */
-esDmemDesc_T * esDmemCreate(
+void esDmemInit(
+    esDmemDesc_T *  desc,
     size_t          size);
 
 /**
