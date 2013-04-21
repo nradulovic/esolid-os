@@ -28,45 +28,21 @@
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
-
-#define MEM_PKG_H_VAR
-#include "mem/mem.h"
-#include "primitive/list.h"
+#include "kernel/mem.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
-
-#if (OPT_MEM_CORE_SIZE == 0U)                                                   /* Koristi se linker skripta.                               */
-/**
- * @brief       Pocetak heap memorije
- */
-# define HEAP_BEGIN                     &_sheap
-
-/**
- * @brief       Kraj heap memorije
- */
-# define HEAP_END                       &_eheap
-
-/**
- * @brief       Velicina heap memorije
- */
-# define HEAP_SIZE                      (size_t)(&_eheap - &_sheap)
-
-#else
-# define HEAP_BEGIN                     (uint8_t *)&heap
-# define HEAP_END                       (uint8_t *)(HEAP_BEGIN + sizeof(heap))
-# define HEAP_SIZE                      sizeof(heap)
-#endif
-
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
 
-typedef uint16_t blockElement;
-
 typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dBlock {
-    unative_T       size;
-    struct dBlock * freeNext;
-    struct dBlock * phyPrev;
-    struct dBlock * phyNext;
+    struct dBlockPhy {
+        size_t          size;
+        struct dBlock * prev;
+    }                   phy;
+    struct dBlockFree {
+        struct dBlock * next;
+        struct dBlock * prev;
+    }                   free;
 } dBlock_T;
 
 struct esDmemDesc {
@@ -104,10 +80,8 @@ void esSmemInit(
     extern uint8_t _sheap;
     extern uint8_t _eheap;
 
-    gSMemSentinel.begin = (unative_T *)ES_ALIGN_UP(
-        &_sheap,
-        sizeof(unative_T));
-    gSMemSentinel.current = (&_eheap - gSMemSentinel.begin) / sizeof(unative_T);
+    gSMemSentinel.begin = (unative_T *)&_sheap;
+    gSMemSentinel.current = (&_eheap - &_sheap) / sizeof(unative_T);
 #endif
 }
 
@@ -143,8 +117,7 @@ void * esSmemAlloc(
     ES_CRITICAL_DECL();
     void * tmp;
 
-    ES_CRITICAL_ENTER(
-        OPT_SYS_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
     tmp = esSmemAllocI(
         size);
     ES_CRITICAL_EXIT();
@@ -155,25 +128,23 @@ void * esSmemAlloc(
 /*----------------------------------------------------------------------------*/
 void esDmemInit(
     esDmemDesc_T *  desc,
-    size_t          size) {
+    void *          array,
+    size_t          elements) {
 
-    dBlock_T * heap;
-    uint32_t numOfBlocks;
+    dBlock_T * begin;
 
-    size = ES_ALIGN_UP(size, sizeof(dBlock_T));
-    numOfBlocks = size / sizeof(dBlock_T) + 2U;
-    heap = esSmemAlloc(
-        numOfBlocks * sizeof(dBlock_T));
-    heap[numOfBlocks - 1U].size = 0U;
-    heap[numOfBlocks - 1U].freeNext = 0U;
-    heap[numOfBlocks - 1U].phyPrev = 0U;
-    heap[numOfBlocks - 1U].phyNext = 0U;
-    desc->freeSpace = size;
-    desc->heapSentinel = &heap[numOfBlocks - 1U];
-    heap[0].size = numOfBlocks - 2U;
-    heap[0].freeNext = numOfBlocks - 1U;
-    heap[0].phyNext = numOfBlocks - 1U;
-    heap[0].phyPrev = numOfBlocks - 1U;
+    elements = ES_ALIGN(elements, sizeof(unative_T));
+    desc->freeSpace = elements - (2U * sizeof(dBlock_T));
+    desc->heapSentinel = (dBlock_T *)((uint8_t *)array + elements) - 1U;
+    begin = (dBlock_T *)array;
+    begin->phy.size = desc->freeSpace;
+    begin->phy.prev = desc->heapSentinel;
+    begin->free.next = desc->heapSentinel;
+    begin->free.prev = desc->heapSentinel;
+    desc->heapSentinel->phy.size = 0U;
+    desc->heapSentinel->phy.prev = begin;
+    desc->heapSentinel->free.next = begin;
+    desc->heapSentinel->free.prev = begin;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -181,16 +152,78 @@ void * esDmemAllocI(
     esDmemDesc_T *  desc,
     size_t          size) {
 
-    dBlock_T * block;
+    dBlock_T * curr;
 
-    size = ES_DIV_ROUNDUP(size, ES_CPU_ATTRIB_ALIGNMENT);
+    size = ES_ALIGN_UP(size, sizeof(unative_T));
+    curr = desc->heapSentinel->free.next;
 
-    block = desc->heapSentinel;
+    while (curr != desc->heapSentinel) {
 
-    while (block->freeNext != desc->heapSentinel) {
+        if (curr->phy.size >= size) {
 
+            if (curr->phy.size > size + sizeof(dBlock_T)) {
+                dBlock_T * tmp;
+
+                tmp = (dBlock_T *)((uint8_t *)(curr + 1U) + size);
+                tmp->phy.size = curr->phy.size - size - sizeof(dBlock_T);
+                tmp->phy.prev = curr;
+                tmp->free.next = curr->free.next;
+                tmp->free.prev = curr->free.prev;
+                tmp->free.next->free.prev = tmp;
+                tmp->free.prev->free.next = tmp;
+                curr->free.next = NULL;                                         /* Mark block as allocated                                  */
+
+                return ((void *)(curr + 1U));
+            } else {
+                curr->free.next->free.prev = curr->free.prev;
+                curr->free.prev->free.next = curr->free.next;
+                curr->free.next = NULL;                                         /* Mark block as allocated                                  */
+
+                return ((void *)(curr + 1U));
+            }
+        }
+        curr = curr->free.next;
+    }
+
+    return (NULL);
+}
+
+/*----------------------------------------------------------------------------*/
+void esDmemDeAllocI(
+    esDmemDesc_T *  desc,
+    void *          mem) {
+
+    dBlock_T * curr;
+    dBlock_T * tmp;
+
+    curr = (dBlock_T *)mem - 1U;
+    tmp = (dBlock_T *)((uint8_t *)(curr + 1U) + curr->phy.size);
+
+    if ((NULL != curr->phy.prev->free.next) && (NULL == tmp->free.next)) {      /* Previous block is free                                   */
+        curr->phy.prev->phy.size += sizeof(dBlock_T) + curr->phy.size;
+        tmp->phy.prev = curr->phy.prev;
+    } else if ((NULL == curr->phy.prev->free.next) && (NULL != tmp->free.next)) { /* Next block is free                                     */
+        curr->free.next = tmp->free.next;
+        curr->free.prev = tmp->free.prev;
+        curr->free.prev->free.next = curr;
+        curr->free.next->free.prev = curr;
+        curr->phy.size += sizeof(dBlock_T) + tmp->phy.size;
+        tmp = (dBlock_T *)((uint8_t *)(curr + 1U) + curr->phy.size);
+        tmp->phy.prev = curr;
+    } else if ((NULL != curr->phy.prev->free.next) && (NULL != tmp->free.next)) { /* Previous and next blocks are free                      */
+        tmp->free.prev->free.next = tmp->free.next;
+        tmp->free.next->free.prev = tmp->free.prev;
+        curr->phy.prev->phy.size += curr->phy.size + tmp->phy.size + (2U * sizeof(dBlock_T));
+        tmp = (dBlock_T *)((uint8_t *)(curr->phy.prev + 1U) + curr->phy.prev->phy.size);
+        tmp->phy.prev = curr->phy.prev;
+    } else {                                                                    /* Previous and next blocks are allocated                   */
+        curr->free.next = desc->heapSentinel->free.next;
+        curr->free.prev = desc->heapSentinel;
+        curr->free.prev->free.next = curr;
+        curr->free.next->free.prev = curr;
     }
 }
+
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
  * END of mem.c
