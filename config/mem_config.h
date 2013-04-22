@@ -23,8 +23,9 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Konfiguracija memorijskog menadzmenta
- * @addtogroup  mem_cfg
+ * @brief       Memory Management Configuration
+ * @defgroup    mem_cfg Memory Management Configuration
+ * @brief       Konfiguracija
  *********************************************************************//** @{ */
 
 #ifndef MEM_CONFIG_H_
@@ -55,6 +56,7 @@
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        eSolid memory allocator override
+ * @brief       Ovim opcijama se moze koristiti drugi alokator
  * @{ *//*--------------------------------------------------------------------*/
 
 #if !defined(OPT_SYS_ENABLE_MEM)
@@ -65,9 +67,11 @@
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-#if !defined(ES_HAL_ENABLE_STARTUP)
-# if (OPT_MEM_CORE_SIZE == 0UL)
-#  error "Memory manager precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MEM_MANAGED_SIZE"
+#if defined(OPT_SYS_ENABLE_MEM)
+# if !defined(ES_HAL_ENABLE_STARTUP)
+#  if (OPT_MEM_CORE_SIZE == 0UL)
+#   error "Memory manager precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MEM_MANAGED_SIZE"
+#  endif
 # endif
 #endif
 
