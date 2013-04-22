@@ -125,6 +125,7 @@ size_t esSMemFreeSpace(
  *                                      bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
+ * @api
  */
 void esDMemInit(
     esDMemDesc_T *  desc,
@@ -233,6 +234,7 @@ size_t esDMemFreeSpaceI(
  * @param       blockSize               Velicina jednog bloka u bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
  *              memorijskog alokatora.
+ * @api
  */
 void esPMemInit(
     esPMemDesc_T *  desc,
@@ -244,12 +246,20 @@ void esPMemInit(
  * @brief       Alocira jedan blok iz memory pool-a
  * @param       desc                    Deskriptor pool alokatora
  * @return      Pokazivac na memorijski blok
+ * @iclass
  */
 void * esPMemAllocI(
     esPMemDesc_T *  desc);
 
+/**
+ * @brief       Alocira jedan blok iz memory pool-a
+ * @param       desc                    Deskriptor pool alokatora
+ * @return      Pokazivac na memorijski blok
+ * @api
+ */
 void * esPMemAlloc(
     esPMemDesc_T *  desc);
+
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
