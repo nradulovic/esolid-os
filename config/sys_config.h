@@ -51,8 +51,6 @@
 
 /**
  * @brief       Omogucavanje memorijskog menadzmenta
- * @details     Ovom opcijom se ukljucuje/iskljucuje eSolid memorijski
- *              menadzment.
  */
 #if defined(__DOXYGEN__)
 # define OPT_SYS_ENABLE_MEM

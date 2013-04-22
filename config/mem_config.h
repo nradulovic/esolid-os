@@ -36,17 +36,19 @@
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Podesavanje Memory Management modula
+ * @name        Memory Management settings
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Managed RAM size by CORE allocator.
- * @details     Size of the RAM area to be managed by the eSolid. If set to zero
- *              then the whole available RAM is used. The core memory is made
- *              available to the heap allocator and/or can be used directly
- *              through the simplified core memory allocator.
- * @pre         In order to let the OS manage the whole RAM the linker script
- *              must provide the @p _sheap and @p _eheap symbols.
+ * @brief       Managed RAM size by memory allocator.
+ * @details     Size of the RAM area to be managed by the Memory Management. If
+ *              set to zero then the whole available RAM is used. The memory is
+ *              made available to the static allocator.
+ * @pre         In order to let the Memory Manager manage the whole RAM the
+ *              linker script must provide the @p _sheap and @p _eheap symbols.
+ *              If eSolid HAL supports port startup sequence then the linker
+ *              scripts also provides necessary symbols for whole memory
+ *              allocation.
  * @note        DEFAULT: 0 (All memory)
  */
 #if !defined(OPT_MEM_CORE_SIZE) || defined(__DOXYGEN__)
@@ -56,7 +58,8 @@
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        eSolid memory allocator override
- * @brief       Ovim opcijama se moze koristiti drugi alokator
+ * @brief       When eSolid Memory Manager is not used these macros provide
+ *              default fallback standard C library routines.
  * @{ *//*--------------------------------------------------------------------*/
 
 #if !defined(OPT_SYS_ENABLE_MEM)
