@@ -229,7 +229,7 @@ size_t esDMemFreeSpaceI(
  * @param       [out] desc              Deskriptor pool alokatora
  * @param       [in] array              Predefinisani memorijski prostor koji se
  *                                      predaje pool alokatoru na koriscenje
- * @param       blocks                  Broj blokova
+ * @param       blocks                  Broj blokova u array
  * @param       blockSize               Velicina jednog bloka u bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
  *              memorijskog alokatora.
