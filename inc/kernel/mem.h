@@ -58,7 +58,7 @@ typedef struct esDMemDesc esDMemDesc_T;
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Funkcije statickog memorijskog alokatora
+ * @name        Funkcije Statickog memorijskog alokatora
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
