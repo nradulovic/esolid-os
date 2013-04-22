@@ -24,7 +24,7 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Konfiguracija eSolid Sistema
- * @addtogroup  sys_cfg
+ * @defgroup    sys_cfg System configuration
  *********************************************************************//** @{ */
 
 #ifndef SYS_CONFIG_H_
@@ -59,10 +59,16 @@
 # define OPT_SYS_ENABLE_MEM
 #endif
 
+/**
+ * @brief       Omogucavanje LOGer-a
+ */
 #if defined(__DOXYGEN__)
 # define OPT_SYS_ENABLE_LOG
 #endif
 
+/**
+ * @brief       Omogucavanje integracije eSolid-a sa sistemskom bibliotekom
+ */
 #if defined(__DOXYGEN__)
 # define OPT_SYS_ENABLE_SYSCALLS
 #endif
