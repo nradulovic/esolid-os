@@ -53,14 +53,14 @@ struct sMemSentinel {
 /**
  * @brief       Blok memorije dinamickog alokatora
  */
-typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dBlock {
+typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
     struct dBlockPhy {
         size_t          size;
-        struct dBlock * prev;
+        struct dMemBlock * prev;
     }                   phy;
     struct dBlockFree {
-        struct dBlock * next;
-        struct dBlock * prev;
+        struct dMemBlock * next;
+        struct dMemBlock * prev;
     }                   free;
 } dMemBlock_T;
 
@@ -76,7 +76,7 @@ struct esDMemDesc {
 /**
  * @brief       Pokazivac na cuvara memorije
  */
-    struct dBlock * heapSentinel;
+    struct dMemBlock * heapSentinel;
 };
 
 /**
@@ -91,7 +91,7 @@ struct esPMemDesc {
 /**
  * @brief       Pokazivac na cuvara memorije
  */
-    struct dBlock * heapSentinel;
+    struct dMemBlock * heapSentinel;
 };
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
@@ -107,8 +107,9 @@ static struct sMemSentinel gSMemSentinel;
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
+#if defined(OPT_SYS_ENABLE_MEM)
 /*----------------------------------------------------------------------------*/
-void esSmemInit(
+void esSMemInit(
     void) {
 
 #if (OPT_MEM_CORE_SIZE != 0U)
@@ -127,14 +128,14 @@ void esSmemInit(
 }
 
 /*----------------------------------------------------------------------------*/
-size_t esSmemFreeSpace(
+size_t esSMemFreeSpace(
     void) {
 
     return (gSMemSentinel.current);
 }
 
 /*----------------------------------------------------------------------------*/
-void * esSmemAllocI(
+void * esSMemAllocI(
     size_t          size) {
 
     void * mem;
@@ -152,14 +153,14 @@ void * esSmemAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
-void * esSmemAlloc(
+void * esSMemAlloc(
     size_t          size) {
 
     ES_CRITICAL_DECL();
     void * tmp;
 
     ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
-    tmp = esSmemAllocI(
+    tmp = esSMemAllocI(
         size);
     ES_CRITICAL_EXIT();
 
@@ -167,8 +168,8 @@ void * esSmemAlloc(
 }
 
 /*----------------------------------------------------------------------------*/
-void esDmemInit(
-    esDmemDesc_T *  desc,
+void esDMemInit(
+    esDMemDesc_T *  desc,
     void *          array,
     size_t          elements) {
 
@@ -189,8 +190,8 @@ void esDmemInit(
 }
 
 /*----------------------------------------------------------------------------*/
-void * esDmemAllocI(
-    esDmemDesc_T *  desc,
+void * esDMemAllocI(
+    esDMemDesc_T *  desc,
     size_t          size) {
 
     dMemBlock_T * curr;
@@ -230,8 +231,25 @@ void * esDmemAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
-void esDmemDeAllocI(
-    esDmemDesc_T *  desc,
+void * esDMemAlloc(
+    esDMemDesc_T *  desc,
+    size_t          size) {
+
+    ES_CRITICAL_DECL();
+    void * mem;
+
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
+    mem = esDMemAllocI(
+        desc,
+        size);
+    ES_CRITICAL_EXIT();
+
+    return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void esDMemDeAllocI(
+    esDMemDesc_T *  desc,
     void *          mem) {
 
     dMemBlock_T * curr;
@@ -264,6 +282,126 @@ void esDmemDeAllocI(
         curr->free.next->free.prev = curr;
     }
 }
+
+/*----------------------------------------------------------------------------*/
+void esDMemDeAlloc(
+    esDMemDesc_T *  desc,
+    void *          mem) {
+
+    ES_CRITICAL_DECL();
+
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
+    esDMemDeAllocI(
+        desc,
+        mem);
+    ES_CRITICAL_EXIT();
+}
+
+#else /* defined(OPT_SYS_ENABLE_MEM) */
+
+/*----------------------------------------------------------------------------*/
+void esSMemInit(
+    void) {
+
+    ;
+}
+
+/*----------------------------------------------------------------------------*/
+size_t esSMemFreeSpace(
+    void) {
+
+    return (0U);
+}
+
+/*----------------------------------------------------------------------------*/
+void * esSMemAllocI(
+    size_t          size) {
+
+    void * mem;
+
+    mem = OPT_MEM_ALLOC(size);
+
+    return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void * esSMemAlloc(
+    size_t          size) {
+
+    ES_CRITICAL_DECL();
+    void * tmp;
+
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
+    tmp = OPT_MEM_ALLOC(size);
+    ES_CRITICAL_EXIT();
+
+    return (tmp);
+}
+
+/*----------------------------------------------------------------------------*/
+void esDMemInit(
+    esDMemDesc_T *  desc,
+    void *          array,
+    size_t          elements) {
+
+    (void)desc;
+    (void)array;
+    (void)elements;
+}
+
+/*----------------------------------------------------------------------------*/
+void * esDMemAllocI(
+    esDMemDesc_T *  desc,
+    size_t          size) {
+
+    void * mem;
+
+    (void)desc;
+
+    mem = OPT_MEM_ALLOC(size);
+
+    return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void * esDMemAlloc(
+    esDMemDesc_T *  desc,
+    size_t          size) {
+
+    ES_CRITICAL_DECL();
+    void * mem;
+    (void)desc;
+
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
+    mem = OPT_MEM_ALLOC(size);
+    ES_CRITICAL_EXIT();
+
+    return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void esDMemDeAllocI(
+    esDMemDesc_T *  desc,
+    void *          mem) {
+
+    (void)desc;
+
+    OPT_MEM_FREE(mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void esDMemDeAlloc(
+    esDMemDesc_T *  desc,
+    void *          mem) {
+
+    ES_CRITICAL_DECL();
+    (void)desc;
+
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
+    OPT_MEM_FREE(mem);
+    ES_CRITICAL_EXIT();
+}
+#endif /* !defined(OPT_SYS_ENABLE_MEM) */
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************

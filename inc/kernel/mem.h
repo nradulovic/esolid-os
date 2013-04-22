@@ -46,13 +46,13 @@ extern "C" {
 /**
  * @brief       Abstraktni tip, pokazivac na deskriptor strukturu pool alokatora.
  */
-typedef struct esPMemDesc esPmemDesc_T;
+typedef struct esPMemDesc esPMemDesc_T;
 
 /**
  * @brief       Abstraktni tip, pokazivac na deskriptor strukturu dinamickog
  *              alokatora.
  */
-typedef struct esDMemDesc esDmemDesc_T;
+typedef struct esDMemDesc esDMemDesc_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
@@ -67,7 +67,7 @@ typedef struct esDMemDesc esDmemDesc_T;
  *              memorijskog alokatora.
  * @api
  */
-void esSmemInit(
+void esSMemInit(
     void);
 
 /**
@@ -83,7 +83,7 @@ void esSmemInit(
  *              standardom.
  * @api
  */
-void * esSmemAlloc(
+void * esSMemAlloc(
     size_t          size);
 
 /**
@@ -99,7 +99,7 @@ void * esSmemAlloc(
  *              standardom.
  * @iclass
  */
-void * esSmemAllocI(
+void * esSMemAllocI(
     size_t          size);
 
 /**
@@ -107,7 +107,7 @@ void * esSmemAllocI(
  * @return      Velicina slobodne memorije u bajtovima.
  * @api
  */
-size_t esSmemFreeSpace(
+size_t esSMemFreeSpace(
     void);
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -126,8 +126,8 @@ size_t esSmemFreeSpace(
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
  */
-void esDmemInit(
-    esDmemDesc_T *  desc,
+void esDMemInit(
+    esDMemDesc_T *  desc,
     void *          array,
     size_t          elements);
 
@@ -145,8 +145,8 @@ void esDmemInit(
  *              standardom.
  * @api
  */
-void * esDmemAlloc(
-    esDmemDesc_T *  desc,
+void * esDMemAlloc(
+    esDMemDesc_T *  desc,
     size_t          size);
 
 /**
@@ -163,8 +163,8 @@ void * esDmemAlloc(
  *              standardom.
  * @iclass
  */
-void * esDmemAllocI(
-    esDmemDesc_T *  desc,
+void * esDMemAllocI(
+    esDMemDesc_T *  desc,
     size_t          size);
 
 /**
@@ -175,8 +175,8 @@ void * esDmemAllocI(
  * 										memorijski prostor.
  * @api
  */
-void esDmemDeAlloc(
-    esDmemDesc_T *  desc,
+void esDMemDeAlloc(
+    esDMemDesc_T *  desc,
     void *          mem);
 
 /**
@@ -187,8 +187,8 @@ void esDmemDeAlloc(
  *                                      memorijski prostor.
  * @iclass
  */
-void esDmemDeAllocI(
-    esDmemDesc_T *  desc,
+void esDMemDeAllocI(
+    esDMemDesc_T *  desc,
     void *          mem);
 
 /**
@@ -202,8 +202,8 @@ void esDmemDeAllocI(
  *              zahtev.
  * @api
  */
-size_t esDmemFreeSpace(
-    esDmemDesc_T *  desc);
+size_t esDMemFreeSpace(
+    esDMemDesc_T *  desc);
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
@@ -216,8 +216,8 @@ size_t esDmemFreeSpace(
  *              zahtev.
  * @iclass
  */
-size_t esDmemFreeSpaceI(
-    esDmemDesc_T *  desc);
+size_t esDMemFreeSpaceI(
+    esDMemDesc_T *  desc);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -234,8 +234,8 @@ size_t esDmemFreeSpaceI(
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
  *              memorijskog alokatora.
  */
-void esPmemInit(
-    esPmemDesc_T *  desc,
+void esPMemInit(
+    esPMemDesc_T *  desc,
     void *          array,
     size_t          blocks,
     size_t          blockSize);
