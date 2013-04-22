@@ -64,36 +64,6 @@ typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
     }                   free;
 } dMemBlock_T;
 
-/**
- * @brief       Deskriptor dinamickog alokatora
- */
-struct esDMemDesc {
-/**
- * @brief       Iznos slobodne memorije
- */
-    size_t          freeSpace;
-
-/**
- * @brief       Pokazivac na cuvara memorije
- */
-    struct dMemBlock * heapSentinel;
-};
-
-/**
- * @brief       Deskriptor pool alokatora
- */
-struct esPMemDesc {
-/**
- * @brief       Iznos slobodne memorije
- */
-    size_t          freeSpace;
-
-/**
- * @brief       Pokazivac na cuvara memorije
- */
-    struct dMemBlock * heapSentinel;
-};
-
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 /*=======================================================  LOCAL VARIABLES  ==*/
 

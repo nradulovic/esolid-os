@@ -44,15 +44,34 @@ extern "C" {
 /*============================================================  DATA TYPES  ==*/
 
 /**
- * @brief       Abstraktni tip, pokazivac na deskriptor strukturu Pool alokatora.
+ * @brief       Deskriptor Dinamickog alokatora
  */
-typedef struct esPMemDesc esPMemDesc_T;
+typedef struct esDMemDesc {
+/**
+ * @brief       Iznos slobodne memorije
+ */
+    size_t          freeSpace;
 
 /**
- * @brief       Abstraktni tip, pokazivac na deskriptor strukturu dinamickog
- *              alokatora.
+ * @brief       Pokazivac na cuvara memorije
  */
-typedef struct esDMemDesc esDMemDesc_T;
+    struct dMemBlock * heapSentinel;
+} esDMemDesc_T;
+
+/**
+ * @brief       Deskriptor Pool alokatora
+ */
+typedef struct esPMemDesc {
+/**
+ * @brief       Iznos slobodne memorije
+ */
+    size_t          freeSpace;
+
+/**
+ * @brief       Pokazivac na cuvara memorije
+ */
+    struct dMemBlock * heapSentinel;
+} esPMemDesc_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
@@ -244,8 +263,8 @@ void esPMemInit(
 
 /**
  * @brief       Alocira jedan blok iz memory pool-a
- * @param       desc                    Deskriptor pool alokatora
- * @return      Pokazivac na memorijski blok
+ * @param       [in] desc               Deskriptor pool alokatora
+ * @return      Pokazivac na alocirani memorijski blok
  * @iclass
  */
 void * esPMemAllocI(
@@ -253,12 +272,21 @@ void * esPMemAllocI(
 
 /**
  * @brief       Alocira jedan blok iz memory pool-a
- * @param       desc                    Deskriptor pool alokatora
- * @return      Pokazivac na memorijski blok
+ * @param       [in] desc               Deskriptor pool alokatora
+ * @return      Pokazivac na alocirani memorijski blok
  * @api
  */
 void * esPMemAlloc(
     esPMemDesc_T *  desc);
+
+/**
+ * @brief       Oslobadja prethodno alocirani blok
+ * @param       [in] desc               Deskriptor pool alokatora
+ * @param       [in] mem
+ */
+void esPMemDeAllocI(
+    esPMemDesc_T *  desc,
+    void *          mem);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/
