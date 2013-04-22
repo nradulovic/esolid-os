@@ -57,9 +57,9 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
- * @name        eSolid memory allocator override
+ * @name        Memory Manager allocator override
  * @brief       When eSolid Memory Manager is not used these macros provide
- *              default fallback standard C library routines.
+ *              default fall back standard C library routines.
  * @{ *//*--------------------------------------------------------------------*/
 
 #if !defined(OPT_SYS_ENABLE_MEM)

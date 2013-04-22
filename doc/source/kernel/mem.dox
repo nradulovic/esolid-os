@@ -8,8 +8,8 @@ Modul implementira tri klase memorijskog menadzera:
 
 @page           page_mem Memory Management
 @section        mem_smem Staticki memorijski menadzer
-Staticki memorijski menadzer moze samo da alocira memoriju, ali jednom alocirana
-memorija ne moze da se oslobodi. Koristi se kada je potrebno staticki alocirati
+Staticki memorijski menadzer moze samo da alocira memoriju i jednom alocirana
+memorija se ne moze osloboditi. Koristi se kada je potrebno staticki alocirati
 objekte koji se nikada ne brisu. Ovaj memorijski menadzer je najjednostavniji i 
 najbrzi, pa se preporucuje za mikroprocesore sa ogranicenim performansama. 
 Potrosnja memorije iznosi samo 4-8 bajtova za ceo memorijski menadzer i ne 
