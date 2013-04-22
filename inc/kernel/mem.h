@@ -44,7 +44,7 @@ extern "C" {
 /*============================================================  DATA TYPES  ==*/
 
 /**
- * @brief       Abstraktni tip, pokazivac na deskriptor strukturu pool alokatora.
+ * @brief       Abstraktni tip, pokazivac na deskriptor strukturu Pool alokatora.
  */
 typedef struct esPMemDesc esPMemDesc_T;
 
