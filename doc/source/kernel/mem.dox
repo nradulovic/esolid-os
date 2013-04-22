@@ -1,0 +1,50 @@
+/**************************************************************************//**
+@file
+@addtogroup     mem_intf
+Modul implementira tri klase memorijskog menadzera:
+- staticni memorijski menadzer
+- dinamicki memorijski menadzer
+- pool memorijski menadzer
+
+@page           page_mem Memory Management
+@section        mem_smem Staticki memorijski menadzer
+Staticki memorijski menadzer moze samo da alocira memoriju, ali jednom alocirana
+memorija ne moze da se oslobodi. Koristi se kada je potrebno staticki alocirati
+objekte koji se nikada ne brisu. Ovaj memorijski menadzer je najjednostavniji i 
+najbrzi, pa se preporucuje za mikroprocesore sa ogranicenim performansama. 
+Potrosnja memorije iznosi samo 4-8 bajtova za ceo memorijski menadzer i ne 
+postoji dodatna potrosnja memorije prilikom alociranja.
+
+@section        mem_dmem Dinamicki memorijski menadzer
+
+Dinamicki memorijski menadzer je po funkcionalnosti identican sa funkcijama 
+standardne C biblioteke malloc/free, sa tom izmenom da je prilagodjen za rad sa
+embedded sistemima. 
+    
+@subsection     mem_ff_alloc First Fit algoritam
+
+U ovom algoritmu, alokator cuva listu slobodnih blokova i po prijemu zahteva za 
+memoriju, skenira duz liste za prvim blokom koji je dovoljno veliki da opsluzi 
+zahtev. Ako je izabrani blok dovoljno veci nego sto je zahtevano onda se blok 
+deli na dva dela, jedan deo se predaje korisniku, a drugi blok se postavlja 
+nazad u listu slobodnih blokova. Kada se vrsi reciklaza blokova, najpre se 
+proveravaju susedni blokovi da li su zauzeti. Susedni blokovi koji su slobodni 
+spajaju se sa blokom koji se reciklira i na taj nacin formira novi, veci blok.
+
+@subsection     mem_ff_specs Specifikacije first fit alokatora
+
+- Maksimalno vreme izvrsavanja operacije alokacije bloka @b nije unapred 
+poznato. Zbog navedene cinjenice alokator nije pogodan za hard real-time
+sisteme.
+- Maksimalno vreme izvrsavanja operacije dealokacije bloka je unapred poznato. 
+- Ukupno minimalno zauzece RAM memorije (Cortex-M3 arch): @b 28B
+- Ukupno zauzece ROM memorije od strane svih funkcija (Cortex-M3 arch, 
+    optimizacija po zauzecu):  @b 322B
+
+@section        mem_pmem Pool memorijski menadzer
+@section        mem_configuration Konfiguracija Memory Management modula
+
+Za konfiguraciju Memory Management modula pogledati @ref mem_cfg.
+    
+**//** @} *//******************************************************************/
+ 
