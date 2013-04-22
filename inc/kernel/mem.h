@@ -240,6 +240,16 @@ void esPMemInit(
     size_t          blocks,
     size_t          blockSize);
 
+/**
+ * @brief       Alocira jedan blok iz memory pool-a
+ * @param       desc                    Deskriptor pool alokatora
+ * @return      Pokazivac na memorijski blok
+ */
+void * esPMemAllocI(
+    esPMemDesc_T *  desc);
+
+void * esPMemAlloc(
+    esPMemDesc_T *  desc);
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
