@@ -17,5 +17,12 @@ intializes the static memory and requires 1024 bytes from it for data storage.
 Note that the amount of available static memory is configured in mem_config.h 
 file.
 **/
-    
+
+/** @example dmem_two_buffs.c
+In this example two independent Dynamic Memory buffers are created. Each buffer
+is used for its own purpose. This can have the benefit of reducing memory 
+fragmentation. Lets say that the data needed to be saved is 40 bytes in size,
+while commands are only one integer in size. So by putting small data (commands)
+in one buffer and large data in other buffer the fragmentation can be reduced. 
+**/
 **//** @} *//******************************************************************/
