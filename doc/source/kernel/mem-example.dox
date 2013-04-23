@@ -5,5 +5,11 @@
 /**
 @example dmem_init1.c
 @brief          This is an example how to initialize Dynamic Memory Manager
+@details        In this example a char buffer of BUFFER_SIZE size is used to 
+                hold the data for Dynamic Memory Manager. BUFFER_SIZE is set to
+                1024 so total buffer size is 1024 bytes. Keep in mind that
+                Dynamic Memory Manager needs some parts of that buffer to keep
+                track of its users so the available memory is slighty less then
+                what is specified in BUFFER_SIZE macro.
     
 **//** @} *//******************************************************************/
