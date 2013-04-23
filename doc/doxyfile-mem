@@ -2,6 +2,7 @@
 PROJECT_NAME        =   "eSolid - Memory Management"
 PROJECT_BRIEF       =   "Event Based System"
 INPUT               =   ../doc/source/kernel/mem-mainpage.dox                   \
+                        ../doc/source/kernel/mem-example.dox                    \
                         ../doc/source/kernel/mem.dox                            \
                         ../inc/kernel/mem.h                                     \
                         ../config/mem_config.h                                  \
