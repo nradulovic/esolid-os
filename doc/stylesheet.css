@@ -60,6 +60,11 @@ div.multicol {
 	-webkit-column-count: 3;
 }
 
+p {
+    padding 10px;
+    text-align: justify;
+}
+
 p.startli, p.startdd, p.starttd {
 	margin-top: 2px;
 }
