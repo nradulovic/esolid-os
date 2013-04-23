@@ -47,10 +47,10 @@ int main (
 
         esDMemDeAlloc(
             &commandHeap,
-            command);
+            command);                                       /* Delete the command */
 
         esDMemDeAlloc(
             &dataHeap,
-            data);                                          /* Delete the array */
+            data);                                          /* Delete the data */
     }
 }
