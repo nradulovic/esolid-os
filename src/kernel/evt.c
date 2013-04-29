@@ -118,7 +118,7 @@ esEvt_T * esEvtCreate(
 
     ES_CRITICAL_ENTER(
         OPT_SYS_INTERRUPT_PRIO_MAX);
-    newEvt = esDmemAllocI(
+    newEvt = esDMemAllocI(
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
     evtInit_(
@@ -140,7 +140,7 @@ esEvt_T * esEvtCreateI(
         ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= sizeof(esEvt_T), LOG_EVT_CREATE, ES_ARG_OUT_OF_RANGE);
     }
 
-    newEvt = esDmemAllocI(
+    newEvt = esDMemAllocI(
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
@@ -199,7 +199,7 @@ void esEvtDestroyI(
     if (0U == evt->dynamic.u) {
         evtDeInit_(
             evt);
-        esDmemDeAllocI(
+        esDMemDeAllocI(
             evt);
     }
 }

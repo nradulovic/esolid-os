@@ -73,9 +73,6 @@
 				<externalSettings containerId="esolid-hal;" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier">
 					<externalSetting>
 						<entry flags="" kind="includePath" name="../esolid-hal/inc"/>
-						<entry flags="" kind="libraryPath" name="../esolid-hal/dbg-STM32F10x_md_vl-o0-csgcc"/>
-						<entry flags="" kind="libraryPath" name="../esolid-hal/linker-scripts/gcc/variant/STM32F100xBxx"/>
-						<entry flags="" kind="libraryFile" name="esolid-hal" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
 			</storageModule>
@@ -159,6 +156,7 @@
 		<buildTargets>
 			<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -166,21 +164,24 @@
 			</target>
 			<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="docs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="doc" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildTarget>docs</buildTarget>
+				<buildArguments/>
+				<buildTarget>doc</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="docs_clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="doc_clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildTarget>docs_clean</buildTarget>
+				<buildArguments/>
+				<buildTarget>doc_clean</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>

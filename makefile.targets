@@ -2,17 +2,19 @@
 .PHONY: docs_clean
 
 # Generisi HTML dokumentaciju	
-docs : docs_clean
-	@echo 'Building HTML documentation'
-	@echo 'Invoking: Doxygen'
-	cd .. && $(DOXYGEN) Doxyfile
-	@echo 'Finished building HTML documentation'
-	@echo ' '
+doc : doc_mem
+
+doc_clean : doc_mem_clean
 	
-docs_clean :
+doc_mem_clean :
 	@echo 'Cleaning up documentation'
-	rm -rf ../doc/html/*
-	rm -rf ../doc/latex/*
-	rm -rf ../doc/man/*
+	rm -rf ../doc/out/mem/*
 	@echo 'Finished Cleaning up documentation'
+	@echo ' '
+
+doc_mem : doc_mem_clean
+	@echo 'Building Memory Management documentation'
+	@echo 'Invoking: Doxygen doxyfile-mem'
+	cd ../doc && $(DOXYGEN) doxyfile-mem
+	@echo 'Finished building documentation'
 	@echo ' '
