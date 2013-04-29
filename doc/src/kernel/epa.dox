@@ -1,8 +1,0 @@
-/**************************************************************************//**
-@file
-@addtogroup     kernel_impl
-*//** @{ *//**
-@defgroup       epa_impl Event Processing Agent (EPA)
-@brief          Event Processing Agent (EPA) implementacija
-
-**//** @} *//******************************************************************/

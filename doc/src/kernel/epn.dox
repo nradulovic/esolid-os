@@ -1,8 +1,0 @@
-/*********************************************************************************************//**
-@file
-@addtogroup     kernel_impl
-*//** @{ *//**
-@defgroup       epn_impl Event Processing Network (EPN)
-@brief          Event Processing Network (EPN) implementacija
-
-**//** @} *//*************************************************************************************/
