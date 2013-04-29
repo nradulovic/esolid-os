@@ -47,7 +47,7 @@
  * @pre         In order to let the Memory Manager manage the whole RAM the
  *              linker script must provide the @p _sheap and @p _eheap symbols.
  *              If eSolid HAL supports port startup sequence then the linker
- *              scripts also provides necessary symbols for whole memory
+ *              scripts will provide necessary symbols for whole memory
  *              allocation.
  * @note        DEFAULT: 0 (All memory)
  */
