@@ -1,0 +1,10 @@
+/*********************************************************************************************//**
+@file
+@addtogroup     kernel_intf
+*//** @{ *//**
+@defgroup       tem_intf Time Event Management (TEM)
+@brief          Menadzment i generisanje dogadjaja u tacno definisanim 
+                vremenskim trenucima
+@section        tem_doc Time Event Management (TEM)
+**//** @} *//*************************************************************************************/
+ 
