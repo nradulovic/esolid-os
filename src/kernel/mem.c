@@ -156,15 +156,15 @@ void * esSMemAlloc(
 void esDMemInit(
     esDMemDesc_T *  desc,
     void *          array,
-    size_t          elements) {
+    size_t          bytes) {
 
     dMemBlock_T * begin;
 
-    elements = ES_ALIGN(elements, sizeof(unative_T));
-    desc->freeSpaceAvailable = desc->freeSpaceTotal = elements - (2U * sizeof(dMemBlock_T));
-    desc->heapSentinel = (dMemBlock_T *)((uint8_t *)array + elements) - 1U;        /* HeapSentinel is the last element of the array            */
+    bytes = ES_ALIGN(bytes, sizeof(unative_T));
+    desc->freeSpaceAvailable = desc->freeSpaceTotal = 0U;                       /* Namerno stavljamo 0U jer je info ne validan              */
+    desc->heapSentinel = (dMemBlock_T *)((uint8_t *)array + bytes) - 1U;        /* HeapSentinel is the last element of the array            */
     begin = (dMemBlock_T *)array;
-    begin->phy.size = elements - sizeof(dMemBlock_T);
+    begin->phy.size = bytes - sizeof(dMemBlock_T);
     begin->phy.prev = desc->heapSentinel;
     begin->free.next = desc->heapSentinel;
     begin->free.prev = desc->heapSentinel;

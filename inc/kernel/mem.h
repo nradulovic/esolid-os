@@ -150,7 +150,7 @@ size_t esSMemFreeSpace(
  * @param       [in] array              Predefinisani memorijski prostor koji se
  *                                      predaje dinamickom alokatoru na
  *                                      koriscenje
- * @param       elements                Velicina memorijskog prostora u
+ * @param       bytes                   Velicina memorijskog prostora u
  *                                      bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
@@ -159,7 +159,7 @@ size_t esSMemFreeSpace(
 void esDMemInit(
     esDMemDesc_T *  desc,
     void *          array,
-    size_t          elements);
+    size_t          bytes);
 
 /**
  * @brief       Dodeljuje memorijski prostor velicine @c size
