@@ -34,7 +34,7 @@
 /*===============================================================  DEFINES  ==*/
 /** @cond */
 
-#define OPT_SYS_ENABLE_MEM
+#define OPT_SYS_ENABLE_DMEM
 
 /** @endcond */
 /*==============================================================  SETTINGS  ==*/
@@ -52,10 +52,12 @@
 #endif
 
 /**
- * @brief       Omogucavanje memorijskog menadzmenta
+ * @brief       Omogucavanje dinamickog memorijskog menadzmenta
+ * @details     Ukoliko se koristi eSolid dinamicki alokator ova opcija mora
+ *              biti definisana.
  */
 #if defined(__DOXYGEN__)
-# define OPT_SYS_ENABLE_MEM
+# define OPT_SYS_ENABLE_DMEM
 #endif
 
 /**

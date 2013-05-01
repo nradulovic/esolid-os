@@ -62,7 +62,7 @@
  *              default fall back standard C library routines.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if !defined(OPT_SYS_ENABLE_MEM)
+#if !defined(OPT_SYS_ENABLE_DMEM)
 # define OPT_MEM_ALLOC                  malloc
 # define OPT_MEM_FREE                   free
 #endif
@@ -70,7 +70,7 @@
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-#if defined(OPT_SYS_ENABLE_MEM)
+#if defined(OPT_SYS_ENABLE_DMEM)
 # if !defined(ES_HAL_ENABLE_STARTUP)
 #  if (OPT_MEM_CORE_SIZE == 0UL)
 #   error "Memory manager precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MEM_MANAGED_SIZE"

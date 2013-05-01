@@ -195,7 +195,7 @@ void esPMemStatusI(
 
 }
 
-#if defined(OPT_SYS_ENABLE_MEM)
+#if defined(OPT_SYS_ENABLE_DMEM)
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
@@ -329,7 +329,7 @@ void esDMemStatusI(
     status->freeSpaceAvailable = freeAvailable;
 }
 
-#else /* defined(OPT_SYS_ENABLE_MEM) */
+#else
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
@@ -361,9 +361,7 @@ void esDMemDeAllocI(
 
     (void)handle;
 
-    mem = OPT_MEM_FREE(size);
-
-    return (mem);
+    OPT_MEM_FREE(mem);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -378,7 +376,7 @@ void esDMemStatusI(
     status->freeSpaceAvailable = 0U;
 }
 
-#endif /* !defined(OPT_SYS_ENABLE_MEM) */
+#endif /* !defined(OPT_SYS_ENABLE_DMEM) */
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
