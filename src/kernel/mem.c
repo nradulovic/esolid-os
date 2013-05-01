@@ -71,8 +71,8 @@ typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
  */
 static struct sMemSentinel gSMemSentinel;
 
-#if (OPT_MEM_CORE_SIZE != 0U)
-static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_CORE_SIZE, sizeof(unative_T))];
+#if (OPT_MEM_SMEM_SIZE != 0U)
+static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_SMEM_SIZE, sizeof(unative_T))];
 #else
 extern uint8_t _sheap;
 extern uint8_t _eheap;
@@ -87,7 +87,7 @@ extern uint8_t _eheap;
 void esSMemInit(
     void) {
 
-#if (OPT_MEM_CORE_SIZE != 0U)
+#if (OPT_MEM_SMEM_SIZE != 0U)
     gSMemSentinel.begin = &sMemBuffer;
     gSMemSentinel.current = ES_DIMENSION(sMemBuffer);
 #else
@@ -118,7 +118,7 @@ void * esSMemAllocI(
 void esSMemStatusI(
     esMemStatus_T *     status) {
 
-#if (OPT_MEM_CORE_SIZE != 0U)
+#if (OPT_MEM_SMEM_SIZE != 0U)
     status->size = sizeof(sMemBuffer);
 #else
     status->size = (size_t)(&_eheap - &_sheap);
@@ -195,7 +195,7 @@ void esPMemStatusI(
 
 }
 
-#if defined(OPT_SYS_ENABLE_DMEM)
+#if defined(OPT_MEM_DMEM_ENABLE)
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
@@ -376,7 +376,7 @@ void esDMemStatusI(
     status->freeSpaceAvailable = 0U;
 }
 
-#endif /* !defined(OPT_SYS_ENABLE_DMEM) */
+#endif /* !defined(OPT_MEM_DMEM_ENABLE) */
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************

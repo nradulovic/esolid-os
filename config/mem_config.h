@@ -51,8 +51,19 @@
  *              allocation.
  * @note        DEFAULT: 0 (All memory)
  */
-#if !defined(OPT_MEM_CORE_SIZE) || defined(__DOXYGEN__)
-# define OPT_MEM_CORE_SIZE              0U
+#if !defined(OPT_MEM_SMEM_SIZE) || defined(__DOXYGEN__)
+# define OPT_MEM_SMEM_SIZE              0U
+#endif
+
+/**
+ * @brief       Omogucavanje dinamickog memorijskog menadzmenta
+ * @details     Ukoliko se koristi eSolid dinamicki alokator ova opcija mora
+ *              biti definisana.
+ * @see         OPT_MEM_ALLOC
+ * @see         OPT_MEM_FREE
+ */
+#if defined(__DOXYGEN__)
+# define OPT_MEM_DMEM_ENABLE
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -62,11 +73,11 @@
  *              default fall back standard C library routines.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if !defined(OPT_SYS_ENABLE_DMEM)
+#if !defined(OPT_MEM_DMEM_ENABLE)
 /**
  * @brief       Fallback alokator funkcija
  * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
- *              odnosno, kada opcija @ref OPT_SYS_ENABLE_DMEM nije definisana. U
+ *              odnosno, kada opcija @ref OPT_MEM_DMEM_ENABLE nije definisana. U
  *              tom slucaju eSolid ce pozvati funkciju koja je navedena ovde.
  * @note        Default: malloc
  */
@@ -75,7 +86,7 @@
 /**
  * @brief       Fallback dealokator funkcija
  * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
- *              odnosno, kada opcija @ref OPT_SYS_ENABLE_DMEM nije definisana. U
+ *              odnosno, kada opcija @ref OPT_MEM_DMEM_ENABLE nije definisana. U
  *              tom slucaju eSolid ce pozvati funkciju koja je navedena ovde.
  * @note        Default: free
  */
@@ -85,12 +96,8 @@
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-#if defined(OPT_SYS_ENABLE_DMEM)
-# if !defined(ES_HAL_ENABLE_STARTUP)
-#  if (OPT_MEM_CORE_SIZE == 0UL)
-#   error "Memory manager precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MEM_MANAGED_SIZE"
-#  endif
-# endif
+#if (OPT_MEM_SMEM_SIZE == 0U) && !defined(ES_HAL_ENABLE_STARTUP)
+# error "Memory manager precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MEM_MANAGED_SIZE"
 #endif
 
 /** @endcond *//** @} *//******************************************************
