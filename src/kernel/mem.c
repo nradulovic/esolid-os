@@ -97,6 +97,7 @@ void esSMemInit(
     void) {
 
 #if (OPT_MEM_CORE_SIZE != 0U)
+
     static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_CORE_SIZE, sizeof(unative_T))];
 
     gSMemSentinel.begin = &sMemBuffer;
@@ -160,7 +161,7 @@ void esDMemInit(
     dMemBlock_T * begin;
 
     elements = ES_ALIGN(elements, sizeof(unative_T));
-    desc->freeSpace = elements - (2U * sizeof(dMemBlock_T));
+    desc->freeSpaceAvailable = desc->freeSpaceTotal = elements - (2U * sizeof(dMemBlock_T));
     desc->heapSentinel = (dMemBlock_T *)((uint8_t *)array + elements) - 1U;        /* HeapSentinel is the last element of the array            */
     begin = (dMemBlock_T *)array;
     begin->phy.size = elements - sizeof(dMemBlock_T);
