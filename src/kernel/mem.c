@@ -115,7 +115,7 @@ void * esSMemAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
-void esSMemStatusI(
+void esSMemUpdateStatusI(
     esMemStatus_T *     status) {
 
 #if (OPT_MEM_SMEM_SIZE != 0U)
@@ -139,9 +139,10 @@ void esPMemInit(
     esPMemBlock_T * block;
 
     blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
+    blocks = arraySize / blockSize;
+    handle->size = blocks * blockSize;
     handle->blockSize = blockSize;
     handle->poolSentinel = (esPMemBlock_T *)array;
-    blocks = arraySize / blockSize;
     block = handle->poolSentinel;
 
     for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
@@ -189,10 +190,23 @@ void esPMemDeAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
-void esPMemStatusI(
+void esPMemUpdateStatusI(
     esPMemHandle_T *    handle,
     esMemStatus_T *     status) {
 
+    size_t freeTotal;
+    esPMemBlock_T * block;
+
+    freeTotal = 0U;
+    block = handle->poolSentinel;
+
+    while (NULL != block) {
+        freeTotal += handle->blockSize;
+        block = block->next;
+    }
+    status->size = handle->size;
+    status->freeSpaceTotal = freeTotal;
+    status->freeSpaceAvailable = handle->blockSize;
 }
 
 #if defined(OPT_MEM_DMEM_ENABLE)
@@ -295,7 +309,7 @@ void esDMemDeAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
-void esDMemStatusI(
+void esDMemUpdateStatusI(
     esDMemHandle_T *    handle,
     esMemStatus_T *     status) {
 
@@ -365,7 +379,7 @@ void esDMemDeAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
-void esDMemStatusI(
+void esDMemUpdateStatusI(
     esDMemHandle_T *    handle,
     esMemStatus_T *     status) {
 

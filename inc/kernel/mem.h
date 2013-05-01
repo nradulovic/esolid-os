@@ -81,7 +81,10 @@ typedef struct esDMemHandle {
  * @api
  */
 typedef struct esPMemHandle {
-/** @brief      Iznos ukupne slobodne memorije                                */
+/** @brief      Vekucuba pool memorije                                        */
+    size_t          size;
+
+/** @brief      Velicina jednog bloka                                         */
     size_t          blockSize;
 
 /** @brief      Pokazivac na cuvara memorije                                  */
@@ -135,7 +138,7 @@ void * esSMemAllocI(
  * @param       [out] status            Status struktura static alokatora
  * @iclass
  */
-void esSMemStatusI(
+void esSMemUpdateStatusI(
     esMemStatus_T *     status);
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -205,7 +208,7 @@ void esDMemDeAllocI(
  * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
  * @iclass
  */
-void esDMemStatusI(
+void esDMemUpdateStatusI(
     esDMemHandle_T *    handle,
     esMemStatus_T *     status);
 
@@ -267,7 +270,7 @@ void esPMemDeAllocI(
  * @param       [out] status            Status struktura pool alokatora
  * @iclass
  */
-void esPMemStatusI(
+void esPMemUpdateStatusI(
     esPMemHandle_T *    handle,
     esMemStatus_T *     status);
 
