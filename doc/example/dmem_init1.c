@@ -6,7 +6,7 @@ int main (
     void) {
 
     static char buffer[BUFFER_SIZE];
-    static esDMemDesc_T myHeap;
+    static esDMemHandle_T myHeap;
 
     esDMemInit(
         &myHeap,

@@ -5,7 +5,7 @@
 int main (
     void) {
 
-    static esDMemDesc_T myHeap;
+    static esDMemHandle_T myHeap;
     static char * buffer;
 
     esSMemInit();                                           /* Initialize the static memory */

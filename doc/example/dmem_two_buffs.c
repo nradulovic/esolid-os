@@ -6,8 +6,8 @@
 int main (
     void) {
 
-    static esDMemDesc_T dataHeap;
-    static esDMemDesc_T commandHeap;
+    static esDMemHandle_T dataHeap;
+    static esDMemHandle_T commandHeap;
     static char * dataBuffer;
     static char * commandBuffer;
 
