@@ -43,6 +43,9 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
+/**
+ * @brief       Status memorije
+ */
 typedef struct esMemStatus {
 /** @brief      Velicina dinamicke memorije                                   */
     size_t          size;
