@@ -43,46 +43,73 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
+/*------------------------------------------------------------------------*//**
+ * @name        Podaci dinamickog alokatora
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Status dinamicke memorije
+ * @details     Ova struktura se koristi sa funkcijom esDMemStatus()
+ */
+typedef struct esDMemStatus {
+/** @brief      Velicina dinamicke memorije                                   */
+    size_t          size;
+
+/** @brief      Iznos ukupne slobodne memorije                                */
+    size_t          freeSpaceTotal;
+
+/** @brief      Iznos maksimalno dostupne memorije kao jedinstven blok        */
+    size_t          freeSpaceAvailable;
+} esDMemStatus_T;
+
 /**
  * @brief       Deskriptor Dinamickog alokatora
  */
-typedef struct esDMemDesc {
-/**
- * @brief       Iznos ukupne slobodne memorije
- */
-    size_t          freeSpaceTotal;
-
-/**
- * @brief       Iznos maksimalno dostupne memorije kao jedinstven blok
- */
-    size_t          freeSpaceAvailable;
-
-/**
- * @brief       Pokazivac na cuvara memorije
- */
+typedef struct esDMemHandle {
+/** @brief      Pokazivac na cuvara memorije                                  */
     struct dMemBlock * heapSentinel;
-} esDMemDesc_T;
+} esDMemHandle_T;
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Podaci pool alokatora
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Status pool memorije
+ * @details     Ova strktura se koristi sa funkcijom esPMemStatus()
+ */
+typedef struct esPMemStatus {
+/** @brief      Velicina pool memorije                                        */
+    size_t          size;
+
+/** @brief      Velicina jednog bloka                                         */
+    size_t          blockSize;
+
+/** @brief      Broj slobodnih blokova                                        */
+    size_t          blockFree;
+};
 
 /**
  * @brief       Deskriptor Pool alokatora
  */
-typedef struct esPMemDesc {
-/**
- * @brief       Iznos ukupne slobodne memorije
- */
+typedef struct esPMemHandle {
+/** @brief      Iznos ukupne slobodne memorije                                */
     size_t          blockSize;
 
-/**
- * @brief       Iznos maksimalno dostupne memorije kao jedinstven blok
- */
-    size_t          blockFree;
+/** @brief      Pokazivac na cuvara memorije                                  */
+    struct esPMemBlock * poolSentinel;
+} esPMemHandle_T;
 
 /**
- * @brief       Pokazivac na cuvara memorije
+ * @brief       Zaglavlje jednog bloka pool memorije
  */
-    struct dMemBlock * heapSentinel;
-} esPMemDesc_T;
+typedef struct esPMemBlock {
+/** @brief      Pokazivac na sledeci slobodan blok                            */
+    struct esPMemBlock *  next;
+} esPMemBlock_T;
 
+/** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
@@ -98,22 +125,6 @@ typedef struct esPMemDesc {
  */
 void esSMemInit(
     void);
-
-/**
- * @brief       Dodeljuje memorijski prostor velicine @c size
- * @param       size                    Velicina zahtevanog memorijskog prostora
- *                                      u bajtovima.
- * @return      Pokazivac na rezervisani memorijski blok.
- * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
- *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
- *              standardna implementacija @c malloc C funkcije. Ukoliko se
- *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
- *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
- *              standardom.
- * @api
- */
-void * esSMemAlloc(
-    size_t          size);
 
 /**
  * @brief       Dodeljuje memorijski prostor velicine @c size
@@ -146,7 +157,7 @@ size_t esSMemFreeSpace(
 
 /**
  * @brief       Inicijalizuje dinamican memorijski alokator
- * @param       [out] desc              Deskriptor dinamickog alokatora
+ * @param       [out] handle              Deskriptor dinamickog alokatora
  * @param       [in] array              Predefinisani memorijski prostor koji se
  *                                      predaje dinamickom alokatoru na
  *                                      koriscenje
@@ -157,31 +168,13 @@ size_t esSMemFreeSpace(
  * @api
  */
 void esDMemInit(
-    esDMemDesc_T *  desc,
+    esDMemHandle_T *    handle,
     void *          array,
     size_t          bytes);
 
 /**
  * @brief       Dodeljuje memorijski prostor velicine @c size
- * @param       [in] desc               Deskriptor dinamickog alokatora
- * @param       size                    Velicina zahtevanog memorijskog prostora
- *                                      u bajtovima.
- * @return      Pokazivac na rezervisani memorijski blok.
- * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
- *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
- *              standardna implementacija @c malloc C funkcije. Ukoliko se
- *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
- *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
- *              standardom.
- * @api
- */
-void * esDMemAlloc(
-    esDMemDesc_T *  desc,
-    size_t          size);
-
-/**
- * @brief       Dodeljuje memorijski prostor velicine @c size
- * @param       [in] desc               Deskriptor dinamickog alokatora
+ * @param       [in] handle             Deskriptor dinamickog alokatora
  * @param       size                    Velicina zahtevanog memorijskog prostora
  *                                      u bajtovima.
  * @return      Pokazivac na rezervisani memorijski blok.
@@ -194,50 +187,25 @@ void * esDMemAlloc(
  * @iclass
  */
 void * esDMemAllocI(
-    esDMemDesc_T *  desc,
+    esDMemHandle_T *    handle,
     size_t          size);
 
 /**
  * @brief       Reciklira memorijski prostor na koji pokazije @c mem
  *              pokazivac
- * @param       [in] desc               Deskriptor dinamickog alokatora
- * @param       mem                     Pokazivac na prethodno dodeljen
- * 										memorijski prostor.
- * @api
- */
-void esDMemDeAlloc(
-    esDMemDesc_T *  desc,
-    void *          mem);
-
-/**
- * @brief       Reciklira memorijski prostor na koji pokazije @c mem
- *              pokazivac
- * @param       [in] desc               Deskriptor dinamickog alokatora
+ * @param       [in] handle             Deskriptor dinamickog alokatora
  * @param       mem                     Pokazivac na prethodno dodeljen
  *                                      memorijski prostor.
  * @iclass
  */
 void esDMemDeAllocI(
-    esDMemDesc_T *  desc,
+    esDMemHandle_T *    handle,
     void *          mem);
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
- * @param       [in] desc               Deskriptor dinamickog alokatora
- * @return      Velicina slobodne memorije u bajtovima.
- * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
- *              za first fit algoritam, moze se desiti da postoji dovoljno
- *              slobodne memorije, ali ne i za blok zahtevane velicine. U tom
- *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
- *              zahtev.
- * @api
- */
-size_t esDMemFreeSpace(
-    esDMemDesc_T *  desc);
-
-/**
- * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
- * @param       [in/out] desc           Deskriptor dinamickog alokatora
+ * @param       [in] handle             Deskriptor dinamickog alokatora
+ * @param       [out] status            Status struktura dinamickog alokatora
  * @return      Velicina slobodne memorije u bajtovima.
  * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
  *              za first fir algoritam, moze se desiti da postoji dovoljno
@@ -246,8 +214,9 @@ size_t esDMemFreeSpace(
  *              zahtev.
  * @iclass
  */
-size_t esDMemStatus(
-    esDMemDesc_T *  desc);
+void esDMemStatusI(
+    esDMemHandle_T *    handle,
+    esDMemStatus_T *    status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -256,46 +225,49 @@ size_t esDMemStatus(
 
 /**
  * @brief       Inicijalizuje pool memorijski alokator
- * @param       [out] desc              Deskriptor pool alokatora
+ * @param       [out] handle            Deskriptor pool alokatora
  * @param       [in] array              Predefinisani memorijski prostor koji se
  *                                      predaje pool alokatoru na koriscenje
- * @param       blocks                  Broj blokova u array
+ * @param       arraySize               Velicina array memorijskog prostora
  * @param       blockSize               Velicina jednog bloka u bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
- *              memorijskog alokatora.
+ *              memorijskog alokatora. Ona ce izracunati koliko blokova se mogu
+ *              formirati u array.
  * @api
  */
 void esPMemInit(
-    esPMemDesc_T *  desc,
+    esPMemHandle_T *    handle,
     void *          array,
+    size_t          arraySize,
+    size_t          blockSize);
+
+/**
+ * @brief       Racuna potrebnu velicinu @c array niza za cuvanje blokova
+ * @param       blocks                  Koliko je blokova potrebno
+ * @param       blockSize               Velicina jednog bloka
+ * @return      Velicina potrebnog niza u bajtovima.
+ */
+size_t esPMemCalcArraySize(
     size_t          blocks,
     size_t          blockSize);
 
 /**
  * @brief       Alocira jedan blok iz memory pool-a
- * @param       [in] desc               Deskriptor pool alokatora
+ * @param       [in] handle             Deskriptor pool alokatora
  * @return      Pokazivac na alocirani memorijski blok
  * @iclass
  */
 void * esPMemAllocI(
-    esPMemDesc_T *  desc);
-
-/**
- * @brief       Alocira jedan blok iz memory pool-a
- * @param       [in] desc               Deskriptor pool alokatora
- * @return      Pokazivac na alocirani memorijski blok
- * @api
- */
-void * esPMemAlloc(
-    esPMemDesc_T *  desc);
+    esPMemHandle_T *    handle);
 
 /**
  * @brief       Oslobadja prethodno alocirani blok
- * @param       [in] desc               Deskriptor pool alokatora
+ * @param       [in] handle             Deskriptor pool alokatora
  * @param       [in] mem
+ * @iclass
  */
 void esPMemDeAllocI(
-    esPMemDesc_T *  desc,
+    esPMemHandle_T *  handle,
     void *          mem);
 
 /** @} *//*-------------------------------------------------------------------*/
