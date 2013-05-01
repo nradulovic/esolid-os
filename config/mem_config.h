@@ -73,7 +73,7 @@
  *              default fall back standard C library routines.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if !defined(OPT_MEM_DMEM_ENABLE)
+#if !defined(OPT_MEM_DMEM_ENABLE) || defined(__DOXYGEN__)
 /**
  * @brief       Fallback alokator funkcija
  * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
