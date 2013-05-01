@@ -55,11 +55,25 @@ struct sMemSentinel {
  */
 typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
     struct dBlockPhy {
+/**
+ * @brief       Velicina bloka memorije
+ */
         size_t          size;
+
+/**
+ * @brief       Prethodni blok u fizickoj listi
+ */
         struct dMemBlock * prev;
     }                   phy;
     struct dBlockFree {
+/**
+ * @brief       Sledeci blok u listi slobodnih blokova
+ */
         struct dMemBlock * next;
+
+/**
+ * @brief       Prethodni blok u listi slobodnih blokova
+ */
         struct dMemBlock * prev;
     }                   free;
 } dMemBlock_T;
