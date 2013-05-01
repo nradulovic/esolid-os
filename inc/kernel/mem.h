@@ -49,7 +49,7 @@ extern "C" {
 
 /**
  * @brief       Status dinamicke memorije
- * @details     Ova struktura se koristi sa funkcijom esDMemStatus()
+ * @details     Ova struktura se koristi sa funkcijom esDMemStatusI()
  */
 typedef struct esDMemStatus {
 /** @brief      Velicina dinamicke memorije                                   */
@@ -77,7 +77,7 @@ typedef struct esDMemHandle {
 
 /**
  * @brief       Status pool memorije
- * @details     Ova struktura se koristi sa funkcijom esPMemStatus()
+ * @details     Ova struktura se koristi sa funkcijom esPMemStatusI()
  */
 typedef struct esPMemStatus {
 /** @brief      Velicina pool memorije                                        */
@@ -206,7 +206,6 @@ void esDMemDeAllocI(
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
  * @param       [in] handle             Deskriptor dinamickog alokatora
  * @param       [out] status            Status struktura dinamickog alokatora
- * @return      Velicina slobodne memorije u bajtovima.
  * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
  *              za first fir algoritam, moze se desiti da postoji dovoljno
  *              slobodne memorije, ali ne i bloka zahtevane velicine. U tom
@@ -269,6 +268,16 @@ void * esPMemAllocI(
 void esPMemDeAllocI(
     esPMemHandle_T *  handle,
     void *          mem);
+
+/**
+ * @brief       Vraca statusne informacije pool memorije
+ * @param       [in] handle             Deskriptor pool alokatora
+ * @param       [out] status            Status struktura pool alokatora
+ * @iclass
+ */
+void esPMemStatusI(
+    esPMemHandle_T *    handle,
+    esPMemStatus_T *    status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/
