@@ -33,7 +33,7 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
-#include "../config/sys_config.h"
+#include "../config/mem_config.h"
 
 /*===============================================================  MACRO's  ==*/
 /*------------------------------------------------------  C++ extern begin  --*/
@@ -241,7 +241,7 @@ void esPMemInit(
  * @param       blockSize               Velicina jednog bloka
  * @return      Velicina potrebnog niza u bajtovima.
  */
-size_t esPMemCalcArraySize(
+size_t esPMemCalcPoolSize(
     size_t          blocks,
     size_t          blockSize);
 

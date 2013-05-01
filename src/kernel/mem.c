@@ -153,7 +153,7 @@ void esPMemInit(
 }
 
 /*----------------------------------------------------------------------------*/
-size_t esPMemCalcArraySize(
+size_t esPMemCalcPoolSize(
     size_t          blocks,
     size_t          blockSize) {
 
