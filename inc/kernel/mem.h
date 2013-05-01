@@ -45,6 +45,7 @@ extern "C" {
 
 /**
  * @brief       Status memorije
+ * @api
  */
 typedef struct esMemStatus {
 /** @brief      Velicina dinamicke memorije                                   */
@@ -63,6 +64,7 @@ typedef struct esMemStatus {
 
 /**
  * @brief       Deskriptor Dinamickog alokatora
+ * @api
  */
 typedef struct esDMemHandle {
 /** @brief      Pokazivac na cuvara memorije                                  */
@@ -76,6 +78,7 @@ typedef struct esDMemHandle {
 
 /**
  * @brief       Deskriptor Pool alokatora
+ * @api
  */
 typedef struct esPMemHandle {
 /** @brief      Iznos ukupne slobodne memorije                                */
@@ -87,6 +90,7 @@ typedef struct esPMemHandle {
 
 /**
  * @brief       Zaglavlje jednog bloka pool memorije
+ * @api
  */
 typedef struct esPMemBlock {
 /** @brief      Pokazivac na sledeci slobodan blok                            */
@@ -128,8 +132,8 @@ void * esSMemAllocI(
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
- * @return      Velicina slobodne memorije u bajtovima.
- * @api
+ * @param       [out] status            Status struktura static alokatora
+ * @iclass
  */
 void esSMemStatusI(
     esMemStatus_T *     status);
@@ -149,6 +153,7 @@ void esSMemStatusI(
  *                                      bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
+ * @pre         Opcija @ref OPT_SYS_ENABLE_MEM mora da bude aktivna
  * @api
  */
 void esDMemInit(
@@ -168,6 +173,7 @@ void esDMemInit(
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
+ * @pre         Opcija @ref OPT_SYS_ENABLE_MEM mora da bude aktivna
  * @iclass
  */
 void * esDMemAllocI(
@@ -178,8 +184,9 @@ void * esDMemAllocI(
  * @brief       Reciklira memorijski prostor na koji pokazije @c mem
  *              pokazivac
  * @param       [in] handle             Deskriptor dinamickog alokatora
- * @param       mem                     Pokazivac na prethodno dodeljen
+ * @param       [in] mem                Pokazivac na prethodno dodeljen
  *                                      memorijski prostor.
+ * @pre         Opcija @ref OPT_SYS_ENABLE_MEM mora da bude aktivna
  * @iclass
  */
 void esDMemDeAllocI(
@@ -195,6 +202,7 @@ void esDMemDeAllocI(
  *              slobodne memorije, ali ne i bloka zahtevane velicine. U tom
  *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
  *              zahtev.
+ * @pre         Opcija @ref OPT_SYS_ENABLE_MEM mora da bude aktivna
  * @iclass
  */
 void esDMemStatusI(
@@ -246,11 +254,11 @@ void * esPMemAllocI(
 /**
  * @brief       Oslobadja prethodno alocirani blok
  * @param       [in] handle             Deskriptor pool alokatora
- * @param       [in] mem
+ * @param       [in] mem                Prethodno alociran blok memorije
  * @iclass
  */
 void esPMemDeAllocI(
-    esPMemHandle_T *  handle,
+    esPMemHandle_T *    handle,
     void *          mem);
 
 /**

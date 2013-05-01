@@ -83,7 +83,6 @@ extern uint8_t _eheap;
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
-#if defined(OPT_SYS_ENABLE_MEM)
 /*----------------------------------------------------------------------------*/
 void esSMemInit(
     void) {
@@ -128,6 +127,75 @@ void esSMemStatusI(
     status->freeSpaceTotal = status->freeSpaceAvailable;
 }
 
+/*----------------------------------------------------------------------------*/
+void esPMemInit(
+    esPMemHandle_T *    handle,
+    void *          array,
+    size_t          arraySize,
+    size_t          blockSize) {
+
+    size_t blockCnt;
+    size_t blocks;
+    esPMemBlock_T * block;
+
+    blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
+    handle->blockSize = blockSize;
+    handle->poolSentinel = (esPMemBlock_T *)array;
+    blocks = arraySize / blockSize;
+    block = handle->poolSentinel;
+
+    for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
+        block->next = (uint8_t *)block + handle->blockSize;
+        block = block->next;
+    }
+    block->next = NULL;
+}
+
+/*----------------------------------------------------------------------------*/
+size_t esPMemCalcArraySize(
+    size_t          blocks,
+    size_t          blockSize) {
+
+    blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
+
+    return (blocks * blockSize);
+}
+
+/*----------------------------------------------------------------------------*/
+void * esPMemAllocI(
+    esPMemHandle_T *    handle) {
+
+    esPMemBlock_T * block;
+
+    block = handle->poolSentinel;
+
+    if (NULL != block) {
+        handle->poolSentinel = block->next;
+    }
+
+    return ((void *)(block + 1U));
+}
+
+/*----------------------------------------------------------------------------*/
+void esPMemDeAllocI(
+    esPMemHandle_T *    handle,
+    void *          mem) {
+
+    esPMemBlock_T * block;
+
+    block = (esPMemBlock_T *)mem - 1U;
+    block->next = handle->poolSentinel;
+    handle->poolSentinel = block;
+}
+
+/*----------------------------------------------------------------------------*/
+void esPMemStatusI(
+    esPMemHandle_T *    handle,
+    esMemStatus_T *     status) {
+
+}
+
+#if defined(OPT_SYS_ENABLE_MEM)
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
@@ -261,76 +329,54 @@ void esDMemStatusI(
     status->freeSpaceAvailable = freeAvailable;
 }
 
+#else /* defined(OPT_SYS_ENABLE_MEM) */
 /*----------------------------------------------------------------------------*/
-void esPMemInit(
-    esPMemHandle_T *    handle,
+void esDMemInit(
+    esDMemHandle_T *    handle,
     void *          array,
-    size_t          arraySize,
-    size_t          blockSize) {
+    size_t          bytes) {
 
-    size_t blockCnt;
-    size_t blocks;
-    esPMemBlock_T * block;
-
-    blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
-    handle->blockSize = blockSize;
-    handle->poolSentinel = (esPMemBlock_T *)array;
-    blocks = arraySize / blockSize;
-    block = handle->poolSentinel;
-
-    for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
-        block->next = (uint8_t *)block + handle->blockSize;
-        block = block->next;
-    }
-    block->next = NULL;
+    (void)handle;
+    (void)array;
+    (void)bytes;
 }
 
 /*----------------------------------------------------------------------------*/
-size_t esPMemCalcArraySize(
-    size_t          blocks,
-    size_t          blockSize) {
+void * esDMemAllocI(
+    esDMemHandle_T *    handle,
+    size_t          size) {
 
-    blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
+    void * mem;
+    (void)handle;
 
-    return (blocks * blockSize);
+    mem = OPT_MEM_ALLOC(size);
+
+    return (mem);
 }
 
 /*----------------------------------------------------------------------------*/
-void * esPMemAllocI(
-    esPMemHandle_T *    handle) {
-
-    esPMemBlock_T * block;
-
-    block = handle->poolSentinel;
-
-    if (NULL != block) {
-        handle->poolSentinel = block->next;
-    }
-
-    return ((void *)(block + 1U));
-}
-
-/*----------------------------------------------------------------------------*/
-void esPMemDeAllocI(
-    esPMemHandle_T *    handle,
+void esDMemDeAllocI(
+    esDMemHandle_T *    handle,
     void *          mem) {
 
-    esPMemBlock_T * block;
+    (void)handle;
 
-    block = (esPMemBlock_T *)mem - 1U;
-    block->next = handle->poolSentinel;
-    handle->poolSentinel = block;
+    mem = OPT_MEM_FREE(size);
+
+    return (mem);
 }
 
 /*----------------------------------------------------------------------------*/
-void esPMemStatusI(
-    esPMemHandle_T *    handle,
+void esDMemStatusI(
+    esDMemHandle_T *    handle,
     esMemStatus_T *     status) {
 
+    (void)handle;
+
+    status->size = 0U;
+    status->freeSpaceTotal = 0U;
+    status->freeSpaceAvailable = 0U;
 }
-
-#else /* defined(OPT_SYS_ENABLE_MEM) */
-
 
 #endif /* !defined(OPT_SYS_ENABLE_MEM) */
 
