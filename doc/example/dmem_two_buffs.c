@@ -14,9 +14,9 @@ int main (
     esSMemInit();                                           /* Initialize the static memory */
                                                             /* The amount of static memory is */
                                                             /* specified in mem_config.h file */
-    dataBuffer = esSMemAlloc(
+    dataBuffer = esSMemAllocI(
         DATA_BUFFER_SIZE);                                  /* Create a data buffer of 2048 bytes */
-    commandBuffer = esSMemAlloc(
+    commandBuffer = esSMemAllocI(
         COMMAND_BUFFER_SIZE);                               /* Create additional buffer of 512 bytes */
 
     esDMemInit(
@@ -33,11 +33,11 @@ int main (
         int * data;
         int * command;
 
-        data = esDMemAlloc(
+        data = esDMemAllocI(
             &dataHeap,
             sizeof(int) * 10U);                             /* Allocate an array of 10 integers */
 
-        command = esDMemAlloc(
+        command = esDMemAllocI(
             &commandHeap,
             sizeof(int));
 
@@ -45,11 +45,11 @@ int main (
          * Do some stuff
          */
 
-        esDMemDeAlloc(
+        esDMemDeAllocI(
             &commandHeap,
             command);                                       /* Delete the command */
 
-        esDMemDeAlloc(
+        esDMemDeAllocI(
             &dataHeap,
             data);                                          /* Delete the data */
     }

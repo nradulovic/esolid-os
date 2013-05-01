@@ -11,7 +11,7 @@ int main (
     esSMemInit();                                           /* Initialize the static memory */
                                                             /* The amount of static memory is */
                                                             /* specified in mem_config.h file */
-    buffer = esSMemAlloc(
+    buffer = esSMemAllocI(
         BUFFER_SIZE);                                       /* Create a buffer of 1024 bytes */
 
     esDMemInit(
@@ -22,7 +22,7 @@ int main (
     while (TRUE) {
         int * myArray;
 
-        myArray = esDMemAlloc(
+        myArray = esDMemAllocI(
             &myHeap,
             sizeof(int) * 10U);                             /* Allocate an array of 10 integers */
 
@@ -30,7 +30,7 @@ int main (
          * Do some stuff
          */
 
-        esDMemDeAlloc(
+        esDMemDeAllocI(
             &myHeap,
             myArray);                                       /* Delete the array */
     }

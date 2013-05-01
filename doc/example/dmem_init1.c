@@ -16,7 +16,7 @@ int main (
     while (TRUE) {
         int * myArray;
 
-        myArray = esDMemAlloc(
+        myArray = esDMemAllocI(
             &myHeap,
             sizeof(int) * 10U);                             /* Allocate an array of 10 integers */
 
@@ -24,7 +24,7 @@ int main (
          * Do some stuff
          */
 
-        esDMemDeAlloc(
+        esDMemDeAllocI(
             &myHeap,
             myArray);                                       /* Delete the array */
     }
