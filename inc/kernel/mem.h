@@ -77,7 +77,7 @@ typedef struct esDMemHandle {
 
 /**
  * @brief       Status pool memorije
- * @details     Ova strktura se koristi sa funkcijom esPMemStatus()
+ * @details     Ova struktura se koristi sa funkcijom esPMemStatus()
  */
 typedef struct esPMemStatus {
 /** @brief      Velicina pool memorije                                        */
@@ -88,7 +88,7 @@ typedef struct esPMemStatus {
 
 /** @brief      Broj slobodnih blokova                                        */
     size_t          blockFree;
-};
+} esPMemStatus_T;
 
 /**
  * @brief       Deskriptor Pool alokatora
