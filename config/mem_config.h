@@ -26,6 +26,8 @@
  * @brief       Memory Management Configuration
  * @defgroup    mem_cfg Memory Management Configuration
  * @brief       Konfiguracija
+ * @details     Podesavanja memorijskog menadzera. Za detalje o radu alokatora
+ *              pogledati @ref page_mem
  *********************************************************************//** @{ */
 
 #ifndef MEM_CONFIG_H_
