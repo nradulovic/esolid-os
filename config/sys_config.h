@@ -55,6 +55,8 @@
  * @brief       Omogucavanje dinamickog memorijskog menadzmenta
  * @details     Ukoliko se koristi eSolid dinamicki alokator ova opcija mora
  *              biti definisana.
+ * @see         OPT_MEM_ALLOC
+ * @see         OPT_MEM_FREE
  */
 #if defined(__DOXYGEN__)
 # define OPT_SYS_ENABLE_DMEM

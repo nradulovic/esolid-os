@@ -63,7 +63,22 @@
  * @{ *//*--------------------------------------------------------------------*/
 
 #if !defined(OPT_SYS_ENABLE_DMEM)
+/**
+ * @brief       Fallback alokator funkcija
+ * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
+ *              odnosno, kada opcija @ref OPT_SYS_ENABLE_DMEM nije definisana. U
+ *              tom slucaju eSolid ce pozvati funkciju koja je navedena ovde.
+ * @note        Default: malloc
+ */
 # define OPT_MEM_ALLOC                  malloc
+
+/**
+ * @brief       Fallback dealokator funkcija
+ * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
+ *              odnosno, kada opcija @ref OPT_SYS_ENABLE_DMEM nije definisana. U
+ *              tom slucaju eSolid ce pozvati funkciju koja je navedena ovde.
+ * @note        Default: free
+ */
 # define OPT_MEM_FREE                   free
 #endif
 
