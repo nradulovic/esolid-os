@@ -48,9 +48,14 @@ extern "C" {
  */
 typedef struct esDMemDesc {
 /**
- * @brief       Iznos slobodne memorije
+ * @brief       Iznos ukupne slobodne memorije
  */
-    size_t          freeSpace;
+    size_t          freeSpaceTotal;
+
+/**
+ * @brief       Iznos maksimalno dostupne memorije kao jedinstven blok
+ */
+    size_t          freeSpaceAvailable;
 
 /**
  * @brief       Pokazivac na cuvara memorije
@@ -65,12 +70,12 @@ typedef struct esPMemDesc {
 /**
  * @brief       Iznos ukupne slobodne memorije
  */
-    size_t          freeSpaceTotal;
+    size_t          blockSize;
 
 /**
  * @brief       Iznos maksimalno dostupne memorije kao jedinstven blok
  */
-    size_t          freeSpaceAvailable;
+    size_t          blockFree;
 
 /**
  * @brief       Pokazivac na cuvara memorije
@@ -232,7 +237,7 @@ size_t esDMemFreeSpace(
 
 /**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
- * @param       [in] desc               Deskriptor dinamickog alokatora
+ * @param       [in/out] desc           Deskriptor dinamickog alokatora
  * @return      Velicina slobodne memorije u bajtovima.
  * @details     Ukoliko je memorija jako fragmenitisana, sto je karakteristicno
  *              za first fir algoritam, moze se desiti da postoji dovoljno
@@ -241,7 +246,7 @@ size_t esDMemFreeSpace(
  *              zahtev.
  * @iclass
  */
-size_t esDMemFreeSpaceI(
+size_t esDMemStatus(
     esDMemDesc_T *  desc);
 
 /** @} *//*-------------------------------------------------------------------*/
