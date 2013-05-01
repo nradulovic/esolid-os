@@ -50,7 +50,7 @@ struct sMemSentinel {
  * @brief       Blok memorije dinamickog alokatora
  */
 typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
-/** @brief      Velicina bloka memorije                                       */
+/** @brief      Velicina bloka memorije (zajedno sa ovom strukturom)          */
     size_t          phySize;
 
 /** @brief      Prethodni blok u fizickoj listi                               */
@@ -71,6 +71,13 @@ typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
  */
 static struct sMemSentinel gSMemSentinel;
 
+#if (OPT_MEM_CORE_SIZE != 0U)
+static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_CORE_SIZE, sizeof(unative_T))];
+#else
+extern uint8_t _sheap;
+extern uint8_t _eheap;
+#endif
+
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
@@ -82,26 +89,12 @@ void esSMemInit(
     void) {
 
 #if (OPT_MEM_CORE_SIZE != 0U)
-
-    static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_CORE_SIZE, sizeof(unative_T))];
-
     gSMemSentinel.begin = &sMemBuffer;
     gSMemSentinel.current = ES_DIMENSION(sMemBuffer);
 #else
-
-    extern uint8_t _sheap;
-    extern uint8_t _eheap;
-
     gSMemSentinel.begin = (unative_T *)&_sheap;
     gSMemSentinel.current = (&_eheap - &_sheap) / sizeof(unative_T);
 #endif
-}
-
-/*----------------------------------------------------------------------------*/
-size_t esSMemFreeSpace(
-    void) {
-
-    return (gSMemSentinel.current);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -120,6 +113,19 @@ void * esSMemAllocI(
     }
 
     return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void esSMemStatusI(
+    esMemStatus_T *     status) {
+
+#if (OPT_MEM_CORE_SIZE != 0U)
+    status->size = sizeof(sMemBuffer);
+#else
+    status->size = (size_t)(&_eheap - &_sheap);
+#endif
+    status->freeSpaceAvailable = gSMemSentinel.current * sizeof(unative_T);
+    status->freeSpaceTotal = status->freeSpaceAvailable;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -223,8 +229,36 @@ void esDMemDeAllocI(
 /*----------------------------------------------------------------------------*/
 void esDMemStatusI(
     esDMemHandle_T *    handle,
-    esDMemStatus_T *    status) {
+    esMemStatus_T *     status) {
 
+    size_t size;
+    size_t freeTotal;
+    size_t freeAvailable;
+    dMemBlock_T * curr;
+
+    size = 0U;
+    freeTotal = 0U;
+    freeAvailable = 0U;
+    curr = handle->heapSentinel->phyPrev;
+
+    while (curr != handle->heapSentinel) {
+        size += curr->phySize;
+
+        if (NULL != curr->freeNext) {
+            size_t freeSize;
+
+            freeSize = curr->phySize - sizeof(dMemBlock_T);
+            freeTotal += freeSize;
+
+            if (freeSize > freeAvailable) {
+                freeAvailable = freeSize;
+            }
+        }
+        curr = curr->phyPrev;
+    }
+    status->size = size;
+    status->freeSpaceTotal = freeTotal;
+    status->freeSpaceAvailable = freeAvailable;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -286,6 +320,13 @@ void esPMemDeAllocI(
     block = (esPMemBlock_T *)mem - 1U;
     block->next = handle->poolSentinel;
     handle->poolSentinel = block;
+}
+
+/*----------------------------------------------------------------------------*/
+void esPMemStatusI(
+    esPMemHandle_T *    handle,
+    esMemStatus_T *     status) {
+
 }
 
 #else /* defined(OPT_SYS_ENABLE_MEM) */

@@ -43,15 +43,7 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
-/*------------------------------------------------------------------------*//**
- * @name        Podaci dinamickog alokatora
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Status dinamicke memorije
- * @details     Ova struktura se koristi sa funkcijom esDMemStatusI()
- */
-typedef struct esDMemStatus {
+typedef struct esMemStatus {
 /** @brief      Velicina dinamicke memorije                                   */
     size_t          size;
 
@@ -60,7 +52,11 @@ typedef struct esDMemStatus {
 
 /** @brief      Iznos maksimalno dostupne memorije kao jedinstven blok        */
     size_t          freeSpaceAvailable;
-} esDMemStatus_T;
+} esMemStatus_T;
+
+/*------------------------------------------------------------------------*//**
+ * @name        Podaci dinamickog alokatora
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Deskriptor Dinamickog alokatora
@@ -74,21 +70,6 @@ typedef struct esDMemHandle {
 /*------------------------------------------------------------------------*//**
  * @name        Podaci pool alokatora
  * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Status pool memorije
- * @details     Ova struktura se koristi sa funkcijom esPMemStatusI()
- */
-typedef struct esPMemStatus {
-/** @brief      Velicina pool memorije                                        */
-    size_t          size;
-
-/** @brief      Velicina jednog bloka                                         */
-    size_t          blockSize;
-
-/** @brief      Broj slobodnih blokova                                        */
-    size_t          blockFree;
-} esPMemStatus_T;
 
 /**
  * @brief       Deskriptor Pool alokatora
@@ -147,8 +128,8 @@ void * esSMemAllocI(
  * @return      Velicina slobodne memorije u bajtovima.
  * @api
  */
-size_t esSMemFreeSpace(
-    void);
+void esSMemStatusI(
+    esMemStatus_T *     status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -215,7 +196,7 @@ void esDMemDeAllocI(
  */
 void esDMemStatusI(
     esDMemHandle_T *    handle,
-    esDMemStatus_T *    status);
+    esMemStatus_T *     status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -277,7 +258,7 @@ void esPMemDeAllocI(
  */
 void esPMemStatusI(
     esPMemHandle_T *    handle,
-    esPMemStatus_T *    status);
+    esMemStatus_T *     status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/
