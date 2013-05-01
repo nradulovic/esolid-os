@@ -63,9 +63,14 @@ typedef struct esDMemDesc {
  */
 typedef struct esPMemDesc {
 /**
- * @brief       Iznos slobodne memorije
+ * @brief       Iznos ukupne slobodne memorije
  */
-    size_t          freeSpace;
+    size_t          freeSpaceTotal;
+
+/**
+ * @brief       Iznos maksimalno dostupne memorije kao jedinstven blok
+ */
+    size_t          freeSpaceAvailable;
 
 /**
  * @brief       Pokazivac na cuvara memorije
