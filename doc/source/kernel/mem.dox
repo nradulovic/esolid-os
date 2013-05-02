@@ -52,8 +52,6 @@ poznato. Zbog navedene cinjenice alokator nije pogodan za hard real-time
 sisteme.
 - Maksimalno vreme izvrsavanja operacije dealokacije bloka je unapred poznato. 
 - Ukupno minimalno zauzece RAM memorije (Cortex-M3 arch): @b 28B
-- Ukupno zauzece ROM memorije od strane svih funkcija (Cortex-M3 arch, 
-    optimizacija po zauzecu):  @b 322B
 
 @section        mem_pmem Pool memorijski menadzer
 
@@ -65,6 +63,14 @@ pool memorije.
 Podrzano je postojanje veceg broja razlicitih instanci, koje se referenciraju
 strukturama tipa @ref esPMemHandle_T. Pogledati primer @ref pmem_two_buffs.c.
 
+@subsection     mem_pool_specs Specifikacije pool alokatora
+
+- Maksimalno vreme izvrsavanja operacije alokacije bloka @b je unapred 
+poznato. Zbog navedene cinjenice alokator @b je pogodan za hard real-time
+sisteme.
+- Maksimalno vreme izvrsavanja operacije dealokacije bloka je unapred poznato. 
+- Ukupno minimalno zauzece RAM memorije (Cortex-M3 arch): @b 12B
+    
 @section        mem_configuration Konfiguracija Memory Management modula
 
 Za konfiguraciju Memory Management modula pogledati @ref mem_cfg.
