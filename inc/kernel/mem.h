@@ -68,7 +68,7 @@ typedef struct esMemStatus {
  */
 typedef struct esDMemHandle {
 /** @brief      Pokazivac na cuvara memorije                                  */
-    struct dMemBlock * heapSentinel;
+    struct dMemBlock * sentinel;
 } esDMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -139,21 +139,30 @@ void esSMemUpdateStatusI(
 
 /**
  * @brief       Inicijalizuje dinamican memorijski alokator
- * @param       [out] handle              Deskriptor dinamickog alokatora
- * @param       [in] array              Predefinisani memorijski prostor koji se
+ * @param       [out] handle            Deskriptor dinamickog alokatora
+ * @param       [in] storage            Predefinisani memorijski prostor koji se
  *                                      predaje dinamickom alokatoru na
  *                                      koriscenje
- * @param       bytes                   Velicina memorijskog prostora u
+ * @param       storageSize             Velicina memorijskog prostora u
  *                                      bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
  * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
+ * @warning     Funkcija zahteva da pokazivaci handle i pool budu poravnani
+ *              (aligned). Ukoliko se koriste eSolid alokatori za instaciranje
+ *              @c handle strukture i @c poolStorage onda je poravnani pristup
+ *              osiguran.
+ * @warning     Funkcija zahteva da velicina memorijskog prostora @c storageSize
+ *              bude poravnana (aligned). Na primer za 32-bitni procesor
+ *              (poravnanje 4 bajta): ako je @c storageSize == 313 onda je
+ *              potrebno poravnati na sledecu vecu vrednost koja je deljiva sa 4,
+ *              u ovom slucaju ce to biti 316.
  * @api
  */
 void esDMemInit(
     esDMemHandle_T * handle,
-    void *          array,
-    size_t          bytes);
+    void *          storage,
+    size_t          storageSize);
 
 /**
  * @brief       Dodeljuje memorijski prostor velicine @c size
@@ -211,27 +220,28 @@ void esDMemUpdateStatusI(
 /**
  * @brief       Inicijalizuje pool memorijski alokator
  * @param       [out] handle            Deskriptor pool alokatora
- * @param       [in] array              Predefinisani memorijski prostor koji se
+ * @param       [in] pool               Predefinisani memorijski prostor koji se
  *                                      predaje pool alokatoru na koriscenje
- * @param       arraySize               Velicina array memorijskog prostora
+ * @param       poolSize                Velicina pool memorijskog prostora
  * @param       blockSize               Velicina jednog bloka u bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
  *              memorijskog alokatora. Ona ce izracunati koliko blokova se mogu
- *              formirati u array.
- * @warning     Funkcija zahteva da pokazivaci handle i array budu poravnani
+ *              formirati u pool.
+ * @warning     Funkcija zahteva da pokazivaci handle i pool budu poravnani
  *              (aligned). Ukoliko se koriste eSolid alokatori za instaciranje
  *              @c handle strukture i @c poolStorage onda je poravnani pristup
  *              osiguran.
- * @warning     Funkcija zahteva da velicina bloka @c blockSize bude poravnana.
- *              Na primer za 32-bitni procesor (poravnanje 4 bajta): ako je
- *              @c blockSize == 3 onda je potrebno poravnati vrednost koja je
- *              deljiva sa 4, odnosno, u ovom slucaju ce to biti 4.
+ * @warning     Funkcija zahteva da velicina bloka @c blockSize bude poravnana
+ *              (aligned). Na primer za 32-bitni procesor (poravnanje 4 bajta):
+ *              ako je @c blockSize == 3 onda je potrebno poravnati na sledecu
+ *              vecu vrednost koja je deljiva sa 4, odnosno, u ovom slucaju ce
+ *              to biti 4.
  * @api
  */
 void esPMemInit(
     esPMemHandle_T * handle,
-    void *          array,
-    size_t          arraySize,
+    void *          pool,
+    size_t          poolSize,
     size_t          blockSize);
 
 /**

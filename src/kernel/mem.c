@@ -47,21 +47,29 @@ struct sMemSentinel {
 };
 
 /**
- * @brief       Blok memorije dinamickog alokatora
+ * @brief       Zaglavlje bloka dinamickog alokatora
  */
 typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
 /** @brief      Velicina bloka memorije (zajedno sa ovom strukturom)          */
     size_t          phySize;
 
 /** @brief      Prethodni blok u fizickoj listi                               */
-    struct dMemBlock * phyPrev;
+    struct dMemBlock *  phyPrev;
 
 /** @brief      Sledeci blok u listi slobodnih blokova                        */
-    struct dMemBlock * freeNext;
+    struct dMemBlock *  freeNext;
 
 /** @brief      Prethodni blok u listi slobodnih blokova                      */
-    struct dMemBlock * freePrev;
+    struct dMemBlock *  freePrev;
 } dMemBlock_T;
+
+/**
+ * @brief       Zaglavlje bloka pool alokatora
+ */
+typedef struct pMemBlock {
+/** @brief      Pokazivac na sledeci slobodan blok                            */
+    struct pMemBlock *  next;
+} pMemBlock_T;
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -136,13 +144,12 @@ void esPMemInit(
 
     size_t blockCnt;
     size_t blocks;
-    esPMemBlock_T * block;
+    pMemBlock_T * block;
 
-    blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
     blocks = arraySize / blockSize;
-    handle->size = blocks * blockSize;
+    handle->size = arraySize;
     handle->blockSize = blockSize;
-    handle->poolSentinel = (esPMemBlock_T *)array;
+    handle->poolSentinel = (pMemBlock_T *)array;
     block = handle->poolSentinel;
 
     for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
@@ -157,7 +164,7 @@ size_t esPMemCalcPoolSize(
     size_t          blocks,
     size_t          blockSize) {
 
-    blockSize = ES_ALIGN_UP(blockSize + sizeof(struct esPMemBlock), sizeof(unative_T));
+    blockSize = ES_ALIGN_UP(blockSize, sizeof(unative_T));
 
     return (blocks * blockSize);
 }
@@ -166,7 +173,7 @@ size_t esPMemCalcPoolSize(
 void * esPMemAllocI(
     esPMemHandle_T *    handle) {
 
-    esPMemBlock_T * block;
+    pMemBlock_T * block;
 
     block = handle->poolSentinel;
 
@@ -174,7 +181,7 @@ void * esPMemAllocI(
         handle->poolSentinel = block->next;
     }
 
-    return ((void *)(block + 1U));
+    return ((void *)block);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -182,9 +189,9 @@ void esPMemDeAllocI(
     esPMemHandle_T *    handle,
     void *          mem) {
 
-    esPMemBlock_T * block;
+    pMemBlock_T * block;
 
-    block = (esPMemBlock_T *)mem - 1U;
+    block = (pMemBlock_T *)mem;
     block->next = handle->poolSentinel;
     handle->poolSentinel = block;
 }
@@ -195,7 +202,7 @@ void esPMemUpdateStatusI(
     esMemStatus_T *     status) {
 
     size_t freeTotal;
-    esPMemBlock_T * block;
+    pMemBlock_T * block;
 
     freeTotal = 0U;
     block = handle->poolSentinel;
@@ -213,22 +220,22 @@ void esPMemUpdateStatusI(
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
-    void *          array,
-    size_t          bytes) {
+    void *          storage,
+    size_t          storageSize) {
 
     dMemBlock_T * begin;
 
-    bytes = ES_ALIGN(bytes, sizeof(unative_T));
-    handle->heapSentinel = (dMemBlock_T *)((uint8_t *)array + bytes) - 1U;        /* HeapSentinel is the last element of the array            */
-    begin = (dMemBlock_T *)array;
-    begin->phySize = bytes - sizeof(dMemBlock_T);
-    begin->phyPrev = handle->heapSentinel;
-    begin->freeNext = handle->heapSentinel;
-    begin->freePrev = handle->heapSentinel;
-    handle->heapSentinel->phySize = 0U;
-    handle->heapSentinel->phyPrev = begin;
-    handle->heapSentinel->freeNext = begin;
-    handle->heapSentinel->freePrev = begin;
+    storageSize = ES_ALIGN(storageSize, sizeof(unative_T));
+    handle->sentinel = (dMemBlock_T *)((uint8_t *)storage + storageSize) - 1U;  /* Sentinel is the last element of the storage              */
+    begin = (dMemBlock_T *)storage;
+    begin->phySize = storageSize - sizeof(dMemBlock_T);
+    begin->phyPrev = handle->sentinel;
+    begin->freeNext = handle->sentinel;
+    begin->freePrev = handle->sentinel;
+    handle->sentinel->phySize = 0U;
+    handle->sentinel->phyPrev = begin;
+    handle->sentinel->freeNext = begin;
+    handle->sentinel->freePrev = begin;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -239,9 +246,9 @@ void * esDMemAllocI(
     dMemBlock_T * curr;
 
     size = ES_ALIGN_UP(size, sizeof(unative_T)) + sizeof(dMemBlock_T);
-    curr = handle->heapSentinel->freeNext;
+    curr = handle->sentinel->freeNext;
 
-    while (curr != handle->heapSentinel) {
+    while (curr != handle->sentinel) {
 
         if (curr->phySize >= size) {
 
@@ -301,8 +308,8 @@ void esDMemDeAllocI(
         tmp = (dMemBlock_T *)((uint8_t *)curr->phyPrev + curr->phyPrev->phySize);
         tmp->phyPrev = curr->phyPrev;
     } else {                                                                    /* Previous and next blocks are allocated                   */
-        curr->freeNext = handle->heapSentinel->freeNext;
-        curr->freePrev = handle->heapSentinel;
+        curr->freeNext = handle->sentinel->freeNext;
+        curr->freePrev = handle->sentinel;
         curr->freePrev->freeNext = curr;
         curr->freeNext->freePrev = curr;
     }
@@ -321,9 +328,9 @@ void esDMemUpdateStatusI(
     size = 0U;
     freeTotal = 0U;
     freeAvailable = 0U;
-    curr = handle->heapSentinel->phyPrev;
+    curr = handle->sentinel->phyPrev;
 
-    while (curr != handle->heapSentinel) {
+    while (curr != handle->sentinel) {
         size += curr->phySize;
 
         if (NULL != curr->freeNext) {
@@ -347,12 +354,12 @@ void esDMemUpdateStatusI(
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
-    void *          array,
-    size_t          bytes) {
+    void *          storage,
+    size_t          storageSize) {
 
     (void)handle;
-    (void)array;
-    (void)bytes;
+    (void)storage;
+    (void)storageSize;
 }
 
 /*----------------------------------------------------------------------------*/
