@@ -264,6 +264,7 @@ void esPMemInit(
  * @param       blocks                  Koliko je blokova potrebno
  * @param       blockSize               Velicina jednog bloka
  * @return      Velicina potrebnog niza u bajtovima.
+ * @api
  */
 size_t esPMemCalcPoolSize(
     size_t          blocks,

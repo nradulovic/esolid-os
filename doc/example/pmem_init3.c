@@ -2,13 +2,13 @@
 #include <stdint.h>
 #include "kernel/mem.h"
 
-struct dataBlock {                                          /* Some application data structure*/
+struct dataBlock {                                          /* Some application data structure which will be placed in pool */
     uint32_t data01;
     uint32_t data02;
     uint16_t command;
 };
 
-#define POOL_ELEMENTS                   10U                 /* Specification of pool */
+#define POOL_ELEMENTS                   10U                 /* Number of blocks in the pool */
 
 int main(
     void) {
@@ -37,7 +37,7 @@ int main(
             &myPool);                                       /* Allocate a block from pool memory */
 
         /*
-         * Do something
+         * Do something with data
          */
 
         esPMemDeAllocI(

@@ -47,4 +47,8 @@ value so there is no need to apply any alignment calculations on it.
 This example is very similar to pmem_init2.c. The only difference is how the
 required pool storage size is calculated.  
 **/
+
+/** @example pmem_two_buffs.c
+TODO
+**/
 **//** @} *//******************************************************************/

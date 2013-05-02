@@ -56,11 +56,12 @@ sisteme.
 
 Pool memorijski menadzer je vrlo slican dinamickom memorijskom menadzeru sa tom
 razlikom sto ne moze da se zatrazi proizvoljna kolicina memorije. Potrazivanje
-memorije se vrsi u unapred definisanom velicinom bloka koja vazi za datu 
-instancu pool memorije.
+memorije se vrsi unapred definisanom velicinom bloka koja vazi za datu instancu 
+pool memorije.
 
 Podrzano je postojanje veceg broja razlicitih instanci, koje se referenciraju
-strukturama tipa @ref esPMemHandle_T.
+strukturama tipa @ref esPMemHandle_T. Pogledati primer @ref pmem_two_buffs.c.
+
 @section        mem_configuration Konfiguracija Memory Management modula
 
 Za konfiguraciju Memory Management modula pogledati @ref mem_cfg.
