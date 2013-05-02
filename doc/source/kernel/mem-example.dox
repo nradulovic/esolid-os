@@ -12,8 +12,8 @@ BUFFER_SIZE macro.
 **/
 
 /** @example dmem_init2.c
-This is a more advanced example of Dynamic Memory initializazion. First it
-intializes the static memory and requires 1024 bytes from it for data storage.
+This is a more advanced example of Dynamic Memory initialization. First it
+initializes the static memory and requires 1024 bytes from it for data storage.
 Note that the amount of available static memory is configured in mem_config.h 
 file.
 **/
@@ -24,5 +24,20 @@ is used for its own purpose. This can have the benefit of reducing memory
 fragmentation. Lets say that the data needed to be saved is 40 bytes in size,
 while commands are only one integer in size. So by putting small data (commands)
 in one buffer and large data in other buffer the fragmentation can be reduced. 
+**/
+
+/** @example pmem_init1.c
+This example creates a memory pool which holds 10 dataBlock structures. The pool
+is referenced with myPool handle, and all pool data is hold in poolStorage[]
+array. Before using the pool it must be first initialized by esPMemInit() 
+function.  
+**/
+
+/** @example pmem_init2.c
+This example uses Static memory manager to allocate storage for pool memory. 
+Before allocating the memory the required size of memory is calculated by 
+following formula: sizeof(/Pool Element/) * /Number of elements/. Use of 
+ES_ALIGN_UP() macro is highly recommended because all pool functions require
+that all data access is aligned.
 **/
 **//** @} *//******************************************************************/
