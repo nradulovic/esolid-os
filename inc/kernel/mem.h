@@ -64,6 +64,8 @@ typedef struct esMemStatus {
 
 /**
  * @brief       Deskriptor Dinamickog alokatora
+ * @details     Ovom strukturom se referenciraju instance dinamickog alokatora.
+ * @see         esDMemInit()
  * @api
  */
 typedef struct esDMemHandle {
