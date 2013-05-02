@@ -46,10 +46,10 @@ extern "C" {
 /**
  * @brief       Status memorije
  * @details     Ovom strukturom opisuje se status memorijske instance. Instanca
- *              moze biti static, dynamic i pool tipa. Ukoliko se mora dobaviti
- *              informacija o velicini, zauzecu i dostupnosti memorije moraju se
- *              koristiti odgovarajuce updateStatus funckcije koje ce vratiti
- *              trazene podatke u ovoj strukturi.
+ *              moze biti @c static, @c dynamic i @c pool tipa. Ukoliko se mora
+ *              dobaviti informacija o velicini, zauzecu i dostupnosti memorije
+ *              moraju se koristiti odgovarajuce updateStatus funckcije koje ce
+ *              vratiti trazene podatke u ovoj strukturi.
  * @see         esSMemUpdateStatusI(), esPMemUpdateStatusI(), esDMemUpdateStatusI()
  * @api
  */
