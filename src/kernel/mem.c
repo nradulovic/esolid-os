@@ -149,8 +149,8 @@ void esPMemInit(
     blocks = arraySize / blockSize;
     handle->size = arraySize;
     handle->blockSize = blockSize;
-    handle->poolSentinel = (pMemBlock_T *)array;
-    block = handle->poolSentinel;
+    handle->sentinel = (pMemBlock_T *)array;
+    block = handle->sentinel;
 
     for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
         block->next = (uint8_t *)block + handle->blockSize;
@@ -175,10 +175,10 @@ void * esPMemAllocI(
 
     pMemBlock_T * block;
 
-    block = handle->poolSentinel;
+    block = handle->sentinel;
 
     if (NULL != block) {
-        handle->poolSentinel = block->next;
+        handle->sentinel = block->next;
     }
 
     return ((void *)block);
@@ -192,8 +192,8 @@ void esPMemDeAllocI(
     pMemBlock_T * block;
 
     block = (pMemBlock_T *)mem;
-    block->next = handle->poolSentinel;
-    handle->poolSentinel = block;
+    block->next = handle->sentinel;
+    handle->sentinel = block;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -205,7 +205,7 @@ void esPMemUpdateStatusI(
     pMemBlock_T * block;
 
     freeTotal = 0U;
-    block = handle->poolSentinel;
+    block = handle->sentinel;
 
     while (NULL != block) {
         freeTotal += handle->blockSize;

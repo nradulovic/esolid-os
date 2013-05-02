@@ -65,6 +65,8 @@ typedef struct esMemStatus {
 /**
  * @brief       Deskriptor Dinamickog alokatora
  * @details     Ovom strukturom se referenciraju instance dinamickog alokatora.
+ *
+ *              Cuva se samo podatak o cuvaru dinamickog memorijskog prostora.
  * @see         esDMemInit()
  * @api
  */
@@ -80,6 +82,13 @@ typedef struct esDMemHandle {
 
 /**
  * @brief       Deskriptor Pool alokatora
+ * @details     Ovom strukturom se referenciraju instance pool alokatora.
+ *
+ *              Ovde se cuvaju podaci o velicini pool memorije i o velicini
+ *              jednog bloka. Pored tih informacija nalazi se cuvar pool
+ *              memorijskog prostora. Ove informacije su potrebne za rad ostalim
+ *              funkcijama pool alokatora.
+ * @see         esPMemInit()
  * @api
  */
 typedef struct esPMemHandle {
@@ -90,7 +99,7 @@ typedef struct esPMemHandle {
     size_t          blockSize;
 
 /** @brief      Pokazivac na cuvara memorije                                  */
-    struct pMemBlock * poolSentinel;
+    struct pMemBlock * sentinel;
 } esPMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
