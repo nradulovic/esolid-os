@@ -84,7 +84,7 @@ typedef struct esDMemHandle {
  * @brief       Deskriptor Pool alokatora
  * @details     Ovom strukturom se referenciraju instance pool alokatora.
  *
- *              Ovde se cuvaju podaci o velicini pool memorije i o velicini
+ * @p           Ovde se cuvaju podaci o velicini pool memorije i o velicini
  *              jednog bloka. Pored tih informacija nalazi se cuvar pool
  *              memorijskog prostora. Ove informacije su potrebne za rad ostalim
  *              funkcijama pool alokatora.
