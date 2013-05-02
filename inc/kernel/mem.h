@@ -45,6 +45,12 @@ extern "C" {
 
 /**
  * @brief       Status memorije
+ * @details     Ovom strukturom opisuje se status memorijske instance. Instanca
+ *              moze biti static, dynamic i pool tipa. Ukoliko se mora dobaviti
+ *              informacija o velicini, zauzecu i dostupnosti memorije moraju se
+ *              koristiti odgovarajuce updateStatus funckcije koje ce vratiti
+ *              trazene podatke u ovoj strukturi.
+ * @see         esSMemUpdateStatusI(), esPMemUpdateStatusI(), esDMemUpdateStatusI()
  * @api
  */
 typedef struct esMemStatus {
@@ -65,8 +71,7 @@ typedef struct esMemStatus {
 /**
  * @brief       Deskriptor Dinamickog alokatora
  * @details     Ovom strukturom se referenciraju instance dinamickog alokatora.
- *
- *              Cuva se samo podatak o cuvaru dinamickog memorijskog prostora.
+ * @p           Cuva se samo podatak o cuvaru dinamickog memorijskog prostora.
  * @see         esDMemInit()
  * @api
  */
@@ -83,7 +88,6 @@ typedef struct esDMemHandle {
 /**
  * @brief       Deskriptor Pool alokatora
  * @details     Ovom strukturom se referenciraju instance pool alokatora.
- *
  * @p           Ovde se cuvaju podaci o velicini pool memorije i o velicini
  *              jednog bloka. Pored tih informacija nalazi se cuvar pool
  *              memorijskog prostora. Ove informacije su potrebne za rad ostalim
