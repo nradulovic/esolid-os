@@ -8,7 +8,7 @@ struct dataBlock {                                          /* Some application 
 };
 
 #define POOL_ELEMENTS                   10U                 /* Specification of pool */
-#define POOL_SIZE                       ES_ALIGN_UP(sizeof(struct dataBlock), sizeof(unative_T)) * POOL_ELEMENTS
+#define POOL_SIZE                       (ES_ALIGN_UP(sizeof(struct dataBlock), sizeof(unative_T)) * POOL_ELEMENTS)
 
 int main(
     void) {
@@ -23,7 +23,7 @@ int main(
         &myPool,
         poolStorage,
         POOL_SIZE,
-        sizeof(struct dataBlock));                          /* Initialize myPool pool memory */
+        ES_ALIGN_UP(sizeof(struct dataBlock), sizeof(unative_T))); /* Initialize myPool pool memory */
 
     while (TRUE) {
         struct dataBlock * data;
