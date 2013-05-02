@@ -17,11 +17,20 @@ najbrzi, pa se preporucuje za mikroprocesore sa ogranicenim performansama.
 Potrosnja memorije iznosi samo 4-8 bajtova za ceo memorijski menadzer i ne 
 postoji dodatna potrosnja memorije prilikom alociranja.
 
+Staticni memorijski menadzer je jedinstven za embedded sistem. Ne mogu postojati
+vise instanci staticnog alokatora. Velicina memorije koja se predaje staticnom
+alokatoru na koriscenje se podesava opcijom @ref OPT_MEM_SMEM_SIZE.
+
 @section        mem_dmem Dinamicki memorijski menadzer
 
 Dinamicki memorijski menadzer je po funkcionalnosti identican sa funkcijama 
 standardne C biblioteke malloc/free, sa tom izmenom da je prilagodjen za rad sa
 embedded sistemima. 
+
+Za razliku od staticnog alokatora, koji je jedinstven za sistem, u jednom 
+embedded sistemu mogu postojati nekoliko instanci dinamickih alokatora.
+Razliciti dinamicki alokatori se referenciraju strukturom tipa 
+@ref esDMemHandle_T. Pogledati primer @ref dmem_two_buffs.c.
     
 @subsection     mem_ff_alloc First Fit algoritam
 
