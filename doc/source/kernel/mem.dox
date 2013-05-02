@@ -6,6 +6,8 @@ Modul implementira tri klase memorijskog menadzera:
 - dinamicki memorijski menadzer
 - pool memorijski menadzer
 
+Za pregled memorijskih menadzera pogledati @ref page_mem
+
 @warning        All memory functions require aligned memory access
 
 @page           page_mem Memory Management
