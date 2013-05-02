@@ -81,24 +81,15 @@ typedef struct esDMemHandle {
  * @api
  */
 typedef struct esPMemHandle {
-/** @brief      Vekucuba pool memorije                                        */
+/** @brief      Velicina pool memorije                                        */
     size_t          size;
 
 /** @brief      Velicina jednog bloka                                         */
     size_t          blockSize;
 
 /** @brief      Pokazivac na cuvara memorije                                  */
-    struct esPMemBlock * poolSentinel;
+    struct pMemBlock * poolSentinel;
 } esPMemHandle_T;
-
-/**
- * @brief       Zaglavlje jednog bloka pool memorije
- * @api
- */
-typedef struct esPMemBlock {
-/** @brief      Pokazivac na sledeci slobodan blok                            */
-    struct esPMemBlock *  next;
-} esPMemBlock_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
@@ -139,7 +130,7 @@ void * esSMemAllocI(
  * @iclass
  */
 void esSMemUpdateStatusI(
-    esMemStatus_T *     status);
+    esMemStatus_T * status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -160,7 +151,7 @@ void esSMemUpdateStatusI(
  * @api
  */
 void esDMemInit(
-    esDMemHandle_T *    handle,
+    esDMemHandle_T * handle,
     void *          array,
     size_t          bytes);
 
@@ -180,7 +171,7 @@ void esDMemInit(
  * @iclass
  */
 void * esDMemAllocI(
-    esDMemHandle_T *    handle,
+    esDMemHandle_T * handle,
     size_t          size);
 
 /**
@@ -193,7 +184,7 @@ void * esDMemAllocI(
  * @iclass
  */
 void esDMemDeAllocI(
-    esDMemHandle_T *    handle,
+    esDMemHandle_T * handle,
     void *          mem);
 
 /**
@@ -209,8 +200,8 @@ void esDMemDeAllocI(
  * @iclass
  */
 void esDMemUpdateStatusI(
-    esDMemHandle_T *    handle,
-    esMemStatus_T *     status);
+    esDMemHandle_T * handle,
+    esMemStatus_T * status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -227,16 +218,24 @@ void esDMemUpdateStatusI(
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
  *              memorijskog alokatora. Ona ce izracunati koliko blokova se mogu
  *              formirati u array.
+ * @warning     Funkcija zahteva da pokazivaci handle i array budu poravnani
+ *              (aligned). Ukoliko se koriste eSolid alokatori za instaciranje
+ *              @c handle strukture i @c poolStorage onda je poravnani pristup
+ *              osiguran.
+ * @warning     Funkcija zahteva da velicina bloka @c blockSize bude poravnana.
+ *              Na primer za 32-bitni procesor (poravnanje 4 bajta): ako je
+ *              @c blockSize == 3 onda je potrebno poravnati vrednost koja je
+ *              deljiva sa 4, odnosno, u ovom slucaju ce to biti 4.
  * @api
  */
 void esPMemInit(
-    esPMemHandle_T *    handle,
+    esPMemHandle_T * handle,
     void *          array,
     size_t          arraySize,
     size_t          blockSize);
 
 /**
- * @brief       Racuna potrebnu velicinu @c array niza za cuvanje blokova
+ * @brief       Racuna potrebnu velicinu @c pool-a za cuvanje blokova
  * @param       blocks                  Koliko je blokova potrebno
  * @param       blockSize               Velicina jednog bloka
  * @return      Velicina potrebnog niza u bajtovima.
@@ -252,7 +251,7 @@ size_t esPMemCalcPoolSize(
  * @iclass
  */
 void * esPMemAllocI(
-    esPMemHandle_T *    handle);
+    esPMemHandle_T * handle);
 
 /**
  * @brief       Oslobadja prethodno alocirani blok
@@ -261,7 +260,7 @@ void * esPMemAllocI(
  * @iclass
  */
 void esPMemDeAllocI(
-    esPMemHandle_T *    handle,
+    esPMemHandle_T * handle,
     void *          mem);
 
 /**
@@ -271,8 +270,8 @@ void esPMemDeAllocI(
  * @iclass
  */
 void esPMemUpdateStatusI(
-    esPMemHandle_T *    handle,
-    esMemStatus_T *     status);
+    esPMemHandle_T * handle,
+    esMemStatus_T * status);
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/

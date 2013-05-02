@@ -6,6 +6,8 @@ Modul implementira tri klase memorijskog menadzera:
 - dinamicki memorijski menadzer
 - pool memorijski menadzer
 
+@warning        All memory function require aligned memory access
+
 @page           page_mem Memory Management
 @section        mem_smem Staticki memorijski menadzer
 Staticki memorijski menadzer moze samo da alocira memoriju i jednom alocirana
