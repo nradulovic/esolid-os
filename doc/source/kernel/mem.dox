@@ -1,6 +1,7 @@
 /**************************************************************************//**
 @file
-/** @defgroup mem Memory management @{
+/** @defgroup mem Memory management */
+/** @{
 @defgroup mem_intf API
 Modul implementira tri klase memorijskih menadzera:
 - staticni memorijski menadzer
@@ -11,7 +12,7 @@ Za pregled memorijskih menadzera pogledati @ref page_mem
 @warning        All memory functions require aligned memory access
 @defgroup mem_impl Implementation
 @defgroup mem_cfg  Configuration
-@} **/
+@} */
 
 @page           page_mem Memory Management
 @brief          Memory Management overview
