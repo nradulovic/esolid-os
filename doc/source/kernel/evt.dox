@@ -1,4 +1,11 @@
 /** @file */
+/** @defgroup   evt Event Management */
+/** @{
+@defgroup       evt_intf API
+@defgroup       evt_impl Implementation
+@defgroup       evt_cfg  Configuration
+@}
+*/
 /** @page       page_evt Dogadjaj - Event objekat
 @brief          Event object overview
 @section        evt_intro Dogadjaj i prelazak
