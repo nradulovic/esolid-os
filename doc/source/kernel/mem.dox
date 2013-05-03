@@ -12,8 +12,7 @@ Za pregled memorijskih menadzera pogledati @ref page_mem
 @defgroup mem_impl Implementation
 @defgroup mem_cfg  Configuration
 @} */
-/**
-@page           page_mem Memory Management
+/** @page       page_mem Memory Management
 @brief          Memory Management overview
 @section        mem_smem Staticki memorijski menadzer
 Staticki memorijski menadzer moze samo da alocira memoriju i jednom alocirana

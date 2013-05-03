@@ -1,11 +1,20 @@
-/**************************************************************************//**
-@file
-@page           page_evt Dogadjaj - Event objekat
+/** @file */
+/** @page       page_evt Dogadjaj - Event objekat
 @brief          Event object overview
-@section        evt_intro Dogadjaj
+@section        evt_intro Dogadjaj i prelazak
+Događaj je pojava stimulusa koji može da okine promenu stanja i koji je značajan 
+objektu ili aplikaciji.
+
+Kao što se skup objekata definiše klasom čiji su oni uzorci, događaji se 
+definišu tipom događaja čije uzorke predstavljaju događaji.
+
+Ono što se modeluje zapravo su tipovi događaja, ali jednostavno ih zovemo 
+događajima.
+
+Događaj može imati parametre 
 
 @section        evt_configuration Konfiguracija dogadjaja
 
 Za konfiguraciju dogadjaja pogledati @ref evt_cfg.
     
-**//** @} *//******************************************************************/
+*/
