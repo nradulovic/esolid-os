@@ -1,6 +1,4 @@
-/**************************************************************************//**
-@file
-*//** @{ */
+/** @file */
 
 /** @example dmem_init1.c
 This is an example how to initialize Dynamic Memory Manager. In this example a 
@@ -51,4 +49,3 @@ required pool storage size is calculated.
 /** @example pmem_two_buffs.c
 TODO
 **/
-**//** @} *//******************************************************************/
