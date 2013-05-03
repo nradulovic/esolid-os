@@ -24,7 +24,7 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Memory Management Configuration
- * @defgroup    mem_cfg Memory Management Configuration
+ * @addtogroup  mem_cfg
  * @brief       Konfiguracija
  * @details     Podesavanja memorijskog menadzera. Za detalje o radu alokatora
  *              pogledati @ref page_mem

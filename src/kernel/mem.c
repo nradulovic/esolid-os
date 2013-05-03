@@ -24,7 +24,7 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Memory Management Implementation
- * @defgroup    mm_impl Memory Management Implementation
+ * @addtogroup  mm_impl
  * @brief       Implementacija
  *********************************************************************//** @{ */
 

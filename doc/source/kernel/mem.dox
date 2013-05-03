@@ -1,5 +1,11 @@
 /**************************************************************************//**
 @file
+/** @defgroup mem Memory management 
+@{
+@defgroup mem_intf API
+@defgroup mem_impl Implementation
+@defgroup mem_cfg  Configuration
+@} **/
 @addtogroup     mem_intf
 Modul implementira tri klase memorijskih menadzera:
 - staticni memorijski menadzer

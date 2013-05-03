@@ -24,7 +24,7 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Memory Management API
- * @defgroup    mem_intf Memory Management API
+ * @addtogroup  mem_intf
  * @brief       Javni interfejs
  *********************************************************************//** @{ */
 

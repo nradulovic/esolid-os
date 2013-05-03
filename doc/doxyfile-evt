@@ -1,8 +1,7 @@
 @INCLUDE            =   doxyfile-generic
 PROJECT_NAME        =   "eSolid - Event Management"
 PROJECT_BRIEF       =   "Event Based System"
-INPUT               =   ../doc/source/kernel/mem-mainpage.dox                   \
-                        ../doc/source/kernel/mem-example.dox                    \
+INPUT               =   ../doc/source/kernel/mem-example.dox                    \
                         ../doc/source/kernel/mem.dox                            \
                         ../doc/source/kernel/evt-mainpage.dox                   \
                         ../doc/source/kernel/evt-example.dox                    \
@@ -11,5 +10,6 @@ INPUT               =   ../doc/source/kernel/mem-mainpage.dox                   
                         ../inc/kernel/evt.h                                     \
                         ../config/mem_config.h                                  \
                         ../config/evt_config.h                                  \
-                        ../src/kernel/evt.c 
+                        ../src/kernel/evt.c                                     \
+                        ../src/kernel/mem.c
 OUTPUT_DIRECTORY    =   ../doc/out/evt
