@@ -33,11 +33,11 @@
 #define EVT_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "mem/mem.h"
 #include "hal/hal.h"
-#include "../config/kernel_config.h"
+#include "kernel/mem.h"
+#include "../config/evt_config.h"
 
-/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
 
 /*------------------------------------------------------------------------*//**
  * @name        Dinamicki attributi dogadjaja
@@ -63,20 +63,6 @@
 #define EVT_CONST_MASK                  ((uint_fast8_t)(1U << 1))
 
 /** @} *//*-------------------------------------------------------------------*/
-/*===============================================================  MACRO's  ==*/
-
-/**
- * @brief       Pomocni makro za kreiranje dogadjaja.
- * @param       type                    Tip dogadjaja koji se kreira
- * @param       id                      identifikator dogadjaja.
- * @details     Ovo je samo pomocni makro koji poziva funkciju esEvtCreate().
- *              Glavna namena je da se samo smanji obim kucanja u glavnoj
- *              aplikaciji.
- * @api
- */
-#define ES_EVT_CREATE(type, id)                                                 \
-    (type)esEvtCreate(sizeof(type), (esEvtId_T)id)
-
 /*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
@@ -118,27 +104,19 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 
 /**
  * @brief       Identifikator dogadjaja
- * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_ID_T.
+ * @details     Podesavanje tipa se vrsi pomocu opcije @ref OPT_EVT_ID_T. Ovo
+ *              polje je obavezno.
  */
     esEvtId_T       id;
 
 /**
- * @brief       Unija dinamickih atributa dogadjaja
- * @details     Koristi se samo za brz pristup clanovima
+ * @brief       Dinamicki atributi dogadjaja
+ * @details     Dinamicki atributi dogadjaja pokazuju koliko korisnika ima dati
+ *              dogadjaj i da li je rezervisan ili konstantan.
+ * @see         EVT_RESERVED_MASK
+ * @see         EVT_CONST_MASK
  */
-    union udynamic {
-        uint16_t    u;                                                          /**< @brief     Unija atributa                              */
-
-        /**
-         * @brief       Struktura atributa
-         */
-        struct sdynamic {
-            uint8_t counter;                                                    /**< @brief     Brojac korisnika dogadjaja                  */
-            uint8_t attrib;                                                     /**< @brief     Kvalifikatori dogadjaja.
-                                                                                     @see       EVT_RESERVED_MASK
-                                                                                     @see       EVT_CONST_MASK                              */
-        }           s;                                                          /**< @brief     Struktura atributa                          */
-    }               dynamic;                                                    /**< @brief     Dinamicki atributi dogadjaja                */
+    uint16_t        attrib;
 
 #if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
 /**
@@ -174,14 +152,12 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Kreiranje/brisanje dogadjaja
+ * @name        Kreiranje/brisanje/rezervacija dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Kreira dogadjaj.
- * @param       size                    Velicina potrebnog memorijskog prostora
- *                                      za podatke dogadjaja,
- * @param       id                      identifikator dogadjaja.
+ * @param       id                      Identifikator dogadjaja.
  * @return      Pokazivac na memorijski prostor za podatke dogadjaja.
  * @details     Kreira memorijski prostor koji je rezervisan za navedeni
  *              dogadjaj. U zaglavlje dogadjaja se upisuju podaci dogadjaja, a
@@ -200,14 +176,11 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @api
  */
 esEvt_T * esEvtCreate(
-    size_t          size,
     esEvtId_T       id);
 
 /**
  * @brief       Kreira dogadjaj.
- * @param       size                    Velicina potrebnog memorijskog prostora
- *                                      za podatke dogadjaja,
- * @param       id                      identifikator dogadjaja.
+ * @param       id                      Identifikator dogadjaja.
  * @return      Pokazivac na memorijski prostor za podatke dogadjaja.
  * @details     Kreira memorijski prostor koji je rezervisan za navedeni
  *              dogadjaj. U zaglavlje dogadjaja se upisuju podaci dogadjaja, a
@@ -217,16 +190,14 @@ esEvt_T * esEvtCreate(
  * @iclass
  */
 esEvt_T * esEvtCreateI(
-    size_t          size,
     esEvtId_T       id);
 
 /**
  * @brief       Unistava dogadjaj.
  * @param       evt                     Pokazivac na dogadjaj koji treba da se
  *                                      unisti.
- * @details     Ukoliko dati @c evt dogadjaj nema vise ni jednog korisnika,
- *              onda ce memorijski prostor koji on zauzima biti recikliran, u
- *              suprotnom, dogadjaj nastavlja da postoji.
+ * @details     Dogadjaj ce biti unisten ukoliko dati @c evt dogadjaj nema vise
+ *              ni jednog korisnika, u suprotnom, dogadjaj nastavlja da postoji.
  * @api
  */
 void esEvtDestroy(
@@ -236,18 +207,12 @@ void esEvtDestroy(
  * @brief       Unistava dogadjaj.
  * @param       evt                     Pokazivac na dogadjaj koji treba da se
  *                                      unisti.
- * @details     Ukoliko dati @c evt dogadjaj nema vise ni jednog korisnika,
- *              onda ce memorijski prostor koji on zauzima biti recikliran, u
- *              suprotnom, dogadjaj nastavlja da postoji.
+ * @details     Dogadjaj ce biti unisten ukoliko dati @c evt dogadjaj nema vise
+ *              ni jednog korisnika, u suprotnom, dogadjaj nastavlja da postoji.
  * @iclass
  */
 void esEvtDestroyI(
     esEvt_T *       evt);
-
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Rad sa staticnim dogadjajima
- * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Rezervise dogadjaj @c evt.
