@@ -1,0 +1,11 @@
+/**************************************************************************//**
+@file
+@page           page_evt Dogadjaj - Event objekat
+@brief          Event object overview
+@section        evt_intro Dogadjaj
+
+@section        evt_configuration Konfiguracija dogadjaja
+
+Za konfiguraciju dogadjaja pogledati @ref evt_cfg.
+    
+**//** @} *//******************************************************************/
