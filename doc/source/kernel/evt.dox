@@ -60,11 +60,11 @@ Definisanje se radi na sledeci nacin:
     tog elementa nije od znacaja, ali se preporucuju imena kao sto su @c super 
     ili @c header.
     
-Primeri:
-
-1. Dogadjaj treba da prenese jedan 32-bitni neoznaceni podatak. Ime novog tipa 
+Primer 1:
+- Dogadjaj treba da prenese jedan 32-bitni neoznaceni podatak. Ime novog tipa 
     dogadjaja neka je @c simpleEvt_T.
 
+@b Listing 1
 @code
 typedef struct simpleEvt {
     esEvt_T         super;
@@ -72,7 +72,8 @@ typedef struct simpleEvt {
 } simpleEvt_T;
 @endcode
 
-2. Dogadjaj treba da prenese dva podatka, jedan je 8-bitni, a drugi 16-bitni.
+Primer 2:
+- Dogadjaj treba da prenese dva podatka, jedan je 8-bitni, a drugi 16-bitni.
     Oba podatka su neoznacena. Ukoliko je raspored podataka unutar strukture 
     nebitan, onda se preporucuje da se prvo navedu podaci koji zauzimaju veci 
     broj bajtiova, a zatim se navode podaci sa manjim zauzecem. Ovo pomaze 
@@ -87,7 +88,8 @@ typedef struct moreComplex {
 } moreComplex_T;
 @endcode
 
-3. Dogadjaj ne treba da prenese ni jedan parametar. Uglavnom se ovakvi dogadjaji
+Primer 3:
+- Dogadjaj ne treba da prenese ni jedan parametar. Uglavnom se ovakvi dogadjaji
 koriste samo za signalizaciju. Neka je tip takvog dogadjaja @c basicEvt_T.
 
 @code
@@ -102,8 +104,8 @@ sledece makro tabele:
 
 @code
 #define EVENT_TABLE(table)                                                      \
-    table(ID1,              type1_T,        "Description")                      \
-    table(ID2,              type2_T,        "Description")
+    table(ID1,              simpleEvt_T,    "This is a very simple event")      \
+    table(ID2,              basicEvt_T,     "A signal event")
 @endcode
 
 U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
@@ -115,13 +117,37 @@ se odredila velicina dogadjaja.
 
 Zadnja kolona u tabeli je znakovni niz koji opisuje dogadjaj. Ukoliko nije 
 potrebno navesti opis onda tu treba da se postavi prazan pokazivac na tekst,
-odnosno, vrednost @c NULL.
+odnosno, vrednost @c NULL:
 
 @code
 #define EVENT_TABLE(table)                                                      \
     table(ID1,              type1_T,        "Description")                      \
     table(ID2,              type2_T,        NULL)
 @endcode
+
+<h3>Instaciranje</h3>
+
+Prvo se definisu enumeratori dogadjaja.
+
+@code
+enum evtId {
+    ZERO_EVT_ID = ES_EVT_ID_USR,
+    EVENT_TABLE(ES_EXPAND_EVT_ID)
+    LAST_EVT_ID
+}
+@endcode
+
+Prvi enumerator je ZERO_EVT_ID. eSolid poseduje nekoliko predefinisanih 
+dogadjaja, sa svojim identifikatorima, i korisnicki definisani dogadjaji moraju
+da nastave enumeratorski niz od pozicije gde je eSolid zavrsio. Zbog navedene
+cinjenice ZERO_EVT_ID prima vrednost ES_EVT_ID_USR. Zadnji enumerator je
+LAST_EVT_ID. On se koristi da specificira zadnji identifikator dogadjaja. 
+Izmedju navedenih enumeratora postavlja se makro tabele @c EVENT_TABLE sa
+argumentom @ref ES_EXPAND_EVT_ID. Naime, ovaj makro vrsi transformaciju makro
+tabele u navodjenje enumeratora. Svi identifikatori dogadjaja koji su navedeni u
+makro tabeli se putem @ref ES_EXPAND_EVT_ID makroa transformisu u odgovarajuce
+enumeratore.
+
 
 @section        evt_configuration Konfiguracija dogadjaja
 
