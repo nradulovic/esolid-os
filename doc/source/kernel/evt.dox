@@ -20,6 +20,22 @@ događajima.
 
 Događaj može imati parametre 
 
+@section        evt_database Baza dogadjaja
+
+eSolid definise centralizovanu bazu podataka za dogadjaja koji se koriste u 
+sistemu. Baza podataka omogucuje efikasno i jednostavno opisivanje dogadjaja. 
+Podaci su staticni, ne menjaju se u toku izvrsenja pa se zbog toga mogu cuvati u
+ROM memoriji. Baza podataka definise sledece aspekte dogadjaja:
+- znakovni identifikator: u C-u se identifikator implementira kao enumerator
+- velicinu dogadjaja: za svaki tip dogadjaja se cuva velicina dogadjaja u 
+    bajtovima
+- tip dogadjaja: definise se C tip dogadjaja za svaki dogadjaj. Nekoliko 
+    dogadjaja mogu imati isti tip.
+- znakovni niz tipa dogadjaja: pored C tipa dogadjaja definise se znakovni niz
+    koji se koristi za debug-ovanje
+- znakovni niz opisa dogadjaja: kratak opis dogadjaja, sta on radi i za sta se
+    koristi.
+    
 @section        evt_configuration Konfiguracija dogadjaja
 
 Za konfiguraciju dogadjaja pogledati @ref evt_cfg.

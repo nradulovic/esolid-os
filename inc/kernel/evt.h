@@ -24,9 +24,8 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Interfejs Event (EVT) objekata
- * @details     This file is not meant to be included in application code
- *              independently but through the inclusion of "kernel.h" file.
  * @addtogroup  evt_intf
+ * @brief       Javni interfejs
  *********************************************************************//** @{ */
 
 #ifndef EVT_H_
@@ -61,6 +60,35 @@
  *              ne moze da postane dinamican.
  */
 #define EVT_CONST_MASK                  ((uint_fast8_t)(1U << 1))
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Baza dogadjaja
+ * @brief       Cuvanje podataka o svim dogadjajima u sistemu
+ * @details     eSolid cuva podatke o svim dogadjajima u sistemu na jedinstvenom
+ *              mestu. Neki podaci se koriste od strane eSolid-a, a veliki deo
+ *              podataka se koriste za prikaz detalja o dogadjaju prilikom
+ *              debagovanja sistema. Svi podaci su konstantni.
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Kreira tabelu enumeratora
+ * @api
+ */
+#define ES_EXPAND_EVT_ID(a, b, c)       a,
+
+/**
+ * @brief       Kreira bazu dogadjaja
+ * @api
+ */
+#define ES_EXPAND_EVT_DATA(a, b, c)     [a] = {sizeof(b), #a, #b, c},
+
+/**
+ * @brief       Kreira C tipove za dogadjaje
+ * @api
+ */
+#define ES_EXPAND_EVT_TYPEDEF(a, b, c)  typedef b a##_T;
+
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------  C++ extern begin  --*/

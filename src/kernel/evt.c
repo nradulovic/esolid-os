@@ -25,6 +25,7 @@
  * @author      Nenad Radulovic
  * @brief       Implementacija Event objekta
  * @addtogroup  evt_impl
+ * @brief       Implementacija
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
