@@ -64,13 +64,13 @@ Primer 1:
 - Dogadjaj treba da prenese jedan 32-bitni neoznaceni podatak. Ime novog tipa 
     dogadjaja neka je @c simpleEvt_T.
 
-@b Listing 1
 @code
 typedef struct simpleEvt {
     esEvt_T         super;
     uint32_t        data;
 } simpleEvt_T;
 @endcode
+<b>Listing 1</b> - Primer tipa dogadjaja sa jednim parametrom
 
 Primer 2:
 - Dogadjaj treba da prenese dva podatka, jedan je 8-bitni, a drugi 16-bitni.
@@ -87,6 +87,7 @@ typedef struct moreComplex {
     uint8_t         data2;
 } moreComplex_T;
 @endcode
+<b>Listing 2</b> - Primer tipa dogadjaja sa dva parametra
 
 Primer 3:
 - Dogadjaj ne treba da prenese ni jedan parametar. Uglavnom se ovakvi dogadjaji
@@ -97,6 +98,7 @@ typedef struct basicEvt {
     esEvt_T         super;
 } basicEvt_T;
 @endcode
+<b>Listing 3</b> - Primer tipa dogadjaja bez parametra
 
 <h3>Popunjavanje podataka</h3>
 Zatim se vrsi popunjavanje svih podataka o dogadjajima. Podaci se upisuju u vidu
@@ -107,6 +109,7 @@ sledece makro tabele:
     table(ID1,              simpleEvt_T,    "This is a very simple event")      \
     table(ID2,              basicEvt_T,     "A signal event")
 @endcode
+<b>Listing 4</b> - Primer makroa tabele sa dva dogadjaja 
 
 U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
 enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima.
@@ -121,12 +124,12 @@ odnosno, vrednost @c NULL:
 
 @code
 #define EVENT_TABLE(table)                                                      \
-    table(ID1,              type1_T,        "Description")                      \
+    table(ID1,              type1_T,        NULL)                               \
     table(ID2,              type2_T,        NULL)
 @endcode
+<b>Listing 5</b> - Makro tabela bez opisa dogadjaja
 
 <h3>Instaciranje</h3>
-
 Prvo se definisu enumeratori dogadjaja.
 
 @code
@@ -136,6 +139,7 @@ enum evtId {
     LAST_EVT_ID
 }
 @endcode
+<b>Listing 6</b> -  
 
 Prvi enumerator je ZERO_EVT_ID. eSolid poseduje nekoliko predefinisanih 
 dogadjaja, sa svojim identifikatorima, i korisnicki definisani dogadjaji moraju
@@ -147,7 +151,6 @@ argumentom @ref ES_EXPAND_EVT_ID. Naime, ovaj makro vrsi transformaciju makro
 tabele u navodjenje enumeratora. Svi identifikatori dogadjaja koji su navedeni u
 makro tabeli se putem @ref ES_EXPAND_EVT_ID makroa transformisu u odgovarajuce
 enumeratore.
-
 
 @section        evt_configuration Konfiguracija dogadjaja
 
