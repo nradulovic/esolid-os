@@ -22,7 +22,7 @@ Događaj može imati parametre
 
 @section        evt_database Baza dogadjaja
 
-eSolid definise centralizovanu bazu podataka za dogadjaja koji se koriste u 
+eSolid definise centralizovanu bazu podataka za dogadjaje koji se koriste u 
 sistemu. Baza podataka omogucuje efikasno i jednostavno opisivanje dogadjaja. 
 Podaci su staticni, ne menjaju se u toku izvrsenja pa se zbog toga mogu cuvati u
 ROM memoriji. Baza podataka definise sledece aspekte dogadjaja:
@@ -36,6 +36,67 @@ ROM memoriji. Baza podataka definise sledece aspekte dogadjaja:
 - znakovni niz opisa dogadjaja: kratak opis dogadjaja, sta on radi i za sta se
     koristi.
     
+Baza podataka dogadjaja omogucuje eSolid-u da jednostavno poveze identifikator
+dogadjaja sa njegovim ostalim atributuma. Naime, ako se eSolid-u preda samo
+identifikator dogadjaja, on moze da iz baze podataka dobavi ostale informacije o
+velicini, tipu, opisu i slicno.
+
+@subsection     evt_db_create Kreiranje i popunjavanje baze podataka
+
+Za implementaciju baze podataka koriste se takozvani X makroi. X makroima se
+vrlo jednostavno generise baza podataka i ne postoji mogucnost da se pojavi
+nesklad izmedju identifikatora dogadjaja i ostalih podataka o dogadjaju.
+
+Najpre se vrsi definisanje tipova dogadjaja. Tipovi dogadjaja su samo one 
+struktrure koje su izvedene iz osnovne strukture dogadjaja @ref esEvt_T. 
+Definisanje se radi na sledeci nacin:
+- razmatra se sta je potrebno da dogadjaj prenese, odnosno, koje informacije
+    neki dogadjaj treba da nosi sa sobom. Ove informacije se zovu parametri
+    dogadjaja.
+- kreira se struktura koja nosi ime novog tipa dogadjaja, sa elementima koji su
+    odredjeni u prethodnom koraku. Zatim se tim elementima dodaje element 
+    zaglavlja dogadjaja @ref esEvt_T koji mora da bude na prvoj poziciji. Ime
+    tog elementa nije od znacaja, ali se preporucuju imena kao sto su @c super 
+    ili @c header.
+    
+Primeri:
+
+1. Dogadjaj treba da prenese jedan 32-bitni neoznaceni podatak. Ime novog tipa 
+    dogadjaja neka je @c simpleEvt_T.
+
+@code
+typedef struct simpleEvt {
+    esEvt_T         super;
+    uint32_t        data;
+} simpleEvt_T;
+@endcode
+
+2. Dogadjaj treba da prenese dva podatka, jedan je 8-bitni, a drugi 16-bitni.
+    Oba podatka su neoznacena. Ukoliko je raspored podataka unutar strukture 
+    nebitan, onda se preporucuje da se prvo navedu podaci koji zauzimaju veci 
+    broj bajtiova, a zatim se navode podaci sa manjim zauzecem. Ovo pomaze 
+    kompajlerima da kompaktnije organizuju strukture. Neka je ime novog tipa 
+    dogadjaja @c moreComplex_T.
+    
+@code
+typedef struct moreComplex {
+    esEvt_T         super;
+    uint16_t        data1;
+    uint8_t         data2;
+} moreComplex_T;
+@endcode
+
+
+
+Zatim se vrsi definisanje svih podataka o dogadjajima. Podaci se upisuju u vidu
+sledece makro tabele:
+
+@code
+#define IME_TABELE(table)                                                       \
+    table(ID1,              type1_T,        "Description")                      \
+    table(ID2,              type2_T,        "Description")
+@endcode
+
 @section        evt_configuration Konfiguracija dogadjaja
 
 Za konfiguraciju dogadjaja pogledati @ref evt_cfg.
