@@ -47,6 +47,7 @@ Za implementaciju baze podataka koriste se takozvani X makroi. X makroima se
 vrlo jednostavno generise baza podataka i ne postoji mogucnost da se pojavi
 nesklad izmedju identifikatora dogadjaja i ostalih podataka o dogadjaju.
 
+<h3>Definisanje tipova</h3>
 Najpre se vrsi definisanje tipova dogadjaja. Tipovi dogadjaja su samo one 
 struktrure koje su izvedene iz osnovne strukture dogadjaja @ref esEvt_T. 
 Definisanje se radi na sledeci nacin:
