@@ -87,15 +87,40 @@ typedef struct moreComplex {
 } moreComplex_T;
 @endcode
 
+3. Dogadjaj ne treba da prenese ni jedan parametar. Uglavnom se ovakvi dogadjaji
+koriste samo za signalizaciju. Neka je tip takvog dogadjaja @c basicEvt_T.
 
+@code
+typedef struct basicEvt {
+    esEvt_T         super;
+} basicEvt_T;
+@endcode
 
-Zatim se vrsi definisanje svih podataka o dogadjajima. Podaci se upisuju u vidu
+<h3>Popunjavanje podataka</h3>
+Zatim se vrsi popunjavanje svih podataka o dogadjajima. Podaci se upisuju u vidu
 sledece makro tabele:
 
 @code
-#define IME_TABELE(table)                                                       \
+#define EVENT_TABLE(table)                                                      \
     table(ID1,              type1_T,        "Description")                      \
     table(ID2,              type2_T,        "Description")
+@endcode
+
+U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
+enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima.
+
+Sledeca kolona u tabeli je tip dogadjaja. Tip dogadjaja mora da odgovara nekoj
+strukturi koja je kreirana u prethodnom koraku. Tip dogadjaja se koristi kako bi
+se odredila velicina dogadjaja.
+
+Zadnja kolona u tabeli je znakovni niz koji opisuje dogadjaj. Ukoliko nije 
+potrebno navesti opis onda tu treba da se postavi prazan pokazivac na tekst,
+odnosno, vrednost @c NULL.
+
+@code
+#define EVENT_TABLE(table)                                                      \
+    table(ID1,              type1_T,        "Description")                      \
+    table(ID2,              type2_T,        NULL)
 @endcode
 
 @section        evt_configuration Konfiguracija dogadjaja
