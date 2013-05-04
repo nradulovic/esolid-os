@@ -101,26 +101,23 @@ typedef struct basicEvt {
 <b>Listing 3</b> - Primer tipa dogadjaja bez parametra
 
 <h3>Popunjavanje podataka</h3>
-Zatim se vrsi popunjavanje svih podataka o dogadjajima. Podaci se upisuju u vidu
-sledece makro tabele:
+Nakon definisanja tipova dogadjaja vrsi se popunjavanje svih podataka o 
+dogadjajima u makro tabelu. Podaci se upisuju u makro tabelu na sledeci nacin:
 
-<b>Listing 4</b> - Primer makro tabele sa dva dogadjaja 
 @code
 #define EVENT_TABLE(table)                                                      \
     table(ID1,              simpleEvt_T,    "This is a very simple event")      \
     table(ID2,              basicEvt_T,     "A signal event")
 @endcode
+<b>Listing 4</b> - Primer makro tabele sa dva dogadjaja 
 
 U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
-enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima.
-
-Sledeca kolona u tabeli je tip dogadjaja. Tip dogadjaja mora da odgovara nekoj
-strukturi koja je kreirana u prethodnom koraku. Tip dogadjaja se koristi kako bi
-se odredila velicina dogadjaja.
-
-Zadnja kolona u tabeli je znakovni niz koji opisuje dogadjaj. Ukoliko nije 
-potrebno navesti opis onda tu treba da se postavi prazan pokazivac na tekst,
-odnosno, vrednost @c NULL:
+enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima. Sledeca 
+kolona u tabeli je tip dogadjaja. Tip dogadjaja mora da odgovara nekoj strukturi 
+koja je kreirana u prethodnom koraku. Tip dogadjaja se koristi kako bi se 
+odredila velicina dogadjaja. Zadnja kolona u tabeli je znakovni niz koji opisuje 
+dogadjaj. Ukoliko nije potrebno navesti opis onda tu treba da se postavi prazan 
+pokazivac na tekst, odnosno, vrednost @c NULL:
 
 @code
 #define EVENT_TABLE(table)                                                      \
@@ -144,7 +141,7 @@ enum evtId {
 Prvi enumerator je ZERO_EVT_ID. eSolid poseduje nekoliko predefinisanih 
 dogadjaja, sa svojim identifikatorima, i korisnicki definisani dogadjaji moraju
 da nastave enumeratorski niz od pozicije gde je eSolid zavrsio. Zbog navedene
-cinjenice ZERO_EVT_ID prima vrednost ES_EVT_ID_USR. Zadnji enumerator je
+cinjenice ZERO_EVT_ID prima vrednost @ref ES_EVT_ID_USR. Zadnji enumerator je
 LAST_EVT_ID. On se koristi da specificira zadnji identifikator dogadjaja. 
 Izmedju navedenih enumeratora postavlja se makro tabele @c EVENT_TABLE sa
 argumentom @ref ES_EXPAND_EVT_ID. Naime, ovaj makro vrsi transformaciju makro
