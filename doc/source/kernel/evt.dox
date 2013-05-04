@@ -104,12 +104,12 @@ typedef struct basicEvt {
 Zatim se vrsi popunjavanje svih podataka o dogadjajima. Podaci se upisuju u vidu
 sledece makro tabele:
 
+<b>Listing 4</b> - Primer makro tabele sa dva dogadjaja 
 @code
 #define EVENT_TABLE(table)                                                      \
     table(ID1,              simpleEvt_T,    "This is a very simple event")      \
     table(ID2,              basicEvt_T,     "A signal event")
 @endcode
-<b>Listing 4</b> - Primer makroa tabele sa dva dogadjaja 
 
 U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
 enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima.
