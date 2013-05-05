@@ -4,7 +4,7 @@
 # Generisi HTML dokumentaciju	
 doc : doc_mem
 
-doc_clean : doc_mem_clean
+doc_clean : doc_mem_clean doc_evt_clean
 	
 doc_mem_clean :
 	@echo 'Cleaning up documentation'
@@ -17,4 +17,10 @@ doc_mem : doc_mem_clean
 	@echo 'Invoking: Doxygen doxyfile-mem'
 	cd ../doc && $(DOXYGEN) doxyfile-mem
 	@echo 'Finished building documentation'
+	@echo ' '
+
+doc_evt_clean :
+	@echo 'Cleaning up documentation'
+	rm -rf ../doc/out/evt/*
+	@echo 'Finished Cleaning up documentation'
 	@echo ' '
