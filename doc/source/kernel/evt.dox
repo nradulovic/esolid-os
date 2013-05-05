@@ -39,7 +39,7 @@ ROM memoriji. Baza podataka definise sledece aspekte dogadjaja:
 Baza podataka dogadjaja omogucuje eSolid-u da jednostavno poveze identifikator
 dogadjaja sa njegovim ostalim atributuma. Naime, ako se eSolid-u preda samo
 identifikator dogadjaja, on moze da iz baze podataka dobavi ostale informacije o
-velicini, tipu, opisu i slicno.
+dogadjaju kao sto je velicina, tip, opis dogadjaja i slicno.
 
 @subsection     evt_db_create Kreiranje i popunjavanje baze podataka
 
