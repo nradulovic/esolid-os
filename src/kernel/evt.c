@@ -31,23 +31,13 @@
 /*=========================================================  INCLUDE FILES  ==*/
 #define EVT_PKG_H_VAR
 #include "kernel_private.h"
+#include "kernel/mem.h"
+#include "kernel/log.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
-
-static C_INLINE_ALWAYS void evtInit_(
-    esEvt_T *       evt,
-    size_t          size,
-    esEvtId_T       id);
-
-static C_INLINE_ALWAYS void evtDeInit_(
-    esEvt_T *       evt);
-
-/*=======================================================  LOCAL VARIABLES  ==*/
-/*======================================================  GLOBAL VARIABLES  ==*/
-/*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 
 /**
  * @brief       Inicijalizator funkcija dogadjaja.
@@ -59,10 +49,29 @@ static C_INLINE_ALWAYS void evtDeInit_(
 static C_INLINE_ALWAYS void evtInit_(
     esEvt_T *       evt,
     size_t          size,
+    esEvtId_T       id);
+
+/**
+ * @brief       DeInicijalizator funkcija dogadjaja
+ * @param       [in] evt                Pokazivac na EPA objekat koji se
+ *                                      unistava.
+ * @inline
+ */
+static C_INLINE_ALWAYS void evtDeInit_(
+    esEvt_T *       evt);
+
+/*=======================================================  LOCAL VARIABLES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
+
+/*----------------------------------------------------------------------------*/
+static C_INLINE_ALWAYS void evtInit_(
+    esEvt_T *       evt,
+    size_t          size,
     esEvtId_T       id) {
 
     evt->id = id;
-    evt->dynamic.u = 0U;                                                        /* Dogadjaj je dinamican, sa 0 korisnika.                   */
+    evt->attrib = 0U;                                                        /* Dogadjaj je dinamican, sa 0 korisnika.                   */
 
 #if defined(OPT_EVT_USE_TIMESTAMP)
     evt->timestamp = OPT_EVT_TIMESTAMP_CALLBACK();
@@ -83,19 +92,14 @@ static C_INLINE_ALWAYS void evtInit_(
 #endif
 }
 
-/**
- * @brief       DeInicijalizator funkcija dogadjaja
- * @param       [in] evt                Pokazivac na EPA objekat koji se
- *                                      unistava.
- * @inline
- */
+/*----------------------------------------------------------------------------*/
 static C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
-    evt->dynamic.u = (uint16_t)~EVT_SIGNATURE;
-
 #if (OPT_LOG_LEVEL <= LOG_DBG)
     evt->signature = (uint16_t)~EVT_SIGNATURE;                                  /* Postavljanje loseg potpisa                               */
+#else
+	(void)evt;    
 #endif
 }
 
@@ -113,12 +117,7 @@ esEvt_T * esEvtCreate(
     ES_CRITICAL_DECL();
     esEvt_T * newEvt;
 
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= sizeof(esEvt_T), LOG_EVT_CREATE, ES_ARG_OUT_OF_RANGE);
-    }
-
-    ES_CRITICAL_ENTER(
-        OPT_SYS_INTERRUPT_PRIO_MAX);
+    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
     newEvt = esDMemAllocI(
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
@@ -137,10 +136,6 @@ esEvt_T * esEvtCreateI(
 
     esEvt_T * newEvt;
 
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, size >= sizeof(esEvt_T), LOG_EVT_CREATE, ES_ARG_OUT_OF_RANGE);
-    }
-
     newEvt = esDMemAllocI(
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
@@ -155,49 +150,37 @@ esEvt_T * esEvtCreateI(
 void esEvtReserve(
     esEvt_T *       evt) {
 
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != evt, LOG_EVT_RESERVE, ES_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_RESERVE, ES_ARG_NOT_VALID);
-    }
-
-    evt->dynamic.s.attrib |= EVT_RESERVED_MASK;
+    evt->attrib |= EVT_RESERVED_MASK;
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtUnReserve(
     esEvt_T *       evt) {
 
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != evt, LOG_EVT_UNRESERVE, ES_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_UNRESERVE, ES_ARG_NOT_VALID);
-    }
-
-    evt->dynamic.s.attrib &= ~EVT_RESERVED_MASK;
+    evt->attrib &= ~EVT_RESERVED_MASK;
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtDestroy(
     esEvt_T *       evt) {
 
-    ES_CRITICAL_DECL();
-
-    ES_CRITICAL_ENTER(
-        OPT_SYS_INTERRUPT_PRIO_MAX);
-    esEvtDestroyI(
-        evt);
-    ES_CRITICAL_EXIT();
+    if (0U == evt->attrib) {
+    	ES_CRITICAL_DECL();
+    	
+        evtDeInit_(
+            evt);
+        ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
+        esDMemDeAllocI(
+            evt);
+        ES_CRITICAL_EXIT();
+    }
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtDestroyI(
     esEvt_T *       evt) {
 
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, NULL != evt, LOG_EVT_DESTROY, ES_ARG_NULL);
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_DESTROY, ES_ARG_NOT_VALID);
-    }
-
-    if (0U == evt->dynamic.u) {
+    if (0U == evt->attrib) {
         evtDeInit_(
             evt);
         esDMemDeAllocI(

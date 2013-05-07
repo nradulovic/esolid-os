@@ -14,7 +14,6 @@
   |  +--index.html      - Local documentation access
   +--inc/               - eSolid include files.
   |  +--kernel/         - eSolid kernel include files.
-  |  +--primitive/      - eSolid primitive data structures.
   +--src/               - eSolid source files.
      +--kernel/         - eSolid kernel source files.
 

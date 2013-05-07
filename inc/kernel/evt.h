@@ -33,7 +33,6 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal.h"
-#include "kernel/mem.h"
 #include "../config/evt_config.h"
 
 /*===============================================================  MACRO's  ==*/
@@ -47,10 +46,7 @@
  * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
  *              rezervisan i sistem ga nece razmatrati kao kandidata za brisanje.
  *              Brojac korisnika dogadjaja se i dalje azurira, tako da kada se
- *              dogadjaj oslobodii rezervacije on moze da bude obrisan ako nema
- *              korisnika.
- */
-#define EVT_RESERVED_MASK               ((uint_fast8_t)(1U << 0))
+ *              dogadjaj oslobodii rezervacij))
 
 /**
  * @brief       Bit maska za definisanje konstantnog dogadjaja.
@@ -59,7 +55,7 @@
  *              izbrisan. Broj korisnika dogadjaja se ne azurira. Dati dogadjaj
  *              ne moze da postane dinamican.
  */
-#define EVT_CONST_MASK                  ((uint_fast8_t)(1U << 1))
+#define EVT_CONST_MASK                  ((uint_fast16_t)(1U << 15))
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
@@ -103,22 +99,20 @@ extern "C" {
  * @details     Interni podaci dogadjaja su obavezni podaci u zaglavlju
  *              dogadjaja. Svi ostali podaci se mogu ukljuciti/iskljuciti po
  *              zelji.
- *
- *              Ova struktura nudi sledece opisivanje dogadjaja:
+ * @p			Ova struktura nudi sledece opisivanje dogadjaja:
  *              - @c generator - ko je generisao dogadjaj,
  *              - @c timestamp - vremenska oznaka kada se dogadjaj desio,
  *              - @c size - velicina dogadjaja,
- *
- *              Svaka od navedenih clanova strukture se moze nezavisno
+ * @p			Svaka od navedenih clanova strukture se moze nezavisno
  *              ukljuciti/iskljuciti i tipovi clanova se mogu po zelji izabrati.
- *
- *              Dinamicki atributi pokazuju da li je dogadjaj konstantan (nalazi
+ * @p			Dinamicki atributi pokazuju da li je dogadjaj konstantan (nalazi
  *              se u ROM memoriji), da li je rezervisan i koliko korisnika dati
  *              dogadjaj ima.
  * @note        Ukoliko se vrsi razmena dogadjaja izmedju sistema sa razlicitim
  *              procesorima/okruzenjem mora se pokloniti posebna paznja
  *              poravnanju (align) podataka ove strukture. Radi podesavanja
- *              nacina pokovanja strukture koristi se @ref OPT_EVT_STRUCT_ATTRIB.
+ *              nacina pakovanja strukture koristi se @ref OPT_EVT_STRUCT_ATTRIB
+ *				opcija.
  * @api
  */
 typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
@@ -135,7 +129,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @details     Podesavanje tipa se vrsi pomocu opcije @ref OPT_EVT_ID_T. Ovo
  *              polje je obavezno.
  */
-    esEvtId_T       id;
+    esEvtId_T      	id;
 
 /**
  * @brief       Dinamicki atributi dogadjaja
@@ -144,7 +138,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @see         EVT_RESERVED_MASK
  * @see         EVT_CONST_MASK
  */
-    uint16_t        attrib;
+    uint16_t      	attrib;
 
 #if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
 /**
@@ -152,7 +146,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
  *              @ref OPT_EVT_USE_GENERATOR.
  */
-    void *          generator;
+    void *         	generator;
 #endif
 
 #if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
@@ -195,8 +189,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @note        Zaglavlje dogadjaja se smatra da je deo korisnickih podataka.
  *              Zbog toga size treba da nosi velicinu strukture zaglavlja
  *              esEvt + velicinu podataka koje dogadjaj obuhvata.
- *
- *              Primer:
+ * @p			Primer:
  *              U datoj aplikaciji je konfigurisano da je struktura zaglavlja
  *              esEvt velicine 4B, a dogadjaj pri tom obuhvata i dodatni
  *              podatak unsigned long int cija je velicina, takodje, 4 bajta. U
