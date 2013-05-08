@@ -7,8 +7,7 @@
   +--todo.txt           - Current plan (development/unstable versions only).
   +--license.txt        - GPL license text.
   +--doc/               - Documentation.
-  |  +--html/           - Local HTML documentation (after rebuild).
-  |  +--inc/            - Documentation source include files
+  |  +--out/            - Doxygen output directory
   |  +--img/            - Documentation image files
   |  +--example/        - Documentation example files
   |  +--index.html      - Local documentation access
