@@ -65,10 +65,16 @@
  * @name        Zastita od istovremenog pristupa
  * @brief       Ovim makroima se sprecava istovremeni pristup istom memorijskom
  *              prostoru.
+ * @details     Koriscenjem ovih makroa moze da se specificira da se prilikom
+ *              pristupa memorijskom prostoru prvo zakljuca pristup na odredjeni
+ *              nacin. To se moze vrsiti gasenjem prekida, podizanjem prioriteta
+ *              scheduler-u, aktiviranjem mutex-a ili semaphore-a.
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Tip podataka za zastitu memorijskog alokatora
+ * @details     Ovde treba postaviti tip cuvara alokatora, kao na primer
+ *              struktura mutex-a ili semaphore-a kada se koristi neki RTOS.
  */
 #if defined(__DOXYGEN__)
 #define GUARD_T
@@ -76,6 +82,9 @@
 
 /**
  * @brief       Inicijalizacija cuvara memorijskog alokatora
+ * @details     Ovde treba postaviti funkciju koja vrsi inicijalizaciju cuvara
+ *              alokatora. Ona se poziva u esPMemInit() ili esDMemInit()
+ *              funkcijama.
  */
 #define GUARD_INIT(guard)               (void)guard
 
