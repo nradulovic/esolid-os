@@ -79,6 +79,7 @@
  *              2. Ostaviti makro @ref GUARD_INIT prazan (nema funkciju)
  *              3. Definisati makro @ref GUARD_LOCK kao: esIntDisable()
  *              4. Definisati makro @ref GUARD_UNLOCK kao: esIntEnable()
+ *
  * @note        Treba naglasiti da za gornji primer treba ucitati u datoteku
  *              @c "hal/hal_int.h".
  * @{ *//*--------------------------------------------------------------------*/
