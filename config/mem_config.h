@@ -72,6 +72,14 @@
  *              - podizanje prioriteta scheduler-a,
  *              - aktiviranjem mutex-a
  *              - aktiviranjem binarnog semaphore-a.
+ * @p           Najjednostavniji nacin je gasenje prekida. Primer u takvom
+ *              slucaju bi bio sledeci:
+ *              1. Ostaviti makro @ref GUARD_T nedefinisan
+ *              2. Ostaviti makro @ref GUART_INIT prazan (nema funkciju)
+ *              3. Definisati makro @ref GUARD_LOCK kao: esIntDisable()
+ *              4. Definisati makro @ref GUARD_UNLOCK kao: esIntEnable()
+ * @note        Treba naglasiti da za gornji primer treba ucitati u datoteku
+ *              @c "hal/hal_int.h".
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
