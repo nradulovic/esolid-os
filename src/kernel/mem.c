@@ -194,6 +194,7 @@ void * esPMemAllocI(
 void * esPMemAlloc(
     esPMemHandle_T *    handle) {
 
+    GUARD_DECL();
     void * mem;
 
 #if defined(GUARD_T)
@@ -229,6 +230,8 @@ void esPMemDeAllocI(
 void esPMemDeAlloc(
     esPMemHandle_T *    handle,
     void *          mem) {
+
+    GUARD_DECL();
 
 #if defined(GUARD_T)
     GUARD_LOCK(handle->guard);
@@ -339,6 +342,7 @@ void * esDMemAlloc(
     esDMemHandle_T * handle,
     size_t          size) {
 
+    GUARD_DECL();
     void * mem;
 
 #if defined(GUARD_T)
@@ -399,6 +403,8 @@ void esDMemDeAllocI(
 void esDMemDeAlloc(
     esDMemHandle_T *    handle,
     void *          mem) {
+
+    GUARD_DECL();
 
 #if defined(GUARD_T)
     GUARD_LOCK(handle->guard);

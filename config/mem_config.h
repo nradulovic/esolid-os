@@ -34,10 +34,9 @@
 #define MEM_CONFIG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+#include "sys_config.h"
+
 /*===============================================================  DEFINES  ==*/
-
-#define OPT_MEM_SMEM_ENABLE
-
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -80,7 +79,7 @@
  *              3. Definisati makro @ref GUARD_LOCK kao: @c esIntDisable()
  *              4. Definisati makro @ref GUARD_UNLOCK kao: @c esIntEnable()
  *
- * @note        Treba naglasiti da za gornji primer treba ucitati u datoteku
+ * @note        Treba naglasiti da za gornji primer treba ucitati i datoteku
  *              @c "hal/hal_int.h".
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -90,8 +89,15 @@
  *              struktura mutex-a ili semaphore-a kada se koristi neki RTOS.
  */
 #if defined(__DOXYGEN__)
-#define GUARD_T
+# define GUARD_T
 #endif
+
+/**
+ * @brief       Deklaracija @c auto promenljive za @c GUARD makroe
+ * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
+ *              promenljive.
+ */
+#define GUARD_DECL()
 
 /**
  * @brief       Inicijalizacija cuvara memorijskog alokatora
