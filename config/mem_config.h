@@ -55,7 +55,7 @@
  *              allocation.
  * @note        DEFAULT: 0 (All memory)
  */
-#if !defined(OPT_MEM_SMEM_SIZE)
+#if !defined(OPT_MEM_SMEM_SIZE) || defined(__DOXYGEN__)
 # define OPT_MEM_SMEM_SIZE              1024U
 #endif
 
