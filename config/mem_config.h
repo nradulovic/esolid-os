@@ -67,8 +67,11 @@
  *              prostoru.
  * @details     Koriscenjem ovih makroa moze da se specificira da se prilikom
  *              pristupa memorijskom prostoru prvo zakljuca pristup na odredjeni
- *              nacin. To se moze vrsiti gasenjem prekida, podizanjem prioriteta
- *              scheduler-u, aktiviranjem mutex-a ili semaphore-a.
+ *              nacin. To se moze vrsiti na nekoliko nacina:
+ *              - gasenje prekida,
+ *              - podizanje prioriteta scheduler-a,
+ *              - aktiviranjem mutex-a
+ *              - aktiviranjem binarnog semaphore-a.
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
