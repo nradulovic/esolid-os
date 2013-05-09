@@ -35,11 +35,9 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 /*===============================================================  DEFINES  ==*/
-/** @cond */
 
-#define OPT_MEM_DMEM_ENABLE
+#define OPT_MEM_SMEM_ENABLE
 
-/** @endcond */
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -58,55 +56,41 @@
  *              allocation.
  * @note        DEFAULT: 0 (All memory)
  */
-#if !defined(OPT_MEM_SMEM_SIZE) || defined(__DOXYGEN__)
-# define OPT_MEM_SMEM_SIZE              0U
-#endif
-
-/**
- * @brief       Omogucavanje dinamickog memorijskog menadzmenta
- * @details     Ukoliko se koristi eSolid dinamicki alokator ova opcija mora
- *              biti definisana.
- * @see         OPT_MEM_ALLOC
- * @see         OPT_MEM_FREE
- */
-#if defined(__DOXYGEN__)
-# define OPT_MEM_DMEM_ENABLE
+#if !defined(OPT_MEM_SMEM_SIZE)
+# define OPT_MEM_SMEM_SIZE              1024U
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
- * @name        Memory Manager allocator override
- * @brief       When eSolid Memory Manager is not used these macros provide
- *              default fall back standard C library routines.
+ * @name        Zastita od istovremenog pristupa
+ * @brief       Ovim makroima se sprecava istovremeni pristup istom memorijskom
+ *              prostoru.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if !defined(OPT_MEM_DMEM_ENABLE) || defined(__DOXYGEN__)
 /**
- * @brief       Fallback alokator funkcija
- * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
- *              odnosno, kada opcija @ref OPT_MEM_DMEM_ENABLE nije definisana. U
- *              tom slucaju eSolid ce pozvati funkciju koja je navedena ovde.
- * @note        Default: malloc
+ * @brief       Tip podataka za zastitu memorijskog alokatora
  */
-# define OPT_MEM_ALLOC                  malloc
+#if defined(__DOXYGEN__)
+#define GUARD_T
+#endif
 
 /**
- * @brief       Fallback dealokator funkcija
- * @details     Makro se koristi kada je zabranjen rad dinamickog alokatora,
- *              odnosno, kada opcija @ref OPT_MEM_DMEM_ENABLE nije definisana. U
- *              tom slucaju eSolid ce pozvati funkciju koja je navedena ovde.
- * @note        Default: free
+ * @brief       Inicijalizacija cuvara memorijskog alokatora
  */
-# define OPT_MEM_FREE                   free
-#endif
+#define GUARD_INIT(guard)               (void)guard
+
+/**
+ * @brief       Zakljucavanje memorijskog alokatora
+ */
+#define GUARD_LOCK(guard)               (void)guard
+
+/**
+ * @brief       Otkljucavanje memorijskog alokatora
+ */
+#define GUARD_UNLOCK(guard)             (void)guard
 
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-
-#if (OPT_MEM_SMEM_SIZE == 0U) && !defined(ES_HAL_ENABLE_STARTUP)
-# error "Memory manager precondition is not satisfied: either enable OPT_HAL_STARTUP or define managed memory size with OPT_MEM_MANAGED_SIZE"
-#endif
-
 /** @endcond *//** @} *//******************************************************
  * END of mem_config.h
  ******************************************************************************/

@@ -32,7 +32,7 @@
 #define MEM_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "hal/hal.h"
+#include "hal/hal_compiler.h"
 #include "../config/mem_config.h"
 
 /*===============================================================  MACRO's  ==*/
@@ -78,6 +78,11 @@ typedef struct esMemStatus {
 typedef struct esDMemHandle {
 /** @brief      Pokazivac na cuvara memorije                                  */
     struct dMemBlock * sentinel;
+
+#if defined(GUARD_T) || defined(__DOXYGEN__)
+/** @brief      Cuvar pool alokatora                                          */
+    GUARD_T         guard;
+#endif
 } esDMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -104,6 +109,11 @@ typedef struct esPMemHandle {
 
 /** @brief      Pokazivac na cuvara memorije                                  */
     struct pMemBlock * sentinel;
+
+#if defined(GUARD_T) || defined(__DOXYGEN__)
+/** @brief      Cuvar pool alokatora                                          */
+    GUARD_T         guard;
+#endif
 } esPMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -199,6 +209,27 @@ void * esDMemAllocI(
     size_t          size);
 
 /**
+ * @brief       Dodeljuje memorijski prostor velicine @c size
+ * @param       [in] handle             Deskriptor dinamickog alokatora
+ * @param       size                    Velicina zahtevanog memorijskog prostora
+ *                                      u bajtovima.
+ * @return      Pokazivac na rezervisani memorijski blok.
+ * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
+ *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
+ *              standardna implementacija @c malloc C funkcije. Ukoliko se
+ *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
+ *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
+ *              standardom.
+ * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
+ * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ *              zastitu memorije od istovremenog pristupa.
+ * @api
+ */
+void * esDMemAlloc(
+    esDMemHandle_T * handle,
+    size_t          size);
+
+/**
  * @brief       Reciklira memorijski prostor na koji pokazije @c mem
  *              pokazivac
  * @param       [in] handle             Deskriptor dinamickog alokatora
@@ -208,6 +239,21 @@ void * esDMemAllocI(
  * @iclass
  */
 void esDMemDeAllocI(
+    esDMemHandle_T * handle,
+    void *          mem);
+
+/**
+ * @brief       Reciklira memorijski prostor na koji pokazije @c mem
+ *              pokazivac
+ * @param       [in] handle             Deskriptor dinamickog alokatora
+ * @param       [in] mem                Pokazivac na prethodno dodeljen
+ *                                      memorijski prostor.
+ * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
+ * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ *              zastitu memorije od istovremenog pristupa.
+ * @api
+ */
+void esDMemDeAlloc(
     esDMemHandle_T * handle,
     void *          mem);
 
@@ -280,12 +326,35 @@ void * esPMemAllocI(
     esPMemHandle_T * handle);
 
 /**
+ * @brief       Alocira jedan blok iz memory pool-a
+ * @param       [in] handle             Deskriptor pool alokatora
+ * @return      Pokazivac na alocirani memorijski blok
+ * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ *              zastitu memorije od istovremenog pristupa.
+ * @api
+ */
+void * esPMemAlloc(
+    esPMemHandle_T * handle);
+
+/**
  * @brief       Oslobadja prethodno alocirani blok
  * @param       [in] handle             Deskriptor pool alokatora
  * @param       [in] mem                Prethodno alociran blok memorije
  * @iclass
  */
 void esPMemDeAllocI(
+    esPMemHandle_T * handle,
+    void *          mem);
+
+/**
+ * @brief       Oslobadja prethodno alocirani blok
+ * @param       [in] handle             Deskriptor pool alokatora
+ * @param       [in] mem                Prethodno alociran blok memorije
+ * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ *              zastitu memorije od istovremenog pristupa.
+ * @api
+ */
+void esPMemDeAlloc(
     esPMemHandle_T * handle,
     void *          mem);
 

@@ -30,6 +30,7 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "kernel/mem.h"
+#include "hal/hal_cpu.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
@@ -96,7 +97,7 @@ void esSMemInit(
     void) {
 
 #if (OPT_MEM_SMEM_SIZE != 0U)
-    gSMemSentinel.begin = &sMemBuffer;
+    gSMemSentinel.begin = &sMemBuffer[0];
     gSMemSentinel.current = ES_DIMENSION(sMemBuffer);
 #else
     gSMemSentinel.begin = (unative_T *)&_sheap;
@@ -153,10 +154,16 @@ void esPMemInit(
     block = handle->sentinel;
 
     for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
-        block->next = (uint8_t *)block + handle->blockSize;
+        block->next = (struct pMemBlock *)((uint8_t *)block + handle->blockSize);
         block = block->next;
     }
     block->next = NULL;
+
+#if defined(GUARD_T)
+    GUARD_INIT(handle->guard);
+#else
+    GUARD_INIT(0U);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -183,6 +190,28 @@ void * esPMemAllocI(
 
     return ((void *)block);
 }
+/*----------------------------------------------------------------------------*/
+void * esPMemAlloc(
+    esPMemHandle_T *    handle) {
+
+    void * mem;
+
+#if defined(GUARD_T)
+    GUARD_LOCK(handle->guard);
+#else
+    GUARD_LOCK(0U);
+#endif
+    mem = esPMemAllocI(
+        handle);
+
+#if defined(GUARD_T)
+    GUARD_UNLOCK(handle->guard);
+#else
+    GUARD_UNLOCK(0U);
+#endif
+
+    return (mem);
+}
 
 /*----------------------------------------------------------------------------*/
 void esPMemDeAllocI(
@@ -194,6 +223,27 @@ void esPMemDeAllocI(
     block = (pMemBlock_T *)mem;
     block->next = handle->sentinel;
     handle->sentinel = block;
+}
+
+/*----------------------------------------------------------------------------*/
+void esPMemDeAlloc(
+    esPMemHandle_T *    handle,
+    void *          mem) {
+
+#if defined(GUARD_T)
+    GUARD_LOCK(handle->guard);
+#else
+    GUARD_LOCK(0U);
+#endif
+    esPMemDeAllocI(
+        handle,
+        mem);
+
+#if defined(GUARD_T)
+    GUARD_UNLOCK(handle->guard);
+#else
+    GUARD_UNLOCK(0U);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -216,7 +266,6 @@ void esPMemUpdateStatusI(
     status->freeSpaceAvailable = handle->blockSize;
 }
 
-#if defined(OPT_MEM_DMEM_ENABLE)
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
@@ -236,6 +285,12 @@ void esDMemInit(
     handle->sentinel->phyPrev = begin;
     handle->sentinel->freeNext = begin;
     handle->sentinel->freePrev = begin;
+
+#if defined(GUARD_T)
+    GUARD_INIT(handle->guard);
+#else
+    GUARD_INIT(0U);
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -280,6 +335,31 @@ void * esDMemAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
+void * esDMemAlloc(
+    esDMemHandle_T * handle,
+    size_t          size) {
+
+    void * mem;
+
+#if defined(GUARD_T)
+    GUARD_LOCK(handle->guard);
+#else
+    GUARD_LOCK(0U);
+#endif
+    mem = esDMemAllocI(
+        handle,
+        size);
+
+#if defined(GUARD_T)
+    GUARD_UNLOCK(handle->guard);
+#else
+    GUARD_UNLOCK(0U);
+#endif
+
+    return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
 void esDMemDeAllocI(
     esDMemHandle_T *    handle,
     void *          mem) {
@@ -316,6 +396,27 @@ void esDMemDeAllocI(
 }
 
 /*----------------------------------------------------------------------------*/
+void esDMemDeAlloc(
+    esDMemHandle_T *    handle,
+    void *          mem) {
+
+#if defined(GUARD_T)
+    GUARD_LOCK(handle->guard);
+#else
+    GUARD_LOCK(0U);
+#endif
+    esDMemDeAllocI(
+        handle,
+        mem);
+
+#if defined(GUARD_T)
+    GUARD_UNLOCK(handle->guard);
+#else
+    GUARD_UNLOCK(0U);
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
 void esDMemUpdateStatusI(
     esDMemHandle_T *    handle,
     esMemStatus_T *     status) {
@@ -349,55 +450,6 @@ void esDMemUpdateStatusI(
     status->freeSpaceTotal = freeTotal;
     status->freeSpaceAvailable = freeAvailable;
 }
-
-#else
-/*----------------------------------------------------------------------------*/
-void esDMemInit(
-    esDMemHandle_T *    handle,
-    void *          storage,
-    size_t          storageSize) {
-
-    (void)handle;
-    (void)storage;
-    (void)storageSize;
-}
-
-/*----------------------------------------------------------------------------*/
-void * esDMemAllocI(
-    esDMemHandle_T *    handle,
-    size_t          size) {
-
-    void * mem;
-    (void)handle;
-
-    mem = OPT_MEM_ALLOC(size);
-
-    return (mem);
-}
-
-/*----------------------------------------------------------------------------*/
-void esDMemDeAllocI(
-    esDMemHandle_T *    handle,
-    void *          mem) {
-
-    (void)handle;
-
-    OPT_MEM_FREE(mem);
-}
-
-/*----------------------------------------------------------------------------*/
-void esDMemUpdateStatusI(
-    esDMemHandle_T *    handle,
-    esMemStatus_T *     status) {
-
-    (void)handle;
-
-    status->size = 0U;
-    status->freeSpaceTotal = 0U;
-    status->freeSpaceAvailable = 0U;
-}
-
-#endif /* !defined(OPT_MEM_DMEM_ENABLE) */
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
