@@ -83,15 +83,16 @@
 
 /**
  * @brief       Generiše ko je proizvodžač događaja
- * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
+ * @details     Ova callback funkcija se poziva samo ako je uključena opcija
  *              @ref OPT_EVT_USE_GENERATOR. Tada je potrebno tek kreirani
  *              događaj popuniti identifikatorom (pokazivač) proizvodžača
  *              događaja.
- *
- * @note        Podrazumevano podesavanje: poziva se kernel funkcija
+ * @pre         Opcija @ref OPT_EVT_USE_GENERATOR mora da bude ukljucena pre ove
+ *              opcije.
+ * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
  */
-#if !defined(OPT_EVT_GENERATOR_CALLBACK)
-# define OPT_EVT_GENERATOR_CALLBACK()   esKernelEpaGet()
+#if defined(__DOXYGEN__)
+# define OPT_EVT_GENERATOR_CALLBACK
 #endif
 
 /**
@@ -113,11 +114,12 @@
  * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
  *              @ref OPT_EVT_USE_TIMESTAMP. Tada je potrebno tek kreirani
  *              događaj popuniti vremenskim markerom nastanka događaja.
- *
- * @note        Podrazumevano podesavanje: 0UL (Ne poziva se funkcija)
+ * @pre         Opcija @ref OPT_EVT_USE_TIMESTAMP mora da bude ukljucena pre ove
+ *              opcije.
+ * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
  */
-#if !defined(OPT_EVT_TIMESTAMP_CALLBACK)
-# define OPT_EVT_TIMESTAMP_CALLBACK()   0UL
+#if defined(__DOXYGEN__)
+# define OPT_EVT_TIMESTAMP_CALLBACK
 #endif
 
 /**
@@ -139,6 +141,8 @@
 /**
  * @brief       Tip podataka za cuvanje velicine prosirenog dogadjaja.
  * @note        Podrazumevano podesavanje: size_t
+ * @note        Ovo podesavanje ima znacaja samo ako je ukljucena opcija
+ *              @ref OPT_EVT_USE_SIZE
  */
 #if !defined(OPT_EVT_SIZE_T)
 # define OPT_EVT_SIZE_T                 size_t
@@ -147,6 +151,8 @@
 /**
  * @brief       Tip za cuvanje vremenskih atributa dogadjaja.
  * @note        Podrazumevano podesavanje: uint32_t
+ * @note        Ovo podesavanje ima znacaja samo ako je ukljucena opcija
+ *              @ref OPT_EVT_USE_TIMESTAMP
  */
 #if !defined(OPT_EVT_TIMESTAMP_T)
 # define OPT_EVT_TIMESTAMP_T            uint32_t

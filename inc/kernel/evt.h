@@ -32,7 +32,7 @@
 #define EVT_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "hal/hal.h"
+#include "hal/hal_compiler.h"
 #include "../config/evt_config.h"
 
 /*===============================================================  MACRO's  ==*/
@@ -46,7 +46,10 @@
  * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
  *              rezervisan i sistem ga nece razmatrati kao kandidata za brisanje.
  *              Brojac korisnika dogadjaja se i dalje azurira, tako da kada se
- *              dogadjaj oslobodii rezervacij))
+ *              dogadjaj oslobodii rezervacije on moze da bude obrisan ako nema
+ *              korisnika.
+ */
+#define EVT_RESERVED_MASK               ((uint_fast16_t)(1U << 14))
 
 /**
  * @brief       Bit maska za definisanje konstantnog dogadjaja.
@@ -75,6 +78,7 @@
 
 /**
  * @brief       Kreira bazu dogadjaja
+ * @see         esEvtDBElem_T
  * @api
  */
 #define ES_EXPAND_EVT_DATA(a, b, c)     [a] = {sizeof(b), #a, #b, c},
@@ -85,7 +89,6 @@
  */
 #define ES_EXPAND_EVT_TYPEDEF(a, b, c)  typedef b a##_T;
 
-
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
@@ -93,6 +96,13 @@ extern "C" {
 #endif
 
 /*============================================================  DATA TYPES  ==*/
+
+/**
+ * @brief       Apstraktni tip pokazivaca na EPA objekat
+ * @details     U zavisnosti od konfiguracije EPA objekat moze da bude prosta
+ *              funkcija, automat ili automat enkapsuliran u RTOS process/task.
+ */
+typedef struct esEpa esEpa_T;
 
 /**
  * @brief       Zaglavlje dogadjaja.
@@ -146,7 +156,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
  *              @ref OPT_EVT_USE_GENERATOR.
  */
-    void *         	generator;
+    esEpa_T *       generator;
 #endif
 
 #if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
@@ -170,9 +180,91 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 #endif
 } esEvt_T;
 
+/**
+ * @brief       Struktura jednog elementa baze dogadjaja
+ * @details     Ova struktura navodi koji se podaci pamte za svaki dogadjaj u
+ *              bazi dogadjaja.
+ */
+typedef struct esEvtDBElem {
+/** @brief      Velicina dogadjaja                                            */
+    size_t          size;
+
+/** @brief      Ime dogadjaja                                                 */
+    const char *    name;
+
+/** @brief      Tip dogadjaja                                                 */
+    const char *    type;
+
+/** @brief      Kratak opis dogadjaja                                         */
+    const char *    desc;
+} esEvtDBElem_T;
+
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
+/*------------------------------------------------------------------------*//**
+ * @name        Baza dogadjaja
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Vrsi registraciju baze dogadjaja
+ * @param       evtDB                   Pokazivac na formiranu bazu dogadjaja
+ * @param       elements                Broj elemenata (dogadjaja) u bazi
+ * @details     Nakon sto se formira baza dogadjaja ona mora da se registruje.
+ *              U jednom trenutku koristi se samo jedna baza dogadjaja i ona se
+ *              mora nalaziti u ROM memoriji. Baza dogadjaja moze da sadrzi
+ *              maksimalno 1024 razlicitih dogadjaja.
+ * @api
+ */
+void esEvtDBRegister(
+    const C_ROM esEvtDBElem_T * evtDB[],
+    uint16_t        elements);
+
+/**
+ * @brief       Dobavlja informaciju o velicini dogadjaja iz baze dogadjaja
+ * @param       id                      Identifikator dogadjaja
+ * @return      Velicinu trazenog dogadjaja u bajtovima.
+ * @pre         Baza dogadjaja pre poziva ove funkcije mora da bude registrovana
+ *              funkcijom esEvtDBRegister()
+ * @api
+ */
+size_t esEvtDBQuerySize(
+    esEvtId_T       id);
+
+/**
+ * @brief       Dobavlja informaciju o imenu dogadjaja iz baze dogadjaja
+ * @param       id                      Identifikator dogadjaja
+ * @return      Znakovni niz imena dogadjaja
+ * @pre         Baza dogadjaja pre poziva ove funkcije mora da bude registrovana
+ *              funkcijom esEvtDBRegister()
+ * @api
+ */
+const C_ROM char * esEvtDBQueryName(
+    esEvtId_T       id);
+
+/**
+ * @brief       Dobavlja informaciju o tipu dogadjaja iz baze dogadjaja
+ * @param       id                      Identifikator dogadjaja
+ * @return      Znakovni niz tipa dogadjaja
+ * @pre         Baza dogadjaja pre poziva ove funkcije mora da bude registrovana
+ *              funkcijom esEvtDBRegister()
+ * @api
+ */
+const C_ROM char * esEvtDBQueryType(
+    esEvtId_T       id);
+
+/**
+ * @brief       Dobavlja informaciju o opisu dogadjaja iz baze dogadjaja
+ * @param       id                      Identifikator dogadjaja
+ * @return      Znakovni niz kratkog opisa dogadjaja
+ * @pre         Baza dogadjaja pre poziva ove funkcije mora da bude registrovana
+ *              funkcijom esEvtDBRegister()
+ * @api
+ */
+const C_ROM char * esEvtDBQueryDesc(
+    esEvtId_T       id);
+
+/** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        Kreiranje/brisanje/rezervacija dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
@@ -180,7 +272,8 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 /**
  * @brief       Kreira dogadjaj.
  * @param       id                      Identifikator dogadjaja.
- * @return      Pokazivac na memorijski prostor za podatke dogadjaja.
+ * @return      Pokazivac na kreiranu instancu dogadjaja. Dogadjaj se preko ovog
+ *              pokazivaca popunjava parametrima koje on nosi.
  * @details     Kreira memorijski prostor koji je rezervisan za navedeni
  *              dogadjaj. U zaglavlje dogadjaja se upisuju podaci dogadjaja, a
  *              nakon toga se korisniku predaje pokazivac na memorijski prostor
@@ -194,6 +287,8 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  *              esEvt velicine 4B, a dogadjaj pri tom obuhvata i dodatni
  *              podatak unsigned long int cija je velicina, takodje, 4 bajta. U
  *              tom slucaju ovoj funkciji se kao prvi parametar predaje 8.
+ * @pre         Baza dogadjaja pre poziva ove funkcije mora da bude registrovana
+ *              funkcijom esEvtDBRegister()
  * @api
  */
 esEvt_T * esEvtCreate(
@@ -202,12 +297,15 @@ esEvt_T * esEvtCreate(
 /**
  * @brief       Kreira dogadjaj.
  * @param       id                      Identifikator dogadjaja.
- * @return      Pokazivac na memorijski prostor za podatke dogadjaja.
+ * @return      Pokazivac na kreiranu instancu dogadjaja. Dogadjaj se preko ovog
+ *              pokazivaca popunjava parametrima koje on nosi.
  * @details     Kreira memorijski prostor koji je rezervisan za navedeni
  *              dogadjaj. U zaglavlje dogadjaja se upisuju podaci dogadjaja, a
  *              nakon toga se korisniku predaje pokazivac na memorijski prostor
  *              rezervisan za dogadjaje. Preko ovog pokazivaca korisnik dalje
  *              upisuje svoje podatke u dogadjaj.
+ * @pre         Baza dogadjaja pre poziva ove funkcije mora da bude registrovana
+ *              funkcijom esEvtDBRegister()
  * @iclass
  */
 esEvt_T * esEvtCreateI(
@@ -259,6 +357,107 @@ void esEvtReserve(
  */
 void esEvtUnReserve(
     esEvt_T *       evt);
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Transport dogadjaja
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta.
+ * @api
+ */
+void esEvtPost(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta.
+ * @iclass
+ */
+void esEvtPostI(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta. Za razliku od
+ *              esEvtPost() funkcije dogadjaj se postavlja na pocetku reda za
+ *              cekanje. Najcesce se koristi kada je potrebno da se EPA objektu
+ *              hitno posalje neki dogadjaj od znacaja koji treba da obradi.
+ * @api
+ */
+void esEvtPostAhead(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/**
+ * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
+ * @param       epa                     Pokazivac na EPA objekat kome se salje,
+ * @param       evt                     pokazivac na dogadjaj koji se salje.
+ * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
+ *              postavlja ga u red cekanja datog EPA objekta. Za razliku od
+ *              esEvtPost() funkcije dogadjaj se postavlja na pocetku reda za
+ *              cekanje. Najcesce se koristi kada je potrebno da se EPA objektu
+ *              hitno posalje neki dogadjaj od znacaja koji treba da obradi.
+ * @iclass
+ */
+void esEvtPostAheadI(
+    esEpa_T *       epa,
+    esEvt_T *       evt);
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Callback funkcije
+ * @brief       Funkcije koje se pozivaju od strane EVT modula u odredjenim
+ *              trenucima izvrsenja
+ * @details     Ovde se nalaze sve callback funkcije koje EVT modul poziva. Njih
+ *              treba da definise samo korisnik prema svojim potrebama.
+ * @{ *//*--------------------------------------------------------------------*/
+
+#if defined(OPT_EVT_USE_GENERATOR) && defined(OPT_EVT_GENERATOR_CALLBACK) ||    \
+    defined(__DOXYGEN__)
+/**
+ * @brief       Dobavlja ko kreira dogadjaj
+ * @return      Pokazivac na objekat koji kreira dogadjaj
+ * @details     Funkcija se poziva u toku kreiranja dogadjaja. Ona treba da
+ *              vrati pokazivac na objekat koji upravo kreira dogadjaj.
+ * @pre         Funkcija se poziva samo ako su ukljucene opcije:
+ *              - @ref OPT_EVT_USE_GENERATOR
+ *              - @ref OPT_EVT_GENERATOR_CALLBACK
+ */
+extern esEpa_T * appEvtGeneratorGet(
+    void);
+#endif
+
+#if defined(OPT_EVT_USE_TIMESTAMP) && defined(OPT_EVT_TIMESTAMP_CALLBACK) ||    \
+    defined(__DOXYGEN__)
+/**
+ * @brief       Dobavlja trenutni vremenski aspekt
+ * @return      Vremenski aspekt koji postaje vremenski marker dogadjaja
+ * @details     Funkcija se poziva u toku kreiranja dogadjaja. Ona treba da
+ *              vrati trenutnu vrednost vremenskog aspekta koja se postavlja u
+ *              dogadjaja i postaje vremenski marker kreiranja dogadjaja.
+ *              Tipicna primena ove funkcije bi bila da vrati trenutnu vrednost
+ *              nekog tajmera koji je stalno aktivan, na primer, @c systick.
+ * @note        Funkcija se poziva samo ako su ukljucene opcije:
+ *              - @ref OPT_EVT_USE_TIMESTAMP
+ *              - @ref OPT_EVT_TIMESTAMP_CALLBACK
+ */
+extern esEvtTimestamp_T appEvtTimestampGet(
+    void);
+#endif
 
 /** @} *//*-------------------------------------------------------------------*/
 /*--------------------------------------------------------  C++ extern end  --*/
