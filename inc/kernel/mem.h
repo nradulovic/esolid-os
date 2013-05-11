@@ -33,6 +33,7 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal_compiler.h"
+#include "../config/sys_config.h"
 #include "../config/mem_config.h"
 
 /*===============================================================  MACRO's  ==*/
@@ -80,7 +81,7 @@ typedef struct esDMemHandle {
     struct dMemBlock * sentinel;
 
 #if defined(GUARD_T) || defined(__DOXYGEN__)
-/** @brief      Cuvar pool alokatora                                          */
+/** @brief      Cuvar dinamickog alokatora                                    */
     GUARD_T         guard;
 #endif
 } esDMemHandle_T;
@@ -221,7 +222,7 @@ void * esDMemAllocI(
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
  * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
- * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
  *              zastitu memorije od istovremenog pristupa.
  * @api
  */
@@ -249,7 +250,7 @@ void esDMemDeAllocI(
  * @param       [in] mem                Pokazivac na prethodno dodeljen
  *                                      memorijski prostor.
  * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
- * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
  *              zastitu memorije od istovremenog pristupa.
  * @api
  */
@@ -329,7 +330,7 @@ void * esPMemAllocI(
  * @brief       Alocira jedan blok iz memory pool-a
  * @param       [in] handle             Deskriptor pool alokatora
  * @return      Pokazivac na alocirani memorijski blok
- * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
  *              zastitu memorije od istovremenog pristupa.
  * @api
  */
@@ -350,7 +351,7 @@ void esPMemDeAllocI(
  * @brief       Oslobadja prethodno alocirani blok
  * @param       [in] handle             Deskriptor pool alokatora
  * @param       [in] mem                Prethodno alociran blok memorije
- * @note        Funkcija koristi makroe @ref GUARD_LOCK i @ref GUARD_UNLOCK za
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
  *              zastitu memorije od istovremenog pristupa.
  * @api
  */

@@ -37,7 +37,6 @@
 
 /** @endcond */
 /*==============================================================  SETTINGS  ==*/
-
 /**
  * @brief       Maksimalan prioritet prekidnih rutina kernela
  * @details     Ovim se ogranicava prioritet prekidnih rutina koje jezgro
@@ -49,6 +48,84 @@
 #if !defined(OPT_SYS_INTERRUPT_PRIO_MAX)
 # define OPT_SYS_INTERRUPT_PRIO_MAX     ES_PRIO_REALTIME
 #endif
+/*------------------------------------------------------------------------*//**
+ * @name        Zastita od istovremenog pristupa
+ * @brief       Ovim makroima se sprecava istovremeni pristup istom memorijskom
+ *              prostoru.
+ * @details     Koriscenjem ovih makroa moze da se specificira da se prilikom
+ *              pristupa memorijskom prostoru prvo zakljuca pristup na odredjeni
+ *              nacin. To se moze vrsiti na nekoliko nacina:
+ *              - gasenje prekida,
+ *              - podizanje prioriteta scheduler-a,
+ *              - aktiviranjem mutex-a
+ *              - aktiviranjem binarnog semaphore-a.
+ *
+ * @p           Najjednostavniji nacin je gasenje prekida. Primer u takvom
+ *              slucaju bi bio sledeci:
+ *              1. Ostaviti makro @ref GUARD_T nedefinisan
+ *              2. Ostaviti makro @ref OPT_GUARD_INIT prazan (nema funkciju)
+ *              3. Ostaviti makro @ref OPT_GUARD_DECL prazan (nema funkciju)
+ *              4. Definisati makro @ref OPT_GUARD_LOCK kao: @c esIntDisable()
+ *              5. Definisati makro @ref OPT_GUARD_UNLOCK kao: @c esIntEnable()
+ *
+ * @note        Treba naglasiti da za gornji primer treba ucitati i datoteku
+ *              @c "hal/hal_int.h".
+ * @{ *//*--------------------------------------------------------------------*/
+
+#if defined(__DOXYGEN__)
+# define OPT_GUARD_EXTERN
+#endif
+
+#if !defined(OPT_GUARD_EXTERN)
+/**
+ * @brief       Tip podataka za zastitu memorijskog alokatora
+ * @details     Ovde treba postaviti tip cuvara alokatora, kao na primer
+ *              struktura mutex-a ili semaphore-a kada se koristi neki RTOS.
+ */
+# if defined(__DOXYGEN__)
+#  define GUARD_T
+# endif
+
+/**
+ * @brief       Deklaracija @c auto promenljive za @c GUARD makroe
+ * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
+ *              promenljive.
+ */
+# define OPT_GUARD_DECL()
+
+/**
+ * @brief       Inicijalizacija cuvara memorijskog alokatora
+ * @details     Ovde treba postaviti funkciju koja vrsi inicijalizaciju cuvara
+ *              alokatora. Ona se poziva u esPMemInit() ili esDMemInit()
+ *              funkcijama.
+ */
+# define OPT_GUARD_INIT(guard)          (void)guard
+
+/**
+ * @brief       Zakljucavanje memorijskog alokatora
+ */
+# define OPT_GUARD_LOCK(guard)          (void)guard
+
+/**
+ * @brief       Otkljucavanje memorijskog alokatora
+ */
+# define OPT_GUARD_UNLOCK(guard)        (void)guard
+#endif
+/** @} *//*-------------------------------------------------------------------*/
+
+
+#if defined(__DOXYGEN__)
+# define OPT_MEM_POOL_EXTERN
+#endif
+
+#if !defined(OPT_MEM_POOL_EXTERN)
+# define OPT_MEM_POOL_T                 esPMemHandle_T
+# define OPT_MEM_POOL_ALLOC(pool)                                               \
+    esPMemAlloc(pool)
+
+# define OPT_MEM_POOL_DEALLOC(pool, mem)                                        \
+    esPMemDeAlloc(pool, mem)
+#endif
 
 /**
  * @brief       Omogucavanje LOGer-a
@@ -56,16 +133,6 @@
 #if defined(__DOXYGEN__)
 # define OPT_SYS_ENABLE_LOG
 #endif
-
-/**
- * @brief       Omogucavanje integracije eSolid-a sa sistemskom bibliotekom
- */
-#if defined(__DOXYGEN__)
-# define OPT_SYS_ENABLE_SYSCALLS
-#endif
-
-#include "mem_config.h"
-#include "log_config.h"
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************

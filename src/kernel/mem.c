@@ -160,9 +160,9 @@ void esPMemInit(
     block->next = NULL;
 
 #if defined(GUARD_T)
-    GUARD_INIT(handle->guard);
+    OPT_GUARD_INIT(handle->guard);
 #else
-    GUARD_INIT(0U);
+    OPT_GUARD_INIT(0U);
 #endif
 }
 
@@ -194,21 +194,21 @@ void * esPMemAllocI(
 void * esPMemAlloc(
     esPMemHandle_T *    handle) {
 
-    GUARD_DECL();
+    OPT_GUARD_DECL();
     void * mem;
 
 #if defined(GUARD_T)
-    GUARD_LOCK(handle->guard);
+    OPT_GUARD_LOCK(handle->guard);
 #else
-    GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0U);
 #endif
     mem = esPMemAllocI(
         handle);
 
 #if defined(GUARD_T)
-    GUARD_UNLOCK(handle->guard);
+    OPT_GUARD_UNLOCK(handle->guard);
 #else
-    GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0U);
 #endif
 
     return (mem);
@@ -231,21 +231,21 @@ void esPMemDeAlloc(
     esPMemHandle_T *    handle,
     void *          mem) {
 
-    GUARD_DECL();
+    OPT_GUARD_DECL();
 
 #if defined(GUARD_T)
-    GUARD_LOCK(handle->guard);
+    OPT_GUARD_LOCK(handle->guard);
 #else
-    GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0U);
 #endif
     esPMemDeAllocI(
         handle,
         mem);
 
 #if defined(GUARD_T)
-    GUARD_UNLOCK(handle->guard);
+    OPT_GUARD_UNLOCK(handle->guard);
 #else
-    GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0U);
 #endif
 }
 
@@ -290,9 +290,9 @@ void esDMemInit(
     handle->sentinel->freePrev = begin;
 
 #if defined(GUARD_T)
-    GUARD_INIT(handle->guard);
+    OPT_GUARD_INIT(handle->guard);
 #else
-    GUARD_INIT(0U);
+    OPT_GUARD_INIT(0U);
 #endif
 }
 
@@ -342,22 +342,22 @@ void * esDMemAlloc(
     esDMemHandle_T * handle,
     size_t          size) {
 
-    GUARD_DECL();
+    OPT_GUARD_DECL();
     void * mem;
 
 #if defined(GUARD_T)
-    GUARD_LOCK(handle->guard);
+    OPT_GUARD_LOCK(handle->guard);
 #else
-    GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0U);
 #endif
     mem = esDMemAllocI(
         handle,
         size);
 
 #if defined(GUARD_T)
-    GUARD_UNLOCK(handle->guard);
+    OPT_GUARD_UNLOCK(handle->guard);
 #else
-    GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0U);
 #endif
 
     return (mem);
@@ -404,21 +404,21 @@ void esDMemDeAlloc(
     esDMemHandle_T *    handle,
     void *          mem) {
 
-    GUARD_DECL();
+    OPT_GUARD_DECL();
 
 #if defined(GUARD_T)
-    GUARD_LOCK(handle->guard);
+    OPT_GUARD_LOCK(handle->guard);
 #else
-    GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0U);
 #endif
     esDMemDeAllocI(
         handle,
         mem);
 
 #if defined(GUARD_T)
-    GUARD_UNLOCK(handle->guard);
+    OPT_GUARD_UNLOCK(handle->guard);
 #else
-    GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0U);
 #endif
 }
 

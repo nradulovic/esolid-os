@@ -34,8 +34,6 @@
 #define MEM_CONFIG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "sys_config.h"
-
 /*===============================================================  DEFINES  ==*/
 /*==============================================================  SETTINGS  ==*/
 
@@ -60,65 +58,7 @@
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Zastita od istovremenog pristupa
- * @brief       Ovim makroima se sprecava istovremeni pristup istom memorijskom
- *              prostoru.
- * @details     Koriscenjem ovih makroa moze da se specificira da se prilikom
- *              pristupa memorijskom prostoru prvo zakljuca pristup na odredjeni
- *              nacin. To se moze vrsiti na nekoliko nacina:
- *              - gasenje prekida,
- *              - podizanje prioriteta scheduler-a,
- *              - aktiviranjem mutex-a
- *              - aktiviranjem binarnog semaphore-a.
- *
- * @p           Najjednostavniji nacin je gasenje prekida. Primer u takvom
- *              slucaju bi bio sledeci:
- *              1. Ostaviti makro @ref GUARD_T nedefinisan
- *              2. Ostaviti makro @ref GUARD_INIT prazan (nema funkciju)
- *              3. Ostaviti makro @ref GUARD_DECL prazan (nema funkciju)
- *              4. Definisati makro @ref GUARD_LOCK kao: @c esIntDisable()
- *              5. Definisati makro @ref GUARD_UNLOCK kao: @c esIntEnable()
- *
- * @note        Treba naglasiti da za gornji primer treba ucitati i datoteku
- *              @c "hal/hal_int.h".
- * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Tip podataka za zastitu memorijskog alokatora
- * @details     Ovde treba postaviti tip cuvara alokatora, kao na primer
- *              struktura mutex-a ili semaphore-a kada se koristi neki RTOS.
- */
-#if defined(__DOXYGEN__)
-# define GUARD_T
-#endif
-
-/**
- * @brief       Deklaracija @c auto promenljive za @c GUARD makroe
- * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
- *              promenljive.
- */
-#define GUARD_DECL()
-
-/**
- * @brief       Inicijalizacija cuvara memorijskog alokatora
- * @details     Ovde treba postaviti funkciju koja vrsi inicijalizaciju cuvara
- *              alokatora. Ona se poziva u esPMemInit() ili esDMemInit()
- *              funkcijama.
- */
-#define GUARD_INIT(guard)               (void)guard
-
-/**
- * @brief       Zakljucavanje memorijskog alokatora
- */
-#define GUARD_LOCK(guard)               (void)guard
-
-/**
- * @brief       Otkljucavanje memorijskog alokatora
- */
-#define GUARD_UNLOCK(guard)             (void)guard
-
-/** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
  * END of mem_config.h
