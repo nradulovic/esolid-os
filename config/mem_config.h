@@ -35,6 +35,20 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 /*===============================================================  DEFINES  ==*/
+/** @cond */
+/*
+ * U ovom segmentu (DEFINES) treba definisati svoje opcije, primer:
+ *
+ * #define OPT_MEM_SMEM_SIZE    1024U
+ *
+ * Kada se opcije definisu u segmentu DEFINES, podrazumevane opcije ce postati
+ * neaktivne. Preporucuje se da se donji kod ne modifikuje na bilo kakav nacin
+ * jer to moze dovesti do lose konfiguracije eSolid-a. Donji kod se koristi samo
+ * kao polazna tacka ili kao primer kako treba definisati, odnosno,
+ * konfigurisati opcije.
+ */
+
+/** @endcond */
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -51,14 +65,13 @@
  *              If eSolid HAL supports port startup sequence then the linker
  *              scripts will provide necessary symbols for whole memory
  *              allocation.
- * @note        DEFAULT: 0 (All memory)
+ * @note        DEFAULT: 1024B
  */
 #if !defined(OPT_MEM_SMEM_SIZE) || defined(__DOXYGEN__)
 # define OPT_MEM_SMEM_SIZE              1024U
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
-
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
  * END of mem_config.h

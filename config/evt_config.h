@@ -35,9 +35,21 @@
 #define EVT_CONFIG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "../config/sys_config.h"
-
 /*===============================================================  DEFINES  ==*/
+/** @cond */
+/*
+ * U ovom segmentu (DEFINES) treba definisati svoje opcije, primer:
+ *
+ * #define OPT_EVT_STRUCT_ATTRIB    C_PACKED
+ *
+ * Kada se opcije definisu u segmentu DEFINES, podrazumevane opcije ce postati
+ * neaktivne. Preporucuje se da se donji kod ne modifikuje na bilo kakav nacin
+ * jer to moze dovesti do lose konfiguracije eSolid-a. Donji kod se koristi samo
+ * kao polazna tacka ili kao primer kako treba definisati, odnosno,
+ * konfigurisati opcije.
+ */
+
+/** @endcond */
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -176,6 +188,49 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
+ * @name        Odabir memorijskog alokatora za dogadjaje
+ * @brief       Moguce je izabrati koji memorijski alokator se koristi prilikom
+ *              kreiranja dogadjaja.
+ * @details     Ukoliko je potrebno specificirati koji memorijski alokator se
+ *              koristi mogu se koristiti dole navedene opcije. Moze se
+ *              koristiti @c pool memorijski alokator i @c dinamicki memorijski
+ *              alokator.
+ *              Postoje sledeci slucajevi:
+ *              - koristi se iskljucivo @c pool alokator: ukljucena je opcija
+ *              @ref OPT_EVT_USE_MEM_POOL, a iskljucena je opcija
+ *              @ref OPT_EVT_USE_MEM_DYN.
+ *              - koristi se iskljucivo @c dinamicki alokator: iskljucena je
+ *              opcija @ref OPT_EVT_USE_MEM_POOL, a ukljucena je opcija
+ *              @ref OPT_EVT_USE_MEM_DYN.
+ *              - koriste se oba alokatora: ukljucene su obe opcije.
+ * @note        Zabranjeno je da obe opcije budu iskljucene, jedan od navedena
+ *              dva alokatora se mora koristiti.
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Ukljucivanje/iskljucivanje @c pool alokatora
+ * @details     Ukoliko je vrednost makroa:
+ *              - 0 - ne koristi se @c pool alokator
+ *              - 1 - koristi se @c pool alokator
+ * @note        Podrazumevano podesavanje: 0 (ne koristi se @c pool alokator)
+ */
+#if !defined(OPT_EVT_USE_MEM_POOL) || defined(__DOXYGEN__)
+# define OPT_EVT_USE_MEM_POOL           0U
+#endif
+
+/**
+ * @brief       Ukljucivanje/iskljucivanje @c dinamickog alokatora
+ * @details     Ukoliko je vrednost makroa:
+ *              - 0 - ne koristi se @c dinamicki alokator
+ *              - 1 - koristi se @c dinamicki alokator
+ * @note        Podrazumevano podesavanje: 1 (koristi se @c dinamicki alokator)
+ */
+#if !defined(OPT_EVT_USE_MEM_DYN) || defined(__DOXYGEN__)
+# define OPT_EVT_USE_MEM_DYN            1U
+#endif
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
  * @name        Tipovi podataka koje korisnik definise
  * @brief       Ovde su navedeni tipovi podataka koji se koriste u strukturi
  *              @ref esEvt_T
@@ -183,11 +238,22 @@
 
 /**
  * @brief       Tip podataka za identifikator dogadjaja
+ * @details     Identifikator dogadjaja je jedinstveni broj tipa dogadjaja u
+ *              sistemu. Opcijom @ref OPT_EVT_ID_T se vrsi odabir koliko bajtova
+ *              se dodeljuje promenljivi koja cuva pomenuti jedinstveni broj.
+ *              Ovaj tip podataka se koristi u strukturi @ref esEvt_T i kao
+ *              argument funkcije za kreiranje dogadjaja.
  */
 typedef OPT_EVT_ID_T                    esEvtId_T;
 
 /**
  * @brief       Tip podataka za vremenski marker dogadjaja
+ * @details     Ovaj tip podataka treba da cuva informaciju o vremenskom markeru
+ *              nastanka dogadjaja. eSolid moze da automatski generise vremenski
+ *              marker nastanka dogadjaja, ali korisnik mora da odluci sta ce da
+ *              uradi sa tom informacijom.
+ * @see         OPT_EVT_TIMESTAMP_T
+ * @see         OPT_EVT_TIMESTAMP_CALLBACK
  */
 #if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
 typedef OPT_EVT_TIMESTAMP_T             esEvtTimestamp_T;
@@ -195,6 +261,10 @@ typedef OPT_EVT_TIMESTAMP_T             esEvtTimestamp_T;
 
 /**
  * @brief       Tip podataka za atribut velicine dogadjaja
+ * @details     Ovaj tip podataka cuva informaciju o velicini dogadjaja. Koristi
+ *              se u strukturi @ref esEvt_T i od strane funkcija koje kreiraju
+ *              dogadjaj.
+ * @see         OPT_EVT_SIZE_T
  */
 #if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
 typedef OPT_EVT_SIZE_T                  esEvtSize_T;

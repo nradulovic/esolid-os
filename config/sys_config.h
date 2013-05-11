@@ -33,7 +33,17 @@
 /*=========================================================  INCLUDE FILES  ==*/
 /*===============================================================  DEFINES  ==*/
 /** @cond */
-
+/*
+ * U ovom segmentu (DEFINES) treba definisati svoje opcije, primer:
+ *
+ * #define OPT_SYS_INTERRUPT_PRIO_MAX   15U
+ *
+ * Kada se opcije definisu u segmentu DEFINES, podrazumevane opcije ce postati
+ * neaktivne. Preporucuje se da se donji kod ne modifikuje na bilo kakav nacin
+ * jer to moze dovesti do lose konfiguracije eSolid-a. Donji kod se koristi samo
+ * kao polazna tacka ili kao primer kako treba definisati, odnosno,
+ * konfigurisati opcije.
+ */
 
 /** @endcond */
 /*==============================================================  SETTINGS  ==*/
@@ -71,11 +81,15 @@
 #endif
 
 /**
- * @brief       Ukljucivanje extern-og cuvara kriticne sekcije koda
+ * @brief       Ukljucivanje eksternog cuvara kriticne sekcije koda
  * @details     Podrazumevano ova opcija nije ukljucena i u tom slucaju eSolid
  *              koristi interne mehanizme za zastitu kriticnih sekcija koda.
  *              Interni mehanizmi za zastitu su zabrana prekida ili maskiranje
  *              prekida.
+ *
+ *              Ukoliko je makro:
+ *              - definisan: opcija je ukljucena i koristi se eksterni cuvar
+ *              - nedefinisan: opcija je iskljucena i koristi se eSolid cuvar
  */
 #if defined(__DOXYGEN__)
 # define OPT_CRITICAL_EXTERN
@@ -123,10 +137,14 @@
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Ukljucivanje extern-og cuvara deljenih resursa
+ * @brief       Ukljucivanje eksternog cuvara deljenih resursa
  * @details     Podrazumevano ova opcija nije ukljucena i u tom slucaju eSolid
  *              koristi interne mehanizme za zastitu deljenih resursa. Interni
  *              mehanizmi za zastitu su zabrana prekida ili maskiranje prekida.
+ *
+ *              Ukoliko je makro:
+ *              - definisan: opcija je ukljucena i koristi se eksterni cuvar
+ *              - nedefinisan: opcija je iskljucena i koristi se eSolid cuvar
  */
 #if defined(__DOXYGEN__)
 # define OPT_GUARD_EXTERN
@@ -174,7 +192,10 @@
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Ukljucivanje extern-og pool alokatora
+ * @brief       Ukljucivanje eksternog pool alokatora
+ * @details     Ukoliko je makro:
+ *              - definisan: opcija je ukljucena i koristi se eksterni alokator
+ *              - nedefinisan: opcija je iskljucena i koristi se eSolid alokator
  */
 #if defined(__DOXYGEN__)
 # define OPT_MEM_POOL_EXTERN
@@ -208,7 +229,7 @@
  *              alokatore memorije ovim makroima se moze izvrsiti odabir
  *              postojecg dinamickog alokatora.
  *
- * @p           Primer kada je potrebno odabrati bibliotecke malloc/free
+ * @p           Primer kada je potrebno odabrati bibliotecke @c malloc/free
  *              funkcije:
  *              - ukljuciti opciju @ref OPT_MEM_DYN_EXTERN
  *              - definisati makro @ref OPT_MEM_DYN_T kao prazan makro
@@ -216,11 +237,14 @@
  *              <c>OPT_MEM_DYN_ALLOC(handle, size) malloc(size)</c>
  *              - definisati makro @ref OPT_MEM_DYN_DEALLOC kao:
  *              <c>OPT_MEM_DYN_DEALLOC(handle, mem) free(mem)</c>
- *              - ukljuciti datoteku: @c stdlib
+ *              - ukljuciti bibliotecku datoteku: @c stdlib
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Ukljucivanje extern-og dinamickog alokatora
+ * @brief       Ukljucivanje eksternog dinamickog alokatora
+ * @details     Ukoliko je makro:
+ *              - definisan: opcija je ukljucena i koristi se eksterni alokator
+ *              - nedefinisan: opcija je iskljucena i koristi se eSolid alokator
  */
 #if defined(__DOXYGEN__)
 # define OPT_MEM_DYN_EXTERN
