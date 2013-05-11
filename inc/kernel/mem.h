@@ -161,7 +161,8 @@ void * esSMemAllocI(
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
- * @note        Koristi @ref Zastita kriticnih sekcija koda
+ * @note        Koristi @ref OPT_CRITICAL_... makroe za zastitu kriticnih
+ *              sekcija koda, pogledati @ref sys_cfg.
  * @api
  */
 void * esSMemAlloc(
