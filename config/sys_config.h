@@ -201,6 +201,51 @@
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Odabir dinamickog alokatora
+ * @brief       Odabiranje zeljenog dinamickog alokatora
+ * @details     Ukoliko sistem u koji se integrise eSolid vec poseduje dinamicke
+ *              alokatore memorije ovim makroima se moze izvrsiti odabir
+ *              postojecg dinamickog alokatora.
+ * @p           Primer kada je potrebno odabrati bibliotecke malloc/free
+ *              funkcije:
+ *              - ukljuciti opciju @ref OPT_MEM_DYN_EXTERN
+ *              - definisati makro @ref OPT_MEM_DYN_T kao prazan makro
+ *              - definisati makro @ref OPT_MEM_DYN_ALLOC kao:
+ *              <c>OPT_MEM_DYN_ALLOC(handle, size) malloc(size)</c>
+ *              - definisati makro @ref OPT_MEM_DYN_DEALLOC kao:
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Ukljucivanje extern-og dinamickog alokatora
+ */
+#if defined(__DOXYGEN__)
+# define OPT_MEM_DYN_EXTERN
+#endif
+
+#if !defined(OPT_MEM_DYN_EXTERN)  || defined(__DOXYGEN__)
+
+/**
+ * @brief       Deskriptor dinamickog alokatora
+ * @details     Ukoliko alokator ne koristi deskriptor onda ovaj makro treba
+ *              definisati kao prazan makro
+ */
+# define OPT_MEM_DYN_T                  esDMemHandle_T
+
+/**
+ * @brief       Dobavlja memorijski blok
+ */
+# define OPT_MEM_DYN_ALLOC(handle, size)                                        \
+    esDMemAlloc(handle, size)
+
+/**
+ * @brief       Oslobadja memorijski blok
+ */
+# define OPT_MEM_DYN_DEALLOC(handle, mem)                                       \
+    esDMemDeAlloc(handle, mem)
+#endif
+
+/** @} *//*-------------------------------------------------------------------*/
 
 /**
  * @brief       Omogucavanje LOGer-a

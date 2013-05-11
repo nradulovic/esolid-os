@@ -23,7 +23,7 @@
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
- * @brief       Interfejs Event (EVT) objekata
+ * @brief       Event object API
  * @addtogroup  evt_intf
  * @brief       Javni interfejs
  *********************************************************************//** @{ */
@@ -34,6 +34,10 @@
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal_compiler.h"
 #include "../config/evt_config.h"
+
+#if !defined(OPT_MEM_POOL_EXTERN)
+# include "kernel/mem.h"
+#endif
 
 /*===============================================================  MACRO's  ==*/
 
@@ -125,7 +129,7 @@ typedef struct esEpa esEpa_T;
  *				opcija.
  * @api
  */
-typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
+struct OPT_EVT_STRUCT_ATTRIB esEvt {
 
 #if (OPT_LOG_LEVEL <= LOG_DBG) || defined(__DOXYGEN__)
 /**
@@ -150,15 +154,6 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  */
     uint16_t      	attrib;
 
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
-/**
- * @brief       Adresa generatora dogadjaja
- * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
- *              @ref OPT_EVT_USE_GENERATOR.
- */
-    esEpa_T *       generator;
-#endif
-
 #if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
 /**
  * @brief       Vremenska oznaka kada se desio dogadjaj.
@@ -167,6 +162,15 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  *              @ref OPT_EVT_USE_TIMESTAMP.
  */
     esEvtTimestamp_T timestamp;
+#endif
+
+#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+/**
+ * @brief       Adresa generatora dogadjaja
+ * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
+ *              @ref OPT_EVT_USE_GENERATOR.
+ */
+    esEpa_T *       generator;
 #endif
 
 #if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
@@ -178,16 +182,26 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  */
     esEvtSize_T     size;
 #endif
-} esEvt_T;
+};
+
+/**
+ * @brief       Tip dogadjaja
+ * @api
+ */
+typedef struct esEvt esEvt_T;
 
 /**
  * @brief       Struktura jednog elementa baze dogadjaja
  * @details     Ova struktura navodi koji se podaci pamte za svaki dogadjaj u
  *              bazi dogadjaja.
  */
-typedef struct esEvtDBElem {
+struct esEvtDBElem {
 /** @brief      Velicina dogadjaja                                            */
     size_t          size;
+
+#if defined(OPT_EVT_MEMPOOL) || defined(__DOXYGEN__)
+    OPT_EXT_MEMPOOL_T pool;
+#endif
 
 /** @brief      Ime dogadjaja                                                 */
     const char *    name;
@@ -197,7 +211,13 @@ typedef struct esEvtDBElem {
 
 /** @brief      Kratak opis dogadjaja                                         */
     const char *    desc;
-} esEvtDBElem_T;
+};
+
+/**
+ * @brief       Tip elementa baze dogadjaja
+ * @api
+ */
+typedef struct esEvtDBElem esEvtDBElem_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/

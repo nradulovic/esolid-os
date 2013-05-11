@@ -54,7 +54,7 @@ extern "C" {
  * @see         esSMemUpdateStatusI(), esPMemUpdateStatusI(), esDMemUpdateStatusI()
  * @api
  */
-typedef struct esMemStatus {
+struct esMemStatus {
 /** @brief      Velicina dinamicke memorije                                   */
     size_t          size;
 
@@ -63,7 +63,13 @@ typedef struct esMemStatus {
 
 /** @brief      Iznos maksimalno dostupne memorije kao jedinstven blok        */
     size_t          freeSpaceAvailable;
-} esMemStatus_T;
+};
+
+/**
+ * @brief       Tip statusa memorije
+ * @api
+ */
+typedef struct esMemStatus esMemStatus_T;
 
 /*------------------------------------------------------------------------*//**
  * @name        Dinamicki memorijski alokator
@@ -88,6 +94,7 @@ struct esDMemHandle {
 
 /**
  * @brief       Tip deskriptora dinamickog alokatora
+ * @api
  */
 typedef struct esDMemHandle esDMemHandle_T;
 
@@ -106,7 +113,7 @@ typedef struct esDMemHandle esDMemHandle_T;
  * @see         esPMemInit()
  * @api
  */
-typedef struct esPMemHandle {
+struct esPMemHandle {
 /** @brief      Velicina pool memorije                                        */
     size_t          size;
 
@@ -120,7 +127,13 @@ typedef struct esPMemHandle {
 /** @brief      Cuvar pool alokatora                                          */
     GUARD_T         guard;
 #endif
-} esPMemHandle_T;
+};
+
+/**
+ * @brief       Tip deskriptora pool alokatora
+ * @api
+ */
+typedef struct esPMemHandle esPMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/

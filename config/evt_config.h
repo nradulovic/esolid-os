@@ -35,12 +35,14 @@
 #define EVT_CONFIG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+#include "../config/sys_config.h"
+
 /*===============================================================  DEFINES  ==*/
 /*==============================================================  SETTINGS  ==*/
 
 /*------------------------------------------------------------------------*//**
  * @name        Podesavanje Event objekta
- * @brief       Specifikacija esEvt_T strukture dogadjaja
+ * @brief       Specifikacija @ref esEvt_T strukture dogadjaja
  * @details     Opcijom @ref OPT_EVT_STRUCT_ATTRIB se definise kakav layout
  *              struktura treba da ima u memoriji. Ovde se najpre misli na
  *              poravnjanje (@c alignment) elemenata u strukturi. Ostale opcije
@@ -174,8 +176,9 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
- * @name        Tipovi podataka koje korisnik definise za esEvt_T strukturu
- * @brief       Ovde su navedeni tipovi podataka koji se koriste u dogadjaju
+ * @name        Tipovi podataka koje korisnik definise
+ * @brief       Ovde su navedeni tipovi podataka koji se koriste u strukturi
+ *              @ref esEvt_T
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
