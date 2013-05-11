@@ -22,13 +22,17 @@ Događaj može imati parametre
 
 @section        evt_database Baza dogadjaja
 
-eSolid definise centralizovanu bazu podataka za dogadjaje koji se koriste u 
-sistemu. Baza podataka omogucuje efikasno i jednostavno opisivanje dogadjaja. 
-Podaci su staticni, ne menjaju se u toku izvrsenja pa se zbog toga mogu cuvati u
-ROM memoriji. Baza podataka definise sledece aspekte dogadjaja:
+eSolid definise centralizovanu bazu dogadjaja koji se koriste u sistemu. Baza 
+dogadjaja omogucuje efikasno i jednostavno opisivanje dogadjaja. Podaci su 
+staticni, ne menjaju se u toku izvrsavanja aplikacije i zbog toga se podaci mogu 
+cuvati u ROM tipu memorije. Baza dogadjaja definise sledece aspekte dogadjaja:
 - znakovni identifikator: u C-u se identifikator implementira kao enumerator
 - velicinu dogadjaja: za svaki tip dogadjaja se cuva velicina dogadjaja u 
     bajtovima
+- memorijsko skladiste dogadjaja: memorijski prostor dogadjaja se moze dobaviti
+    upotrebom @c dinamickog alokatora ili upotrebom @c pool alokatora. Ako se
+    koristi @c pool alokator onda ovaj clan elementa baze dogadjaja cuva koja
+    instanca @c pool alokatora cuva dati tip dogadjaja.
 - tip dogadjaja: definise se C tip dogadjaja za svaki dogadjaj. Nekoliko 
     dogadjaja mogu imati isti tip.
 - znakovni niz tipa dogadjaja: pored C tipa dogadjaja definise se znakovni niz
@@ -36,18 +40,19 @@ ROM memoriji. Baza podataka definise sledece aspekte dogadjaja:
 - znakovni niz opisa dogadjaja: kratak opis dogadjaja, sta on radi i za sta se
     koristi.
     
-Baza podataka dogadjaja omogucuje eSolid-u da jednostavno poveze identifikator
-dogadjaja sa njegovim ostalim atributuma. Naime, ako se eSolid-u preda samo
-identifikator dogadjaja, on moze da iz baze podataka dobavi ostale informacije o
-dogadjaju kao sto je velicina, tip, opis dogadjaja i slicno.
+Baza dogadjaja omogucuje eSolid-u da jednostavno poveze identifikator dogadjaja 
+sa njegovim ostalim atributuma. Naime, ako se eSolid-u preda samo identifikator 
+dogadjaja, on moze da iz baze dogadjaja dobavi ostale atribute o dogadjaju kao 
+sto je velicina, memorijsko skladiste, tip, opis dogadjaja i slicno.
 
-@subsection     evt_db_create Kreiranje i popunjavanje baze podataka
+@subsection     evt_db_create Kreiranje i popunjavanje baze dogadjaja
 
-Za implementaciju baze podataka koriste se takozvani X makroi. X makroima se
-vrlo jednostavno generise baza podataka i ne postoji mogucnost da se pojavi
-nesklad izmedju identifikatora dogadjaja i ostalih podataka o dogadjaju.
+Za implementaciju baze dogadjaja koriste se takozvani <i>X makroi</i>. X 
+makroima se vrlo jednostavno generise baza dogadjaja i ne postoji mogucnost da 
+se pojavi nesklad izmedju identifikatora dogadjaja i ostalih atributa o 
+dogadjaju.
 
-<h3>Definisanje tipova</h3>
+<h3>Korak 1: Definisanje tipova</h3>
 Najpre se vrsi definisanje tipova dogadjaja. Tipovi dogadjaja su samo one 
 struktrure koje su izvedene iz osnovne strukture dogadjaja @ref esEvt_T. 
 Definisanje se radi na sledeci nacin:
@@ -100,16 +105,55 @@ typedef struct basicEvt {
 @endcode
 <b>Listing 3</b> - Primer tipa dogadjaja bez parametra
 
-<h3>Popunjavanje podataka</h3>
-Nakon definisanja tipova dogadjaja vrsi se popunjavanje svih podataka o 
-dogadjajima u makro tabelu. Podaci se upisuju u makro tabelu na sledeci nacin:
+<h3>Korak 1: Definisanje memorijskog skladista</h3>
+Svaka instanca dogadjaja zahteva memorijski prostor. Memorijski prostor se moze
+dobaviti upotrebom dva memorijska alokatora, @c dinamicki alokator i @c pool
+alokator. @c Dinamicki alokator moze da alocira memorijske regione sa 
+promenljivom velicinom, dok @c pool alokator alocira memoriju samo u blokovima 
+fiksne velicine. 
+
+- Dinamicki alokator je vrlo slican standardnoj biblioteckoj funkciji @c malloc
+sa tom razlikom sto je optimizovan za embedded okruzenje. Medjutim, upotreba 
+dinamickog alokatora nije uvek pozeljna u embedded okruzenju zbog nemogucnosti
+dokazivanja da ce alokator uvek uspesno opsluziti zahteve za dobavljanje 
+memorije.
+- Pool alokator je dosta jednostavniji od dinamickog alokatora, ne postoji 
+mogucnost pojave fragmentacije memorije i vreme izvrsenja je uvek poznato. 
+Glavna negativna osobina je da ne moze da alocira delove memorije vece od 
+predefinisane velicine bloka.
+ 
+Ako se koristi pool alokator onda treba kreirati potrebne instance pool 
+alokatora (ogledati @ref page_mem), a zatim se deskriptori pool memorija navode
+u makro tabeli.
+
+Ukoliko je potrebno da neki dogadjaj ima promenljivu velicinu onda se moze
+koristiti dinamicki alokator. U tom slucaju se samo postavlja @c NULL vrednost
+umesto pokazivaca na instancu pool alokatora.   
+
+<h3>Popunjavanje atributa</h3>
+Nakon definisanja tipova dogadjaja vrsi se popunjavanje svih atributa dogadjaja 
+u makro tabelu. 
 
 @code
 #define EVENT_TABLE(table)                                                      \
-    table(ID1,              simpleEvt_T,    "This is a very simple event")      \
-    table(ID2,              basicEvt_T,     "A signal event")
+    table({id},     {type},         {storage},  "description")
 @endcode
-<b>Listing 4</b> - Primer makro tabele sa dva dogadjaja 
+<b>Listing 4a</b> - Format makro tabele 
+- id - identifikator dogadjaja, tip podatka je @ref esEvtId_T
+- type - struktura dogadjaja kreirana u koraku "Definisanje tipova"
+- storage - pokazivac na memorijsko skladiste dogadjaja kreirano u koraku 
+    "Definisanje memorijskog skladista"
+- description - znakovni niz kratkog opisa dogadjaja, sta on radi i za sta se
+    koristi
+    
+Podaci se upisuju u makro tabelu na sledeci nacin:
+
+@code
+#define EVENT_TABLE(table)                                                      \
+    table(ID1,      simpleEvt_T,    NULL,       "This is a very simple event")  \
+    table(ID2,      basicEvt_T,     NULL,       "A signal event")
+@endcode
+<b>Listing 4b</b> - Primer makro tabele sa dva dogadjaja 
 
 U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
 enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima. Sledeca 

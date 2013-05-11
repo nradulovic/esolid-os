@@ -78,8 +78,8 @@ sisteme.
 Konfiguracija se vrsi u datoteci mem_config.h. Navodjenje opcija se vrsi u
 sekciji DEFINES.
 
-Na primer ako je potrebno dodeliti 1024B static alokatoru onda se u datoteci
-mem_config.h u sekciji @c @b DEFINES unosi sledece:
+Na primer, ako je potrebno dodeliti 1024B memorije static alokatoru onda se u 
+datoteci mem_config.h u sekciji @c @b DEFINES unosi sledece:
 
 @code
 
