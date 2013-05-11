@@ -80,20 +80,23 @@
  * @brief       Kreira tabelu enumeratora
  * @api
  */
-#define ES_EXPAND_EVT_ID(a, b, c)       a,
+#define ES_EXPAND_EVT_ID(a, b, c, d)                                            \
+    a,
 
 /**
  * @brief       Kreira bazu dogadjaja
  * @see         esEvtDBElem_T
  * @api
  */
-#define ES_EXPAND_EVT_DATA(a, b, c)     [a] = {sizeof(b), #a, #b, c},
+#define ES_EXPAND_EVT_DATA(a, b, c, d)                                          \
+    [a] = {sizeof(b), #a, #b, d},
 
 /**
  * @brief       Kreira C tipove za dogadjaje
  * @api
  */
-#define ES_EXPAND_EVT_TYPEDEF(a, b, c)  typedef b a##_T;
+#define ES_EXPAND_EVT_TYPEDEF(a, b, c, d)                                       \
+    typedef b a##_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------  C++ extern begin  --*/
@@ -215,8 +218,9 @@ struct esEvtDBElem {
 /** @brief      Velicina dogadjaja                                            */
     size_t          size;
 
-#if defined(OPT_EVT_MEMPOOL) || defined(__DOXYGEN__)
-    OPT_EXT_MEMPOOL_T pool;
+#if (1U == OPT_EVT_USE_MEM_POOL) || defined(__DOXYGEN__)
+/** @brief      Deskriptor Pool alokatora                                     */
+    OPT_MEM_POOL_T  pool;
 #endif
 
 /** @brief      Ime dogadjaja                                                 */
@@ -237,6 +241,15 @@ typedef struct esEvtDBElem esEvtDBElem_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+/**
+ * @brief       Deskriptor dinamickog alokatora
+ * @details     Ukoliko se koristi dinamicki alokator onda je potrebno kreirati
+ *              instancu dinamickog alokatora. Dinamickom alokatoru se predaje
+ *              ovaj deskriptor prilikom inicijalizacije.
+ */
+extern OPT_MEM_DYN_T gEvtDynStorage;
+
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
@@ -249,8 +262,7 @@ typedef struct esEvtDBElem esEvtDBElem_T;
  * @param       elements                Broj elemenata (dogadjaja) u bazi
  * @details     Nakon sto se formira baza dogadjaja ona mora da se registruje.
  *              U jednom trenutku koristi se samo jedna baza dogadjaja i ona se
- *              mora nalaziti u ROM memoriji. Baza dogadjaja moze da sadrzi
- *              maksimalno 1024 razlicitih dogadjaja.
+ *              mora nalaziti u ROM memoriji.
  * @api
  */
 void esEvtDBRegister(
