@@ -79,7 +79,7 @@ Konfiguracija se vrsi u datoteci mem_config.h. Navodjenje opcija se vrsi u
 sekciji DEFINES.
 
 Na primer ako je potrebno dodeliti 1024B static alokatoru onda se u datoteci
-mem_config.h u sekciji DEFINES unosi sledece:
+mem_config.h u sekciji @c @b DEFINES unosi sledece:
 
 @code
 
@@ -96,13 +96,14 @@ mem_config.h u sekciji DEFINES unosi sledece:
     :
     :
     
-/*==============================================================  SETTINGS  ==*/
+/*==============================================================  SETTINGS  ==*/,
+
     :
     :
     
 @endcode
 
-Za konfiguraciju Memory Management modula pogledati @ref mem_cfg.
+Za opcije Memory Management modula pogledati @ref mem_cfg.
     
 */
  
