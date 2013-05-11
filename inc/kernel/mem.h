@@ -26,6 +26,13 @@
  * @brief       Memory Management API
  * @addtogroup  mem_intf
  * @brief       Javni interfejs
+ * @details     Modul implementira tri klase memorijskih menadzera:
+ *              - staticni memorijski menadzer
+ *              - dinamicki memorijski menadzer
+ *              - pool memorijski menadzer
+ *
+ *              Za pregled memorijskih menadzera pogledati @ref mem
+ * @warning     All memory functions require aligned memory access
  *********************************************************************//** @{ */
 
 #ifndef MEM_H_

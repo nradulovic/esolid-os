@@ -6,7 +6,7 @@
 @defgroup       evt_cfg  Configuration
 @}
 */
-/** @page       page_evt Dogadjaj - Event objekat
+/** @addtogroup evt
 @brief          Event object overview
 
 @section        evt_index Sadrzaj
