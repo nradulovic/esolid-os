@@ -6,5 +6,6 @@ INPUT               =   ../doc/source/kernel/mem-mainpage.dox                   
                         ../doc/source/kernel/mem.dox                            \
                         ../inc/kernel/mem.h                                     \
                         ../config/mem_config.h                                  \
+                        ../config/sys_config.h                                  \
                         ../src/kernel/mem.c 
 OUTPUT_DIRECTORY    =   ../doc/out/mem

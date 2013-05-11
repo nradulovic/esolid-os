@@ -10,6 +10,7 @@ INPUT               =   ../doc/source/kernel/mem-example.dox                    
                         ../inc/kernel/evt.h                                     \
                         ../config/mem_config.h                                  \
                         ../config/evt_config.h                                  \
+                        ../config/sys_config.h                                  \
                         ../src/kernel/evt.c                                     \
                         ../src/kernel/mem.c
 OUTPUT_DIRECTORY    =   ../doc/out/evt
