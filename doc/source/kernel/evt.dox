@@ -13,6 +13,7 @@
 - @ref evt_intro
 - @ref evt_database
     - @ref evt_db_create
+    - @ref evt_db_reg
 - @ref evt_configuration
 
 @section        evt_intro Dogadjaj i prelazak
@@ -172,7 +173,7 @@ Podaci se upisuju u makro tabelu na sledeci nacin:
 @endcode
 <i>Listing 4b</i> - Primer makro tabele sa dva dogadjaja 
 
-<i>Opis Listinga 4b</i> Tabela sadrzi dva dogadjaja. 
+<i>Opis Listinga 4b:</i> Tabela sadrzi dva dogadjaja. 
 - Prvi dogadjaj je @c ID1, tip dogadjaja je struktura @c simpleEvt, koristi  
 dinamicki alokator za skladistenje dogadjaja, a opis dogadjaja je: <i>"This is a 
 very simple event"</i>.
@@ -221,7 +222,22 @@ static esEvtDBElem_T gEvtDB[LAST_EVT_ID] = {
 };
 @endcode
 
+@subsection     evt_db_reg Registracija baze dogadjaja
 
+Registracija kreirane baze dogadjaja se vrsi na sledeci nacin:
+
+@code
+
+    :
+    :
+    
+esEvtDBRegister(
+    gEvtDB,
+    LAST_EVT_ID);
+    
+    :
+    :
+@endcode
 @section        evt_configuration Konfiguracija dogadjaja
 
 Za konfiguraciju dogadjaja pogledati @ref evt_cfg.
