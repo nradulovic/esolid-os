@@ -75,7 +75,7 @@
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 #if (16U > OPT_MEM_SMEM_SIZE) && (0U != OPT_MEM_SMEM_SIZE)
-# error "eSolid: MEM: Static memory is too small."
+# error "eSolid: MEM: Static memory is too small. Check option OPT_MEM_SMEM_SIZE"
 #endif
 
 /** @endcond *//** @} *//******************************************************

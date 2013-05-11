@@ -30,12 +30,13 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "kernel/mem.h"
+#include "../config/log_config.h"
 #include "hal/hal_cpu.h"
 
 /*
  * Ako GUARD ili CRITICAL makroi koriste eSolid HAL onda hal_int treba da se ukljuci
  */
-#if !defined(OPT_GUARD_EXTERN) || !defined(OPT_CRITICAL_EXTERN)
+#if (0U == OPT_GUARD_EXTERN) || (0U == OPT_CRITICAL_EXTERN)
 # include "hal/hal_int.h"
 #endif
 
@@ -181,7 +182,7 @@ void esPMemInit(
     }
     block->next = NULL;
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_INIT(handle->guard);
 #else
     OPT_GUARD_INIT(0U);
@@ -200,7 +201,7 @@ size_t esPMemCalcPoolSize(
 
 /*----------------------------------------------------------------------------*/
 void * esPMemAllocI(
-    esPMemHandle_T *    handle) {
+    esPMemHandle_T * handle) {
 
     pMemBlock_T * block;
 
@@ -214,12 +215,12 @@ void * esPMemAllocI(
 }
 /*----------------------------------------------------------------------------*/
 void * esPMemAlloc(
-    esPMemHandle_T *    handle) {
+    esPMemHandle_T * handle) {
 
     OPT_GUARD_DECL();
     void * mem;
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
     OPT_GUARD_LOCK(0U);
@@ -227,7 +228,7 @@ void * esPMemAlloc(
     mem = esPMemAllocI(
         handle);
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
     OPT_GUARD_UNLOCK(0U);
@@ -255,7 +256,7 @@ void esPMemDeAlloc(
 
     OPT_GUARD_DECL();
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
     OPT_GUARD_LOCK(0U);
@@ -264,7 +265,7 @@ void esPMemDeAlloc(
         handle,
         mem);
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
     OPT_GUARD_UNLOCK(0U);
@@ -311,7 +312,7 @@ void esDMemInit(
     handle->sentinel->freeNext = begin;
     handle->sentinel->freePrev = begin;
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_INIT(handle->guard);
 #else
     OPT_GUARD_INIT(0U);
@@ -367,7 +368,7 @@ void * esDMemAlloc(
     OPT_GUARD_DECL();
     void * mem;
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
     OPT_GUARD_LOCK(0U);
@@ -376,7 +377,7 @@ void * esDMemAlloc(
         handle,
         size);
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
     OPT_GUARD_UNLOCK(0U);
@@ -428,7 +429,7 @@ void esDMemDeAlloc(
 
     OPT_GUARD_DECL();
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
     OPT_GUARD_LOCK(0U);
@@ -437,7 +438,7 @@ void esDMemDeAlloc(
         handle,
         mem);
 
-#if defined(GUARD_T)
+#if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
     OPT_GUARD_UNLOCK(0U);

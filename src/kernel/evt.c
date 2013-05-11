@@ -29,14 +29,20 @@
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
-#define EVT_PKG_H_VAR
-#include "kernel_private.h"
-#include "kernel/mem.h"
-#include "kernel/log.h"
+#include "evt_pkg.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
+
+struct evtDB {
+    const C_ROM esEvtDBElem_T ** elem;
+
+#if (OPT_LOG_LEVEL <= LOG_DBG)
+    uint16_t        elements;
+#endif
+};
+
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
 /**
@@ -61,7 +67,13 @@ static C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
+
+static struct evtDB gEvtDB;
+
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+OPT_MEM_DYN_T gEvtDynStorage;
+
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 
 /*----------------------------------------------------------------------------*/
@@ -70,22 +82,26 @@ static C_INLINE_ALWAYS void evtInit_(
     size_t          size,
     esEvtId_T       id) {
 
-    evt->id = id;
-    evt->attrib = 0U;                                                        /* Dogadjaj je dinamican, sa 0 korisnika.                   */
-
-#if defined(OPT_EVT_USE_TIMESTAMP)
-    evt->timestamp = OPT_EVT_TIMESTAMP_CALLBACK();
-#endif
-
 #if (OPT_LOG_LEVEL <= LOG_DBG)
     evt->signature = EVT_SIGNATURE;
 #endif
 
-#if defined(OPT_EVT_USE_GENERATOR)
-    evt->generator = OPT_EVT_GENERATOR_CALLBACK();
+    evt->id = id;
+    evt->attrib = 0U;                                                           /* Dogadjaj je dinamican, sa 0 korisnika.                   */
+
+#if (1U == OPT_EVT_USE_TIMESTAMP)
+# if defined(1U == OPT_EVT_TIMESTAMP_CALLBACK)
+    evt->timestamp = appEvtTimestampGet();
+# endif
 #endif
 
-#if defined(OPT_EVT_USE_SIZE)
+#if (1U == OPT_EVT_USE_GENERATOR)
+# if (1U == OPT_EVT_GENERATOR_CALLBACK)
+    evt->generator = appEvtGeneratorGet();
+# endif
+#endif
+
+#if (1U == OPT_EVT_USE_SIZE)
     evt->size = (esEvtSize_T)size;
 #else
     (void)size;
@@ -99,31 +115,124 @@ static C_INLINE_ALWAYS void evtDeInit_(
 #if (OPT_LOG_LEVEL <= LOG_DBG)
     evt->signature = (uint16_t)~EVT_SIGNATURE;                                  /* Postavljanje loseg potpisa                               */
 #else
-	(void)evt;    
+	(void)evt;
 #endif
 }
 
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
-/*------------------------------------------------------------------------*//**
- * @ingroup         evt_intf
- * @{ *//*--------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+void esEvtDBRegister(
+    const C_ROM esEvtDBElem_T * evtDB[],
+    uint16_t        elements) {
 
-esEvt_T * esEvtCreate(
-    size_t          size,
+    gEvtDB.elem = evtDB;
+
+#if (OPT_LOG_LEVEL <= LOG_DBG)
+    gEvtDB.elements = elements;                                                 /* Snimi broj elemenata kako bi ogranicili ulazni opseg id  */
+
+# if (1U == OPT_EVT_USE_MEM_POOL) && (0U == OPT_MEM_POOL_EXTERN)                /* Proveri da li pool moze da sadrzi dogadjaje              */
+    {
+        uint16_t cntr;
+
+        for (cntr = 0U; cntr < elements; cntr++) {
+            ES_LOG_DBG_IF_INVALID(log, gEvtDB.elem[cntr] <= gEvtDB.elem[cntr]->pool.blockSize, "Pool size too small", 1U);
+        }
+    }
+# endif
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+size_t esEvtDBQuerySize(
     esEvtId_T       id) {
 
-    ES_CRITICAL_DECL();
+    return (gEvtDB.elem[id]->size);
+}
+
+/*----------------------------------------------------------------------------*/
+const C_ROM char * esEvtDBQueryName(
+    esEvtId_T       id) {
+
+    const C_ROM char * name;
+
+#if (1U == OPT_EVT_DB_USE_DESC_DATA)
+    name = gEvtDB.elem[id]->name;
+#else
+    (void)id;
+
+    name = "unknown";
+#endif
+
+    return (name);
+}
+
+/*----------------------------------------------------------------------------*/
+const C_ROM char * esEvtDBQueryType(
+    esEvtId_T       id) {
+
+    const C_ROM char * type;
+
+#if (1U == OPT_EVT_DB_USE_DESC_DATA)
+    type = gEvtDB.elem[id]->type;
+#else
+    (void)id;
+
+    type = "unknown";
+#endif
+
+    return (type);
+}
+
+/*----------------------------------------------------------------------------*/
+const C_ROM char * esEvtDBQueryDesc(
+    esEvtId_T       id) {
+
+    const C_ROM char * desc;
+
+#if (1U == OPT_EVT_DB_USE_DESC_DATA)
+    desc = gEvtDB.elem[id]->desc;
+
+    if (NULL == desc) {
+        desc = "no description";
+    }
+#else
+    (void)id;
+
+    desc = "no description";
+#endif
+
+    return (desc);
+}
+
+/*----------------------------------------------------------------------------*/
+esEvt_T * esEvtCreate(
+    esEvtId_T       id) {
+
     esEvt_T * newEvt;
 
-    ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
-    newEvt = esDMemAllocI(
-        size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
-    ES_CRITICAL_EXIT();
+#if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
+    newEvt = OPT_MEM_DYN_ALLOC(
+        &gEvtDynStorage,
+        gEvtDB.elem[id]->size);                                                 /* Dobavi potreban memorijski prostor za dogadjaj           */
+#elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
+    newEvt = OPT_MEM_POOL_ALLOC(
+        gEvtDB.elem[id]->pool);
+#else                                                                           /* Koriste se oba alokatora                                 */
+
+    if (NULL != gEvtDB.elem[id]->pool) {                                        /* Ako je pokazivac != NULL onda je to pool alokator        */
+        newEvt = OPT_MEM_POOL_ALLOC(
+            gEvtDB.elem[id]->pool);
+    } else {
+        newEvt = OPT_MEM_DYN_ALLOC(
+            &gEvtDynStorage,
+            gEvtDB.elem[id]->size);                                             /* Dobavi potreban memorijski prostor za dogadjaj           */
+    }
+#endif
     evtInit_(
         newEvt,
-        size,
+        gEvtDB.elem[id]->size,
         id);
 
     return (newEvt);
@@ -131,16 +240,25 @@ esEvt_T * esEvtCreate(
 
 /*----------------------------------------------------------------------------*/
 esEvt_T * esEvtCreateI(
-    size_t          size,
     esEvtId_T       id) {
 
     esEvt_T * newEvt;
 
-    newEvt = esDMemAllocI(
-        size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
+#if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
+    newEvt = OPT_MEM_DYN_ALLOCI(&gEvtDynStorage, gEvtDB.elem[id]->size);        /* Dobavi potreban memorijski prostor za dogadjaj           */
+#elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
+    newEvt = OPT_MEM_POOL_ALLOCI(gEvtDB.elem[id]->pool);
+#else                                                                           /* Koriste se oba alokatora                                 */
+
+    if (NULL != gEvtDB.elem[id]->pool) {                                        /* Ako je pokazivac != NULL onda je to pool alokator        */
+        newEvt = OPT_MEM_POOL_ALLOCI(gEvtDB.elem[id]->pool);
+    } else {
+        newEvt = OPT_MEM_DYN_ALLOCI(&gEvtDynStorage, gEvtDB.elem[id]->size);    /* Dobavi potreban memorijski prostor za dogadjaj           */
+    }
+#endif
     evtInit_(
         newEvt,
-        size,
+        gEvtDB.elem[id]->size,
         id);
 
     return (newEvt);
@@ -165,14 +283,21 @@ void esEvtDestroy(
     esEvt_T *       evt) {
 
     if (0U == evt->attrib) {
-    	ES_CRITICAL_DECL();
-    	
         evtDeInit_(
             evt);
-        ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX);
-        esDMemDeAllocI(
-            evt);
-        ES_CRITICAL_EXIT();
+
+#if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
+        OPT_MEM_DYN_DEALLOC(&gEvtDynStorage, evt);
+#elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
+        OPT_MEM_POOL_DEALLOC(&gEvtDB.elem[evt->id]->pool, evt);
+#else                                                                           /* Koriste se oba alokatora                                 */
+
+        if (NULL != gEvtDB.elem[evt->id]->pool) {
+            OPT_MEM_POOL_DEALLOC(gEvtDB.elem[evt->id]->pool, evt);
+        } else {
+            OPT_MEM_DYN_DEALLOC(&gEvtDynStorage, evt);
+        }
+#endif
     }
 }
 
@@ -183,12 +308,22 @@ void esEvtDestroyI(
     if (0U == evt->attrib) {
         evtDeInit_(
             evt);
-        esDMemDeAllocI(
-            evt);
+
+#if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
+        OPT_MEM_DYN_DEALLOCI(&gEvtDynStorage, evt);
+#elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
+        OPT_MEM_POOL_DEALLOCI(gEvtDB.elem[evt->id]->pool, evt);
+#else                                                                           /* Koriste se oba alokatora                                 */
+
+        if (NULL != gEvtDB.elem[evt->id]->pool) {
+            OPT_MEM_POOL_DEALLOCI(gEvtDB.elem[evt->id]->pool, evt);
+        } else {
+            OPT_MEM_DYN_DEALLOCI(&gEvtDynStorage, evt);
+        }
+#endif
     }
 }
 
-/** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
  * END of evt.c

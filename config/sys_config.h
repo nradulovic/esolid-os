@@ -161,7 +161,7 @@
  *              mutex-a ili semaphore-a kada se koristi neki RTOS.
  */
 # if defined(__DOXYGEN__)
-#  define GUARD_T
+#  define OPT_GUARD_T
 # endif
 
 /**
@@ -215,16 +215,28 @@
 # define OPT_MEM_POOL_T                 esPMemHandle_T
 
 /**
- * @brief       Dobavlja memorijski blok
+ * @brief       Dobavlja memorijski blok (prekid omogucen)
  */
 # define OPT_MEM_POOL_ALLOC(pool)                                               \
     esPMemAlloc(pool)
 
 /**
- * @brief       Oslobadja memorijski blok
+ * @brief       Dobavlja memorijski blok
+ */
+# define OPT_MEM_POOL_ALLOCI(pool)                                              \
+    esPMemAllocI(pool)
+
+/**
+ * @brief       Oslobadja memorijski blok (prekid omogucen)
  */
 # define OPT_MEM_POOL_DEALLOC(pool, mem)                                        \
     esPMemDeAlloc(pool, mem)
+
+/**
+ * @brief       Oslobadja memorijski blok
+ */
+# define OPT_MEM_POOL_DEALLOCI(pool, mem)                                       \
+    esPMemDeAllocI(pool, mem)
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -239,10 +251,13 @@
  *              funkcije:
  *              - ukljuciti opciju @ref OPT_MEM_DYN_EXTERN
  *              - definisati makro @ref OPT_MEM_DYN_T kao prazan makro
- *              - definisati makro @ref OPT_MEM_DYN_ALLOC kao:
+ *              - definisati makro @ref OPT_MEM_DYN_ALLOCI kao:
  *              <c>OPT_MEM_DYN_ALLOC(handle, size) malloc(size)</c>
- *              - definisati makro @ref OPT_MEM_DYN_DEALLOC kao:
+ *              - definisati makro @ref OPT_MEM_DYN_DEALLOCI kao:
  *              <c>OPT_MEM_DYN_DEALLOC(handle, mem) free(mem)</c>
+ *              - makroi @ref OPT_MEM_DYN_ALLOC i @ref OPT_MEM_DYN_DEALLOC su
+ *              isti kao i makroi sa I sufiksom, sa tom razlikom što oni
+ *              zakljucavaju i otkljucavaju prekide
  *              - ukljuciti bibliotecku datoteku: @c stdlib
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -268,16 +283,28 @@
 # define OPT_MEM_DYN_T                  esDMemHandle_T
 
 /**
- * @brief       Dobavlja memorijski blok
+ * @brief       Dobavlja memorijski blok (prekid omogucen)
  */
 # define OPT_MEM_DYN_ALLOC(handle, size)                                        \
     esDMemAlloc(handle, size)
 
 /**
- * @brief       Oslobadja memorijski blok
+ * @brief       Dobavlja memorijski blok
+ */
+# define OPT_MEM_DYN_ALLOCI(handle, size)                                       \
+    esDMemAllocI(handle, size)
+
+/**
+ * @brief       Oslobadja memorijski blok (prekid omogucen)
  */
 # define OPT_MEM_DYN_DEALLOC(handle, mem)                                       \
     esDMemDeAlloc(handle, mem)
+
+/**
+ * @brief       Oslobadja memorijski blok
+ */
+# define OPT_MEM_DYN_DEALLOCI(handle, mem)                                      \
+    esDMemDeAllocI(handle, mem)
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -305,13 +332,15 @@
 
 #if (1U == OPT_MEM_DYN_EXTERN) &&                                               \
     (!defined(OPT_MEM_DYN_T) || !defined(OPT_MEM_DYN_ALLOC) ||                  \
-     !defined(OPT_MEM_DYN_DEALLOC))
+     !defined(OPT_MEM_DYN_ALLOCI) || !defined(OPT_MEM_DYN_DEALLOC) ||           \
+     !defined(OPT_MEM_DYN_DEALLOCI))
 # error "eSolid: When option OPT_MEM_DYN_EXTERN is active you have to define all OPT_MEM_DYN_... macros"
 #endif
 
 #if (1U == OPT_MEM_POOL_EXTERN) &&                                              \
     (!defined(OPT_MEM_POOL_T) || !defined(OPT_MEM_POOL_ALLOC) ||                \
-     !defined(OPT_MEM_POOL_DEALLOC))
+     !defined(OPT_MEM_POOL_ALLOCI) || !defined(OPT_MEM_POOL_DEALLOC) ||         \
+     !defined(OPT_MEM_POOL_DEALLOCI))
 # error "eSolid: When option OPT_MEM_POOL_EXTERN is active you have to define all OPT_MEM_POOL_... macros"
 #endif
 

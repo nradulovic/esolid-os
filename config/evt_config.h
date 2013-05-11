@@ -244,7 +244,30 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
- * @name        Tipovi podataka koje korisnik definise
+ * @name        Baza dogadjaja
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Ukljucivanje/iskljucivanje da li baza dogadjaja cuva podatke
+ *              tipa znakovni niz
+ * @details     U vecini slucajeva aplikacija ne zahteva da se cuvaju dodatni
+ *              podaci o dogadjajima kao sto su imena, tip i opis dogadjaja.
+ *              Ovom opcijom navedeni podaci se ukljucuju/iskljucuju.
+ *
+ *              Moguce vrednosti:
+ *              - 0 - ne koriste se imena, tip i opis dogadjaja
+ *              - 1 - koriste se imena, tip i opis dogadjaja
+ *
+ * @note        Podrazumevano podesavanje: 0 (ne koriste se imena, tip i opis
+ *              dogadjaja)
+ */
+#if !defined(OPT_EVT_DB_USE_DESC_DATA)
+# define OPT_EVT_DB_USE_DESC_DATA       0U
+#endif
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Tipovi podataka u zaglavlju dogadjaja
  * @brief       Ovde su navedeni tipovi podataka koji se koriste u strukturi
  *              @ref esEvt_T
  * @{ *//*--------------------------------------------------------------------*/

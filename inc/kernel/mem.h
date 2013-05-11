@@ -93,9 +93,9 @@ struct esDMemHandle {
 /** @brief      Pokazivac na cuvara memorije                                  */
     struct dMemBlock * sentinel;
 
-#if defined(GUARD_T) || defined(__DOXYGEN__)
+#if defined(OPT_GUARD_T) || defined(__DOXYGEN__)
 /** @brief      Cuvar dinamickog alokatora                                    */
-    GUARD_T         guard;
+    OPT_GUARD_T     guard;
 #endif
 };
 
@@ -130,9 +130,9 @@ struct esPMemHandle {
 /** @brief      Pokazivac na cuvara memorije                                  */
     struct pMemBlock * sentinel;
 
-#if defined(GUARD_T) || defined(__DOXYGEN__)
+#if defined(OPT_GUARD_T) || defined(__DOXYGEN__)
 /** @brief      Cuvar pool alokatora                                          */
-    GUARD_T         guard;
+    OPT_GUARD_T     guard;
 #endif
 };
 

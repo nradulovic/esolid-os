@@ -88,8 +88,19 @@
  * @see         esEvtDBElem_T
  * @api
  */
-#define ES_EXPAND_EVT_DATA(a, b, c, d)                                          \
-    [a] = {sizeof(b), #a, #b, d},
+#if (1U == OPT_EVT_DB_USE_DESC_DATA) && (1U == OPT_EVT_USE_MEM_POOL)            /* Koriste se: deskriptivni podaci i pool alokator          */
+# define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
+    [a] = {sizeof(b), c, #a, #b, #d},
+#elif (1U == OPT_EVT_DB_USE_DESC_DATA) && (0U == OPT_EVT_USE_MEM_POOL)          /* Koriste se samo deskriptivni podaci                      */
+# define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
+    [a] = {sizeof(b), #a, #b, #d},
+#elif (0U == OPT_EVT_DB_USE_DESC_DATA) && (1U == OPT_EVT_USE_MEM_POOL)          /* Koristi se samo pool alokator                            */
+# define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
+    [a] = {sizeof(b), c},
+#else                                                                           /* Ne koriste se deskriptivni podaci i ne koristi se pool   */
+# define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
+    [a] = {sizeof(b)},
+#endif
 
 /**
  * @brief       Kreira C tipove za dogadjaje
@@ -220,9 +231,10 @@ struct esEvtDBElem {
 
 #if (1U == OPT_EVT_USE_MEM_POOL) || defined(__DOXYGEN__)
 /** @brief      Deskriptor Pool alokatora                                     */
-    OPT_MEM_POOL_T  pool;
+    OPT_MEM_POOL_T * pool;
 #endif
 
+#if (1U == OPT_EVT_DB_USE_DESC_DATA) || defined(__DOXYGEN__)
 /** @brief      Ime dogadjaja                                                 */
     const char *    name;
 
@@ -231,6 +243,7 @@ struct esEvtDBElem {
 
 /** @brief      Kratak opis dogadjaja                                         */
     const char *    desc;
+#endif
 };
 
 /**
@@ -247,6 +260,7 @@ typedef struct esEvtDBElem esEvtDBElem_T;
  * @details     Ukoliko se koristi dinamicki alokator onda je potrebno kreirati
  *              instancu dinamickog alokatora. Dinamickom alokatoru se predaje
  *              ovaj deskriptor prilikom inicijalizacije.
+ * @see         evtc_step_2
  */
 extern OPT_MEM_DYN_T gEvtDynStorage;
 
