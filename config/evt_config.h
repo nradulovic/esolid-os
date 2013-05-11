@@ -285,6 +285,19 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+
+#if (0U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)
+# error "eSolid: EVT: enable at least one memory allocator. See options: OPT_EVT_USE_MEM_DYN and OPT_EVT_USE_MEM_POOL"
+#endif
+
+#if (1U == OPT_EVT_TIMESTAMP_CALLBACK) && (0U == OPT_EVT_USE_TIMESTAMP)
+# error "eSolid: EVT: Option OPT_EVT_TIMESTAMP_CALLBACK is enabled while option OPT_EVT_USE_TIMESTAMP is disabled. Enable option OPT_EVT_TIMESTAMP_CALLBACK only if you use timestamp."
+#endif
+
+#if (1U == OPT_EVT_GENERATOR_CALLBACK) && (0U == OPT_EVT_USE_GENERATOR)
+# error "eSolid: EVT: Option OPT_EVT_GENERATOR_CALLBACK is enabled while option OPT_EVT_USE_GENERATOR is disabled. Enable option OPT_EVT_GENERATOR_CALLBACK only if you use generator."
+#endif
+
 /** @endcond *//** @} *//******************************************************
  * END of evt_config.h
  ******************************************************************************/

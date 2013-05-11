@@ -290,6 +290,31 @@
 #endif
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+
+#if (1U == OPT_GUARD_EXTERN) &&                                                 \
+    (!defined(OPT_GUARD_DECL) || !defined(OPT_GUARD_INIT) ||                    \
+     !defined(OPT_GUARD_LOCK) || !defined(OPT_GUARD_UNLOCK))
+# error "eSolid: When option OPT_GUARD_EXTERN is active you have to define all OPT_GUARD_... macros"
+#endif
+
+#if (1U == OPT_CRITICAL_EXTERN) &&                                              \
+    (!defined(OPT_CRITICAL_DECL) || !defined(OPT_CRITICAL_LOCK) ||              \
+     !defined(OPT_CRITICAL_UNLOCK))
+# error "eSolid: When option OPT_CRITICAL_EXTERN is active you have to define all OPT_CRITICAL_... macros"
+#endif
+
+#if (1U == OPT_MEM_DYN_EXTERN) &&                                               \
+    (!defined(OPT_MEM_DYN_T) || !defined(OPT_MEM_DYN_ALLOC) ||                  \
+     !defined(OPT_MEM_DYN_DEALLOC))
+# error "eSolid: When option OPT_MEM_DYN_EXTERN is active you have to define all OPT_MEM_DYN_... macros"
+#endif
+
+#if (1U == OPT_MEM_POOL_EXTERN) &&                                              \
+    (!defined(OPT_MEM_POOL_T) || !defined(OPT_MEM_POOL_ALLOC) ||                \
+     !defined(OPT_MEM_POOL_DEALLOC))
+# error "eSolid: When option OPT_MEM_POOL_EXTERN is active you have to define all OPT_MEM_POOL_... macros"
+#endif
+
 /** @endcond *//** @} *//******************************************************
  * END of sys_config.h
  ******************************************************************************/
