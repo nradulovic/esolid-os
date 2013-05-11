@@ -48,39 +48,42 @@
 #if !defined(OPT_SYS_INTERRUPT_PRIO_MAX)
 # define OPT_SYS_INTERRUPT_PRIO_MAX     ES_PRIO_REALTIME
 #endif
+
 /*------------------------------------------------------------------------*//**
- * @name        Zastita od istovremenog pristupa
- * @brief       Ovim makroima se sprecava istovremeni pristup istom memorijskom
- *              prostoru.
+ * @name        Zastita od istovremenog pristupa deljenom resursu
+ * @brief       Ovim makroima se sprecava istovremeni pristup deljenom resursu
  * @details     Koriscenjem ovih makroa moze da se specificira da se prilikom
- *              pristupa memorijskom prostoru prvo zakljuca pristup na odredjeni
+ *              pristupa deljenom resursu prvo zakljuca pristup na odredjeni
  *              nacin. To se moze vrsiti na nekoliko nacina:
  *              - gasenje prekida,
  *              - podizanje prioriteta scheduler-a,
  *              - aktiviranjem mutex-a
  *              - aktiviranjem binarnog semaphore-a.
- *
- * @p           Najjednostavniji nacin je gasenje prekida. Primer u takvom
- *              slucaju bi bio sledeci:
- *              1. Ostaviti makro @ref GUARD_T nedefinisan
- *              2. Ostaviti makro @ref OPT_GUARD_INIT prazan (nema funkciju)
- *              3. Ostaviti makro @ref OPT_GUARD_DECL prazan (nema funkciju)
- *              4. Definisati makro @ref OPT_GUARD_LOCK kao: @c esIntDisable()
- *              5. Definisati makro @ref OPT_GUARD_UNLOCK kao: @c esIntEnable()
- *
- * @note        Treba naglasiti da za gornji primer treba ucitati i datoteku
- *              @c "hal/hal_int.h".
+ * @p           Za zastitu kriticnih sekcija koda i za zastitu od istovremenog
+ *              pristupa deljenom resursu se koriste interni mehanizmi eSolid-a
+ *              ili RTOS funkcije. Ukoliko se koristi RTOS onda je moguce
+ *              koristiti njegove mehanizme za sinhronizaciju. Da bi se
+ *              koristile RTOS funkcije potrebno je ukljuciti opciju
+ *              @ref OPT_GUARD_EXTERN i definisati sve ostale OPT_GUARD_...
+ *              makroe.
  * @{ *//*--------------------------------------------------------------------*/
 
+/**
+ * @brief       Ukljucivanje extern-og cuvara
+ * @details     Podrazumevano ova opcija nije ukljucena i u tom slucaju eSolid
+ *              koristi interne mehanizme za zastitu kriticnih sekcija koda i
+ *              deljenih resursa. Interni mehanizmi za zastitu su zabrana
+ *              prekida ili maskiranje prekida.
+ */
 #if defined(__DOXYGEN__)
 # define OPT_GUARD_EXTERN
 #endif
 
-#if !defined(OPT_GUARD_EXTERN)
+#if !defined(OPT_GUARD_EXTERN) || defined(__DOXYGEN__)
 /**
- * @brief       Tip podataka za zastitu memorijskog alokatora
- * @details     Ovde treba postaviti tip cuvara alokatora, kao na primer
- *              struktura mutex-a ili semaphore-a kada se koristi neki RTOS.
+ * @brief       Tip podataka za zastitu deljenog resursa
+ * @details     Ovde treba postaviti tip cuvara resursa, kao na primer struktura
+ *              mutex-a ili semaphore-a kada se koristi neki RTOS.
  */
 # if defined(__DOXYGEN__)
 #  define GUARD_T
@@ -89,28 +92,29 @@
 /**
  * @brief       Deklaracija @c auto promenljive za @c GUARD makroe
  * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
- *              promenljive.
+ *              promenljiva.
  */
-# define OPT_GUARD_DECL()
+# define OPT_GUARD_DECL()               ES_CRITICAL_DECL()
 
 /**
- * @brief       Inicijalizacija cuvara memorijskog alokatora
+ * @brief       Inicijalizacija cuvara deljenog resursa
  * @details     Ovde treba postaviti funkciju koja vrsi inicijalizaciju cuvara
- *              alokatora. Ona se poziva u esPMemInit() ili esDMemInit()
- *              funkcijama.
+ *              resursa. Ona se poziva u ...Init() funkcijama.
  */
 # define OPT_GUARD_INIT(guard)          (void)guard
 
 /**
- * @brief       Zakljucavanje memorijskog alokatora
+ * @brief       Zakljucavanje pristupa
  */
-# define OPT_GUARD_LOCK(guard)          (void)guard
+# define OPT_GUARD_LOCK(guard)          ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX)
+
 
 /**
- * @brief       Otkljucavanje memorijskog alokatora
+ * @brief       Otkljucavanje pristupa
  */
-# define OPT_GUARD_UNLOCK(guard)        (void)guard
+# define OPT_GUARD_UNLOCK(guard)        ES_CRITICAL_EXIT()
 #endif
+
 /** @} *//*-------------------------------------------------------------------*/
 
 
@@ -118,7 +122,7 @@
 # define OPT_MEM_POOL_EXTERN
 #endif
 
-#if !defined(OPT_MEM_POOL_EXTERN)
+#if !defined(OPT_MEM_POOL_EXTERN)  || defined(__DOXYGEN__)
 # define OPT_MEM_POOL_T                 esPMemHandle_T
 # define OPT_MEM_POOL_ALLOC(pool)                                               \
     esPMemAlloc(pool)

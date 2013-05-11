@@ -32,6 +32,10 @@
 #include "kernel/mem.h"
 #include "hal/hal_cpu.h"
 
+#if !defined(OPT_GUARD_EXTERN)
+# include "hal/hal_int.h"
+#endif
+
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
