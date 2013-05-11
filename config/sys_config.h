@@ -37,18 +37,72 @@
 
 /** @endcond */
 /*==============================================================  SETTINGS  ==*/
+
+/*------------------------------------------------------------------------*//**
+ * @name        Zastita kriticnih sekcija koda
+ * @brief       Ovim makroima se stite kriticne sekcije koda
+ * @details     Koriscenjem ovih makroa moze da se specificira da se prilikom
+ *              pristupa deljenom resursu prvo zakljuca pristup na odredjeni
+ *              nacin. To se moze vrsiti na nekoliko nacina:
+ *              - gasenje prekida,
+ *              - podizanje prioriteta scheduler-a,
+ *
+ * @p           Za zastitu kriticne sekcije koda se koriste interni mehanizmi
+ *              eSolid-a ili RTOS funkcije. Ukoliko se koristi RTOS onda je
+ *              moguce koristiti njegove mehanizme za zastitu kriticnih sekcija.
+ *              Da bi se koristile RTOS funkcije potrebno je ukljuciti opciju
+ *              @ref OPT_CRITICAL_EXTERN i definisati sve ostale
+ *              OPT_CRITICAL_... makroe.
+ * @{ *//*--------------------------------------------------------------------*/
+
 /**
- * @brief       Maksimalan prioritet prekidnih rutina kernela
- * @details     Ovim se ogranicava prioritet prekidnih rutina koje jezgro
+ * @brief       Maksimalan prioritet kriticnih sekcija koda
+ * @details     Ovim se ogranicava prioritet kriticnih sekcija koda koje jezgro
  *              koristi. Ovo podesavanje je izuzetno korisno kada postoji
  *              potreba da se pojedini hardverski prekidi ne prekidaju od strane
  *              jezgra.
+ * @pre         Ova opcija je validna samo ako se koristi interni mehanizam
+ *              eSolid-a, odnosno, ako je opcija @ref OPT_CRITICAL_EXTERN
+ *              iskljucena.
  * @note        Podrazumevano podesavanje: ES_PRIO_REALTIME
  */
 #if !defined(OPT_SYS_INTERRUPT_PRIO_MAX)
 # define OPT_SYS_INTERRUPT_PRIO_MAX     ES_PRIO_REALTIME
 #endif
 
+/**
+ * @brief       Ukljucivanje extern-og cuvara kriticne sekcije koda
+ * @details     Podrazumevano ova opcija nije ukljucena i u tom slucaju eSolid
+ *              koristi interne mehanizme za zastitu kriticnih sekcija koda.
+ *              Interni mehanizmi za zastitu su zabrana prekida ili maskiranje
+ *              prekida.
+ */
+#if defined(__DOXYGEN__)
+# define OPT_CRITICAL_EXTERN
+#endif
+
+#if !defined(OPT_CRITICAL_EXTERN) || defined(__DOXYGEN__)
+
+/**
+ * @brief       Deklaracija @c auto promenljive za @c CRITICAL makroe
+ * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
+ *              promenljiva.
+ */
+# define OPT_CRITICAL_DECL()            ES_CRITICAL_DECL()
+
+/**
+ * @brief       Zakljucavanje pristupa
+ */
+# define OPT_CRITICAL_LOCK()            ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX)
+
+
+/**
+ * @brief       Otkljucavanje pristupa
+ */
+# define OPT_CRITICAL_UNLOCK()          ES_CRITICAL_EXIT()
+#endif
+
+/** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        Zastita od istovremenog pristupa deljenom resursu
  * @brief       Ovim makroima se sprecava istovremeni pristup deljenom resursu
@@ -60,21 +114,19 @@
  *              - aktiviranjem mutex-a
  *              - aktiviranjem binarnog semaphore-a.
  *
- * @p           Za zastitu kriticnih sekcija koda i za zastitu od istovremenog
- *              pristupa deljenom resursu se koriste interni mehanizmi eSolid-a
- *              ili RTOS funkcije. Ukoliko se koristi RTOS onda je moguce
- *              koristiti njegove mehanizme za sinhronizaciju. Da bi se
- *              koristile RTOS funkcije potrebno je ukljuciti opciju
- *              @ref OPT_GUARD_EXTERN i definisati sve ostale OPT_GUARD_...
- *              makroe.
+ * @p           Za zastitu od istovremenog pristupa deljenom resursu se koriste
+ *              interni mehanizmi eSolid-a ili RTOS funkcije. Ukoliko se koristi
+ *              RTOS onda je moguce koristiti njegove mehanizme za
+ *              sinhronizaciju. Da bi se koristile RTOS funkcije potrebno je
+ *              ukljuciti opciju @ref OPT_GUARD_EXTERN i definisati sve ostale
+ *              OPT_GUARD_... makroe.
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Ukljucivanje extern-og cuvara
+ * @brief       Ukljucivanje extern-og cuvara deljenih resursa
  * @details     Podrazumevano ova opcija nije ukljucena i u tom slucaju eSolid
- *              koristi interne mehanizme za zastitu kriticnih sekcija koda i
- *              deljenih resursa. Interni mehanizmi za zastitu su zabrana
- *              prekida ili maskiranje prekida.
+ *              koristi interne mehanizme za zastitu deljenih resursa. Interni
+ *              mehanizmi za zastitu su zabrana prekida ili maskiranje prekida.
  */
 #if defined(__DOXYGEN__)
 # define OPT_GUARD_EXTERN
@@ -117,20 +169,38 @@
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Odabir pool alokatora
+ * @{ *//*--------------------------------------------------------------------*/
 
-
+/**
+ * @brief       Ukljucivanje extern-og pool alokatora
+ */
 #if defined(__DOXYGEN__)
 # define OPT_MEM_POOL_EXTERN
 #endif
 
 #if !defined(OPT_MEM_POOL_EXTERN)  || defined(__DOXYGEN__)
+
+/**
+ * @brief       Deskriptor Pool alokatora
+ */
 # define OPT_MEM_POOL_T                 esPMemHandle_T
+
+/**
+ * @brief       Dobavlja memorijski blok
+ */
 # define OPT_MEM_POOL_ALLOC(pool)                                               \
     esPMemAlloc(pool)
 
+/**
+ * @brief       Oslobadja memorijski blok
+ */
 # define OPT_MEM_POOL_DEALLOC(pool, mem)                                        \
     esPMemDeAlloc(pool, mem)
 #endif
+
+/** @} *//*-------------------------------------------------------------------*/
 
 /**
  * @brief       Omogucavanje LOGer-a

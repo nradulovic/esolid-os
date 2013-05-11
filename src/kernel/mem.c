@@ -32,7 +32,10 @@
 #include "kernel/mem.h"
 #include "hal/hal_cpu.h"
 
-#if !defined(OPT_GUARD_EXTERN)
+/*
+ * Ako GUARD ili CRITICAL makroi koriste eSolid HAL onda hal_int treba da se ukljuci
+ */
+#if !defined(OPT_GUARD_EXTERN) || !defined(OPT_CRITICAL_EXTERN)
 # include "hal/hal_int.h"
 #endif
 
@@ -123,6 +126,21 @@ void * esSMemAllocI(
     } else {
         mem = NULL;
     }
+
+    return (mem);
+}
+
+/*----------------------------------------------------------------------------*/
+void * esSMemAlloc(
+    size_t          size) {
+
+    OPT_CRITICAL_DECL();
+    void * mem;
+
+    OPT_CRITICAL_LOCK();
+    mem = esSMemAllocI(
+        size);
+    OPT_CRITICAL_UNLOCK();
 
     return (mem);
 }

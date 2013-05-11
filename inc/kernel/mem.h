@@ -151,6 +151,23 @@ void * esSMemAllocI(
     size_t          size);
 
 /**
+ * @brief       Dodeljuje memorijski prostor velicine @c size
+ * @param       size                    Velicina zahtevanog memorijskog prostora
+ *                                      u bajtovima.
+ * @return      Pokazivac na rezervisani memorijski blok.
+ * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
+ *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
+ *              standardna implementacija @c malloc C funkcije. Ukoliko se
+ *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
+ *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
+ *              standardom.
+ * @note        Koristi @ref Zastita kriticnih sekcija koda
+ * @api
+ */
+void * esSMemAlloc(
+    size_t          size);
+
+/**
  * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
  * @param       [out] status            Status struktura static alokatora
  * @iclass
