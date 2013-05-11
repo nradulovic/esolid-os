@@ -207,6 +207,7 @@
  * @details     Ukoliko sistem u koji se integrise eSolid vec poseduje dinamicke
  *              alokatore memorije ovim makroima se moze izvrsiti odabir
  *              postojecg dinamickog alokatora.
+ *
  * @p           Primer kada je potrebno odabrati bibliotecke malloc/free
  *              funkcije:
  *              - ukljuciti opciju @ref OPT_MEM_DYN_EXTERN
@@ -214,6 +215,8 @@
  *              - definisati makro @ref OPT_MEM_DYN_ALLOC kao:
  *              <c>OPT_MEM_DYN_ALLOC(handle, size) malloc(size)</c>
  *              - definisati makro @ref OPT_MEM_DYN_DEALLOC kao:
+ *              <c>OPT_MEM_DYN_DEALLOC(handle, mem) free(mem)</c>
+ *              - ukljuciti datoteku: @c stdlib
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
