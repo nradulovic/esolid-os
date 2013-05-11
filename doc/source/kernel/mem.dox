@@ -14,6 +14,13 @@ Za pregled memorijskih menadzera pogledati @ref page_mem
 @} */
 /** @page       page_mem Memory Management
 @brief          Memory Management overview
+
+@section        mem_index Sadrzaj
+- @ref mem_smem
+- @ref mem_dmem
+- @ref mem_pmem
+- @ref mem_configuration
+
 @section        mem_smem Staticki memorijski menadzer
 Staticki memorijski menadzer moze samo da alocira memoriju i jednom alocirana
 memorija se ne moze osloboditi. Koristi se kada je potrebno staticki alocirati

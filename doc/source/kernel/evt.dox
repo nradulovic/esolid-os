@@ -8,6 +8,12 @@
 */
 /** @page       page_evt Dogadjaj - Event objekat
 @brief          Event object overview
+
+@section        evt_index Sadrzaj
+- @ref evt_intro
+- @ref evt_database
+- @ref evt_configuration
+
 @section        evt_intro Dogadjaj i prelazak
 Događaj je pojava stimulusa koji može da okine promenu stanja i koji je značajan 
 objektu ili aplikaciji.
@@ -135,7 +141,7 @@ Ukoliko je potrebno da neki dogadjaj ima promenljivu velicinu onda se moze
 koristiti dinamicki alokator. U tom slucaju se samo postavlja @c NULL vrednost
 umesto pokazivaca na instancu pool alokatora.   
 
-@subsubsection  evtc_step_3 Popunjavanje atributa
+@subsubsection  evtc_step_3 Korak 3: Popunjavanje atributa
 Nakon definisanja tipova dogadjaja vrsi se popunjavanje svih atributa dogadjaja 
 u makro tabelu. 
 
@@ -175,7 +181,7 @@ pokazivac na tekst, odnosno, vrednost @c NULL:
 @endcode
 <b>Listing 5</b> - Makro tabela bez opisa dogadjaja
 
-<h3>Korak 4: Instaciranje</h3>
+@subsubsection  evtc_step_4 Korak 4: Instaciranje
 Prvo se definisu enumeratori dogadjaja.
 
 @code
