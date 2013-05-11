@@ -142,7 +142,24 @@ u makro tabeli.
 
 Ukoliko je potrebno da neki dogadjaj ima promenljivu velicinu onda se moze
 koristiti dinamicki alokator. U tom slucaju se samo postavlja @c NULL vrednost
-umesto pokazivaca na instancu pool alokatora.   
+umesto pokazivaca na instancu pool alokatora. Dinamicki alokator se 
+inicijalizuje na sledeci nacin:
+
+@code
+
+    :
+    :
+
+#define BUFFER_SIZE                     1024
+
+    :
+    
+static char buffer[BUFFER_SIZE];
+esDMemInit(
+    &gEvtDynStorage,
+    &buffer[0],
+    sizeof(buffer));
+@endcode
 
 @note           Pogledati opcije @ref OPT_EVT_USE_MEM_POOL i 
                 @ref OPT_EVT_USE_MEM_DYN kojima se ukljucuje/iskljucuje koji
@@ -224,6 +241,8 @@ static esEvtDBElem_T gEvtDB[LAST_EVT_ID] = {
 
 @subsection     evt_db_reg Registracija baze dogadjaja
 
+Nakon sto se formira baza dogadjaja ona mora da se registruje. U jednom trenutku 
+koristi se samo jedna baza dogadjaja i ona se mora nalaziti u ROM memoriji. 
 Registracija kreirane baze dogadjaja se vrsi na sledeci nacin:
 
 @code
