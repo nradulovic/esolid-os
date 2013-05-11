@@ -76,7 +76,7 @@ typedef struct esMemStatus {
  * @see         esDMemInit()
  * @api
  */
-typedef struct esDMemHandle {
+struct esDMemHandle {
 /** @brief      Pokazivac na cuvara memorije                                  */
     struct dMemBlock * sentinel;
 
@@ -84,7 +84,12 @@ typedef struct esDMemHandle {
 /** @brief      Cuvar dinamickog alokatora                                    */
     GUARD_T         guard;
 #endif
-} esDMemHandle_T;
+};
+
+/**
+ * @brief       Tip deskriptora dinamickog alokatora
+ */
+typedef struct esDMemHandle esDMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
