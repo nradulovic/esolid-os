@@ -63,6 +63,7 @@ Kreiranje i popunjavanje baze dogadjaja se vrsi u nekoliko koraka:
 - @ref evtc_step_1
 - @ref evtc_step_2
 - @ref evtc_step_3
+- @ref evtc_step_4
 
 @subsubsection  evtc_step_1 Korak 1: Definisanje tipova
 Najpre se vrsi definisanje tipova dogadjaja. Tipovi dogadjaja su samo one 
@@ -142,6 +143,10 @@ Ukoliko je potrebno da neki dogadjaj ima promenljivu velicinu onda se moze
 koristiti dinamicki alokator. U tom slucaju se samo postavlja @c NULL vrednost
 umesto pokazivaca na instancu pool alokatora.   
 
+@note           Pogledati opcije @ref OPT_EVT_USE_MEM_POOL i 
+                @ref OPT_EVT_USE_MEM_DYN kojima se ukljucuje/iskljucuje koji
+                alokatori se koriste.
+                
 @subsubsection  evtc_step_3 Korak 3: Popunjavanje atributa
 Nakon definisanja tipova dogadjaja vrsi se popunjavanje svih atributa dogadjaja 
 u makro tabelu. 
@@ -152,9 +157,9 @@ u makro tabelu.
 @endcode
 <b>Listing 4a</b> - Format makro tabele 
 - @c id - identifikator dogadjaja, tip podatka je @ref esEvtId_T
-- @c type - struktura dogadjaja kreirana u koraku 1, "Definisanje tipova"
-- @c storage - pokazivac na memorijsko skladiste dogadjaja kreirano u koraku 2, 
-    "Definisanje memorijskog skladista"
+- @c type - struktura dogadjaja kreirana u @ref evtc_step_1
+- @c storage - pokazivac na memorijsko skladiste dogadjaja kreirano u 
+    @ref evtc_step_1,
 - @c description - znakovni niz kratkog opisa dogadjaja, sta on radi i za sta se
     koristi
     
@@ -167,18 +172,27 @@ Podaci se upisuju u makro tabelu na sledeci nacin:
 @endcode
 <b>Listing 4b</b> - Primer makro tabele sa dva dogadjaja 
 
+<i>Opis Listinga 4b</i> Tabela sadrzi dva dogadjaja. 
+- Prvi dogadjaj je @c ID1, tip dogadjaja je struktura @c simpleEvt, koristi  
+dinamicki alokator za skladistenje dogadjaja, a opis dogadjaja je: <i>"This is a 
+very simple event"</i>.
+- Drugi dogadjaj je @c ID2, tip dogadjaja je struktrua @c basicEvt, koristi
+dinamicki alokator za skladistenje dogadjaja, a opis dogadjaja je: <i>"A signal 
+event"</i>.
+
 U tabeli se prvo navodi identifikator dogadjaja. Identifikator dogadjaja je
 enumeratator u C-u. Imena enumeratora se uglavnom pisu velikim slovima. Sledeca 
 kolona u tabeli je tip dogadjaja. Tip dogadjaja mora da odgovara nekoj strukturi 
 koja je kreirana u prethodnom koraku. Tip dogadjaja se koristi kako bi se 
-odredila velicina dogadjaja. Zadnja kolona u tabeli je znakovni niz koji opisuje 
-dogadjaj. Ukoliko nije potrebno navesti opis onda tu treba da se postavi prazan 
-pokazivac na tekst, odnosno, vrednost @c NULL:
+odredila velicina dogadjaja. Sledecu kolonu cine deskriptori pool memorija za
+skladistenje. Zadnja kolona u tabeli je znakovni niz koji opisuje dogadjaj. 
+Ukoliko nije potrebno navesti opis onda tu treba da se postavi prazan pokazivac 
+na tekst, odnosno, vrednost @c NULL:
 
 @code
 #define EVENT_TABLE(table)                                                      \
-    table(ID1,              type1_T,        NULL)                               \
-    table(ID2,              type2_T,        NULL)
+    table(ID1,      type1_T,        NULL,       NULL)                           \
+    table(ID2,      type2_T,        NULL,       NULL)
 @endcode
 <b>Listing 5</b> - Makro tabela bez opisa dogadjaja
 
@@ -187,23 +201,17 @@ Prvo se definisu enumeratori dogadjaja.
 
 @code
 enum evtId {
-    ZERO_EVT_ID = ES_EVT_ID_USR,
     EVENT_TABLE(ES_EXPAND_EVT_ID)
     LAST_EVT_ID
 }
 @endcode
 <b>Listing 6</b> -  
 
-Prvi enumerator je ZERO_EVT_ID. eSolid poseduje nekoliko predefinisanih 
-dogadjaja, sa svojim identifikatorima, i korisnicki definisani dogadjaji moraju
-da nastave enumeratorski niz od pozicije gde je eSolid zavrsio. Zbog navedene
-cinjenice ZERO_EVT_ID prima vrednost @ref ES_EVT_ID_USR. Zadnji enumerator je
-LAST_EVT_ID. On se koristi da specificira zadnji identifikator dogadjaja. 
-Izmedju navedenih enumeratora postavlja se makro tabele @c EVENT_TABLE sa
-argumentom @ref ES_EXPAND_EVT_ID. Naime, ovaj makro vrsi transformaciju makro
-tabele u navodjenje enumeratora. Svi identifikatori dogadjaja koji su navedeni u
-makro tabeli se putem @ref ES_EXPAND_EVT_ID makroa transformisu u odgovarajuce
-enumeratore.
+Zadnji enumerator je LAST_EVT_ID. On se koristi da specificira zadnji 
+identifikator dogadjaja. Makro tabela @c EVENT_TABLE sa argumentom 
+@ref ES_EXPAND_EVT_ID vrsi transformaciju makro tabele u navodjenje enumeratora. 
+Svi identifikatori dogadjaja koji su navedeni u makro tabeli se putem 
+@ref ES_EXPAND_EVT_ID makroa transformisu u odgovarajuce enumeratore.
 
 @section        evt_configuration Konfiguracija dogadjaja
 
