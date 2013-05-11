@@ -87,15 +87,17 @@
  *              Interni mehanizmi za zastitu su zabrana prekida ili maskiranje
  *              prekida.
  *
- *              Ukoliko je makro:
- *              - definisan: opcija je ukljucena i koristi se eksterni cuvar
- *              - nedefinisan: opcija je iskljucena i koristi se eSolid cuvar
+ *              Moguce vrednosti:
+ *              - 0 - koristi se eSolid cuvar
+ *              - 1 - koristi se eksterni cuvar
+ *
+ * @note        Podrazumevano podesavanje: 0 (koristi se eSolid cuvar)
  */
-#if defined(__DOXYGEN__)
-# define OPT_CRITICAL_EXTERN
+#if !defined(OPT_CRITICAL_EXTERN) || defined(__DOXYGEN__)
+# define OPT_CRITICAL_EXTERN            0U
 #endif
 
-#if !defined(OPT_CRITICAL_EXTERN) || defined(__DOXYGEN__)
+#if (0U == OPT_CRITICAL_EXTERN) || defined(__DOXYGEN__)
 
 /**
  * @brief       Deklaracija @c auto promenljive za @c CRITICAL makroe
@@ -142,15 +144,17 @@
  *              koristi interne mehanizme za zastitu deljenih resursa. Interni
  *              mehanizmi za zastitu su zabrana prekida ili maskiranje prekida.
  *
- *              Ukoliko je makro:
- *              - definisan: opcija je ukljucena i koristi se eksterni cuvar
- *              - nedefinisan: opcija je iskljucena i koristi se eSolid cuvar
+ *              Moguce vrednosti:
+ *              - 0 - koristi se eSolid cuvar
+ *              - 1 - koristi se eksterni cuvar
+ *
+ * @note        Podrazumevano podesavanje: 0 (koristi se eSolid cuvar)
  */
-#if defined(__DOXYGEN__)
-# define OPT_GUARD_EXTERN
+#if !defined(OPT_GUARD_EXTERN) || defined(__DOXYGEN__)
+# define OPT_GUARD_EXTERN               0U
 #endif
 
-#if !defined(OPT_GUARD_EXTERN) || defined(__DOXYGEN__)
+#if (0U == OPT_GUARD_EXTERN) || defined(__DOXYGEN__)
 /**
  * @brief       Tip podataka za zastitu deljenog resursa
  * @details     Ovde treba postaviti tip cuvara resursa, kao na primer struktura
@@ -193,15 +197,17 @@
 
 /**
  * @brief       Ukljucivanje eksternog pool alokatora
- * @details     Ukoliko je makro:
- *              - definisan: opcija je ukljucena i koristi se eksterni alokator
- *              - nedefinisan: opcija je iskljucena i koristi se eSolid alokator
+ * @details     Moguce vrednosti:
+ *              - 0 - koristi se eSolid alokator
+ *              - 1 - koristi se eksterni alokator
+ *
+ * @note        Podrazumevano podesavanje: 0 (koristi se eSolid alokator)
  */
-#if defined(__DOXYGEN__)
-# define OPT_MEM_POOL_EXTERN
+#if !defined(OPT_MEM_POOL_EXTERN) || defined(__DOXYGEN__)
+# define OPT_MEM_POOL_EXTERN            0U
 #endif
 
-#if !defined(OPT_MEM_POOL_EXTERN)  || defined(__DOXYGEN__)
+#if (0U == OPT_MEM_POOL_EXTERN)  || defined(__DOXYGEN__)
 
 /**
  * @brief       Deskriptor Pool alokatora
@@ -242,15 +248,17 @@
 
 /**
  * @brief       Ukljucivanje eksternog dinamickog alokatora
- * @details     Ukoliko je makro:
- *              - definisan: opcija je ukljucena i koristi se eksterni alokator
- *              - nedefinisan: opcija je iskljucena i koristi se eSolid alokator
+ * @details     Moguce vrednosti:
+ *              - 0 - koristi se eSolid alokator
+ *              - 1 - koristi se eksterni alokator
+ *
+ * @note        Podrazumevano podesavanje: 0 (koristi se eSolid alokator)
  */
-#if defined(__DOXYGEN__)
-# define OPT_MEM_DYN_EXTERN
+#if !defined(OPT_MEM_DYN_EXTERN) || defined(__DOXYGEN__)
+# define OPT_MEM_DYN_EXTERN             0U
 #endif
 
-#if !defined(OPT_MEM_DYN_EXTERN)  || defined(__DOXYGEN__)
+#if (0U == OPT_MEM_DYN_EXTERN)  || defined(__DOXYGEN__)
 
 /**
  * @brief       Deskriptor dinamickog alokatora

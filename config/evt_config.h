@@ -67,51 +67,51 @@
  *              pakovanja podataka unutar strukture dogadjaja.
  *              Ovom promenljivom se moze definisati koja direktiva ce se
  *              koristiti za strukture dogadjaja (poravnjanje, pakovanje).
- * @note        Podrazumevano podesavanje: @ref C_PACKED - pakovana struktrua
+ * @note        Podrazumevano podesavanje: prazno (ne koristi se atribut)
  */
-#if !defined(OPT_EVT_STRUCT_ATTRIB)
+#if !defined(OPT_EVT_STRUCT_ATTRIB) || defined(__DOXYGEN__)
 # define OPT_EVT_STRUCT_ATTRIB
 #endif
 
 /**
  * @brief       Koristi se atribut o velicini dogadjaja
  * @details     Moguce vrednosti:
- *                  - nedefinisano - ne koristi se atribut o velicini
- *                  - definisano   - koristi se atribut o velicini
+ *              - 0 - ne koristi se atribut o velicini
+ *              - 1 - koristi se atribut o velicini
  *
  *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_SIZE_T.
- * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
- *              velicini.
+ * @note        Podrazumevano podesavanje: 0 (dogadjaji ne koriste atribut o
+ *              velicini)
  */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_SIZE
+#if !defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
+# define OPT_EVT_USE_SIZE               0U
 #endif
 
 /**
  * @brief       Koristi se pokazivac na proizvodjaca dogadjaja.
  * @details     Moguce vrednosti:
- *                  - nedefinisano - pokazivac na objekat se ne koristi
- *                  - definisano   - pokazivac na objekat se koristi
+ *              - 0 - pokazivac na objekat se ne koristi
+ *              - 1 - pokazivac na objekat se koristi
  *
- * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
- *              generatoru.
+ * @note        Podrazumevano podesavanje: 0 (dogadjaji ne koriste atribut o
+ *              generatoru)
  */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_GENERATOR
+#if !defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+# define OPT_EVT_USE_GENERATOR          0U
 #endif
 
 /**
  * @brief       Koristi se vremenski marker dogadjaja.
  * @details     Moguce vrednosti:
- *              - nedefinisano - vrem. marker se ne koristi
- *              - definisano   - vrem. marker se koristi
+ *              - 0 - vrem. marker se ne koristi
+ *              - 1 - vrem. marker se koristi
  *
  *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_TIMESTAMP_T.
- * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
- *              vremenskom markeru.
+ * @note        Podrazumevano podesavanje: 0 (dogadjaji ne koriste atribut o
+ *              vremenskom markeru)
  */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_TIMESTAMP
+#if !defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
+# define OPT_EVT_USE_TIMESTAMP          0U
 #endif
 
 /**
@@ -126,7 +126,7 @@
  *              potreba za vecim tipom od minimalnog.
  * @note        Podrazumevano podesavanje: uint32_t
  */
-#if !defined(OPT_EVT_ID_T)
+#if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
 # define OPT_EVT_ID_T                   uint16_t
 #endif
 
@@ -136,7 +136,7 @@
  * @note        Ovo podesavanje ima znacaja samo ako je ukljucena opcija
  *              @ref OPT_EVT_USE_SIZE
  */
-#if !defined(OPT_EVT_SIZE_T)
+#if !defined(OPT_EVT_SIZE_T) || defined(__DOXYGEN__)
 # define OPT_EVT_SIZE_T                 size_t
 #endif
 
@@ -146,7 +146,7 @@
  * @note        Ovo podesavanje ima znacaja samo ako je ukljucena opcija
  *              @ref OPT_EVT_USE_TIMESTAMP
  */
-#if !defined(OPT_EVT_TIMESTAMP_T)
+#if !defined(OPT_EVT_TIMESTAMP_T) || defined(__DOXYGEN__)
 # define OPT_EVT_TIMESTAMP_T            uint32_t
 #endif
 
@@ -165,12 +165,17 @@
  *              @ref OPT_EVT_USE_GENERATOR. Tada je potrebno tek kreirani
  *              događaj popuniti identifikatorom (pokazivač) proizvodžača
  *              događaja.
+ *
+ *              Moguce vrednosti:
+ *              - 0 - ne koristi se callback funkcija
+ *              - 1 - koristi se callback funkcija
+ *
  * @pre         Opcija @ref OPT_EVT_USE_GENERATOR mora da bude ukljucena pre ove
  *              opcije.
- * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
+ * @note        Podrazumevano podesavanje: 0 (ne koristi se callback funkcija)
  */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_GENERATOR_CALLBACK
+#if !defined(OPT_EVT_GENERATOR_CALLBACK) || defined(__DOXYGEN__)
+# define OPT_EVT_GENERATOR_CALLBACK     0U
 #endif
 
 /**
@@ -178,12 +183,17 @@
  * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
  *              @ref OPT_EVT_USE_TIMESTAMP. Tada je potrebno tek kreirani
  *              događaj popuniti vremenskim markerom nastanka događaja.
+ *
+ *              Moguce vrednosti:
+ *              - 0 - ne koristi se callback funkcija
+ *              - 1 - koristi se callback funkcija
+ *
  * @pre         Opcija @ref OPT_EVT_USE_TIMESTAMP mora da bude ukljucena pre ove
  *              opcije.
- * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
+ * @note        Podrazumevano podesavanje: 0 (ne koristi se callback funkcija)
  */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_TIMESTAMP_CALLBACK
+#if !defined(OPT_EVT_TIMESTAMP_CALLBACK) || defined(__DOXYGEN__)
+# define OPT_EVT_TIMESTAMP_CALLBACK     0U
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -203,15 +213,17 @@
  *              opcija @ref OPT_EVT_USE_MEM_POOL, a ukljucena je opcija
  *              @ref OPT_EVT_USE_MEM_DYN.
  *              - koriste se oba alokatora: ukljucene su obe opcije.
+ *
  * @note        Zabranjeno je da obe opcije budu iskljucene, jedan od navedena
  *              dva alokatora se mora koristiti.
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Ukljucivanje/iskljucivanje @c pool alokatora
- * @details     Ukoliko je vrednost makroa:
+ * @details     Moguce vrednosti:
  *              - 0 - ne koristi se @c pool alokator
  *              - 1 - koristi se @c pool alokator
+ *
  * @note        Podrazumevano podesavanje: 0 (ne koristi se @c pool alokator)
  */
 #if !defined(OPT_EVT_USE_MEM_POOL) || defined(__DOXYGEN__)
@@ -220,9 +232,10 @@
 
 /**
  * @brief       Ukljucivanje/iskljucivanje @c dinamickog alokatora
- * @details     Ukoliko je vrednost makroa:
+ * @details     Moguce vrednosti:
  *              - 0 - ne koristi se @c dinamicki alokator
  *              - 1 - koristi se @c dinamicki alokator
+ *
  * @note        Podrazumevano podesavanje: 1 (koristi se @c dinamicki alokator)
  */
 #if !defined(OPT_EVT_USE_MEM_DYN) || defined(__DOXYGEN__)
