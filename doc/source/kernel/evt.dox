@@ -88,7 +88,7 @@ typedef struct simpleEvt {
     uint32_t        data;
 } simpleEvt_T;
 @endcode
-<b>Listing 1</b> - Primer tipa dogadjaja sa jednim parametrom
+<i>Listing 1</i> - Primer tipa dogadjaja sa jednim parametrom
 
 Primer 2:
 - Dogadjaj treba da prenese dva podatka, jedan je 8-bitni, a drugi 16-bitni.
@@ -105,7 +105,7 @@ typedef struct moreComplex {
     uint8_t         data2;
 } moreComplex_T;
 @endcode
-<b>Listing 2</b> - Primer tipa dogadjaja sa dva parametra
+<i>Listing 2</i> - Primer tipa dogadjaja sa dva parametra
 
 Primer 3:
 - Dogadjaj ne treba da prenese ni jedan parametar. Uglavnom se ovakvi dogadjaji
@@ -116,7 +116,7 @@ typedef struct basicEvt {
     esEvt_T         super;
 } basicEvt_T;
 @endcode
-<b>Listing 3</b> - Primer tipa dogadjaja bez parametra
+<i>Listing 3</i> - Primer tipa dogadjaja bez parametra
 
 @subsubsection  evtc_step_2 Korak 2: Definisanje memorijskog skladista
 Svaka instanca dogadjaja zahteva memorijski prostor. Memorijski prostor se moze
@@ -155,7 +155,7 @@ u makro tabelu.
 #define EVENT_TABLE(table)                                                      \
     table({id},     {type},         {storage},  "description")
 @endcode
-<b>Listing 4a</b> - Format makro tabele 
+<i>Listing 4a</i> - Format makro tabele 
 - @c id - identifikator dogadjaja, tip podatka je @ref esEvtId_T
 - @c type - struktura dogadjaja kreirana u @ref evtc_step_1
 - @c storage - pokazivac na memorijsko skladiste dogadjaja kreirano u 
@@ -170,7 +170,7 @@ Podaci se upisuju u makro tabelu na sledeci nacin:
     table(ID1,      simpleEvt_T,    NULL,       "This is a very simple event")  \
     table(ID2,      basicEvt_T,     NULL,       "A signal event")
 @endcode
-<b>Listing 4b</b> - Primer makro tabele sa dva dogadjaja 
+<i>Listing 4b</i> - Primer makro tabele sa dva dogadjaja 
 
 <i>Opis Listinga 4b</i> Tabela sadrzi dva dogadjaja. 
 - Prvi dogadjaj je @c ID1, tip dogadjaja je struktura @c simpleEvt, koristi  
@@ -194,7 +194,7 @@ na tekst, odnosno, vrednost @c NULL:
     table(ID1,      type1_T,        NULL,       NULL)                           \
     table(ID2,      type2_T,        NULL,       NULL)
 @endcode
-<b>Listing 5</b> - Makro tabela bez opisa dogadjaja
+<i>Listing 5</i> - Makro tabela bez opisa dogadjaja
 
 @subsubsection  evtc_step_4 Korak 4: Instaciranje
 Prvo se definisu enumeratori dogadjaja.
@@ -205,13 +205,22 @@ enum evtId {
     LAST_EVT_ID
 }
 @endcode
-<b>Listing 6</b> -  
+<i>Listing 6</i> - Instaciranje enumeratora dogadjaja
 
 Zadnji enumerator je LAST_EVT_ID. On se koristi da specificira zadnji 
 identifikator dogadjaja. Makro tabela @c EVENT_TABLE sa argumentom 
 @ref ES_EXPAND_EVT_ID vrsi transformaciju makro tabele u navodjenje enumeratora. 
 Svi identifikatori dogadjaja koji su navedeni u makro tabeli se putem 
 @ref ES_EXPAND_EVT_ID makroa transformisu u odgovarajuce enumeratore.
+
+Nakon sto su enumeratori kreirani instacira se sama tabela dogadjaja:
+
+@code
+static esEvtDBElem_T gEvtDB[LAST_EVT_ID] = {
+    EVENT_TABLE(ES_EXPAND_EVT_DATA)
+};
+@endcode
+
 
 @section        evt_configuration Konfiguracija dogadjaja
 
