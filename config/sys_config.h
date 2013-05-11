@@ -59,6 +59,7 @@
  *              - podizanje prioriteta scheduler-a,
  *              - aktiviranjem mutex-a
  *              - aktiviranjem binarnog semaphore-a.
+ *
  * @p           Za zastitu kriticnih sekcija koda i za zastitu od istovremenog
  *              pristupa deljenom resursu se koriste interni mehanizmi eSolid-a
  *              ili RTOS funkcije. Ukoliko se koristi RTOS onda je moguce
