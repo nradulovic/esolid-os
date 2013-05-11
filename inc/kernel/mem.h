@@ -161,8 +161,9 @@ void * esSMemAllocI(
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
- * @note        Koristi @ref OPT_CRITICAL_... makroe za zastitu kriticnih
- *              sekcija koda, pogledati @ref sys_cfg.
+ * @note        Funkcija koristi makroe @ref OPT_CRITICAL_LOCK i
+ *              @ref OPT_CRITICAL_UNLOCK za zastitu memorije od istovremenog
+ *              pristupa.
  * @api
  */
 void * esSMemAlloc(
@@ -191,7 +192,6 @@ void esSMemUpdateStatusI(
  *                                      bajtovima
  * @details     Ova funkcija se mora pozvati pre koriscenja funkcija dinamickog
  *              memorijskog alokatora.
- * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
  * @warning     Funkcija zahteva da pokazivaci handle i pool budu poravnani
  *              (aligned). Ukoliko se koriste eSolid alokatori za instaciranje
  *              @c handle strukture i @c poolStorage onda je poravnani pristup
@@ -220,7 +220,6 @@ void esDMemInit(
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
- * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
  * @iclass
  */
 void * esDMemAllocI(
@@ -239,9 +238,9 @@ void * esDMemAllocI(
  *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
  *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
  *              standardom.
- * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
- * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
- *              zastitu memorije od istovremenog pristupa.
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
+ *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
+ *              pristupa.
  * @api
  */
 void * esDMemAlloc(
@@ -254,7 +253,6 @@ void * esDMemAlloc(
  * @param       [in] handle             Deskriptor dinamickog alokatora
  * @param       [in] mem                Pokazivac na prethodno dodeljen
  *                                      memorijski prostor.
- * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
  * @iclass
  */
 void esDMemDeAllocI(
@@ -267,9 +265,9 @@ void esDMemDeAllocI(
  * @param       [in] handle             Deskriptor dinamickog alokatora
  * @param       [in] mem                Pokazivac na prethodno dodeljen
  *                                      memorijski prostor.
- * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
- * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
- *              zastitu memorije od istovremenog pristupa.
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
+ *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
+ *              pristupa.
  * @api
  */
 void esDMemDeAlloc(
@@ -285,7 +283,6 @@ void esDMemDeAlloc(
  *              slobodne memorije, ali ne i bloka zahtevane velicine. U tom
  *              slucaju memorijski alokator nece biti u mogucnosti da ispuni
  *              zahtev.
- * @pre         Opcija @ref OPT_MEM_DMEM_ENABLE mora da bude aktivna
  * @iclass
  */
 void esDMemUpdateStatusI(
@@ -348,8 +345,9 @@ void * esPMemAllocI(
  * @brief       Alocira jedan blok iz memory pool-a
  * @param       [in] handle             Deskriptor pool alokatora
  * @return      Pokazivac na alocirani memorijski blok
- * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
- *              zastitu memorije od istovremenog pristupa.
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
+ *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
+ *              pristupa.
  * @api
  */
 void * esPMemAlloc(
@@ -369,8 +367,9 @@ void esPMemDeAllocI(
  * @brief       Oslobadja prethodno alocirani blok
  * @param       [in] handle             Deskriptor pool alokatora
  * @param       [in] mem                Prethodno alociran blok memorije
- * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i @ref OPT_GUARD_UNLOCK za
- *              zastitu memorije od istovremenog pristupa.
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
+ *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
+ *              pristupa.
  * @api
  */
 void esPMemDeAlloc(
