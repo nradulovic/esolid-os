@@ -12,7 +12,7 @@
 @section        evt_index Sadrzaj
 - @ref evt_intro
 - @ref evt_database
-    * @ref evt_db_create
+    - @ref evt_db_create
 - @ref evt_configuration
 
 @section        evt_intro Dogadjaj i prelazak
