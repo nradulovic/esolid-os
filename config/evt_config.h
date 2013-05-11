@@ -40,6 +40,11 @@
 
 /*------------------------------------------------------------------------*//**
  * @name        Podesavanje Event objekta
+ * @brief       Specifikacija esEvt_T strukture dogadjaja
+ * @details     Opcijom @ref OPT_EVT_STRUCT_ATTRIB se definise kakav layout
+ *              struktura treba da ima u memoriji. Ovde se najpre misli na
+ *              poravnjanje (@c alignment) elemenata u strukturi. Ostale opcije
+ *              specificiraju koje elemente struktura poseduje.
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
@@ -82,20 +87,6 @@
 #endif
 
 /**
- * @brief       Generiše ko je proizvodžač događaja
- * @details     Ova callback funkcija se poziva samo ako je uključena opcija
- *              @ref OPT_EVT_USE_GENERATOR. Tada je potrebno tek kreirani
- *              događaj popuniti identifikatorom (pokazivač) proizvodžača
- *              događaja.
- * @pre         Opcija @ref OPT_EVT_USE_GENERATOR mora da bude ukljucena pre ove
- *              opcije.
- * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
- */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_GENERATOR_CALLBACK
-#endif
-
-/**
  * @brief       Koristi se vremenski marker dogadjaja.
  * @details     Moguce vrednosti:
  *              - nedefinisano - vrem. marker se ne koristi
@@ -107,19 +98,6 @@
  */
 #if defined(__DOXYGEN__)
 # define OPT_EVT_USE_TIMESTAMP
-#endif
-
-/**
- * @brief       Generiše vremenski marker događaja
- * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
- *              @ref OPT_EVT_USE_TIMESTAMP. Tada je potrebno tek kreirani
- *              događaj popuniti vremenskim markerom nastanka događaja.
- * @pre         Opcija @ref OPT_EVT_USE_TIMESTAMP mora da bude ukljucena pre ove
- *              opcije.
- * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
- */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_TIMESTAMP_CALLBACK
 #endif
 
 /**
@@ -160,7 +138,44 @@
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
- * @name        Tipovi podataka koje korisnik definise
+ * @name        Callback funkcije
+ * @brief       Funkcije koje se pozivaju od strane EVT modula u odredjenim
+ *              trenucima izvrsenja
+ * @details     Ovde se nalaze sve callback funkcije koje EVT modul poziva. Njih
+ *              treba da definise korisnik prema svojim potrebama.
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**
+ * @brief       Generiše ko je proizvodžač događaja
+ * @details     Ova callback funkcija se poziva samo ako je uključena opcija
+ *              @ref OPT_EVT_USE_GENERATOR. Tada je potrebno tek kreirani
+ *              događaj popuniti identifikatorom (pokazivač) proizvodžača
+ *              događaja.
+ * @pre         Opcija @ref OPT_EVT_USE_GENERATOR mora da bude ukljucena pre ove
+ *              opcije.
+ * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
+ */
+#if defined(__DOXYGEN__)
+# define OPT_EVT_GENERATOR_CALLBACK
+#endif
+
+/**
+ * @brief       Generiše vremenski marker događaja
+ * @details     Ova callback funkcija se poziva ukoliko je uključena opcija
+ *              @ref OPT_EVT_USE_TIMESTAMP. Tada je potrebno tek kreirani
+ *              događaj popuniti vremenskim markerom nastanka događaja.
+ * @pre         Opcija @ref OPT_EVT_USE_TIMESTAMP mora da bude ukljucena pre ove
+ *              opcije.
+ * @note        Podrazumevano podesavanje: ne koristi se callback funkcija
+ */
+#if defined(__DOXYGEN__)
+# define OPT_EVT_TIMESTAMP_CALLBACK
+#endif
+
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Tipovi podataka koje korisnik definise za esEvt_T strukturu
+ * @brief       Ovde su navedeni tipovi podataka koji se koriste u dogadjaju
  * @{ *//*--------------------------------------------------------------------*/
 
 /**

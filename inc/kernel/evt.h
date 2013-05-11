@@ -423,7 +423,7 @@ void esEvtPostAheadI(
  * @brief       Funkcije koje se pozivaju od strane EVT modula u odredjenim
  *              trenucima izvrsenja
  * @details     Ovde se nalaze sve callback funkcije koje EVT modul poziva. Njih
- *              treba da definise samo korisnik prema svojim potrebama.
+ *              treba da definise korisnik prema svojim potrebama.
  * @{ *//*--------------------------------------------------------------------*/
 
 #if defined(OPT_EVT_USE_GENERATOR) && defined(OPT_EVT_GENERATOR_CALLBACK) ||    \
@@ -448,10 +448,10 @@ extern esEpa_T * appEvtGeneratorGet(
  * @return      Vremenski aspekt koji postaje vremenski marker dogadjaja
  * @details     Funkcija se poziva u toku kreiranja dogadjaja. Ona treba da
  *              vrati trenutnu vrednost vremenskog aspekta koja se postavlja u
- *              dogadjaja i postaje vremenski marker kreiranja dogadjaja.
+ *              dogadjaj i postaje vremenski marker kreiranja dogadjaja.
  *              Tipicna primena ove funkcije bi bila da vrati trenutnu vrednost
  *              nekog tajmera koji je stalno aktivan, na primer, @c systick.
- * @note        Funkcija se poziva samo ako su ukljucene opcije:
+ * @pre         Funkcija se poziva samo ako su ukljucene opcije:
  *              - @ref OPT_EVT_USE_TIMESTAMP
  *              - @ref OPT_EVT_TIMESTAMP_CALLBACK
  */
