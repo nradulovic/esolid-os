@@ -33,9 +33,10 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "hal/hal_compiler.h"
+#include "../config/sys_config.h"
 #include "../config/evt_config.h"
 
-#if !defined(OPT_MEM_POOL_EXTERN)
+#if (0U == OPT_MEM_POOL_EXTERN)
 # include "kernel/mem.h"
 #endif
 
@@ -154,7 +155,7 @@ struct OPT_EVT_STRUCT_ATTRIB esEvt {
  */
     uint16_t      	attrib;
 
-#if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
 /**
  * @brief       Vremenska oznaka kada se desio dogadjaj.
  * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_TIMESTAMP_T.
@@ -164,7 +165,7 @@ struct OPT_EVT_STRUCT_ATTRIB esEvt {
     esEvtTimestamp_T timestamp;
 #endif
 
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
 /**
  * @brief       Adresa generatora dogadjaja
  * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
@@ -173,7 +174,7 @@ struct OPT_EVT_STRUCT_ATTRIB esEvt {
     esEpa_T *       generator;
 #endif
 
-#if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
 /**
  * @brief       Velicina podataka dogadjaja.
  * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_SIZE_T.
@@ -190,6 +191,9 @@ struct OPT_EVT_STRUCT_ATTRIB esEvt {
  */
 typedef struct esEvt esEvt_T;
 
+/*------------------------------------------------------------------------*//**
+ * @name        Baza dogadjaja
+ * @{ *//*--------------------------------------------------------------------*/
 /**
  * @brief       Struktura jednog elementa baze dogadjaja
  * @details     Ova struktura navodi koji se podaci pamte za svaki dogadjaj u
@@ -219,6 +223,7 @@ struct esEvtDBElem {
  */
 typedef struct esEvtDBElem esEvtDBElem_T;
 
+/** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
@@ -446,7 +451,7 @@ void esEvtPostAheadI(
  *              treba da definise korisnik prema svojim potrebama.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if defined(OPT_EVT_USE_GENERATOR) && defined(OPT_EVT_GENERATOR_CALLBACK) ||    \
+#if (1U == OPT_EVT_USE_GENERATOR) && (1U == OPT_EVT_GENERATOR_CALLBACK) ||      \
     defined(__DOXYGEN__)
 /**
  * @brief       Dobavlja ko kreira dogadjaj
@@ -461,7 +466,7 @@ extern esEpa_T * appEvtGeneratorGet(
     void);
 #endif
 
-#if defined(OPT_EVT_USE_TIMESTAMP) && defined(OPT_EVT_TIMESTAMP_CALLBACK) ||    \
+#if (1U == OPT_EVT_USE_TIMESTAMP) && (1U == OPT_EVT_TIMESTAMP_CALLBACK) ||      \
     defined(__DOXYGEN__)
 /**
  * @brief       Dobavlja trenutni vremenski aspekt
