@@ -52,7 +52,12 @@ makroima se vrlo jednostavno generise baza dogadjaja i ne postoji mogucnost da
 se pojavi nesklad izmedju identifikatora dogadjaja i ostalih atributa o 
 dogadjaju.
 
-@subsubsection step_1 Korak 1: Definisanje tipova
+Kreiranje i popunjavanje baze dogadjaja se vrsi u nekoliko koraka:
+- @ref evtc_step_1
+- @ref evtc_step_2
+- @ref evtc_step_3
+
+@subsubsection  evtc_step_1 Korak 1: Definisanje tipova
 Najpre se vrsi definisanje tipova dogadjaja. Tipovi dogadjaja su samo one 
 struktrure koje su izvedene iz osnovne strukture dogadjaja @ref esEvt_T. 
 Definisanje se radi na sledeci nacin:
@@ -105,7 +110,7 @@ typedef struct basicEvt {
 @endcode
 <b>Listing 3</b> - Primer tipa dogadjaja bez parametra
 
-<h3>Korak 2: Definisanje memorijskog skladista</h3>
+@subsubsection  evtc_step_2 Korak 2: Definisanje memorijskog skladista
 Svaka instanca dogadjaja zahteva memorijski prostor. Memorijski prostor se moze
 dobaviti upotrebom dva memorijska alokatora, @c dinamicki alokator i @c pool
 alokator. @c Dinamicki alokator moze da alocira memorijske regione sa 
@@ -130,7 +135,7 @@ Ukoliko je potrebno da neki dogadjaj ima promenljivu velicinu onda se moze
 koristiti dinamicki alokator. U tom slucaju se samo postavlja @c NULL vrednost
 umesto pokazivaca na instancu pool alokatora.   
 
-<h3>Korak 3: Popunjavanje atributa</h3>
+@subsubsection  evtc_step_3 Popunjavanje atributa
 Nakon definisanja tipova dogadjaja vrsi se popunjavanje svih atributa dogadjaja 
 u makro tabelu. 
 
