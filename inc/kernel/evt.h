@@ -32,7 +32,7 @@
 #define EVT_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "hal/hal_compiler.h"
+#include "compiler.h"
 #include "../config/sys_config.h"
 #include "../config/evt_config.h"
 
@@ -280,7 +280,7 @@ extern OPT_MEM_DYN_T gEvtDynStorage;
  * @api
  */
 void esEvtDBRegister(
-    const C_ROM esEvtDBElem_T * evtDB[],
+    const PORT_C_ROM esEvtDBElem_T * evtDB[],
     uint16_t        elements);
 
 /**
@@ -302,7 +302,7 @@ size_t esEvtDBQuerySize(
  *              funkcijom esEvtDBRegister()
  * @api
  */
-const C_ROM char * esEvtDBQueryName(
+const PORT_C_ROM char * esEvtDBQueryName(
     esEvtId_T       id);
 
 /**
@@ -313,7 +313,7 @@ const C_ROM char * esEvtDBQueryName(
  *              funkcijom esEvtDBRegister()
  * @api
  */
-const C_ROM char * esEvtDBQueryType(
+const PORT_C_ROM char * esEvtDBQueryType(
     esEvtId_T       id);
 
 /**
@@ -324,7 +324,7 @@ const C_ROM char * esEvtDBQueryType(
  *              funkcijom esEvtDBRegister()
  * @api
  */
-const C_ROM char * esEvtDBQueryDesc(
+const PORT_C_ROM char * esEvtDBQueryDesc(
     esEvtId_T       id);
 
 /** @} *//*-------------------------------------------------------------------*/

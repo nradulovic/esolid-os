@@ -31,13 +31,14 @@
 /*=========================================================  INCLUDE FILES  ==*/
 #include "kernel/mem.h"
 #include "../config/log_config.h"
-#include "hal/hal_cpu.h"
+#include "cpu.h"
+#include "common.h"
 
 /*
  * Ako GUARD ili CRITICAL makroi koriste eSolid HAL onda hal_int treba da se ukljuci
  */
 #if (0U == OPT_GUARD_EXTERN) || (0U == OPT_CRITICAL_EXTERN)
-# include "hal/hal_int.h"
+/* # include "hal/hal_int.h" */
 #endif
 
 /*=========================================================  LOCAL DEFINES  ==*/
@@ -49,16 +50,16 @@
  */
 struct sMemSentinel {
 /** @brief      Pocetak bloka memorije                                        */
-    unative_T *     begin;
+    portReg_T *     begin;
 
 /** @brief      Indeks trenutno koriscene memorije                            */
-    unative_T       current;
+    portReg_T       current;
 };
 
 /**
  * @brief       Zaglavlje bloka dinamickog alokatora
  */
-typedef struct C_ALIGNED(ES_CPU_ATTRIB_ALIGNMENT) dMemBlock {
+typedef struct PORT_C_ALIGNED(PORT_DATA_ALIGNMENT) dMemBlock {
 /** @brief      Velicina bloka memorije (zajedno sa ovom strukturom)          */
     size_t          phySize;
 
@@ -89,7 +90,7 @@ typedef struct pMemBlock {
 static struct sMemSentinel gSMemSentinel;
 
 #if (OPT_MEM_SMEM_SIZE != 0U)
-static unative_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_SMEM_SIZE, sizeof(unative_T))];
+static portReg_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_SMEM_SIZE, sizeof(portReg_T))];
 #else
 extern uint8_t _sheap;
 extern uint8_t _eheap;
@@ -108,8 +109,8 @@ void esSMemInit(
     gSMemSentinel.begin = &sMemBuffer[0];
     gSMemSentinel.current = ES_DIMENSION(sMemBuffer);
 #else
-    gSMemSentinel.begin = (unative_T *)&_sheap;
-    gSMemSentinel.current = (&_eheap - &_sheap) / sizeof(unative_T);
+    gSMemSentinel.begin = (portReg_T *)&_sheap;
+    gSMemSentinel.current = (&_eheap - &_sheap) / sizeof(portReg_T);
 #endif
 }
 
@@ -119,7 +120,7 @@ void * esSMemAllocI(
 
     void * mem;
 
-    size = ES_DIV_ROUNDUP(size, sizeof(unative_T));
+    size = ES_DIV_ROUNDUP(size, sizeof(portReg_T));
 
     if (size <= gSMemSentinel.current) {
         gSMemSentinel.current -= size;
@@ -155,7 +156,7 @@ void esSMemUpdateStatusI(
 #else
     status->size = (size_t)(&_eheap - &_sheap);
 #endif
-    status->freeSpaceAvailable = gSMemSentinel.current * sizeof(unative_T);
+    status->freeSpaceAvailable = gSMemSentinel.current * sizeof(portReg_T);
     status->freeSpaceTotal = status->freeSpaceAvailable;
 }
 
@@ -194,7 +195,7 @@ size_t esPMemCalcPoolSize(
     size_t          blocks,
     size_t          blockSize) {
 
-    blockSize = ES_ALIGN_UP(blockSize, sizeof(unative_T));
+    blockSize = ES_ALIGN_UP(blockSize, sizeof(portReg_T));
 
     return (blocks * blockSize);
 }
@@ -300,7 +301,7 @@ void esDMemInit(
 
     dMemBlock_T * begin;
 
-    storageSize = ES_ALIGN(storageSize, sizeof(unative_T));
+    storageSize = ES_ALIGN(storageSize, sizeof(portReg_T));
     handle->sentinel = (dMemBlock_T *)((uint8_t *)storage + storageSize) - 1U;  /* Sentinel is the last element of the storage              */
     begin = (dMemBlock_T *)storage;
     begin->phySize = storageSize - sizeof(dMemBlock_T);
@@ -326,7 +327,7 @@ void * esDMemAllocI(
 
     dMemBlock_T * curr;
 
-    size = ES_ALIGN_UP(size, sizeof(unative_T)) + sizeof(dMemBlock_T);
+    size = ES_ALIGN_UP(size, sizeof(portReg_T)) + sizeof(dMemBlock_T);
     curr = handle->sentinel->freeNext;
 
     while (curr != handle->sentinel) {

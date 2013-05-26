@@ -30,13 +30,19 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "evt_pkg.h"
+#include "cpu.h"
+
+#if (1U != OPT_QUEUE_EXTERN)
+# include "epa_pkg.h"
+# include "evtq_pkg.h"
+#endif
 
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
 
 struct evtDB {
-    const C_ROM esEvtDBElem_T ** elem;
+    const PORT_C_ROM esEvtDBElem_T ** elem;
 
 #if (OPT_LOG_LEVEL <= LOG_DBG)
     uint16_t        elements;
@@ -52,7 +58,7 @@ struct evtDB {
  * @param       id                      identifikator dogadjaja.
  * @inline
  */
-static C_INLINE_ALWAYS void evtInit_(
+static PORT_C_INLINE_ALWAYS void evtInit_(
     esEvt_T *       evt,
     size_t          size,
     esEvtId_T       id);
@@ -63,7 +69,7 @@ static C_INLINE_ALWAYS void evtInit_(
  *                                      unistava.
  * @inline
  */
-static C_INLINE_ALWAYS void evtDeInit_(
+static PORT_C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -77,7 +83,7 @@ OPT_MEM_DYN_T gEvtDynStorage;
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 
 /*----------------------------------------------------------------------------*/
-static C_INLINE_ALWAYS void evtInit_(
+static PORT_C_INLINE_ALWAYS void evtInit_(
     esEvt_T *       evt,
     size_t          size,
     esEvtId_T       id) {
@@ -109,7 +115,7 @@ static C_INLINE_ALWAYS void evtInit_(
 }
 
 /*----------------------------------------------------------------------------*/
-static C_INLINE_ALWAYS void evtDeInit_(
+static PORT_C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
 #if (OPT_LOG_LEVEL <= LOG_DBG)
@@ -124,7 +130,7 @@ static C_INLINE_ALWAYS void evtDeInit_(
 
 /*----------------------------------------------------------------------------*/
 void esEvtDBRegister(
-    const C_ROM esEvtDBElem_T * evtDB[],
+    const PORT_C_ROM esEvtDBElem_T * evtDB[],
     uint16_t        elements) {
 
     gEvtDB.elem = evtDB;
@@ -152,10 +158,10 @@ size_t esEvtDBQuerySize(
 }
 
 /*----------------------------------------------------------------------------*/
-const C_ROM char * esEvtDBQueryName(
+const PORT_C_ROM char * esEvtDBQueryName(
     esEvtId_T       id) {
 
-    const C_ROM char * name;
+    const PORT_C_ROM char * name;
 
 #if (1U == OPT_EVT_DB_USE_DESC_DATA)
     name = gEvtDB.elem[id]->name;
@@ -169,10 +175,10 @@ const C_ROM char * esEvtDBQueryName(
 }
 
 /*----------------------------------------------------------------------------*/
-const C_ROM char * esEvtDBQueryType(
+const PORT_C_ROM char * esEvtDBQueryType(
     esEvtId_T       id) {
 
-    const C_ROM char * type;
+    const PORT_C_ROM char * type;
 
 #if (1U == OPT_EVT_DB_USE_DESC_DATA)
     type = gEvtDB.elem[id]->type;
@@ -186,10 +192,10 @@ const C_ROM char * esEvtDBQueryType(
 }
 
 /*----------------------------------------------------------------------------*/
-const C_ROM char * esEvtDBQueryDesc(
+const PORT_C_ROM char * esEvtDBQueryDesc(
     esEvtId_T       id) {
 
-    const C_ROM char * desc;
+    const PORT_C_ROM char * desc;
 
 #if (1U == OPT_EVT_DB_USE_DESC_DATA)
     desc = gEvtDB.elem[id]->desc;
@@ -322,6 +328,52 @@ void esEvtDestroyI(
         }
 #endif
     }
+}
+
+/*----------------------------------------------------------------------------*/
+void esEvtPost(
+    esEpa_T *       epa,
+    esEvt_T *       evt) {
+
+    if (TRUE == OPT_QUEUE_PUT(epa, evt)) {
+        OPT_CRITICAL_DECL();
+
+        OPT_CRITICAL_LOCK();
+        evtUsrAddI_(
+            evt);
+        OPT_CRITICAL_UNLOCK();
+    } else {
+        esEvtDestroy(
+            evt);
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+void esEvtPostI(
+    esEpa_T *       epa,
+    esEvt_T *       evt) {
+
+    if (TRUE == OPT_QUEUE_PUTI(epa, evt)) {
+        evtUsrAddI_(
+            evt);
+    } else {
+        esEvtDestroyI(
+            evt);
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+void esEvtPostAhead(
+    esEpa_T *       epa,
+    esEvt_T *       evt) {
+
+}
+
+/*----------------------------------------------------------------------------*/
+void esEvtPostAheadI(
+    esEpa_T *       epa,
+    esEvt_T *       evt) {
+
 }
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/

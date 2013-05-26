@@ -39,7 +39,7 @@
 #define MEM_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "hal/hal_compiler.h"
+#include "compiler.h"
 #include "../config/sys_config.h"
 #include "../config/mem_config.h"
 
@@ -144,6 +144,12 @@ typedef struct esPMemHandle esPMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+/**
+ * TODO: Napisati globalni Handle za Dinamicki mem. alok.
+ */
+extern esDMemHandle_T gDynHandle;
+
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**

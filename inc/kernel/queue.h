@@ -33,7 +33,7 @@
 #define QUEUE_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "hal/hal.h"
+#include "compiler.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -109,7 +109,7 @@ typedef struct esQueue {
  *                                      u broju elemenata u redu za cekanje.
  * @inline
  */
-static C_INLINE_ALWAYS void esQpInit_(
+static PORT_C_INLINE_ALWAYS void esQpInit_(
     esQp_T *        queue,
     void **         memBuff,
     size_t          size) {
@@ -126,7 +126,7 @@ static C_INLINE_ALWAYS void esQpInit_(
  * @return      Pocetak reda za cekanje.
  * @inline
  */
-static C_INLINE_ALWAYS void * esQpDeInit_(
+static PORT_C_INLINE_ALWAYS void * esQpDeInit_(
     esQp_T *        queue) {
 
     queue->head = (void **)0U;
@@ -146,7 +146,7 @@ static C_INLINE_ALWAYS void * esQpDeInit_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS void esQpPut_(
+static PORT_C_INLINE_ALWAYS void esQpPut_(
     esQp_T *        queue,
     void *          item) {
 
@@ -168,7 +168,7 @@ static C_INLINE_ALWAYS void esQpPut_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS void esQpPutAhead_(
+static PORT_C_INLINE_ALWAYS void esQpPutAhead_(
     esQp_T *        queue,
     void *          item) {
 
@@ -188,7 +188,7 @@ static C_INLINE_ALWAYS void esQpPutAhead_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS void * esQpGet_(
+static PORT_C_INLINE_ALWAYS void * esQpGet_(
     esQp_T *        queue) {
 
     void * tmp;
@@ -212,7 +212,7 @@ static C_INLINE_ALWAYS void * esQpGet_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS size_t esQpSize_(
+static PORT_C_INLINE_ALWAYS size_t esQpSize_(
     const esQp_T *  queue) {
 
     return ((size_t)(queue->end - queue->begin + 1U));
@@ -225,7 +225,7 @@ static C_INLINE_ALWAYS size_t esQpSize_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS size_t esQpOccupied_(
+static PORT_C_INLINE_ALWAYS size_t esQpOccupied_(
     const esQp_T *  queue) {
 
     if (queue->head < queue->tail) {
@@ -244,7 +244,7 @@ static C_INLINE_ALWAYS size_t esQpOccupied_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS size_t esQpFreeSpace_(
+static PORT_C_INLINE_ALWAYS size_t esQpFreeSpace_(
     const esQp_T *  queue) {
 
     if (queue->head <= queue->tail) {
@@ -265,7 +265,7 @@ static C_INLINE_ALWAYS size_t esQpFreeSpace_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS bool_T esQpIsFull_ (
+static PORT_C_INLINE_ALWAYS bool_T esQpIsFull_ (
     const esQp_T *  queue) {
 
     if (((queue->head == queue->begin) && (queue->tail == queue->end)) ||
@@ -287,7 +287,7 @@ static C_INLINE_ALWAYS bool_T esQpIsFull_ (
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-static C_INLINE_ALWAYS bool_T esQpIsEmpty_(
+static PORT_C_INLINE_ALWAYS bool_T esQpIsEmpty_(
     const esQp_T *  queue) {
 
     if (queue->head == queue->tail) {
@@ -312,7 +312,7 @@ static C_INLINE_ALWAYS bool_T esQpIsEmpty_(
  *                                      u broju elemenata u redu za cekanje.
  * @inline
  */
-static C_INLINE_ALWAYS void esQInit_(
+static PORT_C_INLINE_ALWAYS void esQInit_(
     esQ_T *         queue,
     uint8_t *       memBuff,
     size_t          size) {
@@ -328,7 +328,7 @@ static C_INLINE_ALWAYS void esQInit_(
  * @param       queue                   Red za cekanje koji treba da se unisti.
  * @inline
  */
-static C_INLINE_ALWAYS void * esQDeInit_(
+static PORT_C_INLINE_ALWAYS void * esQDeInit_(
     esQ_T *         queue) {
 
     queue->head = (uint8_t *)0U;
@@ -348,7 +348,7 @@ static C_INLINE_ALWAYS void * esQDeInit_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS void esQPut_(
+static PORT_C_INLINE_ALWAYS void esQPut_(
     esQ_T      * queue,
     uint8_t         item) {
 
@@ -370,7 +370,7 @@ static C_INLINE_ALWAYS void esQPut_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS void esQPutAhead_(
+static PORT_C_INLINE_ALWAYS void esQPutAhead_(
     esQ_T   * queue,
     uint8_t      item) {
 
@@ -390,7 +390,7 @@ static C_INLINE_ALWAYS void esQPutAhead_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS uint8_t esQGet_(
+static PORT_C_INLINE_ALWAYS uint8_t esQGet_(
     esQ_T   * queue) {
 
     uint8_t tmp;
@@ -414,7 +414,7 @@ static C_INLINE_ALWAYS uint8_t esQGet_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS size_t esQSize_(
+static PORT_C_INLINE_ALWAYS size_t esQSize_(
     const esQ_T    * queue) {
 
     return ((size_t)(queue->end - queue->begin + 1U));
@@ -427,7 +427,7 @@ static C_INLINE_ALWAYS size_t esQSize_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS size_t esQOccupied_(
+static PORT_C_INLINE_ALWAYS size_t esQOccupied_(
     const esQ_T    * queue) {
 
     if (queue->head < queue->tail) {
@@ -447,7 +447,7 @@ static C_INLINE_ALWAYS size_t esQOccupied_(
  *              esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS size_t esQFreeSpace_(
+static PORT_C_INLINE_ALWAYS size_t esQFreeSpace_(
     const esQ_T    * queue) {
 
     if (queue->head < queue->tail) {
@@ -469,7 +469,7 @@ static C_INLINE_ALWAYS size_t esQFreeSpace_(
  *              esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS bool_T esQIsFull_(
+static PORT_C_INLINE_ALWAYS bool_T esQIsFull_(
     const esQ_T *   queue) {
 
     if (((queue->head == queue->begin) && (queue->tail == queue->end)) ||
@@ -491,7 +491,7 @@ static C_INLINE_ALWAYS bool_T esQIsFull_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQInit_().
  * @inline
  */
-static C_INLINE_ALWAYS bool_T esQIsEmpty_(
+static PORT_C_INLINE_ALWAYS bool_T esQIsEmpty_(
     const esQ_T *   queue) {
 
     if (queue->head == queue->tail) {

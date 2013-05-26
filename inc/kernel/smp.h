@@ -31,7 +31,7 @@
 #define SMP_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "smp/evt.h"
+#include "kernel/evt.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -50,15 +50,9 @@ extern "C" {
  */
 enum esEvtSignalId {
 /**
- * @brief       Signalni dogadjaj - prazan signal.
- * @note        Ne koristi se.
- */
-    SIG_EMPTY,
-
-/**
  * @brief       Signalni dogadjaj - zahteva se entry obrada u datom stanju.
  */
-    SIG_ENTRY,
+    SIG_ENTRY = 1024U,
 
 /**
  * @brief       Signalni dogadjaj - zahteva se exit obrada u datom stanju.
@@ -76,12 +70,7 @@ enum esEvtSignalId {
  *              super stanje. Funkcija stanja mora da vrati pokazivac na njeno
  *              super stanje.
  */
-    SIG_SUPER,
-
-/**
- * @brief       Domen korisnickih identifikatora dogadjaja.
- */
-    SIG_ID_USR = 15
+    SIG_SUPER
 };
 
 /**
@@ -143,7 +132,7 @@ typedef struct esSmDef {
  * @brief       Signalni događaji koji se koriste prilikom izvršavanja automata
  * @details     Identifikatori događaja su navedeni u @ref esEvtSignalId
  */
-extern const C_ROM esEvt_T esEvtSignal[];
+extern const PORT_C_ROM esEvt_T esEvtSignal[];
 
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
@@ -174,8 +163,8 @@ void esSmpInit(
  * @api
  */
 esSm_T * esSmCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esSmDef_T *     definition);
+    /* const PORT_C_ROM esMemClass_T *  memClass,*/
+    const PORT_C_ROM esSmDef_T *     definition);
 
 /**
  * @brief       Unistava automat

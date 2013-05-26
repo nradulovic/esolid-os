@@ -31,6 +31,9 @@
 #define EVT_PKG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+#include "kernel/evt.h"
+#include "../config/log_config.h"
+
 /*===============================================================  DEFINES  ==*/
 
 /**
@@ -65,15 +68,11 @@ extern "C" {
  * @brief       Povecava broj korisnika koji koriste dogadjaj
  * @param       evt                     Dogadjaj koji ce se koristiti
  */
-static C_INLINE_ALWAYS void evtUsrAddI_(
+static PORT_C_INLINE_ALWAYS void evtUsrAddI_(
     esEvt_T *       evt) {
 
-    if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EVT)) {
-        ES_LOG_DBG_IF_INVALID(&gKernelLog, EVT_SIGNATURE == evt->signature, LOG_EVT_USRADD, ES_ARG_NOT_VALID);
-    }
-
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
-        ++evt->dynamic.s.counter;
+    if (0U == (EVT_CONST_MASK & evt->attrib)) {         /* Da li je dogadjaj dinamičan?                             */
+        ++evt->attrib;
     }
 }
 
@@ -81,11 +80,11 @@ static C_INLINE_ALWAYS void evtUsrAddI_(
  * @brief       Smanjuje broj korisnika koji koriste dogadjaj
  * @param       evt                     Dogadjaj koji se koristio
  */
-static C_INLINE_ALWAYS void evtUsrRmI_(
+static PORT_C_INLINE_ALWAYS void evtUsrRmI_(
     esEvt_T *       evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic.s.attrib)) {         /* Da li je dogadjaj dinamičan?                             */
-        --evt->dynamic.s.counter;
+    if (0U == (EVT_CONST_MASK & evt->attrib)) {         /* Da li je dogadjaj dinamičan?                             */
+        --evt->attrib;
     }
 }
 

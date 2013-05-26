@@ -32,6 +32,9 @@
 #define EPA_PKG_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
+#include "evtq_pkg.h"
+#include "smp_pkg.h"
+
 /*==================================================================================  DEFINES  ==*/
 /*==================================================================================  MACRO's  ==*/
 
@@ -74,7 +77,7 @@ struct esEpa {
 /**
  * @brief       Ime EPA objekta
  */
-    const C_ROM char * name;
+    const PORT_C_ROM char * name;
 
 /**
  * @brief       Automat (FSM ili HSM)

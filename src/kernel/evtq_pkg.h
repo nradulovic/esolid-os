@@ -31,7 +31,7 @@
 #define EVTQ_PKG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "primitive/queue.h"
+#include "kernel/queue.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -91,7 +91,7 @@ typedef struct evtQueue {
  * @param       [in] evtQ               Pokazivac na red cekanja.
  * @return      Status popunjenosti reda za cekanje dogadjaja.
  */
-static C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
+static PORT_C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsEmpty_(&evtQ->queue));
@@ -102,7 +102,7 @@ static C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
  * @param       [in] evtQ               Pokazivac na red cekanja.
  * @return      Status popunjenosti reda za cekanje dogadjaja.
  */
-static C_INLINE_ALWAYS bool_T evtQIsFullI_(
+static PORT_C_INLINE_ALWAYS bool_T evtQIsFullI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsFull_(&evtQ->queue));
@@ -113,7 +113,7 @@ static C_INLINE_ALWAYS bool_T evtQIsFullI_(
  * @param       [in] evtQ               Pokazivac na red cekanja.
  * @return      Dogadjaj sa pocetka reda za cekanje.
  */
-static C_INLINE_ALWAYS esEvt_T * evtQGetI_(
+static PORT_C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     evtQueue_T *    evtQ) {
 
     esEvt_T * evt;
@@ -134,7 +134,7 @@ static C_INLINE_ALWAYS esEvt_T * evtQGetI_(
  * @param       [in] evt                Pokazivac na dogadjaj koji treba da se
  *                                      ubaci u red za cekanje.
  */
-static C_INLINE_ALWAYS void evtQPutAheadI_(
+static PORT_C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
 
@@ -156,10 +156,14 @@ static C_INLINE_ALWAYS void evtQPutAheadI_(
  * @param       [in] evt                Pokazivac na dogadjaj koji treba da se
  *                                      ubaci u red za cekanje.
  */
-static C_INLINE_ALWAYS void evtQPutI_(
+static PORT_C_INLINE_ALWAYS bool_T evtQPutI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
 
+    bool_T ans;
+
+    ans = evtQIsEmptyI_(
+        evtQ);
     esQpPut_(
         &evtQ->queue,
         evt);
@@ -170,6 +174,7 @@ static C_INLINE_ALWAYS void evtQPutI_(
         evtQ->freeMin = evtQ->free;
     }
 #endif
+    return (ans);
 }
 
 /**

@@ -63,7 +63,7 @@
 #define KERNEL_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/epa.h"
+#include "kernel/evt.h"
 
 /*===============================================================  DEFINES  ==*/
 
@@ -151,7 +151,7 @@ typedef struct esEpaDef {
  *              EPA objektu i u druge svrhe se ne koristi. Vise EPA objekata
  *              mogu imati isto ime.
  */
-    const C_ROM char * epaName;
+    const PORT_C_ROM char * epaName;
 
 /**
  * @brief       Prioritet EPA objekta
@@ -173,7 +173,7 @@ typedef struct esEpaDef {
 /**
  * @brief       Inicijalno stanje automata
  */
-    esState_T       smInitState;
+/*    esState_T       smInitState; */
 
 /**
  * @brief       Maksimalna dubina hijerarhije stanja automata.
@@ -183,73 +183,30 @@ typedef struct esEpaDef {
 } esEpaDef_T;
 
 /**
- * @brief       Objekt Event Processing Agent-a
+ * @brief       Objekat Event Processing Agent-a
  * @api
  */
 typedef struct esEpa esEpa_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+/**
+ * TODO: Napraviti globalnu koja pokazuje kako je OS kompajliran, da bi
+ * prekompajlirane biblioteke znale kako da se konfigurisu.
+ */
+extern const volatile uint8_t gKernelFeature;
+
+enum kernelFeature {
+    ES_DYNAMIC_MEMORY   = 0x00,
+    ES_STATIC_MEMORY    = 0x01
+};
+
+#define ES_KERNEL_FEATURE(feature)                                              \
+    (gKernelFeature & (1U << feature) ? TRUE : FALSE)
+
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
-/*------------------------------------------------------------------------*//**
- * @name        Transport dogadjaja
- * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
- * @param       epa                     Pokazivac na EPA objekat kome se salje,
- * @param       evt                     pokazivac na dogadjaj koji se salje.
- * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
- *              postavlja ga u red cekanja datog EPA objekta.
- * @api
- */
-void esEvtPost(
-    esEpa_T *       epa,
-    esEvt_T *       evt);
-
-/**
- * @brief       Salje dogadjaj na kraju reda za cekanje (FIFO metod).
- * @param       epa                     Pokazivac na EPA objekat kome se salje,
- * @param       evt                     pokazivac na dogadjaj koji se salje.
- * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
- *              postavlja ga u red cekanja datog EPA objekta.
- * @iclass
- */
-void esEvtPostI(
-    esEpa_T *       epa,
-    esEvt_T *       evt);
-
-/**
- * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
- * @param       epa                     Pokazivac na EPA objekat kome se salje,
- * @param       evt                     pokazivac na dogadjaj koji se salje.
- * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
- *              postavlja ga u red cekanja datog EPA objekta. Za razliku od
- *              esEvtPost() funkcije dogadjaj se postavlja na pocetku reda za
- *              cekanje. Najcesce se koristi kada je potrebno da se EPA objektu
- *              hitno posalje neki dogadjaj od znacaja koji treba da obradi.
- * @api
- */
-void esEvtPostAhead(
-    esEpa_T *       epa,
-    esEvt_T *       evt);
-
-/**
- * @brief       Salje dogadjaj na pocetku reda za cekanje (LIFO metod).
- * @param       epa                     Pokazivac na EPA objekat kome se salje,
- * @param       evt                     pokazivac na dogadjaj koji se salje.
- * @details     Prihvata prethodno kreiran dogadjaj funkcijom esEvtCreate() i
- *              postavlja ga u red cekanja datog EPA objekta. Za razliku od
- *              esEvtPost() funkcije dogadjaj se postavlja na pocetku reda za
- *              cekanje. Najcesce se koristi kada je potrebno da se EPA objektu
- *              hitno posalje neki dogadjaj od znacaja koji treba da obradi.
- * @iclass
- */
-void esEvtPostAheadI(
-    esEpa_T *       epa,
-    esEvt_T *       evt);
-
-/** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*//**
  * @name        Osnovne funkcije za menadzment EPA objekata
  * @{ *//*--------------------------------------------------------------------*/
@@ -273,11 +230,11 @@ void esEvtPostAheadI(
  *                  ispravan. Pogledati @ref esMemClass.
  *              - @ref ES_ARG_OUT_OF_RANGE, argumenti predati funkciji su
  *                  van moguceg opsega. Pogledati @ref esEpaDef_T.
- */
+ *//*
 esEpa_T * esEpaCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esEpaDef_T *    definition);
-
+    const PORT_C_ROM esMemClass_T *  memClass,
+    const PORT_C_ROM esEpaDef_T *    definition);
+*/
 /**
  * @brief       Unistava EPA objekat.
  * @param       [in] epa                Pokazivac na strukturu EPA objekta.
