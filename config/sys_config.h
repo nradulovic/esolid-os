@@ -66,21 +66,6 @@
  * @{ *//*--------------------------------------------------------------------*/
 
 /**
- * @brief       Maksimalan prioritet kriticnih sekcija koda
- * @details     Ovim se ogranicava prioritet kriticnih sekcija koda koje jezgro
- *              koristi. Ovo podesavanje je izuzetno korisno kada postoji
- *              potreba da se pojedini hardverski prekidi ne prekidaju od strane
- *              jezgra.
- * @pre         Ova opcija je validna samo ako se koristi interni mehanizam
- *              eSolid-a, odnosno, ako je opcija @ref OPT_CRITICAL_EXTERN
- *              iskljucena.
- * @note        Podrazumevano podesavanje: ES_PRIO_REALTIME
- */
-#if !defined(OPT_SYS_INTERRUPT_PRIO_MAX)
-# define OPT_SYS_INTERRUPT_PRIO_MAX     ES_PRIO_REALTIME
-#endif
-
-/**
  * @brief       Ukljucivanje eksternog cuvara kriticne sekcije koda
  * @details     Podrazumevano ova opcija nije ukljucena i u tom slucaju eSolid
  *              koristi interne mehanizme za zastitu kriticnih sekcija koda.
@@ -104,18 +89,18 @@
  * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
  *              promenljiva.
  */
-# define OPT_CRITICAL_DECL()            ES_CRITICAL_DECL()
+# define OPT_CRITICAL_DECL()            PORT_CRITICAL_DECL()
 
 /**
  * @brief       Zakljucavanje pristupa
  */
-# define OPT_CRITICAL_LOCK()            ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX)
+# define OPT_CRITICAL_LOCK()            PORT_CRITICAL_ENTER()
 
 
 /**
  * @brief       Otkljucavanje pristupa
  */
-# define OPT_CRITICAL_UNLOCK()          ES_CRITICAL_EXIT()
+# define OPT_CRITICAL_UNLOCK()          PORT_CRITICAL_EXIT()
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -169,7 +154,7 @@
  * @details     Koristi se samo ako je ostalim makroima potrebna @c auto
  *              promenljiva.
  */
-# define OPT_GUARD_DECL()               ES_CRITICAL_DECL()
+# define OPT_GUARD_DECL()               PORT_CRITICAL_DECL()
 
 /**
  * @brief       Inicijalizacija cuvara deljenog resursa
@@ -181,13 +166,13 @@
 /**
  * @brief       Zakljucavanje pristupa
  */
-# define OPT_GUARD_LOCK(guard)          ES_CRITICAL_ENTER(OPT_SYS_INTERRUPT_PRIO_MAX)
+# define OPT_GUARD_LOCK(guard)          PORT_CRITICAL_ENTER()
 
 
 /**
  * @brief       Otkljucavanje pristupa
  */
-# define OPT_GUARD_UNLOCK(guard)        ES_CRITICAL_EXIT()
+# define OPT_GUARD_UNLOCK(guard)        PORT_CRITICAL_EXIT()
 #endif
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -273,7 +258,7 @@
 # define OPT_MEM_DYN_EXTERN             0U
 #endif
 
-#if (0U == OPT_MEM_DYN_EXTERN)  || defined(__DOXYGEN__)
+#if (0U == OPT_MEM_DYN_EXTERN) || defined(__DOXYGEN__)
 
 /**
  * @brief       Deskriptor dinamickog alokatora
@@ -307,6 +292,30 @@
     esDMemDeAllocI(handle, mem)
 #endif
 
+/** @} *//*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*//**
+ * @name        Odabir redova za cekanje
+ * @{ *//*--------------------------------------------------------------------*/
+
+#if !defined(OPT_QUEUE_EXTERN) || defined(__DOXYGEN__)
+# define OPT_QUEUE_EXTERN               0U
+#endif
+
+#if (0U == OPT_QUEUE_EXTERN)
+
+#define OPT_QUEUE_PUT(queue, item)                                              \
+    evtQPutI_(queue, item)
+
+#define OPT_QUEUE_GET(queue)                                                    \
+    evtQGetI_(queue)
+
+#define OPT_QUEUE_PUTI(queue, item)                                             \
+    evtQPutI_(queue, item)
+
+#define OPT_QUEUE_GETI(queue)                                                   \
+    evtQGetI_(queue)
+
+#endif
 /** @} *//*-------------------------------------------------------------------*/
 
 /**
