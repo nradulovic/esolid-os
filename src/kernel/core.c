@@ -198,7 +198,7 @@ C_INLINE esEpa_T * schedRdyGetEpaI_(
 #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
     esEpa_T *epa;
 
-    epa = gRdyBitmap.list[ES_CPU_FLS(gRdyBitmap.bit[0])];
+    epa = gRdyBitmap.list[esCpuFindLastSet(gRdyBitmap.bit[0])];
 
     return (epa);
 #else
@@ -346,7 +346,7 @@ C_INLINE void epaInit_(
     evtQInit(
         &epa->evtQueue,
         evtQueue,
-        definition->evtQueueDepth);
+        definition->evtQueueLevels);
     epa->prio = definition->epaPrio;
     epa->name = definition->epaName;
     ES_CRITICAL_ENTER(
@@ -530,14 +530,14 @@ esEpa_T * esEpaCreate(
         ES_CPU_ATTRIB_ALIGNMENT);
     evtQSize = ES_ALIGN(
         evtQReqSize(
-            definition->evtQueueDepth),
+            definition->evtQueueLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
 #else
     coreSize = definition->epaWorkspaceSize;
     smpQSize = stateQReqSize(
         definition->smLevels);
     evtQSize = evtQReqSize(
-        definition->evtQueueDepth
+        definition->evtQueueLevels
 #endif
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
@@ -548,7 +548,7 @@ esEpa_T * esEpaCreate(
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         newEpa = esDmemAllocI(
-            coreSize + smpQSize + evtQSize);
+            sizeof(esEpa_T) + coreSize + smpQSize + evtQSize);
         ES_CRITICAL_EXIT();
     }
 #elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
@@ -559,7 +559,7 @@ esEpa_T * esEpaCreate(
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         newEpa = esSmemAllocI(
-            coreSize + smpQSize + evtQSize);
+            sizeof(esEpa_T) + coreSize + smpQSize + evtQSize);
         ES_CRITICAL_EXIT();
     }
 #else
@@ -568,8 +568,8 @@ esEpa_T * esEpaCreate(
 #endif
     epaInit_(
         (esEpa_T *)newEpa,
-        (esState_T *)(newEpa + coreSize),
-        (esEvt_T **)(newEpa + coreSize + smpQSize),
+        (esState_T *)(newEpa + sizeof(esEpa_T) + coreSize),
+        (esEvt_T **)(newEpa + sizeof(esEpa_T) + coreSize + smpQSize),
         definition);
 
     return ((esEpa_T *)newEpa);

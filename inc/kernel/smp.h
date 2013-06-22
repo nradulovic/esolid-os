@@ -94,7 +94,7 @@ extern "C" {
  *              identifikatora korisnik definise svoje, aplikacione
  *              identifikatore dogadjaja.
  */
-enum evtId {
+enum esEvtId {
 /**
  * @brief       Signalni dogadjaj - prazan signal.
  * @note        Ne koristi se.

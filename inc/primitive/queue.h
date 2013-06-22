@@ -111,7 +111,7 @@ typedef struct esQueue {
  *                                      u broju elemenata u redu za cekanje.
  * @inline
  */
-C_INLINE_ALWAYS void esQpInit_(
+static C_INLINE_ALWAYS void esQpInit_(
     esQueuePtr_T   * aQueue,
     void            ** aMemBuffer,
     size_t          aQueueSize) {
@@ -127,7 +127,7 @@ C_INLINE_ALWAYS void esQpInit_(
  * @param       aQueue                  Red za cekanje koji treba da se unisti.
  * @inline
  */
-C_INLINE_ALWAYS void * esQpDeInit_(
+static C_INLINE_ALWAYS void * esQpDeInit_(
     esQueuePtr_T   * aQueue) {
 
     aQueue->head = (void **)0U;
@@ -146,7 +146,7 @@ C_INLINE_ALWAYS void * esQpDeInit_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS void esQpPut_(
+static C_INLINE_ALWAYS void esQpPut_(
     esQueuePtr_T   * aQueue,
     void            * aItem) {
 
@@ -167,7 +167,7 @@ C_INLINE_ALWAYS void esQpPut_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS void esQpPutAhead_(
+static C_INLINE_ALWAYS void esQpPutAhead_(
     esQueuePtr_T   * aQueue,
     void            * aItem) {
 
@@ -187,7 +187,7 @@ C_INLINE_ALWAYS void esQpPutAhead_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS void * esQpGet_(
+static C_INLINE_ALWAYS void * esQpGet_(
     esQueuePtr_T   * aQueue) {
 
     void * tmpPtr;
@@ -210,7 +210,7 @@ C_INLINE_ALWAYS void * esQpGet_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS size_t esQpSize_(
+static C_INLINE_ALWAYS size_t esQpSize_(
     const esQueuePtr_T * aQueue) {
 
     return ((size_t)(aQueue->end - aQueue->begin + 1U));
@@ -223,7 +223,7 @@ C_INLINE_ALWAYS size_t esQpSize_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS size_t esQpOccupied_(
+static C_INLINE_ALWAYS size_t esQpOccupied_(
     const esQueuePtr_T * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -242,7 +242,7 @@ C_INLINE_ALWAYS size_t esQpOccupied_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS size_t esQpFreeSpace_(
+static C_INLINE_ALWAYS size_t esQpFreeSpace_(
     const esQueuePtr_T * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -263,7 +263,7 @@ C_INLINE_ALWAYS size_t esQpFreeSpace_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS bool_T esQpIsFull_ (
+static C_INLINE_ALWAYS bool_T esQpIsFull_ (
     const esQueuePtr_T * aQueue) {
 
     if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
@@ -285,7 +285,7 @@ C_INLINE_ALWAYS bool_T esQpIsFull_ (
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS bool_T esQpIsEmpty_(
+static C_INLINE_ALWAYS bool_T esQpIsEmpty_(
     const esQueuePtr_T * aQueue) {
 
     if (aQueue->head == aQueue->tail) {
@@ -310,7 +310,7 @@ C_INLINE_ALWAYS bool_T esQpIsEmpty_(
  *                                      u broju elemenata u redu za cekanje.
  * @inline
  */
-C_INLINE_ALWAYS void esQInit_(
+static C_INLINE_ALWAYS void esQInit_(
     esQueue_T      * aQueue,
     uint8_t         * aMemBuffer,
     size_t          aQueueSize) {
@@ -326,7 +326,7 @@ C_INLINE_ALWAYS void esQInit_(
  * @param       aQueue                  Red za cekanje koji treba da se unisti.
  * @inline
  */
-C_INLINE_ALWAYS void * esQDeInit_(
+static C_INLINE_ALWAYS void * esQDeInit_(
     esQueue_T      * aQueue) {
 
     aQueue->head = (uint8_t *)0U;
@@ -345,7 +345,7 @@ C_INLINE_ALWAYS void * esQDeInit_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS void esQPut_(
+static C_INLINE_ALWAYS void esQPut_(
     esQueue_T      * aQueue,
     uint8_t         aItem) {
 
@@ -366,7 +366,7 @@ C_INLINE_ALWAYS void esQPut_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS void esQPutAhead_(
+static C_INLINE_ALWAYS void esQPutAhead_(
     esQueue_T   * aQueue,
     uint8_t      aItem) {
 
@@ -386,7 +386,7 @@ C_INLINE_ALWAYS void esQPutAhead_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS uint8_t esQGet_(
+static C_INLINE_ALWAYS uint8_t esQGet_(
     esQueue_T   * aQueue) {
 
     uint8_t tmp;
@@ -409,7 +409,7 @@ C_INLINE_ALWAYS uint8_t esQGet_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS size_t esQSize_(
+static C_INLINE_ALWAYS size_t esQSize_(
     const esQueue_T    * aQueue) {
 
     return ((size_t)(aQueue->end - aQueue->begin + 1U));
@@ -422,7 +422,7 @@ C_INLINE_ALWAYS size_t esQSize_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS size_t esQOccupied_(
+static C_INLINE_ALWAYS size_t esQOccupied_(
     const esQueue_T    * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -442,7 +442,7 @@ C_INLINE_ALWAYS size_t esQOccupied_(
  *              esQpInit_().
  * @inline
  */
-C_INLINE_ALWAYS size_t esQFreeSpace_(
+static C_INLINE_ALWAYS size_t esQFreeSpace_(
     const esQueue_T    * aQueue) {
 
     if (aQueue->head < aQueue->tail) {
@@ -464,7 +464,7 @@ C_INLINE_ALWAYS size_t esQFreeSpace_(
  *              eS_qCtor().
  * @inline
  */
-C_INLINE_ALWAYS bool_T esQIsFull_(
+static C_INLINE_ALWAYS bool_T esQIsFull_(
     const esQueue_T    * aQueue) {
 
     if (((aQueue->head == aQueue->begin) && (aQueue->tail == aQueue->end)) ||
@@ -486,7 +486,7 @@ C_INLINE_ALWAYS bool_T esQIsFull_(
  * @pre         Red za cekanje je prethodno kreiran init funkcijom eS_qCtor().
  * @inline
  */
-C_INLINE_ALWAYS bool_T esQIsEmpty_(
+static C_INLINE_ALWAYS bool_T esQIsEmpty_(
     const esQueue_T    * aQueue) {
 
     if (aQueue->head == aQueue->tail) {

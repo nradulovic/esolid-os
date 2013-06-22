@@ -74,7 +74,7 @@ typedef struct esEpaDef {
 /**
  * @brief       Velicina reda za cekanje za dogadjaje
  */
-    size_t          evtQueueDepth;
+    size_t          evtQueueLevels;
 
 /**
  * @brief       Inicijalno stanje automata
