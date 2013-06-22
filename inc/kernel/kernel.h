@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,37 +20,25 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
+ * ----------------------------------------------------------------------------
+ *
+ * Project settings:
+ * - include paths:
+ *      1. ./esolid-os/inc
+ * - source paths:
+ *      1. ./esolid-hal, exclude: doc/
+ * - references
+ *      1. esolid-hal
+ * - exported include paths:
+ *      1. ./esolid-os/inc
+ * - exported lib include paths:
+ *      1. ./esolid-os/<profile name>
+ * - exported lib:
+ *      1. esolid-os
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Interfejs eSolid operativnog sistema.
- * @details     Product description:
- *              - MM - Memory Management
- *              - SMP - State Machine Processor
- *              - KERNEL - Kernel
- *
- *              Text Editor Settings:
- *              - TAB: 4 spaces
- *              - Print Margin Columnt: 80 characters
- *              - Encoding: UTF-8
- *
- *              Development Environment:
- *              - Eclipse v4.2.1 + CDT v8.1.0
- *              - GNU make v3.8.2
- *
- *              Compiler make and version:
- *              - arm-none-eabi-gcc v4.6.3 (Sourcery CodeBench Lite 2012.03-56)
- *
- *              Libraries:
- *              - esolid-hal
- *              - esolid-ett
- *
- *              Configuraion:
- *              - config/kernel_config.h
- *
- *              CPU configuration:
- *              - independent
- *
  * @addtogroup  kernel_intf
  *********************************************************************//** @{ */
 
