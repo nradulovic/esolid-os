@@ -148,14 +148,6 @@ typedef struct esEpa {
  */
     struct evtQueue evtQueue;
 
-#if defined(OPT_KERNEL_DBG_CORE) && defined(OPT_DBG_USE_CHECK)                  \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
- */
-    uint32_t        signature;
-#endif
-
 /**
  * @brief       Prioritet EPA objekta.
  * @details     Ova promenljiva odredjuje prioritet datog EPA objekta.
@@ -166,6 +158,13 @@ typedef struct esEpa {
  * @brief       Ime EPA objekta
  */
     const C_ROM char * name;
+
+#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
+ */
+    uint32_t        signature;
+#endif
 } esEpa_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
@@ -244,7 +243,7 @@ void esEvtPostAheadI(
  * @return      Pokazivac na strukturu zaglavlja EPA objekta.
  * @see         esEpaDef_T
  * @details     Nakon dobavljanja odgovarajuceg memorijskog prostora ova
- *              funkcija vrsi inicijalizaciju EPA objekta sa odgovarajucim 
+ *              funkcija vrsi inicijalizaciju EPA objekta sa odgovarajucim
  * 				parametrima.
  * @api
  */

@@ -138,11 +138,15 @@ esEvt_T * esEvtCreateI(
 
     esEvt_T * newEvt;
 
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, sizeof(esEvt_T) <= size);
+
     newEvt = esDmemAllocI(size);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
         size,
         id);
+
+    ES_KERN_API_OBLIGATION(newEvt->signature = EVT_SIGNATURE);
 
     return (newEvt);
 }
@@ -151,12 +155,18 @@ esEvt_T * esEvtCreateI(
 void esEvtReserve(
     esEvt_T *       evt) {
 
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != evt);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EVT_SIGNATURE == evt->signature);
+
     evt->dynamic |= EVT_RESERVED_MASK;
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtUnReserve(
     esEvt_T *       evt) {
+
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != evt);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
     evt->dynamic &= ~EVT_RESERVED_MASK;
 }
@@ -177,6 +187,9 @@ void esEvtDestroy(
 /*----------------------------------------------------------------------------*/
 void esEvtDestroyI(
     esEvt_T *       evt) {
+
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != evt);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
     if ((uint_fast8_t)0U == evt->dynamic) {
         evtDeInit_(

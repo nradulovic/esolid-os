@@ -132,7 +132,7 @@ static esEpa_T * gCurrentEpa;
 /**
  * @brief       Trenutno stanje kernel-a
  */
-static esKernelStatus_T gKernelStatus;
+static esKernelState_T gKernelState;
 
 /**
  * @brief       Bitmape spremnih EPA objekata
@@ -153,7 +153,7 @@ static void schedInit(
     void) {
 
     gCurrentEpa = (esEpa_T *)0U;
-    gKernelStatus = KERNEL_STOPPED;
+    gKernelState = KERNEL_STOPPED;
 }
 
 /**
@@ -357,6 +357,8 @@ C_INLINE void epaInit_(
         epa,
         (esEvt_T *)&evtSignal[SIG_INIT]);
     ES_CRITICAL_EXIT();
+
+    ES_KERN_API_OBLIGATION(epa->signature = EPA_SIGNATURE);
 }
 
 /**
@@ -392,6 +394,8 @@ C_INLINE void esEpaDeInit_(
         &epa->evtQueue);
     smDeInit(
         &epa->sm);
+
+    ES_KERN_API_OBLIGATION(epa->signature = 0U);
 }
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -447,6 +451,11 @@ void esEvtPostI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != evt);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EVT_SIGNATURE == evt->signature);
+
     if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         schedRdyInsertI_(
             epa);
@@ -488,6 +497,11 @@ void esEvtPostAheadI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != evt);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EVT_SIGNATURE == evt->signature);
+
     if (TRUE == evtQIsEmptyI_(&epa->evtQueue)) {
         schedRdyInsertI_(
             epa);
@@ -518,6 +532,13 @@ esEpa_T * esEpaCreate(
     size_t coreSize;
     size_t smpQSize;
     size_t evtQSize;
+
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, (memClass == &esMemDynClass) || (memClass == &esMemStaticClass));
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != definition);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, OPT_KERNEL_EPA_PRIO_MAX > definition->epaPrio);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, 0U < definition->evtQueueLevels);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != definition->smInitState);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, 2U <= definition->smLevels);
 
 #if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
@@ -584,6 +605,9 @@ void esEpaDestroy(
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     ES_CRITICAL_DECL();
 
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
+
     esEpaDeInit_(
         epa);
     ES_CRITICAL_ENTER(
@@ -609,6 +633,9 @@ esEpa_T * esEpaGet(
 uint8_t esEpaPrioGet(
     const esEpa_T * epa) {
 
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
+
     return (epa->prio);
 }
 
@@ -619,6 +646,10 @@ void esEpaPrioSet(
 
     ES_CRITICAL_DECL();
     bool_T status;
+
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
+    ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, OPT_KERNEL_EPA_PRIO_MAX > newPrio);
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
@@ -643,6 +674,8 @@ void esEpaPrioSet(
 void esKernelInit(
     void) {
 
+    ES_KERN_API_REQUIRE(ES_KERN_USAGE_FAILURE, gKernelState == KERNEL_STOPPED);
+
     esSmpInit();
     schedInit();
 
@@ -657,7 +690,7 @@ void esKernelStart(
 
     ES_CRITICAL_DECL();
 
-    gKernelStatus = KERNEL_RUNNING;
+    gKernelState = KERNEL_RUNNING;
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
 
@@ -696,10 +729,10 @@ void esKernelStart(
 }
 
 /*----------------------------------------------------------------------------*/
-esKernelStatus_T esKernelStatus(
+esKernelState_T esKernelStatus(
     void) {
 
-    return (gKernelStatus);
+    return (gKernelState);
 }
 /** @} *//*-------------------------------------------------------------------*/
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/

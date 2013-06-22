@@ -117,14 +117,6 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  */
     uint_fast8_t    dynamic;
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)                   \
-    || defined(__DOXYGEN__)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
- */
-    uint32_t        signature;
-#endif
-
 #if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
 /**
  * @brief       Adresa generatora dogadjaja
@@ -152,6 +144,13 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  *              @ref OPT_EVT_USE_SIZE.
  */
     esEvtSize_T     size;
+#endif
+
+#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+/**
+ * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
+ */
+    uint32_t        signature;
 #endif
 } esEvt_T;
 

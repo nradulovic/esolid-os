@@ -42,14 +42,13 @@
  * @addtogroup  kernel_intf
  *********************************************************************//** @{ */
 
-
 #ifndef KERNEL_H_
 #define KERNEL_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
 #include "kernel/core.h"
 
-/*===============================================================  DEFINES  ==*/
+/*===============================================================  MACRO's  ==*/
 
 /**
  * @brief       Znakovna konstanta koja pokazuje puno ime i verziju eSolid-a.
@@ -66,18 +65,95 @@
  */
 #define ES_KERNEL_VERSION_MINOR         0U
 
-/*===============================================================  MACRO's  ==*/
-/*------------------------------------------------------  C++ extern begin  --*/
+/*------------------------------------------------------------------------*//**
+ * @name        Error checking
+ * @brief       Some basic infrastructure for error checking
+ * @details     These macros provide basic detection of errors. For more
+ *              datails see @ref errors.
+ * @{ *//*--------------------------------------------------------------------*/
+
+#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+
+/**@brief       Generic assert macro
+ * @param       num
+ *              Error number
+ * @param       expr
+ *              Expression which must be TRUE
+ */
+# define ES_KERN_ASSERT(num, expr)                                              \
+    do {                                                                        \
+        if (!(expr)) {                                                          \
+            userAssert(C_FUNC, #num, #expr);                                    \
+        }                                                                       \
+    } while (0U)
+
+/**@brief       Execute code to fulfill the contract
+ * @param       expr
+ *              Expression to be executed only if contracts need to be validated.
+ */
+# define ES_KERN_API_OBLIGATION(expr)                                           \
+    expr
+
+/**@brief       Make sure the caller has fulfilled all contract preconditions
+ * @param       expr
+ *              Expression which must be satisfied
+ */
+# define ES_KERN_API_REQUIRE(num, expr)                                         \
+    ES_KERN_ASSERT(num, expr)
+
+/**@brief       Make sure the callee has fulfilled all contract postconditions
+ * @param       expr
+ *              Expression which must be satisfied
+ */
+# define ES_KERN_API_ENSURE(num, expr)                                          \
+    ES_KERN_ASSERT(num, expr)
+
+#else
+# define ES_KERN_ASSERT(expr)           (void)0
+# define ES_KERN_API_OBLIGATION(expr)   (void)0
+# define ES_KERN_API_REQUIRE(expr)      (void)0
+# define ES_KERN_API_ENSURE(expr)       (void)0
+#endif
+
+/** @} *//*-------------------------------------------------------------------*/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*============================================================  DATA TYPES  ==*/
 
-/**
- * @brief       Stanje kernel-a
+/**@brief       Listing kodova gresaka koje se generisu kada je assert sistem
+ *              ukljucen.
  */
-typedef enum esKernelStatus {
+enum esKernelStatus {
+    ES_KERN_NO_ERROR,
+
+/**@brief       Argument nije ispravan, pokazivac pokazuje na nesto drugo od
+ *              ocekivanog.
+ */
+    ES_KERN_ARG_NOT_VALID = 0x100UL,
+
+/**@brief       Vrednost argumenta je van opsega dozvoljenih vrednosti.
+ */
+    ES_KERN_ARG_OUT_OF_RANGE,
+
+/**@brief       Pokazivac je NULL, a ocekuje se konkretna vrednost.
+ */
+    ES_KERN_ARG_NULL,
+
+/**@brief       Nema dovoljno memorije za alociranje.
+ */
+    ES_KERN_NOT_ENOUGH_MEM,
+
+/**@brief       Funkcija/objekat se koristi na nepravilan nacin
+ */
+    ES_KERN_USAGE_FAILURE
+};
+
+/**@brief       Stanje kernel-a
+ */
+typedef enum esKernelState {
 /**
  * @brief       Kernel se ne izvrsava
  */
@@ -87,7 +163,7 @@ typedef enum esKernelStatus {
  * @brief       Kernel se izvrsava
  */
     KERNEL_RUNNING
-} esKernelStatus_T;
+} esKernelState_T;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
@@ -121,10 +197,37 @@ void esKernelStart(
  *  @retval     KERNEL_RUNNING - kernel se izvrsava,
  * @api
  */
-esKernelStatus_T esKernelStatus(
+esKernelState_T esKernelStatus(
     void);
 
 /** @} *//*-------------------------------------------------------------------*/
+
+/**@brief       An assertion has failed. This function should inform the user
+ *              about failed assertion.
+ * @param       fnName
+ *              Function name: is pointer to the function name string where the
+ *              assertion has failed. Macro will automatically fill in the
+ *              function name.
+ * @param       errNum
+ *              Error number: is predefined number of error that just occured.
+ * @param       errExpr
+ *              Error Expression: is a pointer to the string containing the
+ *              expression that failed to evaluate to `TRUE`.
+ * @pre         1) `NULL != fnName`
+ * @pre         2) `NULL != errNum`
+ * @pre         3) `NULL != errExpr`
+ * @note        1) The definition of this function must be written by the user.
+ * @note        2) This function is called only if @ref CFG_HALAPI_VALIDATION
+ *              option is active.
+ * @details     Function will just print the information which was given by
+ *              the macros. After the function informs the user it **must** go
+ *              into infinite loop or HALT the processor.
+ */
+C_NORETURN extern void userAssert(
+    const char *    fnName,
+    const char *    errNum,
+    const char *    errExpr);
+
 /*--------------------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }

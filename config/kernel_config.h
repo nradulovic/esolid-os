@@ -42,8 +42,10 @@
 #define ES_KERNEL_API_MM                0
 #define ES_KERNEL_API_SM                1
 #define ES_KERNEL_API_FULL              2
+
 /* Ovde se pisu podesavanja projekta ------------------------------------------------------------*/
 
+# define OPT_KERN_API_VALIDATION
 
 /*=================================================================================  SETTINGS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -61,6 +63,15 @@
  */
 #if defined(__DOXYGEN__)
 # define OPT_KERNEL_DBG
+#endif
+
+/**
+ * @brief       Vrsi validaciju API ugovora
+ * @details     Ukljucivanjem ove opcija eSolid funkcije ce vrsiti proveru
+ *              predatih argumenata.
+ */
+#if defined(__DOXYGEN__)
+# define OPT_KERN_API_VALIDATION
 #endif
 
 /**
