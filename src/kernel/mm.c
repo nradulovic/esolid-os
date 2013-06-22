@@ -279,8 +279,6 @@ static void dummyDeAlloc(
 void esMemInit(
     void) {
 
-    esHalInit();
-
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     dmemInit(
         HEAP_BEGIN,
