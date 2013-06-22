@@ -1,9 +1,0 @@
-/*********************************************************************************************//**
-@file
-@addtogroup     kernel_intf
-*//** @{ *//**
-@defgroup       core_intf Kernel Core (CORE) 
-@brief          Interfejs za jezgro eSolid Operativnog Sistema
-@section        core_doc Kernel Core (CORE)
-  
-**//** @} *//*************************************************************************************/

@@ -3,7 +3,6 @@
 	<name>esolid-kernel</name>
 	<comment></comment>
 	<projects>
-		<project>esolid-ett</project>
 		<project>esolid-hal</project>
 	</projects>
 	<buildSpec>
