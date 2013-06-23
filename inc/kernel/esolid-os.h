@@ -24,37 +24,6 @@
  * @file
  * @author      Nenad Radulovic
  * @brief       Interfejs eSolid operativnog sistema.
- * @details     Product description:
- *              - MM - Memory Management
- *              - SMP - State Machine Processor
- *              - KERNEL - Kernel
- *
- *              Text Editor Settings:
- *              - TAB: 4 spaces
- *              - Print Margin Columnt: 80 characters
- *              - Encoding: UTF-8
- *
- *              Development Environment:
- *              - Eclipse v4.2.1 + CDT v8.1.0
- *              - GNU make v3.8.2
- *
- *              Compiler make and version:
- *              - arm-none-eabi-gcc v4.6.3 (Sourcery CodeBench Lite 2012.03-56)
- *
- *              Libraries:
- *              - esolid-hal
- *              - esolid-ett
- *
- *              Configuraion:
- *              - config/kernel_config.h
- *
- *              CPU configuration:
- *              - independent
- *
- *              Include paths:
- *              - ./esolid-kernel/inc
- *              - ./esolid-hal/inc (and port defined paths)
- *              - ./esolid-ett/inc
  * @addtogroup  kernel_intf
  *********************************************************************//** @{ */
 
@@ -93,7 +62,7 @@ extern "C" {
 /**
  * @brief       Stanje kernel-a
  */
-typedef enum esKernelStatus {
+typedef enum esKernelState {
 /**
  * @brief       Kernel se ne izvrsava
  */
@@ -103,7 +72,7 @@ typedef enum esKernelStatus {
  * @brief       Kernel se izvrsava
  */
     ES_KERNEL_RUNNING
-} esKernelStatus_T;
+} esKernelState_T;
 
 /**
  * @brief       Listing kodova gresaka koje se generisu kada je LOG sistem
@@ -315,7 +284,7 @@ void esKernelStart(
  *  @retval     ES_KERNEL_RUNNING - kernel se izvrsava,
  * @api
  */
-esKernelStatus_T esKernelStatus(
+esKernelState_T esKernelStatus(
     void);
 
 /**

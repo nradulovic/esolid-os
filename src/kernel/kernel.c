@@ -40,7 +40,7 @@
 /**
  * @brief       Trenutno stanje kernel-a
  */
-static esKernelStatus_T gKernelStatus;
+static esKernelState_T gKernelStatus;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
@@ -101,7 +101,7 @@ C_NAKED void esKernelStart(
 }
 
 /*----------------------------------------------------------------------------*/
-esKernelStatus_T esKernelStatus(
+esKernelState_T esKernelStatus(
     void) {
 
     return (gKernelStatus);
