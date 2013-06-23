@@ -239,7 +239,7 @@
  * @note        Podrazumevano podesavanje: 3 (Omogucena su oba tipa automata)
  */
 #if !defined(OPT_SMP_SM_TYPES) || defined(__DOXYGEN__)
-# define OPT_SMP_SM_TYPES               ES_SMP_FSM_AND_HSM
+# define OPT_SMP_SM_TYPES               ES_SMP_FSM_ONLY
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

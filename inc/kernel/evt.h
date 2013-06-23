@@ -41,8 +41,7 @@
  * @name        Dinamicki attributi dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Bit maska za definisanje rezervisanog dogadjaja.
+/**@brief       Bit maska za definisanje rezervisanog dogadjaja.
  * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
  *              rezervisan i sistem ga nece razmatrati kao kandidata za brisanje.
  *              Brojac korisnika dogadjaja se i dalje azurira, tako da kada se
@@ -51,8 +50,7 @@
  */
 #define EVT_RESERVED_MASK                ((uint_fast8_t)(1U << 6))
 
-/**
- * @brief       Bit maska za definisanje konstantnog dogadjaja.
+/**@brief       Bit maska za definisanje konstantnog dogadjaja.
  * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
  *              konstantan (najčešće se nalazi u ROM memoriju) i ne moze biti
  *              izbrisan. Broj korisnika dogadjaja se ne azurira. Dati dogadjaj
@@ -63,10 +61,11 @@
 /** @} *//*-------------------------------------------------------------------*/
 /*===============================================================  MACRO's  ==*/
 
-/**
- * @brief       Pomocni makro za kreiranje dogadjaja.
- * @param       type                    Tip dogadjaja koji se kreira
- * @param       id                      identifikator dogadjaja.
+/**@brief       Pomocni makro za kreiranje dogadjaja.
+ * @param       type
+ *              Tip dogadjaja koji se kreira.
+ * @param       id
+ *              Identifikator dogadjaja.
  * @details     Ovo je samo pomocni makro koji poziva funkciju esEvtCreate().
  *              Glavna namena je da se samo smanji obim kucanja u glavnoj
  *              aplikaciji.
@@ -82,8 +81,7 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
-/**
- * @brief       Zaglavlje dogadjaja.
+/**@brief       Zaglavlje dogadjaja.
  * @details     Interni podaci dogadjaja su obavezni podaci u zaglavlju
  *              dogadjaja. Svi ostali podaci se mogu ukljuciti/iskljuciti po
  *              zelji.
@@ -106,20 +104,17 @@ extern "C" {
  * @api
  */
 typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
-/**
- * @brief       Identifikator dogadjaja
+/**@brief       Identifikator dogadjaja
  * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_ID_T.
  */
     esEvtId_T       id;
 
-/**
- * @brief       Dinamicki atributi dogadjaja
+/**@brief       Dinamicki atributi dogadjaja
  */
     uint_fast8_t    dynamic;
 
 #if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
-/**
- * @brief       Adresa generatora dogadjaja
+/**@brief       Adresa generatora dogadjaja
  * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
  *              @ref OPT_EVT_USE_GENERATOR.
  */
@@ -127,8 +122,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 #endif
 
 #if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-/**
- * @brief       Vremenska oznaka kada se desio dogadjaj.
+/**@brief       Vremenska oznaka kada se desio dogadjaj.
  * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_TIMESTAMP_T.
  *              Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
  *              @ref OPT_EVT_USE_TIMESTAMP.
@@ -137,8 +131,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 #endif
 
 #if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-/**
- * @brief       Velicina podataka dogadjaja.
+/**@brief       Velicina podataka dogadjaja.
  * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_SIZE_T.
  *              Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
  *              @ref OPT_EVT_USE_SIZE.
@@ -147,8 +140,7 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
 #endif
 
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
+/**@brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
  */
     uint32_t        signature;
 #endif
@@ -161,11 +153,11 @@ typedef struct OPT_EVT_STRUCT_ATTRIB esEvt {
  * @name        Kreiranje/brisanje dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Kreira dogadjaj.
- * @param       size                    Velicina potrebnog memorijskog prostora
- *                                      za podatke dogadjaja,
- * @param       id                      identifikator dogadjaja.
+/**@brief       Kreira dogadjaj.
+ * @param       size
+ *              Velicina potrebnog memorijskog prostora za podatke dogadjaja.
+ * @param       id
+ *              Identifikator dogadjaja.
  * @return      Pokazivac na memorijski prostor za podatke dogadjaja.
  * @details     Kreira memorijski prostor koji je rezervisan za navedeni
  *              dogadjaj. U zaglavlje dogadjaja se upisuju podaci dogadjaja, a
@@ -187,11 +179,11 @@ esEvt_T * esEvtCreate(
     size_t          size,
     esEvtId_T       id);
 
-/**
- * @brief       Kreira dogadjaj.
- * @param       size                    Velicina potrebnog memorijskog prostora
- *                                      za podatke dogadjaja,
- * @param       id                      identifikator dogadjaja.
+/**@brief       Kreira dogadjaj.
+ * @param       size
+ *              Velicina potrebnog memorijskog prostora za podatke dogadjaja.
+ * @param       id
+ *              Identifikator dogadjaja.
  * @return      Pokazivac na memorijski prostor za podatke dogadjaja.
  * @details     Kreira memorijski prostor koji je rezervisan za navedeni
  *              dogadjaj. U zaglavlje dogadjaja se upisuju podaci dogadjaja, a
@@ -204,10 +196,9 @@ esEvt_T * esEvtCreateI(
     size_t          size,
     esEvtId_T       id);
 
-/**
- * @brief       Unistava dogadjaj.
- * @param       evt                     Pokazivac na dogadjaj koji treba da se
- *                                      unisti.
+/**@brief       Unistava dogadjaj.
+ * @param       evt
+ *              Pokazivac na dogadjaj koji treba da se unisti.
  * @details     Ukoliko dati @c evt dogadjaj nema vise ni jednog korisnika,
  *              onda ce memorijski prostor koji on zauzima biti recikliran, u
  *              suprotnom, dogadjaj nastavlja da postoji.
@@ -216,10 +207,9 @@ esEvt_T * esEvtCreateI(
 void esEvtDestroy(
     esEvt_T *       evt);
 
-/**
- * @brief       Unistava dogadjaj.
- * @param       evt                     Pokazivac na dogadjaj koji treba da se
- *                                      unisti.
+/**@brief       Unistava dogadjaj.
+ * @param       evt
+ *              Pokazivac na dogadjaj koji treba da se unisti.
  * @details     Ukoliko dati @c evt dogadjaj nema vise ni jednog korisnika,
  *              onda ce memorijski prostor koji on zauzima biti recikliran, u
  *              suprotnom, dogadjaj nastavlja da postoji.
@@ -228,14 +218,13 @@ void esEvtDestroy(
 void esEvtDestroyI(
     esEvt_T *       evt);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/** @} *//*---------------------------------------------------------------*//**
  * @name        Rad sa staticnim dogadjajima
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Rezervise dogadjaj @c evt.
- * @param       evt                     Pokazivac na dogadjaj koji se rezervise.
+/**@brief       Rezervise dogadjaj @c evt.
+ * @param       evt
+ *              Pokazivac na dogadjaj koji se rezervise.
  * @pre         Dogadjaj mora da bude kreiran funkcijom esEvtCreate().
  * @details     Rezervise @c evt dogadjaj cime se onemogucava eSolid-u da
  *              izvrsi recikliranje memorijskog prostora ovog dogadjaja.
@@ -250,22 +239,20 @@ void esEvtDestroyI(
 void esEvtReserve(
     esEvt_T *       evt);
 
-/**
- * @brief       Oslobadja prethodno rezervisan dogadjaj.
- * @param       evt                     Pokazivac na dogadjaj koji se oslobadja.
+/**@brief       Oslobadja prethodno rezervisan dogadjaj.
+ * @param       evt
+ *              Pokazivac na dogadjaj koji se oslobadja.
  * @api
  */
 void esEvtUnReserve(
     esEvt_T *       evt);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/** @} *//*---------------------------------------------------------------*//**
  * @name        Korisnicke callback funkcije
  * @{ *//*--------------------------------------------------------------------*/
 
 #if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-/**
- * @brief       Korisnicka callback funkcija: generise timestamp prilikom slanja
+/**@brief       Korisnicka callback funkcija: generise timestamp prilikom slanja
  *              dogadjaja.
  * @return      timestamp informacija koja se ugradjuje u dogadjaj.
  * @details     Poziva se prilikom slanja dogadjaja odredišnom EPA objektu (
@@ -279,8 +266,7 @@ extern esEvtTimestamp_T uTimestampGet(
 
 #if defined(OPT_EVT_USE_GENERATOR) && (OPT_KERNEL_API_LEVEL < 2)                \
     || defined(__DOXYGEN__)
-/**
- * @brief       Korisnicka callback funkcija: generise pokazivac na generatora
+/**@brief       Korisnicka callback funkcija: generise pokazivac na generatora
  *              dogadjaja.
  * @return      Pokazivac ka generatoru dogadjaja.
  * @details     Poziva se u toku kreiranja dogadjaja. Ukoliko je API kernel nivo
@@ -292,8 +278,7 @@ extern void * uGeneratorGet(
     void);
 #endif
 
-/** @} *//*-------------------------------------------------------------------*/
-/*--------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-----------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif

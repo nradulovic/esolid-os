@@ -50,18 +50,15 @@
 
 /*===============================================================  MACRO's  ==*/
 
-/**
- * @brief       Znakovna konstanta koja pokazuje puno ime i verziju eSolid-a.
+/**@brief       Znakovna konstanta koja pokazuje puno ime i verziju eSolid-a.
  */
 #define ES_KERNEL_ID                    "eSolid v1.0"
 
-/**
- * @brief       Numericka vrednost major verzije eSolid-a.
+/**@brief       Numericka vrednost major verzije eSolid-a.
  */
 #define ES_KERNEL_VERSION_MAJOR         1U
 
-/**
- * @brief       Numericka vrednost minor verzije eSolid-a.
+/**@brief       Numericka vrednost minor verzije eSolid-a.
  */
 #define ES_KERNEL_VERSION_MINOR         0U
 
@@ -115,8 +112,7 @@
 # define ES_KERN_API_ENSURE(expr)       (void)0
 #endif
 
-/** @} *//*-------------------------------------------------------------------*/
-
+/** @} *//*---------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -154,13 +150,11 @@ enum esKernelStatus {
 /**@brief       Stanje kernel-a
  */
 typedef enum esKernelState {
-/**
- * @brief       Kernel se ne izvrsava
+/**@brief       Kernel se ne izvrsava
  */
     KERNEL_STOPPED,
 
-/**
- * @brief       Kernel se izvrsava
+/**@brief       Kernel se izvrsava
  */
     KERNEL_RUNNING
 } esKernelState_T;
@@ -173,8 +167,7 @@ typedef enum esKernelState {
  * @brief       Ove funkcije se koriste za upravljanjem kernel-om
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Inicijalizacija kernel-a
+/**@brief       Inicijalizacija kernel-a
  * @details     Ova funkcija vrsi najpre inicijalizaciju HAL-a, zatim
  *              memorijskog menadzera i prelazi na inicijalizaciju samog kernela.
  * @api
@@ -182,16 +175,14 @@ typedef enum esKernelState {
 void esKernelInit(
     void);
 
-/**
- * @brief       Pokrece izvrsavanje jezgra
+/**@brief       Pokrece izvrsavanje jezgra
  * @details     Pokrecu se svi prethodno kreirani EPA objekti.
  * @api
  */
 void esKernelStart(
     void);
 
-/**
- * @brief       Vraca odgovor da li trenutno radi kernel
+/**@brief       Vraca odgovor da li trenutno radi kernel
  * @return      Status izvrsavanja kernel-a.
  *  @retval     KERNEL_STOPPED - kernel se ne izvrsava,
  *  @retval     KERNEL_RUNNING - kernel se izvrsava,

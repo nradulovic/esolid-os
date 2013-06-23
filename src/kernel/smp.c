@@ -47,6 +47,8 @@
 /*======================================================  LOCAL DATA TYPES  ==*/
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
+
 static esState_T * disTranFindPath(
     esSm_T *        sm,
     esState_T *     exit,
@@ -59,6 +61,7 @@ static void disTranEnter(
 static void disTranExit(
     esSm_T *        sm,
     esState_T *     exit);
+#endif
 
 /*=======================================================  LOCAL VARIABLES  ==*/
 /*======================================================  GLOBAL VARIABLES  ==*/
@@ -100,6 +103,8 @@ const C_ROM esEvt_T evtSignal[] = {
 };
 
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
+
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
 
 /**
  * @brief       Pronalazi putanju od izvorista do odredista
@@ -205,6 +210,7 @@ static void disTranEnter(
     esSm_T *        sm,
     esState_T *     entry) {
 
+
     while (entry != sm->stateQEnd) {
         ++entry;
         (void)EVT_SIGNAL_SEND(sm, *entry, SIG_ENTRY);
@@ -227,6 +233,7 @@ static void disTranExit(
         ++exit;
     }
 }
+#endif
 
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 
@@ -238,6 +245,8 @@ void smInit (
     size_t          levels) {
 
 #if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
+    (void)stateQueue;
+    (void)levels;
     sm->state = initState;
 #elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
     sm->state = initState;
@@ -264,8 +273,12 @@ void smInit (
 void smDeInit(
     esSm_T *        sm) {
 
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
     sm->stateQBegin = (esState_T *)0U;
     sm->stateQEnd = (esState_T *)0U;
+#else
+    (void)sm;
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -273,6 +286,7 @@ size_t stateQReqSize(
     uint8_t         levels) {
 
 #if (OPT_SMP_SM_TYPES == ES_SMP_FSM_ONLY)
+    (void)levels;
 
     return (0U);
 #elif (OPT_SMP_SM_TYPES == ES_SMP_HSM_ONLY)
@@ -285,7 +299,6 @@ size_t stateQReqSize(
     size_t needed;
 
     if (levels <= 2) {
-
         needed = 0U;
     } else {
         needed = levels * 2U * sizeof(esState_T *);
@@ -299,6 +312,8 @@ size_t stateQReqSize(
 esStatus_T hsmDispatch(
     esSm_T *        sm,
     const esEvt_T * evt) {
+
+#if (OPT_SMP_SM_TYPES != ES_SMP_FSM_ONLY)
 
     esState_T * stateQCurr;
     esStatus_T status;
@@ -332,6 +347,11 @@ esStatus_T hsmDispatch(
     sm->state = *sm->stateQEnd;
 
     return (status);
+#else
+    (void)sm;
+    (void)evt;
+#endif
+    return (RETN_IGNORED);
 }
 
 /*----------------------------------------------------------------------------*/
