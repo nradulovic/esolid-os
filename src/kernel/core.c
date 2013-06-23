@@ -349,6 +349,7 @@ C_INLINE void epaInit_(
         definition->evtQueueLevels);
     epa->prio = definition->epaPrio;
     epa->name = definition->epaName;
+    ES_KERN_API_OBLIGATION(epa->signature = EPA_SIGNATURE);
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
     schedRdyRegI_(
@@ -357,8 +358,6 @@ C_INLINE void epaInit_(
         epa,
         (esEvt_T *)&evtSignal[SIG_INIT]);
     ES_CRITICAL_EXIT();
-
-    ES_KERN_API_OBLIGATION(epa->signature = EPA_SIGNATURE);
 }
 
 /**
