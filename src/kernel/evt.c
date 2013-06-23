@@ -68,10 +68,6 @@ C_INLINE_ALWAYS void evtInit_(
         evt->timestamp = uTimestampGet();
 #endif
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
-    evt->signature = EVT_SIGNATURE;
-#endif
-
 #if defined(OPT_EVT_USE_GENERATOR)
 
 # if (OPT_KERNEL_API_LEVEL < 2)
@@ -86,6 +82,8 @@ C_INLINE_ALWAYS void evtInit_(
 #else
     (void)size;
 #endif
+
+    ES_KERN_API_OBLIGATION(evt->signature = EVT_SIGNATURE);
 }
 
 /**
@@ -100,9 +98,7 @@ C_INLINE_ALWAYS void evtDeInit_(
 
     evt->id = 0;
 
-#if defined(OPT_KERNEL_DBG_EVT) && defined(OPT_DBG_USE_CHECK)
-    evt->signature = ~EVT_SIGNATURE;                                            /* Postavljanje loseg potpisa                               */
-#endif
+    ES_KERN_API_OBLIGATION(evt->signature = 0U);
 }
 
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
@@ -121,7 +117,7 @@ esEvt_T * esEvtCreate(
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    newEvt = esDmemAllocI(size);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
     ES_CRITICAL_EXIT();
     evtInit_(
         newEvt,
@@ -140,13 +136,11 @@ esEvt_T * esEvtCreateI(
 
     ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, sizeof(esEvt_T) <= size);
 
-    newEvt = esDmemAllocI(size);                                            /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = esDmemAllocI(size);                                                /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
         size,
         id);
-
-    ES_KERN_API_OBLIGATION(newEvt->signature = EVT_SIGNATURE);
 
     return (newEvt);
 }
