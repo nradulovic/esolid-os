@@ -1,2 +1,0 @@
-# Generisi sistemsku promenljivu koja cuva trenutnu reviziju eSolid-a
-SVNREV:='"$(shell LC_ALL=C svnversion -cn ../ | sed -e "s/.*://" -e "s/\([0-9]*\).*/\1/" | grep "[0-9]" )"'
