@@ -1,7 +1,0 @@
-@INCLUDE                =   doxyfile-generic
-PROJECT_NAME            =   "eSolid - Kernel"
-PROJECT_BRIEF           =   "Event Based System"
-INPUT                   +=  ../inc/kernel                                       \
-                            ../config/                                          \
-                            ../src/kernel
-OUTPUT_DIRECTORY        =   ../doc/out/all

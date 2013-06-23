@@ -1,8 +1,0 @@
-/*********************************************************************************************//**
-@file
-@addtogroup     kernel_impl
-*//** @{ *//**
-@defgroup       smp_impl State Machine Processor (SMP)
-@brief          State Machine Processor (SMP) implementacija
-
-**//** @} *//*************************************************************************************/
