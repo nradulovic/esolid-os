@@ -538,6 +538,7 @@ esEpa_T * esEpaCreate(
     ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, 0U < definition->evtQueueLevels);
     ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != definition->smInitState);
     ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, 2U <= definition->smLevels);
+    ES_KERN_API_REQUIRE(ES_KERN_USAGE_FAILURE, sizeof(esEpa_T) <= definition->epaWorkspaceSize);
 
 #if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
