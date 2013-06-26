@@ -568,7 +568,7 @@ esEpa_T * esEpaCreate(
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         newEpa = esDmemAllocI(
-            sizeof(esEpa_T) + coreSize + smpQSize + evtQSize);
+            coreSize + smpQSize + evtQSize);
         ES_CRITICAL_EXIT();
     }
 #elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
@@ -588,8 +588,8 @@ esEpa_T * esEpaCreate(
 #endif
     epaInit_(
         (esEpa_T *)newEpa,
-        (esState_T *)(newEpa + sizeof(esEpa_T) + coreSize),
-        (esEvt_T **)(newEpa + sizeof(esEpa_T) + coreSize + smpQSize),
+        (esState_T *)(newEpa + coreSize),
+        (esEvt_T **)(newEpa + coreSize + smpQSize),
         definition);
 
     return ((esEpa_T *)newEpa);
