@@ -579,7 +579,7 @@ esEpa_T * esEpaCreate(
         ES_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         newEpa = esSmemAllocI(
-            sizeof(esEpa_T) + coreSize + smpQSize + evtQSize);
+            coreSize + smpQSize + evtQSize);
         ES_CRITICAL_EXIT();
     }
 #else
