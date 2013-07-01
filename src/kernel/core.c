@@ -92,31 +92,31 @@ struct rdyBitmap {
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-C_INLINE bool_T schedRdyIsEmptyI_(
+static C_INLINE bool_T schedRdyIsEmptyI_(
     void);
 
-C_INLINE esEpa_T *schedRdyGetEpaI_(
+static C_INLINE esEpa_T *schedRdyGetEpaI_(
     void);
 
-C_INLINE bool_T schedRdyIsEpaRdy_(
+static C_INLINE bool_T schedRdyIsEpaRdy_(
     const esEpa_T * epa);
 
-C_INLINE void schedRdyRegI_(
+static C_INLINE void schedRdyRegI_(
     const esEpa_T * epa);
 
-C_INLINE void schedRdyUnRegI_(
+static C_INLINE void schedRdyUnRegI_(
     const esEpa_T * epa);
 
 static void schedInit(
     void);
 
-C_INLINE void epaInit_(
+static C_INLINE void epaInit_(
     esEpa_T *       epa,
     esState_T *     stateQueue,
     esEvt_T **      evtQueue,
     const C_ROM esEpaDef_T * definition);
 
-C_INLINE void esEpaDeInit_(
+static C_INLINE void esEpaDeInit_(
     esEpa_T *       epa);
 
 esEvt_T * evtFetchI(
@@ -162,7 +162,7 @@ static void schedInit(
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
  *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
  */
-C_INLINE bool_T schedRdyIsEmptyI_(
+static C_INLINE bool_T schedRdyIsEmptyI_(
     void) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -192,7 +192,7 @@ C_INLINE bool_T schedRdyIsEmptyI_(
  * @brief       Vraca pokazivac na sledeci EPA objekat sa najvecim prioritetom.
  * @return      EPA objekat sa najvecim prioritetom koji ceka na izvrsenje.
  */
-C_INLINE esEpa_T * schedRdyGetEpaI_(
+static C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
 #if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
@@ -222,7 +222,7 @@ C_INLINE esEpa_T * schedRdyGetEpaI_(
  *  @retval     TRUE - EPA objekat ceka na izvrsenje
  *  @retval     FALSE - EPA objekat ne ceka na izvrsenje
  */
-C_INLINE bool_T schedRdyIsEpaRdy_(
+static C_INLINE bool_T schedRdyIsEpaRdy_(
     const esEpa_T * epa) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -255,8 +255,10 @@ C_INLINE bool_T schedRdyIsEpaRdy_(
 /**
  * @brief       Prijavljuje EPA objekat u red za cekanje.
  */
-C_INLINE void schedRdyRegI_(
+static C_INLINE void schedRdyRegI_(
     const esEpa_T * epa) {
+
+	ES_KERN_ASSERT(ES_KERN_USAGE_FAILURE, NULL == gRdyBitmap.list[epa->prio]);
 
     gRdyBitmap.list[epa->prio] = (esEpa_T *)epa;
 }
@@ -264,7 +266,7 @@ C_INLINE void schedRdyRegI_(
 /**
  * @brief       Odjavljuje EPA objekat iz reda za cekanje.
  */
-C_INLINE void schedRdyUnRegI_(
+static C_INLINE void schedRdyUnRegI_(
     const esEpa_T * epa) {
 
     gRdyBitmap.list[epa->prio] = (esEpa_T *)0U;
@@ -277,7 +279,7 @@ C_INLINE void schedRdyUnRegI_(
  * @details     EPA objekat na koji pokazuje pokazivac se ubacuje u listu
  *              spremnih EPA objekata na izvrsenje.
  */
-C_INLINE void schedRdyInsertI_(
+static C_INLINE void schedRdyInsertI_(
     const esEpa_T * epa) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -297,7 +299,7 @@ C_INLINE void schedRdyInsertI_(
  * @param       [in] epa               Pokazivac na EPA objekat koji nije
  *                                      spreman za izvrsenje.
  */
-C_INLINE void schedRdyRmI_(
+static C_INLINE void schedRdyRmI_(
     const esEpa_T * epa) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -330,7 +332,7 @@ C_INLINE void schedRdyRmI_(
  *                                      objekta.
  * @notapi
  */
-C_INLINE void epaInit_(
+static C_INLINE void epaInit_(
     esEpa_T *       epa,
     esState_T *     stateQueue,
     esEvt_T **      evtQueue,
@@ -365,7 +367,7 @@ C_INLINE void epaInit_(
  * @param       [out] epa               Pokazivac na strukturu EPA objekta.
  * @notapi
  */
-C_INLINE void esEpaDeInit_(
+static C_INLINE void esEpaDeInit_(
     esEpa_T *       epa) {
 
     ES_CRITICAL_DECL();
@@ -394,7 +396,7 @@ C_INLINE void esEpaDeInit_(
     smDeInit(
         &epa->sm);
 
-    ES_KERN_API_OBLIGATION(epa->signature = 0U);
+    ES_KERN_API_OBLIGATION(epa->signature = ~EPA_SIGNATURE);
 }
 
 /** @} *//*-------------------------------------------------------------------*/
@@ -471,6 +473,8 @@ void esEvtPostI(
             evt);
     } else {
         /* Greska! Red je pun. */
+    	ES_KERN_ASSERT(ES_KERN_NOT_ENOUGH_MEM, FALSE);
+
         esEvtDestroyI(
             evt);
     }

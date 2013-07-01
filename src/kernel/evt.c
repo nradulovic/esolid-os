@@ -98,7 +98,7 @@ C_INLINE_ALWAYS void evtDeInit_(
 
     evt->id = 0;
 
-    ES_KERN_API_OBLIGATION(evt->signature = 0U);
+    ES_KERN_API_OBLIGATION(evt->signature = ~EVT_SIGNATURE);
 }
 
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
