@@ -221,7 +221,7 @@
  *              enabled)
  */
 #if !defined(OPT_MM_STATIC_SIZE) || defined(__DOXYGEN__)
-# define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
+# define OPT_MM_DISTRIBUTION            3072U
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

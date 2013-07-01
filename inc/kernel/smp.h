@@ -214,7 +214,7 @@ typedef struct esSmDef {
  */
 typedef struct esSm {
 
-#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                              \
+#if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)                                 \
     && (OPT_MM_DISTRIBUTION != ES_MM_STATIC_ONLY)                               \
     || defined(__DOXYGEN__)
 /**

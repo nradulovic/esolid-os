@@ -622,7 +622,7 @@ void esEpaDestroy(
 #else
     esEpaDeInit_(
         epa);
-    (**((const C_ROM struct esMemClass **)epa))(epa);
+    ((const C_ROM struct esMemClass *)epa)->deAlloc(epa);
 #endif
 }
 

@@ -480,7 +480,7 @@ void esSmDestroy(
         ES_CRITICAL_EXIT();
     }
 #else
-    (**((const C_ROM struct esMemClass **)sm))(sm);
+    ((const C_ROM struct esMemClass *)sm)->deAlloc(sm);
 #endif
 }
 

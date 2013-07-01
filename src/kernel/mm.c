@@ -286,7 +286,7 @@ void esMemInit(
 #elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     smemInit();
 #else
-    void * tmp;
+    uint8_t * tmp;
 
     smemInit();
     tmp = esSmemAlloc(
@@ -319,10 +319,12 @@ void * esSmemAllocI(
 #if (OPT_MM_DISTRIBUTION != ES_MM_DYNAMIC_ONLY)
     void * tmp;
 
-    if (size <= (HEAP_END - gSmemSentinel)) {
+    if (size <= esSmemFreeSpace()) {
         tmp = gSmemSentinel;
         gSmemSentinel += size;
     } else {
+        ES_KERN_API_ENSURE(ES_KERN_NOT_ENOUGH_MEM, FALSE);
+
         tmp = (void *)0;
     }
 
@@ -344,7 +346,8 @@ void * esSmemAlloc(
 
     ES_CRITICAL_ENTER(
         OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    tmp = esSmemAllocI(size);
+    tmp = esSmemAllocI(
+        size);
     ES_CRITICAL_EXIT();
 
     return (tmp);
@@ -416,6 +419,7 @@ void * esDmemAllocI(
             return ((void *)&(freeBlk->freeList));
         }
     }
+    ES_KERN_API_ENSURE(ES_KERN_NOT_ENOUGH_MEM, FALSE);
 
     return ((void *)0);
 #else
