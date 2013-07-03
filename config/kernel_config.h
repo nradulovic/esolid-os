@@ -45,7 +45,8 @@
 
 /* Ovde se pisu podesavanja projekta ------------------------------------------------------------*/
 
-# define OPT_KERN_API_VALIDATION
+# define OPT_EVT_USE_GENERATOR
+# define OPT_KERNEL_EPA_PRIO_MAX        9U
 
 /*=================================================================================  SETTINGS  ==*/
 /*-------------------------------------------------------------------------------------------*//**
@@ -221,7 +222,7 @@
  *              enabled)
  */
 #if !defined(OPT_MM_STATIC_SIZE) || defined(__DOXYGEN__)
-# define OPT_MM_DISTRIBUTION            3072U
+# define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
 #endif
 
 /** @} *//*--------------------------------------------------------------------------------------*/

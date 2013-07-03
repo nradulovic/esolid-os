@@ -41,6 +41,30 @@
  * @brief       Interfejs eSolid operativnog sistema.
  * @addtogroup  kernel_intf
  *********************************************************************//** @{ */
+/*
+ * Include paths:
+ * 		- esolid-os/inc
+ *
+ * Source paths:
+ * 		- esolid-os/src
+ *
+ * Dependencies:
+ * 		- CMSIS/trunk v3.0.1
+ * 		- esolid-hal/tags/formula_display
+ *
+ * Exported unclude paths:
+ * 		- esolid-os/inc
+ *
+ * Exported library:
+ * 		- esolid-os
+ *
+ * Exported library paths:
+ * 		- <configuration_name>
+ *
+ * Compiler:
+ * 		- gcc version 4.7.2 (Sourcery CodeBench Lite 2012.09-63)
+ * 		- optimization flags: -01 -fomit-frame-pointer
+ */
 
 #ifndef KERNEL_H_
 #define KERNEL_H_
@@ -106,10 +130,10 @@
     ES_KERN_ASSERT(num, expr)
 
 #else
-# define ES_KERN_ASSERT(expr)           (void)0
+# define ES_KERN_ASSERT(num, expr)  	(void)0
 # define ES_KERN_API_OBLIGATION(expr)   (void)0
-# define ES_KERN_API_REQUIRE(expr)      (void)0
-# define ES_KERN_API_ENSURE(expr)       (void)0
+# define ES_KERN_API_REQUIRE(num, expr)	(void)0
+# define ES_KERN_API_ENSURE(num, expr) 	(void)0
 #endif
 
 /** @} *//*---------------------------------------------  C++ extern begin  --*/
