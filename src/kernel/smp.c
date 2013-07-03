@@ -72,30 +72,45 @@ static void disTranExit(
 const C_ROM esEvt_T evtSignal[] = {
     {(esEvtId_T)SIG_EMPTY,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
+#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+    NULL,
+#endif
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_ENTRY,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
+#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+    NULL,
+#endif
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_EXIT,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
+#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+    NULL,
+#endif
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_INIT,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
+#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+    NULL,
+#endif
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_SUPER,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
+#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+    NULL,
+#endif
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
     EVT_SIGNATURE
 #endif
