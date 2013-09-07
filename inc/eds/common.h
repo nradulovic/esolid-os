@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid-OS
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,39 +20,38 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//***********************************************************************//**
+ *//**
  * @file
  * @author  	Nenad Radulovic
- * @brief       Interface of common.
- * @details     Detailed description
- * @addtogroup  module_intf
- * @brief		Interface of common module.
+ * @brief       Common module API
+ * @details     Common macros for various eSolid modules
+ * @addtogroup  common_intf
+ * @brief		Common module API
  *********************************************************************//** @{ */
 
-#ifndef COMMON_H_
+#if !defined(COMMON_H_)
 #define COMMON_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
 /*===============================================================  MACRO's  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Makroi opste namene - Extended Support
- * @details     Ovde su dostupni makroi za:
- *              - rad sa stringovima i konkatenacija
- *              - jednostavne aritmeticke operacije
+ * @name        General Purpose macros
+ * @details     These macros are used for:
+ *              - string concatenation
+ *              - simple arithmetic operations
+ *              - address and bitwise operations
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Izracunavanje dimenzije elementa jedno-dimenzionalnog niza
+/**@brief       Izracunavanje dimenzije elementa jedno-dimenzionalnog niza
  *              @a expr.
  * @param       string                  Niz
  * @mseffect
  */
-#define ES_DIMENSION(string)                                                    \
+#define GP_DIMENSION(string)                                                    \
     (sizeof(string) / sizeof(string[0]))
 
-/**
- * @brief       Vrsi deljenje dva broja i zaokruzuje rezultat.
+/**@brief       Vrsi deljenje dva broja i zaokruzuje rezultat.
  * @param       expr1                   deljenik
  * @param       expr2                   delitelj
  * @note        Pozeljno je da @a expr2 bude konstanta, inace, generisace se dva
@@ -68,11 +67,10 @@
  *              Zaokruzeno: 6
  *              @endcode
  */
-#define ES_DIV_ROUND(numerator, denominator)                                    \
+#define GP_DIV_ROUND(numerator, denominator)                                    \
     (((numerator) + ((denominator) / 2U)) / (denominator))
 
-/**
- * @brief       Vrsi deljenje dva broja sa zaokruzivanjem broja navise.
+/**@brief       Vrsi deljenje dva broja sa zaokruzivanjem broja navise.
  * @param       expr1                   deljenik
  * @param       expr2                   delitelj
  * @note        Pozeljno je da @a expr2 bude konstanta, inace, generisace se
@@ -88,28 +86,20 @@
  *              Zaokruzeno: 6
  *              @endcode
  */
-#define ES_DIV_ROUNDUP(numerator, denominator)                                  \
+#define GP_DIV_ROUNDUP(numerator, denominator)                                  \
     (((numerator) + (denominator) - 1U) / (denominator))
 
-/**
- * @brief       Vraca vecu vrednost od ponudjenih vrednosti @a expr1 i @a expr2
+/**@brief       Vraca vecu vrednost od ponudjenih vrednosti @a expr1 i @a expr2
  */
-#define ES_MAX(expr1, expr2)                                                    \
+#define GP_MAX(expr1, expr2)                                                    \
     ((expr1 > expr2) ? expr1 : expr2))
 
-/**
- * @brief       Vraca manju vrednost od ponudjenih vrednosti @a expr1 i @a expr2
+/**@brief       Vraca manju vrednost od ponudjenih vrednosti @a expr1 i @a expr2
  */
-#define ES_MIN(expr1, expr2)                                                    \
+#define GP_MIN(expr1, expr2)                                                    \
     ((expr1 < expr2) ? expr1 : expr2))
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Makroi za bit manipulaciju - Extended Support
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Vrsi poravnjanje @a num promenjive sa granicama specificarane
+/**@brief       Vrsi poravnjanje @a num promenjive sa granicama specificarane
  *              u @a align
  * @param       num                     Promenjiva koju treba poravnati,
  * @param       align                   granica poravnanja.
@@ -119,11 +109,10 @@
  *              Dobija se 152.
  * @mseffect
  */
-#define ES_ALIGN(num, align)                                                    \
+#define GP_ALIGN(num, align)                                                    \
     ((num) & ~((align) - 1U))
 
-/**
- * @brief       Vrsi poravnjanje @a num promenjive sa granicama specificarane
+/**@brief       Vrsi poravnjanje @a num promenjive sa granicama specificarane
  *              u @a align
  * @param       num                     Promenjiva koju treba poravnati,
  * @param       align                   granica poravnanja.
@@ -133,23 +122,21 @@
  *              Dobija se 152.
  * @mseffect
  */
-#define ES_ALIGN_UP(num, align)                                                 \
+#define GP_ALIGN_UP(num, align)                                                 \
     (((num) + (align) - 1U) & ~((align) - 1U))
 
-/**
- * @brief       Da li je @c expr jednak nekom stepenu dvojke?
+/**@brief       Da li je @c expr jednak nekom stepenu dvojke?
  * @details     Makro vraca TRUE kada je vrednost @c expr izraza jednaka nekom
  *              stepenu dvojke, inace, vraca FALSE.
  * @mseffect
  */
-#define ES_IS_POW2(num)                                                         \
+#define GP_IS_POW2(num)                                                         \
     (!((num) & ((num) - 1)))
 
-/**
- * @brief       Izracunava log2 za vreme kompajliranja za uint8_t
+/**@brief       Izracunava log2 za vreme kompajliranja za uint8_t
  * @mseffect
  */
-#define ES_UINT8_LOG2(x)                                                        \
+#define GP_UINT8_LOG2(x)                                                        \
     ((x) < 2 ? 0 :                                                              \
      ((x) < 4 ? 1 :                                                             \
       ((x) < 8 ? 2 :                                                            \
@@ -158,71 +145,38 @@
          ((x) < 64 ? 5 :                                                        \
           ((x) < 128 ? 6 : 7)))))))
 
-/**
- * @brief       Kreira masku za MSB bit koji odgovara tipu @c type
+/**@brief       Kreira masku za MSB bit koji odgovara tipu @c type
  * @param       type                    Tip podataka za koji se trazi MSB.
  * @return      Odgovarajuca binarna maska za MSB.
  */
-#define ES_MASK_MSB(type)                                                       \
+#define GP_MASK_MSB(type)                                                       \
     (1UL << ((sizeof(type) * 8U) - 1U))
 
-/**
- * @brief       Postavlja MSB bit na jedan, "1".
+/**@brief       Postavlja MSB bit na jedan, "1".
  * @param       var                     Promenljiva kojoj se postavlja MSB bit
  *                                      na jedan.
  * @mseffect
  */
-#define ES_SET_MSB(var)                                                         \
+#define GP_SET_MSB(var)                                                         \
     do {                                                                        \
-        var |= ES_MASK_MSB(var);                                                \
+        var |= GP_MASK_MSB(var);                                                \
     } while (0)
 
-/**
- * @brief       Postavlja MSB bit na nulu, "0".
+/**@brief       Postavlja MSB bit na nulu, "0".
  * @param       var                     Promenljiva kojoj se postavlja MSB bit
  *                                      na nulu.
  * @mseffect
  */
-#define ES_CLR_MSB(var)                                                         \
+#define GP_CLR_MSB(var)                                                         \
     do {                                                                        \
-        var &= ~ES_MASK_MSB(var);                                               \
+        var &= ~GP_MASK_MSB(var);                                               \
     } while (0)
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------  C++ extern begin  --*/
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**@} *//*--------------------------------------------------------------------*/
 
 /*============================================================  DATA TYPES  ==*/
-
-/*------------------------------------------------------------------------*//**
- * @name        Data types group
- * @brief       brief description
- * @{ *//*--------------------------------------------------------------------*/
-
-/** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
-
-/*------------------------------------------------------------------------*//**
- * @name        Variables group
- * @brief       brief description
- * @{ *//*--------------------------------------------------------------------*/
-
-/** @} *//*-------------------------------------------------------------------*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
-
-/*------------------------------------------------------------------------*//**
- * @name        Function group
- * @brief       brief description
- * @{ *//*--------------------------------------------------------------------*/
-
-/** @} *//*-------------------------------------------------------------------*/
-/*--------------------------------------------------------  C++ extern end  --*/
-#ifdef __cplusplus
-}
-#endif
-
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 /** @endcond *//** @} *//******************************************************
  * END of common.h
