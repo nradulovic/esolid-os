@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,30 +20,32 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//***********************************************************************//**
+ *//*---------------------------------------------------------------------*//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Memory Management API
  * @addtogroup  mem_intf
- * @brief       Javni interfejs
- * @details     Modul implementira tri klase memorijskih menadzera:
- *              - staticni memorijski menadzer
- *              - dinamicki memorijski menadzer
- *              - pool memorijski menadzer
- *
- *              Za pregled memorijskih menadzera pogledati @ref mem
+ * @brief       Memory Management API
+ * @details     This module implements three classes of memory managers:
+ *              - dynamic
+ *              - pool
+ *              - static
+ *              For more details see @ref mem.
  * @warning     All memory functions require aligned memory access
  *********************************************************************//** @{ */
 
-#ifndef MEM_H_
+#if !defined(MEM_H_)
 #define MEM_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+
 #include "compiler.h"
+#include "cpu.h"
+#include "eds/dbg.h"
 #include "../config/sys_config.h"
-#include "../config/mem_config.h"
 
 /*===============================================================  MACRO's  ==*/
+
 /*------------------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
@@ -51,165 +53,254 @@ extern "C" {
 
 /*============================================================  DATA TYPES  ==*/
 
-/**
- * @brief       Status memorije
- * @details     Ovom strukturom opisuje se status memorijske instance. Instanca
- *              moze biti @c static, @c dynamic i @c pool tipa. Ukoliko se mora
- *              dobaviti informacija o velicini, zauzecu i dostupnosti memorije
- *              moraju se koristiti odgovarajuce updateStatus funckcije koje ce
- *              vratiti trazene podatke u ovoj strukturi.
+/**@brief       Memory status structure
+ * @details     This structure is used to get the status of a memory instance.
+ *              Memory instance can be of type @c static, @c dynamic and @c pool.
  * @see         esSMemUpdateStatusI(), esPMemUpdateStatusI(), esDMemUpdateStatusI()
  * @api
  */
 struct esMemStatus {
-/** @brief      Velicina dinamicke memorije                                   */
-    size_t          size;
-
-/** @brief      Iznos ukupne slobodne memorije                                */
-    size_t          freeSpaceTotal;
-
-/** @brief      Iznos maksimalno dostupne memorije kao jedinstven blok        */
-    size_t          freeSpaceAvailable;
+    size_t              size;                                                   /**<@brief Size of dynamic memory                           */
+    size_t              freeSpaceTotal;                                         /**<@brief Total free space                                 */
+    size_t              freeSpaceContiguous;                                    /**<@brief Contiguous free space                            */
 };
 
-/**
- * @brief       Tip statusa memorije
+/**@brief       Memory status type
  * @api
  */
 typedef struct esMemStatus esMemStatus_T;
 
 /*------------------------------------------------------------------------*//**
- * @name        Dinamicki memorijski alokator
+ * @name        Static memory manager - SMem
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Deskriptor Dinamickog alokatora
- * @details     Ovom strukturom se referenciraju instance dinamickog alokatora.
- * @p           Cuva se samo podatak o cuvaru dinamickog memorijskog prostora.
+/**@brief       Static memory instance handle structure
+ * @details     This structure holds information about static memory instance.
+ * @api
+ */
+struct esSMemHandle {
+    portReg_T *         begin;                                                  /**<@brief Pointer to the beginning of static memory        */
+    portReg_T           current;                                                /**<@brief Current index of managed memory                  */
+    size_t              size;                                                   /**<@brief The size of static memory                        */
+
+#if defined(OPT_GUARD_T) || defined(__DOXYGEN__)
+    OPT_GUARD_T         guard;                                                  /**<@brief Memory allocator guard to implement MUTEX        */
+#endif
+#if (1U == CFG_DBG_API_VALIDATION) || defined(__DOXYGEN__)
+    portReg_T           signature;                                              /**<@brief Structure signature, used during development only*/
+#endif
+};
+
+/**@brief       Static memory instance handle type
+ * @api
+ */
+typedef struct esSMemHandle esSMemHandle_T;
+
+/**@} *//*----------------------------------------------------------------*//**
+ * @name        Pool memory allocator - PMem
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**@brief       Pool memory instance handle structure
+ * @details     This structure holds information about pool memory instance.
+ * @p           This structure hold information about pool and block sizes.
+ *              Additionally, it holds a guard member which will ensure mutual
+ *              exclusion in preemption environments.
+ * @see         esPMemInit()
+ * @api
+ */
+struct esPMemHandle {
+    struct pMemBlock *  sentinel;                                               /**<@brief Pointer to the pool sentinel                     */
+    size_t              size;                                                   /**<@brief The size of pool memory                          */
+    size_t              blockSize;                                              /**<@brief Size of one block                                */
+
+#if defined(OPT_GUARD_T) || defined(__DOXYGEN__)
+    OPT_GUARD_T         guard;                                                  /**<@brief Memory allocator guard to implement MUTEX        */
+#endif
+#if (1U == CFG_DBG_API_VALIDATION) || defined(__DOXYGEN__)
+    portReg_T           signature;                                              /**<@brief Structure signature, used during development only*/
+#endif
+};
+
+/**@brief       Pool memory instance handle type
+ * @api
+ */
+typedef struct esPMemHandle esPMemHandle_T;
+
+/**@} *//*----------------------------------------------------------------*//**
+ * @name        Dynamic memory allocator - DMem
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**@brief       Dynamic memory instance handle structure
+ * @details     This structure holds information about dynamic memory instance.
  * @see         esDMemInit()
  * @api
  */
 struct esDMemHandle {
-/** @brief      Pokazivac na cuvara memorije                                  */
-    struct dMemBlock * sentinel;
+    struct dMemBlock *  sentinel;                                               /**<@brief Pointer to the memory sentinel                   */
 
 #if defined(OPT_GUARD_T) || defined(__DOXYGEN__)
-/** @brief      Cuvar dinamickog alokatora                                    */
-    OPT_GUARD_T     guard;
+    OPT_GUARD_T         guard;                                                  /**<@brief Memory allocator guard to implement MUTEX        */
+#endif
+#if (1U == CFG_DBG_API_VALIDATION) || defined(__DOXYGEN__)
+    portReg_T           signature;                                              /**<@brief Structure signature, used during development only*/
 #endif
 };
 
-/**
- * @brief       Tip deskriptora dinamickog alokatora
+/**@brief       Dynamic memory instance handle type
  * @api
  */
 typedef struct esDMemHandle esDMemHandle_T;
 
 /** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Pool memorijski alokator
- * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Deskriptor Pool alokatora
- * @details     Ovom strukturom se referenciraju instance pool alokatora.
- * @p           Ovde se cuvaju podaci o velicini pool memorije i o velicini
- *              jednog bloka. Pored tih informacija nalazi se cuvar pool
- *              memorijskog prostora. Ove informacije su potrebne za rad ostalim
- *              funkcijama pool alokatora.
- * @see         esPMemInit()
- * @api
- */
-struct esPMemHandle {
-/** @brief      Velicina pool memorije                                        */
-    size_t          size;
-
-/** @brief      Velicina jednog bloka                                         */
-    size_t          blockSize;
-
-/** @brief      Pokazivac na cuvara memorije                                  */
-    struct pMemBlock * sentinel;
-
-#if defined(OPT_GUARD_T) || defined(__DOXYGEN__)
-/** @brief      Cuvar pool alokatora                                          */
-    OPT_GUARD_T     guard;
-#endif
-};
-
-/**
- * @brief       Tip deskriptora pool alokatora
- * @api
- */
-typedef struct esPMemHandle esPMemHandle_T;
-
-/** @} *//*-------------------------------------------------------------------*/
 /*======================================================  GLOBAL VARIABLES  ==*/
-
-/**
- * TODO: Napisati globalni Handle za Dinamicki mem. alok.
- */
-extern esDMemHandle_T gDynHandle;
-
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Staticki memorijski alokator
+ * @name        Static memory manager - SMem
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Inicijalizuje staticni memorijski alokator
- * @details     Ova funkcija se mora pozvati pre koriscenja funkcija staticnog
- *              memorijskog alokatora.
+/**@brief       Initializes static memory instance
+ * @param       handle
+ *              Pointer to handle type variable, see @ref esSMemHandle_T.
+ * @param       storage
+ *              Storage memory reserved for static memory manager.
+ * @param       storageSize
+ *              Size of reserved memory expresses in bytes.
+ * @details     This function shall be called before any other static memory
+ *              management function.
  * @api
  */
 void esSMemInit(
-    void);
+    esSMemHandle_T *    handle,
+    void *              storage,
+    size_t              storageSize);
 
-/**
- * @brief       Dodeljuje memorijski prostor velicine @c size
- * @param       size                    Velicina zahtevanog memorijskog prostora
- *                                      u bajtovima.
- * @return      Pokazivac na rezervisani memorijski blok.
- * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
- *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
- *              standardna implementacija @c malloc C funkcije. Ukoliko se
- *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
- *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
- *              standardom.
+/**@brief       Allocates static memory of size @c size
+ * @param       handle
+ *              Pointer to static memory instance, see @ref esSMemHandle_T.
+ * @param       size
+ *              The size of requested memory in bytes.
+ * @return      Pointer to free memory of requested size.
  * @iclass
  */
 void * esSMemAllocI(
-    size_t          size);
+    esSMemHandle_T *    handle,
+    size_t              size);
 
-/**
- * @brief       Dodeljuje memorijski prostor velicine @c size
- * @param       size                    Velicina zahtevanog memorijskog prostora
- *                                      u bajtovima.
- * @return      Pokazivac na rezervisani memorijski blok.
- * @details     U debug rezimu ova funkcija uvek vraca pokazivac, odnosno, ne
- *              moze se desiti da vrati NULL pokazivac, kao sto nalaze
- *              standardna implementacija @c malloc C funkcije. Ukoliko se
- *              zahtevana memorija ne moze dobaviti generisace se ASSERT greska.
- *              Kada se ne koristi debug rezim funkcija se ponasa u skladu sa
- *              standardom.
- * @note        Funkcija koristi makroe @ref OPT_CRITICAL_LOCK i
- *              @ref OPT_CRITICAL_UNLOCK za zastitu memorije od istovremenog
- *              pristupa.
+/**@brief       Allocates static memory of size @c size
+ * @param       handle
+ *              Pointer to static memory instance, see @ref esSMemHandle_T.
+ * @param       size
+ *              The size of requested memory in bytes.
+ * @return      Pointer to free memory of requested size.
  * @api
  */
 void * esSMemAlloc(
-    size_t          size);
+    esSMemHandle_T *    handle,
+    size_t              size);
 
-/**
- * @brief       Vraca velicinu trenutno slobodne memorije u bajtovima.
- * @param       [out] status            Status struktura static alokatora
+/**@brief       Returns various information about given memory instance
+ * @param       handle
+ *              Pointer to static memory instance, see @ref esSMemHandle_T.
+ * @param       status
+ *              Pointer to memory status type, see @ref esMemStatus_T.
  * @iclass
  */
 void esSMemUpdateStatusI(
+    esSMemHandle_T *    handle,
+    esMemStatus_T *     status);
+
+/**@} *//*----------------------------------------------------------------*//**
+ * @name        Pool memory manager - PMem
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**@brief       Initializes pool memory instance
+ * @param       handle
+ *              Pointer to pool memory instance, see @ref esPMemHandle_T.
+ * @param       pool
+ *              Reserved memory area for pool allocator.
+ * @param       poolSize
+ *              The size of reserved memory area expressed in bytes.
+ * @param       blockSize
+ *              The size of one block expressed in bytes.
+ * @details     This function must be called before any call to esPMemAllocI()
+ *              or esPMemAlloc().
+ * @warning     Pointers to @c handle and @c pool must be aligned to CPU defined
+ *              alignment.
+ * @api
+ */
+void esPMemInit(
+    esPMemHandle_T *    handle,
+    void *              pool,
+    size_t              poolSize,
+    size_t              blockSize);
+
+/**@brief       Calculates required reserved memory size for defined number of
+ *              blocks.
+ * @param       blocks
+ *              Number of required blocks.
+ * @param       blockSize
+ *              The size of one block.
+ * @return      Required reserved memory size.
+ * @api
+ */
+size_t esPMemCalcPoolSize(
+    size_t          blocks,
+    size_t          blockSize);
+
+/**@brief       Allocate one block from memory pool
+ * @param       handle
+ *              Pointer to pool memory instance, see @ref esPMemHandle_T.
+ * @return      Pointer to requested block.
+ * @iclass
+ */
+void * esPMemAllocI(
+    esPMemHandle_T * handle);
+
+/**@brief       Allocate one block from memory pool
+ * @param       handle
+ *              Pointer to pool memory instance, see @ref esPMemHandle_T.
+ * @return      Pointer to requested block.
+ * @api
+ */
+void * esPMemAlloc(
+    esPMemHandle_T * handle);
+
+/**
+ * @brief       Oslobadja prethodno alocirani blok
+ * @param       [in] handle             Deskriptor pool alokatora
+ * @param       [in] mem                Prethodno alociran blok memorije
+ * @iclass
+ */
+void esPMemDeAllocI(
+    esPMemHandle_T * handle,
+    void *          mem);
+
+/**
+ * @brief       Oslobadja prethodno alocirani blok
+ * @param       [in] handle             Deskriptor pool alokatora
+ * @param       [in] mem                Prethodno alociran blok memorije
+ * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
+ *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
+ *              pristupa.
+ * @api
+ */
+void esPMemDeAlloc(
+    esPMemHandle_T * handle,
+    void *          mem);
+
+/**
+ * @brief       Vraca statusne informacije pool memorije
+ * @param       [in] handle             Deskriptor pool alokatora
+ * @param       [out] status            Status struktura pool alokatora
+ * @iclass
+ */
+void esPMemUpdateStatusI(
+    esPMemHandle_T * handle,
     esMemStatus_T * status);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Dinamicki memorijski alokator
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -235,9 +326,9 @@ void esSMemUpdateStatusI(
  * @api
  */
 void esDMemInit(
-    esDMemHandle_T * handle,
-    void *          storage,
-    size_t          storageSize);
+    esDMemHandle_T *    handle,
+    void *              storage,
+    size_t              storageSize);
 
 /**
  * @brief       Dodeljuje memorijski prostor velicine @c size
@@ -320,105 +411,8 @@ void esDMemUpdateStatusI(
     esDMemHandle_T * handle,
     esMemStatus_T * status);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Pool memorijski alokator
- * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Inicijalizuje pool memorijski alokator
- * @param       [out] handle            Deskriptor pool alokatora
- * @param       [in] pool               Predefinisani memorijski prostor koji se
- *                                      predaje pool alokatoru na koriscenje
- * @param       poolSize                Velicina pool memorijskog prostora
- * @param       blockSize               Velicina jednog bloka u bajtovima
- * @details     Ova funkcija se mora pozvati pre koriscenja funkcija pool
- *              memorijskog alokatora. Ona ce izracunati koliko blokova se mogu
- *              formirati u pool.
- * @warning     Funkcija zahteva da pokazivaci handle i pool budu poravnani
- *              (aligned). Ukoliko se koriste eSolid alokatori za instaciranje
- *              @c handle strukture i @c poolStorage onda je poravnani pristup
- *              osiguran.
- * @warning     Funkcija zahteva da velicina bloka @c blockSize bude poravnana
- *              (aligned). Na primer za 32-bitni procesor (poravnanje 4 bajta):
- *              ako je @c blockSize == 3 onda je potrebno poravnati na sledecu
- *              vecu vrednost koja je deljiva sa 4, odnosno, u ovom slucaju ce
- *              to biti 4.
- * @api
- */
-void esPMemInit(
-    esPMemHandle_T * handle,
-    void *          pool,
-    size_t          poolSize,
-    size_t          blockSize);
-
-/**
- * @brief       Racuna potrebnu velicinu @c pool-a za cuvanje blokova
- * @param       blocks                  Koliko je blokova potrebno
- * @param       blockSize               Velicina jednog bloka
- * @return      Velicina potrebnog niza u bajtovima.
- * @api
- */
-size_t esPMemCalcPoolSize(
-    size_t          blocks,
-    size_t          blockSize);
-
-/**
- * @brief       Alocira jedan blok iz memory pool-a
- * @param       [in] handle             Deskriptor pool alokatora
- * @return      Pokazivac na alocirani memorijski blok
- * @iclass
- */
-void * esPMemAllocI(
-    esPMemHandle_T * handle);
-
-/**
- * @brief       Alocira jedan blok iz memory pool-a
- * @param       [in] handle             Deskriptor pool alokatora
- * @return      Pokazivac na alocirani memorijski blok
- * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
- *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
- *              pristupa.
- * @api
- */
-void * esPMemAlloc(
-    esPMemHandle_T * handle);
-
-/**
- * @brief       Oslobadja prethodno alocirani blok
- * @param       [in] handle             Deskriptor pool alokatora
- * @param       [in] mem                Prethodno alociran blok memorije
- * @iclass
- */
-void esPMemDeAllocI(
-    esPMemHandle_T * handle,
-    void *          mem);
-
-/**
- * @brief       Oslobadja prethodno alocirani blok
- * @param       [in] handle             Deskriptor pool alokatora
- * @param       [in] mem                Prethodno alociran blok memorije
- * @note        Funkcija koristi makroe @ref OPT_GUARD_LOCK i
- *              @ref OPT_GUARD_UNLOCK za zastitu memorije od istovremenog
- *              pristupa.
- * @api
- */
-void esPMemDeAlloc(
-    esPMemHandle_T * handle,
-    void *          mem);
-
-/**
- * @brief       Vraca statusne informacije pool memorije
- * @param       [in] handle             Deskriptor pool alokatora
- * @param       [out] status            Status struktura pool alokatora
- * @iclass
- */
-void esPMemUpdateStatusI(
-    esPMemHandle_T * handle,
-    esMemStatus_T * status);
-
-/** @} *//*-------------------------------------------------------------------*/
-/*--------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-----------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif

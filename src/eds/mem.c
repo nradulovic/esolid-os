@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,19 +20,17 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//***********************************************************************//**
+ *//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Memory Management Implementation
  * @addtogroup  mem_impl
- * @brief       Implementacija
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/mem.h"
-#include "../config/log_config.h"
-#include "cpu.h"
-#include "common.h"
+
+#include "eds/mem.h"
+#include "eds/common.h"
 
 /*
  * Ako GUARD ili CRITICAL makroi koriste eSolid HAL onda hal_int treba da se ukljuci
@@ -41,60 +39,49 @@
 /* # include "hal/hal_int.h" */
 #endif
 
-/*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
+
+/**@brief       Signature for static memory manager
+ */
+#define SMEM_SIGNATURE                  ((portReg_T)0xDEADBEEDU)
+
+/**@brief       Signature for pool memory manager
+ */
+#define PMEM_SIGNATURE                  ((portReg_T)0xDEADBEEEU)
+
+/**@brief       Signature for dynamic memory manager
+ */
+#define DMEM_SIGNATURE                  ((portReg_T)0xDEADBEEFU)
+
 /*======================================================  LOCAL DATA TYPES  ==*/
 
-/**
- * @brief       Cuvar memorije staticnog alokatora
+/**@brief       Dynamic allocator memory block header structure
  */
-struct sMemSentinel {
-/** @brief      Pocetak bloka memorije                                        */
-    portReg_T *     begin;
-
-/** @brief      Indeks trenutno koriscene memorije                            */
-    portReg_T       current;
+struct PORT_C_ALIGNED(PORT_DATA_ALIGNMENT) dMemBlock {
+    size_t              phySize;                                                /**<@brief Block size (including header)                    */
+    struct dMemBlock *  phyPrev;                                                /**<@brief Previous block in linked list                    */
+    struct dMemBlock *  freeNext;                                               /**<@brief Next free block in linked list                   */
+    struct dMemBlock *  freePrev;                                               /**<@brief Previous free block in linked list               */
 };
 
-/**
- * @brief       Zaglavlje bloka dinamickog alokatora
+/**@brief       Dynamic allocator memory block header type
  */
-typedef struct PORT_C_ALIGNED(PORT_DATA_ALIGNMENT) dMemBlock {
-/** @brief      Velicina bloka memorije (zajedno sa ovom strukturom)          */
-    size_t          phySize;
+typedef struct dMemBlock dMemBlock_T;
 
-/** @brief      Prethodni blok u fizickoj listi                               */
-    struct dMemBlock *  phyPrev;
-
-/** @brief      Sledeci blok u listi slobodnih blokova                        */
-    struct dMemBlock *  freeNext;
-
-/** @brief      Prethodni blok u listi slobodnih blokova                      */
-    struct dMemBlock *  freePrev;
-} dMemBlock_T;
-
-/**
- * @brief       Zaglavlje bloka pool alokatora
+/**@brief       Pool allocator header structure
  */
-typedef struct pMemBlock {
-/** @brief      Pokazivac na sledeci slobodan blok                            */
-    struct pMemBlock *  next;
-} pMemBlock_T;
+struct pMemBlock {
+    struct pMemBlock *  next;                                                   /**<@brief Next free block                                  */
+};
+
+/**@brief       Pool allocator header type
+ */
+typedef struct pMemBlock pMemBlock_T;
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 /*=======================================================  LOCAL VARIABLES  ==*/
 
-/**
- * @brief       Cuvar memorije staticnog alokatora
- */
-static struct sMemSentinel gSMemSentinel;
-
-#if (OPT_MEM_SMEM_SIZE != 0U)
-static portReg_T sMemBuffer[ES_DIV_ROUNDUP(OPT_MEM_SMEM_SIZE, sizeof(portReg_T))];
-#else
-extern uint8_t _sheap;
-extern uint8_t _eheap;
-#endif
+DECL_MODULE_INFO("MEM", "Memory management", "Nenad Radulovic");
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
@@ -103,73 +90,100 @@ extern uint8_t _eheap;
 
 /*----------------------------------------------------------------------------*/
 void esSMemInit(
-    void) {
+    esSMemHandle_T *    handle,
+    void *              storage,
+    size_t              storageSize) {
 
-#if (OPT_MEM_SMEM_SIZE != 0U)
-    gSMemSentinel.begin = &sMemBuffer[0];
-    gSMemSentinel.current = ES_DIMENSION(sMemBuffer);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != storage);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != storageSize);
+    handle->begin = storage;
+    handle->current = GP_ALIGN(storageSize, sizeof(portReg_T));
+    handle->size = GP_ALIGN(storageSize, sizeof(portReg_T));
+
+#if defined(OPT_GUARD_T)
+    OPT_GUARD_INIT(handle->guard);
 #else
-    gSMemSentinel.begin = (portReg_T *)&_sheap;
-    gSMemSentinel.current = (&_eheap - &_sheap) / sizeof(portReg_T);
+    OPT_GUARD_INIT(0U);
 #endif
+    ES_DBG_API_OBLIGATION(handle->signature = SMEM_SIGNATURE);
 }
 
 /*----------------------------------------------------------------------------*/
 void * esSMemAllocI(
-    size_t          size) {
+    esSMemHandle_T *    handle,
+    size_t              size) {
 
     void * mem;
 
-    size = ES_DIV_ROUNDUP(size, sizeof(portReg_T));
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, SMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != size);
 
-    if (size <= gSMemSentinel.current) {
-        gSMemSentinel.current -= size;
-        mem = (void *)&gSMemSentinel.begin[gSMemSentinel.current];
-    } else {
-        mem = NULL;
-    }
+    size = GP_DIV_ROUNDUP(size, sizeof(portReg_T));
+    handle->current -= size;
+    mem = (void *)&handle->begin[handle->current];
+
+    ES_DBG_API_ENSURE(ES_DBG_NOT_ENOUGH_MEM, size <= handle->current);
 
     return (mem);
 }
 
 /*----------------------------------------------------------------------------*/
 void * esSMemAlloc(
-    size_t          size) {
+    esSMemHandle_T *    handle,
+    size_t              size) {
 
-    OPT_CRITICAL_DECL();
+    OPT_GUARD_DECL();
     void * mem;
 
-    OPT_CRITICAL_LOCK();
+#if defined(OPT_GUARD_T)
+    OPT_GUARD_LOCK(handle->guard);
+#else
+    OPT_GUARD_LOCK(0U);
+#endif
     mem = esSMemAllocI(
+        handle,
         size);
-    OPT_CRITICAL_UNLOCK();
-
+#if defined(OPT_GUARD_T)
+    OPT_GUARD_UNLOCK(handle->guard);
+#else
+    OPT_GUARD_UNLOCK(0U);
+#endif
     return (mem);
 }
 
 /*----------------------------------------------------------------------------*/
 void esSMemUpdateStatusI(
+    esSMemHandle_T *    handle,
     esMemStatus_T *     status) {
 
-#if (OPT_MEM_SMEM_SIZE != 0U)
-    status->size = sizeof(sMemBuffer);
-#else
-    status->size = (size_t)(&_eheap - &_sheap);
-#endif
-    status->freeSpaceAvailable = gSMemSentinel.current * sizeof(portReg_T);
-    status->freeSpaceTotal = status->freeSpaceAvailable;
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, SMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != status);
+
+    status->size = handle->size;
+    status->freeSpaceContiguous = handle->current * sizeof(portReg_T);
+    status->freeSpaceTotal = status->freeSpaceContiguous;
 }
 
 /*----------------------------------------------------------------------------*/
 void esPMemInit(
     esPMemHandle_T *    handle,
-    void *          array,
-    size_t          arraySize,
-    size_t          blockSize) {
+    void *              array,
+    size_t              arraySize,
+    size_t              blockSize) {
 
     size_t blockCnt;
     size_t blocks;
     pMemBlock_T * block;
+
+    blockSize = GP_ALIGN_UP(blockSize, sizeof(portReg_T));
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != array);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != blockSize);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, blockSize <= arraySize);
 
     blocks = arraySize / blockSize;
     handle->size = arraySize;
@@ -188,35 +202,40 @@ void esPMemInit(
 #else
     OPT_GUARD_INIT(0U);
 #endif
+    ES_DBG_API_OBLIGATION(handle->signature = PMEM_SIGNATURE);
 }
 
 /*----------------------------------------------------------------------------*/
 size_t esPMemCalcPoolSize(
-    size_t          blocks,
-    size_t          blockSize) {
+    size_t              blocks,
+    size_t              blockSize) {
 
-    blockSize = ES_ALIGN_UP(blockSize, sizeof(portReg_T));
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != blocks);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != blockSize);
+
+    blockSize = GP_ALIGN_UP(blockSize, sizeof(portReg_T));
 
     return (blocks * blockSize);
 }
 
 /*----------------------------------------------------------------------------*/
 void * esPMemAllocI(
-    esPMemHandle_T * handle) {
+    esPMemHandle_T *    handle) {
 
     pMemBlock_T * block;
 
-    block = handle->sentinel;
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, PMEM_SIGNATURE == handle->signature);
 
-    if (NULL != block) {
-        handle->sentinel = block->next;
-    }
+    block = handle->sentinel;
+    ES_DBG_API_ENSURE(ES_DBG_NOT_ENOUGH_MEM, NULL != block);
+    handle->sentinel = block->next;
 
     return ((void *)block);
 }
 /*----------------------------------------------------------------------------*/
 void * esPMemAlloc(
-    esPMemHandle_T * handle) {
+    esPMemHandle_T *    handle) {
 
     OPT_GUARD_DECL();
     void * mem;
@@ -241,9 +260,13 @@ void * esPMemAlloc(
 /*----------------------------------------------------------------------------*/
 void esPMemDeAllocI(
     esPMemHandle_T *    handle,
-    void *          mem) {
+    void *              mem) {
 
     pMemBlock_T * block;
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, PMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != mem);
 
     block = (pMemBlock_T *)mem;
     block->next = handle->sentinel;
@@ -253,7 +276,7 @@ void esPMemDeAllocI(
 /*----------------------------------------------------------------------------*/
 void esPMemDeAlloc(
     esPMemHandle_T *    handle,
-    void *          mem) {
+    void *              mem) {
 
     OPT_GUARD_DECL();
 
@@ -281,6 +304,10 @@ void esPMemUpdateStatusI(
     size_t freeTotal;
     pMemBlock_T * block;
 
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, PMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != status);
+
     freeTotal = 0U;
     block = handle->sentinel;
 
@@ -290,18 +317,22 @@ void esPMemUpdateStatusI(
     }
     status->size = handle->size;
     status->freeSpaceTotal = freeTotal;
-    status->freeSpaceAvailable = handle->blockSize;
+    status->freeSpaceContiguous = handle->blockSize;
 }
 
 /*----------------------------------------------------------------------------*/
 void esDMemInit(
     esDMemHandle_T *    handle,
-    void *          storage,
-    size_t          storageSize) {
+    void *              storage,
+    size_t              storageSize) {
 
     dMemBlock_T * begin;
 
-    storageSize = ES_ALIGN(storageSize, sizeof(portReg_T));
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != storage);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != storageSize);
+
+    storageSize = GP_ALIGN(storageSize, sizeof(portReg_T));
     handle->sentinel = (dMemBlock_T *)((uint8_t *)storage + storageSize) - 1U;  /* Sentinel is the last element of the storage              */
     begin = (dMemBlock_T *)storage;
     begin->phySize = storageSize - sizeof(dMemBlock_T);
@@ -318,16 +349,21 @@ void esDMemInit(
 #else
     OPT_GUARD_INIT(0U);
 #endif
+    ES_DBG_API_OBLIGATION(handle->signature = DMEM_SIGNATURE);
 }
 
 /*----------------------------------------------------------------------------*/
 void * esDMemAllocI(
     esDMemHandle_T *    handle,
-    size_t          size) {
+    size_t              size) {
 
     dMemBlock_T * curr;
 
-    size = ES_ALIGN_UP(size, sizeof(portReg_T)) + sizeof(dMemBlock_T);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, DMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != size);
+
+    size = GP_ALIGN_UP(size, sizeof(portReg_T)) + sizeof(dMemBlock_T);
     curr = handle->sentinel->freeNext;
 
     while (curr != handle->sentinel) {
@@ -344,27 +380,29 @@ void * esDMemAllocI(
                 tmp->freePrev = curr->freePrev;
                 tmp->freeNext->freePrev = tmp;
                 tmp->freePrev->freeNext = tmp;
-                curr->freeNext = NULL;                                         /* Mark block as allocated                                  */
+                curr->freeNext = NULL;                                          /* Mark block as allocated                                  */
 
                 return ((void *)(curr + 1U));
             } else {
                 curr->freeNext->freePrev = curr->freePrev;
                 curr->freePrev->freeNext = curr->freeNext;
-                curr->freeNext = NULL;                                         /* Mark block as allocated                                  */
+                curr->freeNext = NULL;                                          /* Mark block as allocated                                  */
 
                 return ((void *)(curr + 1U));
             }
         }
         curr = curr->freeNext;
     }
+    curr = NULL;
+    ES_DBG_API_ENSURE(ES_DBG_NOT_ENOUGH_MEM, NULL != curr);
 
-    return (NULL);
+    return ((void *)curr);
 }
 
 /*----------------------------------------------------------------------------*/
 void * esDMemAlloc(
-    esDMemHandle_T * handle,
-    size_t          size) {
+    esDMemHandle_T *    handle,
+    size_t              size) {
 
     OPT_GUARD_DECL();
     void * mem;
@@ -390,10 +428,14 @@ void * esDMemAlloc(
 /*----------------------------------------------------------------------------*/
 void esDMemDeAllocI(
     esDMemHandle_T *    handle,
-    void *          mem) {
+    void *              mem) {
 
     dMemBlock_T * curr;
     dMemBlock_T * tmp;
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, DMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != mem);
 
     curr = (dMemBlock_T *)mem - 1U;
     tmp = (dMemBlock_T *)((uint8_t *)curr + curr->phySize);
@@ -426,7 +468,7 @@ void esDMemDeAllocI(
 /*----------------------------------------------------------------------------*/
 void esDMemDeAlloc(
     esDMemHandle_T *    handle,
-    void *          mem) {
+    void *              mem) {
 
     OPT_GUARD_DECL();
 
@@ -456,6 +498,10 @@ void esDMemUpdateStatusI(
     size_t freeAvailable;
     dMemBlock_T * curr;
 
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, DMEM_SIGNATURE == handle->signature);
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != status);
+
     size = 0U;
     freeTotal = 0U;
     freeAvailable = 0U;
@@ -478,7 +524,7 @@ void esDMemUpdateStatusI(
     }
     status->size = size;
     status->freeSpaceTotal = freeTotal;
-    status->freeSpaceAvailable = freeAvailable;
+    status->freeSpaceContiguous = freeAvailable;
 }
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
