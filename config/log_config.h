@@ -83,7 +83,14 @@
 #define LOG_MSG_IS_ENUM                 2U
 
 /** @} *//*-------------------------------------------------------------------*/
+
+#define CFG_LOG_ENABLE
+
 /*==============================================================  SETTINGS  ==*/
+
+#if defined(__DOXYGEN__)
+# define CFG_LOG_ENABLE
+#endif
 
 /**
  * @brief       Definisanje nivoa upisivanja u LOG
@@ -117,53 +124,6 @@
  */
 #if !defined(OPT_LOG_MSG_TYPE)
 # define OPT_LOG_MSG_TYPE               LOG_MSG_IS_TEXT
-#endif
-
-#if !defined(OPT_SYS_ENABLE_LOG)
-# define ES_LOG_IS_ERR(log, filter)     FALSE
-# define ES_LOG_ERR_START(log, msg, var)
-# define ES_LOG_ERR_APPEND(log, msg, var)
-# define ES_LOG_IF_ERR(log, filter, msg, var)
-# define ES_LOGX_ERR_START(log, msg, var)
-# define ES_LOGX_ERR_APPEND(log, msg, var)
-# define ES_LOGX_IF_ERR(log, filter, msg, var)
-
-# define ES_LOG_IS_WARN(log, filter)    FALSE
-# define ES_LOG_WARN_START(log, msg, var)
-# define ES_LOG_WARN_APPEND(log, msg, var)
-# define ES_LOG_IF_WARN(log, filter, msg, var)
-# define ES_LOG_WARN_IF_INVALID(log, condition, msg, var)
-# define ES_LOGX_WARN_START(log, msg, var)
-# define ES_LOGX_WARN_APPEND(log, msg, var)
-# define ES_LOGX_IF_WARN(log, filter, msg, var)
-# define ES_LOGX_WARN_IF_INVALID(log, condition, msg, var)
-# define ES_LOG_INFO_START(log, msg, var)                                       \
-
-# define ES_LOG_IS_INFO(log, filter)    FALSE
-# define ES_LOG_INFO_START(log, msg, var)
-# define ES_LOG_INFO_APPEND(log, msg, var)
-# define ES_LOG_IF_INFO(log, filter, msg, var)
-# define ES_LOGX_INFO_START(log, msg, var)
-# define ES_LOGX_INFO_APPEND(log, msg, var)
-# define ES_LOGX_IF_INFO(log, filter, msg, var)
-
-# define ES_LOG_IS_DBG(log, filter)     FALSE
-# define ES_LOG_DBG_START(log, msg, var)
-# define ES_LOG_DBG_APPEND(log, msg, var)
-# define ES_LOG_IF_DBG(log, filter, msg, var)
-# define ES_LOG_DBG_IF_INVALID(log, condition, msg, var)
-# define ES_LOGX_DBG_START(log, msg, var)
-# define ES_LOGX_DBG_APPEND(log, msg, var)
-# define ES_LOGX_IF_DBG(log, filter, msg, var)
-# define ES_LOGX_DBG_IF_INVALID(log, condition, msg, var)
-
-# define ES_LOG_IS_TRACE(log, filter)   FALSE
-# define ES_LOG_TRACE_START(log, msg, var)
-# define ES_LOG_TRACE_APPEND(log, msg, var)
-# define ES_LOG_IF_TRACE(log, filter, msg, var)
-# define ES_LOGX_TRACE_START(log, msg, var)
-# define ES_LOGX_TRACE_APPEND(log, msg, var)
-# define ES_LOGX_IF_TRACE(log, filter, msg, var)
 #endif
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/

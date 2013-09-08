@@ -26,10 +26,10 @@
  * @brief       Implementacija LOGer-a
  * @addtogroup  log_impl
  *********************************************************************//** @{ */
-                                                                                                  
+
 /*=========================================================  INCLUDE FILES  ==*/
 #define log_VAR
-#include "log/log.h"
+#include "eds/log.h"
 
 /*===============================================================  DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
@@ -53,7 +53,7 @@ struct logMsg {
 
 /*----------------------------------------------------------------------------*/
 void esLogInit(esLog_T * log,
-    const C_ROM esLogDescriptor_T * C_ROM_VAR logDescriptor) {
+    const PORT_C_ROM esLogDescriptor_T * PORT_C_ROM_VAR logDescriptor) {
 
     (void)log;
     (void)logDescriptor;
@@ -74,7 +74,7 @@ uint16_t logMsg(
     uint32_t        msg,
     uint32_t        val) {
 
-    const C_ROM char * text;
+    const PORT_C_ROM char * text;
     size_t size;
 
     if (msg <= log->logDescriptor->entries) {
@@ -85,8 +85,7 @@ uint16_t logMsg(
     }
 
     switch (type) {
-        case LOG_TYPE_ERR :
-        case LOG_TYPE_DBG : {
+        case LOG_TYPE_ERR : {
 
             esCpuStop();
             break;
