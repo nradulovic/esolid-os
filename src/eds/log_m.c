@@ -31,7 +31,7 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 #define LOG_M_H_VAR
-#include "../src/kernel/kernel_private.h"
+#include "kernel_private.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
@@ -42,7 +42,7 @@
 /**
  * @brief       Tabela teksta
  */
-static const char C_ROM * C_ROM_VAR const logMsgText[LOG_LAST_ENTRY] = {
+static const char PORT_C_ROM * PORT_C_ROM_VAR const logMsgText[LOG_LAST_ENTRY] = {
     TEXT_TABLE(EXPAND_AS_TEXT)
 };
 
@@ -58,7 +58,7 @@ static const size_t logMsgSize[LOG_LAST_ENTRY] = {
 /**
  * @brief       Deskriptor struktura za LOG sistem
  */
-const C_ROM esLogDescriptor_T gKernelLogDescriptor = {
+const PORT_C_ROM esLogDescriptor_T gKernelLogDescriptor = {
     .entries = LOG_LAST_ENTRY,
     .textTable = &logMsgText[0],
     .sizeTable = &logMsgSize[0],

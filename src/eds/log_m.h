@@ -120,7 +120,7 @@ LOG_M_H_EXT esLog_T gKernelLog;
 /**
  * @brief       Kernel LOG deskriptor
  */
-extern const C_ROM esLogDescriptor_T gKernelLogDescriptor;
+extern const PORT_C_ROM esLogDescriptor_T gKernelLogDescriptor;
 
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 /*--------------------------------------------------------  C++ extern end  --*/
