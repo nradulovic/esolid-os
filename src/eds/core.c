@@ -28,8 +28,13 @@
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
+
 #define CORE_PKG_H_VAR
-#include "kernel_private.h"
+#include "eds_private.h"
+#include "eds/common.h"
+#include "eds/mem.h"
+#include "arch/cpu.h"
+#include "../config/kernel_config.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 
@@ -48,11 +53,11 @@
 /*------------------------------------------------------------------------*//**
  * @ingroup     Pomocni makroi za rad sa bitmapom
  * @{ *//*--------------------------------------------------------------------*/
-#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX <= PORT_DATA_WIDTH)
 # define PRIO_INDX                      OPT_KERNEL_EPA_PRIO_MAX
 # define PRIO_INDX_GROUP                1
 #else
-# define PRIO_INDX                      HAL_UNATIVE_BITS
+# define PRIO_INDX                      PORT_DATA_WIDTH
 # define PRIO_INDX_GROUP                (ES_DIV_ROUNDUP(OPT_KERNEL_EPA_PRIO_MAX, PRIO_INDX))
 #endif
 #define PRIO_INDX_PWR                   ES_UINT8_LOG2(PRIO_INDX)
@@ -64,17 +69,17 @@
  * @brief       Bitmap spremnih EPA objekata
  */
 struct rdyBitmap {
-#if !(OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS) || defined(__DOXYGEN__)
+#if !(OPT_KERNEL_EPA_PRIO_MAX <= PORT_DATA_WIDTH) || defined(__DOXYGEN__)
 /**
  * @brief       Grupa prioriteta EPA objekata
  * @details     Prilikom trazenja sledeceg aktivnog EPA objekta prvo se
  *              pretrazuje ovaj clan.
  * @note        Ovaj clan se ne koristi kada uslov
- *              "OPT_KERNEL_EPA_PRIO_MAX < ES_CPU_UNATIVE_BITS" nije ispunjen. U
+ *              "OPT_KERNEL_EPA_PRIO_MAX < PORT_DATA_WIDTH" nije ispunjen. U
  *              tom slucaju, generisani kod je manji i efikasniji prilikom
  *              komutacije EPA objekata.
  */
-    volatile unative_T       bitGroup;
+    volatile portReg_T       bitGroup;
 #endif
 
 /**
@@ -82,7 +87,7 @@ struct rdyBitmap {
  * @details     Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
  *              EPA objekat, onda se pretraga nastavlja ovde.
  */
-    volatile unative_T       bit[PRIO_INDX_GROUP];
+    volatile portReg_T       bit[PRIO_INDX_GROUP];
 
 /**
  * @brief       Lista aktivnih EPA objekata;
@@ -92,31 +97,31 @@ struct rdyBitmap {
 
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-static C_INLINE bool_T schedRdyIsEmptyI_(
+static PORT_C_INLINE bool_T schedRdyIsEmptyI_(
     void);
 
-static C_INLINE esEpa_T *schedRdyGetEpaI_(
+static PORT_C_INLINE esEpa_T *schedRdyGetEpaI_(
     void);
 
-static C_INLINE bool_T schedRdyIsEpaRdy_(
+static PORT_C_INLINE bool_T schedRdyIsEpaRdy_(
     const esEpa_T * epa);
 
-static C_INLINE void schedRdyRegI_(
+static PORT_C_INLINE void schedRdyRegI_(
     const esEpa_T * epa);
 
-static C_INLINE void schedRdyUnRegI_(
+static PORT_C_INLINE void schedRdyUnRegI_(
     const esEpa_T * epa);
 
 static void schedInit(
     void);
 
-static C_INLINE void epaInit_(
+static PORT_C_INLINE void epaInit_(
     esEpa_T *       epa,
     esState_T *     stateQueue,
     esEvt_T **      evtQueue,
-    const C_ROM esEpaDef_T * definition);
+    const PORT_C_ROM esEpaDef_T * definition);
 
-static C_INLINE void esEpaDeInit_(
+static PORT_C_INLINE void esEpaDeInit_(
     esEpa_T *       epa);
 
 esEvt_T * evtFetchI(
@@ -162,13 +167,13 @@ static void schedInit(
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
  *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
  */
-static C_INLINE bool_T schedRdyIsEmptyI_(
+static PORT_C_INLINE bool_T schedRdyIsEmptyI_(
     void) {
 
-#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX <= PORT_DATA_WIDTH)
     bool_T answer;
 
-    if ((unative_T)0U == gRdyBitmap.bit[0]) {
+    if ((portReg_T)0U == gRdyBitmap.bit[0]) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -178,7 +183,7 @@ static C_INLINE bool_T schedRdyIsEmptyI_(
 #else
     bool_T answer;
 
-    if ((unative_T)0U == gRdyBitmap.bitGroup) {
+    if ((portReg_T)0U == gRdyBitmap.bitGroup) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -192,18 +197,18 @@ static C_INLINE bool_T schedRdyIsEmptyI_(
  * @brief       Vraca pokazivac na sledeci EPA objekat sa najvecim prioritetom.
  * @return      EPA objekat sa najvecim prioritetom koji ceka na izvrsenje.
  */
-static C_INLINE esEpa_T * schedRdyGetEpaI_(
+static PORT_C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
-#if (OPT_KERNEL_INTERRUPT_PRIO_MAX < ES_CPU_UNATIVE_BITS)
+#if (OPT_KERNEL_INTERRUPT_PRIO_MAX < PORT_DATA_WIDTH)
     esEpa_T *epa;
 
     epa = gRdyBitmap.list[esCpuFindLastSet(gRdyBitmap.bit[0])];
 
     return (epa);
 #else
-    unative_T indxGroup;
-    unative_T indx;
+    portReg_T indxGroup;
+    portReg_T indx;
     esEpa_T * epa;
 
     indxGroup = ES_CPU_FLS(gRdyBitmap.bitGroup);
@@ -222,13 +227,13 @@ static C_INLINE esEpa_T * schedRdyGetEpaI_(
  *  @retval     TRUE - EPA objekat ceka na izvrsenje
  *  @retval     FALSE - EPA objekat ne ceka na izvrsenje
  */
-static C_INLINE bool_T schedRdyIsEpaRdy_(
+static PORT_C_INLINE bool_T schedRdyIsEpaRdy_(
     const esEpa_T * epa) {
 
-#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
+#if (OPT_KERNEL_EPA_PRIO_MAX <= PORT_DATA_WIDTH)
     bool_T answer;
 
-    if (gRdyBitmap.bit[0] & ((unative_T)1U << epa->prio)) {
+    if (gRdyBitmap.bit[0] & ((portReg_T)1U << epa->prio)) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -236,13 +241,13 @@ static C_INLINE bool_T schedRdyIsEpaRdy_(
 
     return (answer);
 #else
-    unative_T indxGroup;
-    unative_T indx;
+    portReg_T indxGroup;
+    portReg_T indx;
 
-    indx = epa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+    indx = epa->prio & (~((portReg_T)0U) >> (PORT_DATA_WIDTH - PRIO_INDX_PWR));
     indxGroup = epa->internals.prio >> PRIO_INDX_PWR;
 
-    if (gRdyBitmap.bit[indxGroup] & ((unative_T)1U << indx)) {
+    if (gRdyBitmap.bit[indxGroup] & ((portReg_T)1U << indx)) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -255,7 +260,7 @@ static C_INLINE bool_T schedRdyIsEpaRdy_(
 /**
  * @brief       Prijavljuje EPA objekat u red za cekanje.
  */
-static C_INLINE void schedRdyRegI_(
+static PORT_C_INLINE void schedRdyRegI_(
     const esEpa_T * epa) {
 
 	ES_KERN_ASSERT(ES_KERN_USAGE_FAILURE, NULL == gRdyBitmap.list[epa->prio]);
@@ -266,7 +271,7 @@ static C_INLINE void schedRdyRegI_(
 /**
  * @brief       Odjavljuje EPA objekat iz reda za cekanje.
  */
-static C_INLINE void schedRdyUnRegI_(
+static PORT_C_INLINE void schedRdyUnRegI_(
     const esEpa_T * epa) {
 
     gRdyBitmap.list[epa->prio] = (esEpa_T *)0U;
@@ -279,18 +284,18 @@ static C_INLINE void schedRdyUnRegI_(
  * @details     EPA objekat na koji pokazuje pokazivac se ubacuje u listu
  *              spremnih EPA objekata na izvrsenje.
  */
-static C_INLINE void schedRdyInsertI_(
+static PORT_C_INLINE void schedRdyInsertI_(
     const esEpa_T * epa) {
 
-#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
-    gRdyBitmap.bit[0] |= (unative_T)1U << epa->prio;
+#if (OPT_KERNEL_EPA_PRIO_MAX <= PORT_DATA_WIDTH)
+    gRdyBitmap.bit[0] |= (portReg_T)1U << epa->prio;
 #else
-    unative_T indxGroup;
-    unative_T indx;
+    portReg_T indxGroup;
+    portReg_T indx;
 
-    indx = epa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
-    gRdyBitmap.bitGroup |= (unative_T)1U << indxGroup;
-    gRdyBitmap.bit[indxGroup] |= (unative_T)1U << indx;
+    indx = epa->prio & (~((portReg_T)0U) >> (PORT_DATA_WIDTH - PRIO_INDX_PWR));
+    gRdyBitmap.bitGroup |= (portReg_T)1U << indxGroup;
+    gRdyBitmap.bit[indxGroup] |= (portReg_T)1U << indx;
 #endif
 }
 
@@ -299,21 +304,21 @@ static C_INLINE void schedRdyInsertI_(
  * @param       [in] epa               Pokazivac na EPA objekat koji nije
  *                                      spreman za izvrsenje.
  */
-static C_INLINE void schedRdyRmI_(
+static PORT_C_INLINE void schedRdyRmI_(
     const esEpa_T * epa) {
 
-#if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
-    gRdyBitmap.bit[0] &= ~((unative_T)1U << epa->prio);
+#if (OPT_KERNEL_EPA_PRIO_MAX <= PORT_DATA_WIDTH)
+    gRdyBitmap.bit[0] &= ~((portReg_T)1U << epa->prio);
 #else
-    unative_T indxGroup;
-    unative_T indx;
+    portReg_T indxGroup;
+    portReg_T indx;
 
-    indx = epa->prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
+    indx = epa->prio & (~((portReg_T)0U) >> (PORT_DATA_WIDTH - PRIO_INDX_PWR));
     indxGroup = epa->prio >> PRIO_INDX_PWR;
-    gRdyBitmap.bit[indxGroup] &= ~((unative_T)1U << indx);
+    gRdyBitmap.bit[indxGroup] &= ~((portReg_T)1U << indx);
 
-    if ((unative_T)0U == gRdyBitmap.bit[indxGroup]) {
-        gRdyBitmap.bitGroup &= ~((unative_T)1U << indxGroup);
+    if ((portReg_T)0U == gRdyBitmap.bit[indxGroup]) {
+        gRdyBitmap.bitGroup &= ~((portReg_T)1U << indxGroup);
     }
 #endif
 }
@@ -332,13 +337,13 @@ static C_INLINE void schedRdyRmI_(
  *                                      objekta.
  * @notapi
  */
-static C_INLINE void epaInit_(
+static PORT_C_INLINE void epaInit_(
     esEpa_T *       epa,
     esState_T *     stateQueue,
     esEvt_T **      evtQueue,
-    const C_ROM esEpaDef_T * definition) {
+    const PORT_C_ROM esEpaDef_T * definition) {
 
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
 
     smInit(
         (esSm_T *)epa,
@@ -352,14 +357,13 @@ static C_INLINE void epaInit_(
     epa->prio = definition->epaPrio;
     epa->name = definition->epaName;
     ES_KERN_API_OBLIGATION(epa->signature = EPA_SIGNATURE);
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    PORT_CRITICAL_ENTER();
     schedRdyRegI_(
         epa);
     esEvtPostI(                                                                 /* Postavi dogadjaj INIT u redu cekanja ovog automata.      */
         epa,
         (esEvt_T *)&evtSignal[SIG_INIT]);
-    ES_CRITICAL_EXIT();
+    PORT_CRITICAL_EXIT();
 }
 
 /**
@@ -367,29 +371,27 @@ static C_INLINE void epaInit_(
  * @param       [out] epa               Pokazivac na strukturu EPA objekta.
  * @notapi
  */
-static C_INLINE void esEpaDeInit_(
+static PORT_C_INLINE void esEpaDeInit_(
     esEpa_T *       epa) {
 
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
 
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    PORT_CRITICAL_ENTER();
     schedRdyRmI_(
         epa);
     schedRdyUnRegI_(
         epa);
-    ES_CRITICAL_EXIT();
+    PORT_CRITICAL_EXIT();
 
     while (FALSE == evtQIsEmptyI_(&epa->evtQueue)) {
         esEvt_T * evt;
 
         evt = evtQGetI_(
             &epa->evtQueue);
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        PORT_CRITICAL_ENTER();
         esEvtDestroyI(
             evt);
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
     }
     evtQDeInit(
         &epa->evtQueue);
@@ -437,14 +439,13 @@ void esEvtPost(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
 
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    PORT_CRITICAL_ENTER();
     esEvtPostI(
        epa,
        evt);
-    ES_CRITICAL_EXIT();
+    PORT_CRITICAL_EXIT();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -485,14 +486,13 @@ void esEvtPostAhead(
     esEpa_T *       epa,
     esEvt_T *       evt) {
 
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
 
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    PORT_CRITICAL_ENTER();
     esEvtPostAheadI(
         epa,
         evt);
-    ES_CRITICAL_EXIT();
+    PORT_CRITICAL_EXIT();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -528,8 +528,8 @@ void esEvtPostAheadI(
 
 /*----------------------------------------------------------------------------*/
 esEpa_T * esEpaCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esEpaDef_T *    definition) {
+    const PORT_C_ROM esMemClass_T *  memClass,
+    const PORT_C_ROM esEpaDef_T *    definition) {
 
     uint8_t * newEpa;
     size_t coreSize;
@@ -547,16 +547,16 @@ esEpa_T * esEpaCreate(
 #if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
-    coreSize = ES_ALIGN(
-        definition->epaWorkspaceSize, ES_CPU_ATTRIB_ALIGNMENT);
-    smpQSize = ES_ALIGN(
+    coreSize = GP_ALIGN(
+        definition->epaWorkspaceSize, PORT_DATA_ALIGNMENT);
+    smpQSize = GP_ALIGN(
         stateQReqSize(
             definition->smLevels),
-        ES_CPU_ATTRIB_ALIGNMENT);
-    evtQSize = ES_ALIGN(
+        PORT_DATA_ALIGNMENT);
+    evtQSize = GP_ALIGN(
         evtQReqSize(
             definition->evtQueueLevels),
-        ES_CPU_ATTRIB_ALIGNMENT);
+        PORT_DATA_ALIGNMENT);
 #else
     coreSize = definition->epaWorkspaceSize;
     smpQSize = stateQReqSize(
@@ -567,29 +567,28 @@ esEpa_T * esEpaCreate(
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     {
-        ES_CRITICAL_DECL();
+        PORT_CRITICAL_DECL;
 
         (void)memClass;
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        newEpa = esDmemAllocI(
+        PORT_CRITICAL_ENTER();
+        newEpa = esDMemAllocI(
+            &gDefDMemHandle,
             coreSize + smpQSize + evtQSize);
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
     }
 #elif (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     {
-        ES_CRITICAL_DECL();
+        PORT_CRITICAL_DECL;
 
         (void)memClass;
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        PORT_CRITICAL_ENTER();
         newEpa = esSmemAllocI(
             coreSize + smpQSize + evtQSize);
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
     }
 #else
     newEpa = (* memClass->alloc)(coreSize + smpQSize + evtQSize);
-    *((const C_ROM struct esMemClass **)newEpa) = memClass;
+    *((const PORT_C_ROM struct memClass **)newEpa) = memClass;
 #endif
     epaInit_(
         (esEpa_T *)newEpa,
@@ -607,22 +606,22 @@ void esEpaDestroy(
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
     /* Greska! Statican objekat */
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
 
     ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
     ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
 
     esEpaDeInit_(
         epa);
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
-    esDmemDeAllocI(
+    PORT_CRITICAL_ENTER();
+    esDMemDeAllocI(
+        &gDefDMemHandle,
         epa);
-    ES_CRITICAL_EXIT();
+    PORT_CRITICAL_EXIT();
 #else
     esEpaDeInit_(
         epa);
-    ((const C_ROM struct esMemClass *)epa)->deAlloc(epa);
+    ((const PORT_C_ROM struct memClass *)epa)->deAlloc(epa);
 #endif
 }
 
@@ -648,15 +647,14 @@ void esEpaPrioSet(
     esEpa_T *       epa,
     uint8_t         newPrio) {
 
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
     bool_T status;
 
     ES_KERN_API_REQUIRE(ES_KERN_ARG_NULL, NULL != epa);
     ES_KERN_API_REQUIRE(ES_KERN_ARG_NOT_VALID, EPA_SIGNATURE == epa->signature);
     ES_KERN_API_REQUIRE(ES_KERN_ARG_OUT_OF_RANGE, OPT_KERNEL_EPA_PRIO_MAX > newPrio);
 
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    PORT_CRITICAL_ENTER();
     status = schedRdyIsEpaRdy_(
         epa);
     schedRdyRmI_(
@@ -671,7 +669,7 @@ void esEpaPrioSet(
         schedRdyInsertI_(
             epa);
     }
-    ES_CRITICAL_EXIT();
+    PORT_CRITICAL_EXIT();
 }
 
 /*----------------------------------------------------------------------------*/
@@ -692,11 +690,10 @@ void esKernelInit(
 void esKernelStart(
     void) {
 
-    ES_CRITICAL_DECL();
+    PORT_CRITICAL_DECL;
 
     gKernelState = KERNEL_RUNNING;
-    ES_CRITICAL_ENTER(
-        OPT_KERNEL_INTERRUPT_PRIO_MAX);
+    PORT_CRITICAL_ENTER();
 
     while (TRUE) {
 
@@ -708,12 +705,11 @@ void esKernelStart(
             gCurrentEpa = epa = schedRdyGetEpaI_();
             evt = evtFetchI(
                 epa);
-            ES_CRITICAL_EXIT();
+            PORT_CRITICAL_EXIT();
             status = SM_DISPATCH(
                 (esSm_T *)epa,
                 evt);
-            ES_CRITICAL_ENTER(
-                OPT_KERNEL_INTERRUPT_PRIO_MAX);
+            PORT_CRITICAL_ENTER();
 
             if (RETN_DEFERRED == status) {
                 esEvtPostI(
@@ -725,10 +721,9 @@ void esKernelStart(
             }
         }
         gCurrentEpa = (esEpa_T *)0U;
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
         /* ES_CPU_SLEEP(); */
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        PORT_CRITICAL_ENTER();
     }
 }
 

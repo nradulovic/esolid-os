@@ -30,10 +30,10 @@
  * @brief		Implementation of evtq module.
  * @section		sec_name Section name
  *********************************************************************//** @{ */
-                                                                                                  
+
 /*=========================================================  INCLUDE FILES  ==*/
 #define EVTQ_PKG_H_VAR
-#include "kernel_private.h"
+#include "eds_private.h"
 
 
 /*===============================================================  DEFINES  ==*/

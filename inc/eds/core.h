@@ -33,7 +33,8 @@
 #define CORE_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/smp.h"
+
+#include "eds/smp.h"
 #include "primitive/queue.h"
 
 /*===============================================================  DEFINES  ==*/
@@ -56,7 +57,7 @@ typedef struct esEpaDef {
  *              EPA objektu i u druge svrhe se ne koristi. Vise EPA objekata
  *              mogu imati isto ime.
  */
-    const C_ROM char * epaName;
+    const PORT_C_ROM char * epaName;
 
 /**@brief       Prioritet EPA objekta
  */
@@ -125,7 +126,7 @@ struct evtQueue {
  *              strukturu.
  * @api
  */
-typedef struct esEpa {
+struct esEpa {
 /**@brief       Struktura izvrsne jedinice.
  * @details     Strukturu izvrsne jedinice koju definise SMP modul i pristup
  *              podacima ove strukture je zabranjen drugim modulima.
@@ -143,14 +144,14 @@ typedef struct esEpa {
 
 /**@brief       Ime EPA objekta
  */
-    const C_ROM char * name;
+    const PORT_C_ROM char * name;
 
 #if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
 /**@brief       Potpis koji pokazuje da je ovo zaista EPA objekat.
  */
     uint32_t        signature;
 #endif
-} esEpa_T;
+};
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
@@ -236,8 +237,8 @@ void esEvtPostAheadI(
  * @api
  */
 esEpa_T * esEpaCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esEpaDef_T *    definition);
+    const PORT_C_ROM esMemClass_T *  memClass,
+    const PORT_C_ROM esEpaDef_T *    definition);
 
 /**@brief       Unistava EPA objekat.
  * @param       epa

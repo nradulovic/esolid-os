@@ -31,8 +31,8 @@
 #define KERNEL_PRIVATE_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
-#include "kernel/kernel.h"
-#include "mm_pkg.h"
+
+#include "eds/kernel.h"
 #include "evt_pkg.h"
 #include "smp_pkg.h"
 #include "evtq_pkg.h"

@@ -28,8 +28,9 @@
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
-#define SMP_PKG_H_VAR
-#include "kernel_private.h"
+
+#include "eds_private.h"
+#include "eds/common.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 /*=========================================================  LOCAL MACRO's  ==*/
@@ -69,49 +70,79 @@ static void disTranExit(
 /**
  * @brief       Tabela signalnih dogadjaja
  */
-const C_ROM esEvt_T evtSignal[] = {
+const PORT_C_ROM esEvt_T evtSignal[] = {
     {(esEvtId_T)SIG_EMPTY,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1U == CFG_EVT_USE_TIMESTAMP)
+    0U,
+#endif
+#if defined(CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_SIZE)
+    0U,
+#endif
+#if (1U == CFG_DBG_API_VALIDATION)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_ENTRY,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1U == CFG_EVT_USE_TIMESTAMP)
+    0U,
+#endif
+#if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_SIZE)
+    0U,
+#endif
+#if (1U == CFG_DBG_API_VALIDATION)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_EXIT,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1U == CFG_EVT_USE_TIMESTAMP)
+    0U,
+#endif
+#if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_SIZE)
+    0U,
+#endif
+#if (1U == CFG_DBG_API_VALIDATION)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_INIT,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1U == CFG_EVT_USE_TIMESTAMP)
+    0U,
+#endif
+#if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_SIZE)
+    0U,
+#endif
+#if (1U == CFG_DBG_API_VALIDATION)
     EVT_SIGNATURE
 #endif
     },
     {(esEvtId_T)SIG_SUPER,
     EVT_RESERVED_MASK | EVT_CONST_MASK,
-#if defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1U == CFG_EVT_USE_TIMESTAMP)
+    0U,
+#endif
+#if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if defined(OPT_KERN_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1U == OPT_EVT_USE_SIZE)
+    0U,
+#endif
+#if (1U == CFG_DBG_API_VALIDATION)
     EVT_SIGNATURE
 #endif
     }
@@ -417,54 +448,45 @@ esStatus_T esSmDispatch(
 
 /*----------------------------------------------------------------------------*/
 esSm_T * esSmCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esSmDef_T *     definition) {
+    const PORT_C_ROM esMemClass_T *  memClass,
+    const PORT_C_ROM esSmDef_T *     definition) {
 
     uint8_t * newSm;
     size_t smpSize;
     size_t stateQSize;
 
-#if !defined(PORT_SUPP_UNALIGNED_ACCESS) || defined(OPT_OPTIMIZE_SPEED)         /* Ukoliko port ne podrzava UNALIGNED ACCESS ili je ukljuce-*/
-                                                                                /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
-                                                                                /* radi brzeg pristupa memoriji.                            */
-    smpSize = ES_ALIGN(
+    smpSize = GP_ALIGN(
         definition->smWorkspaceSize,
-        ES_CPU_ATTRIB_ALIGNMENT);
-    stateQSize = ES_ALIGN(
+        PORT_DATA_ALIGNMENT);
+    stateQSize = GP_ALIGN(
         stateQReqSize(
             definition->smLevels),
-        ES_CPU_ATTRIB_ALIGNMENT);
-#else
-    smpSize = definition->smWorkspaceSize;
-    stateQSize = stateQReqSize(
-        definition->smLevels);
-# endif
+        PORT_DATA_ALIGNMENT);
 
 #if (OPT_MM_DISTRIBUTION == ES_MM_STATIC_ONLY)
-    (void)aMemClass;
+    (void)memClass;
     {
-        ES_CRITICAL_DECL();
+        PORT_CRITICAL_DECL;
 
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
-        newSm = esSmemAllocI(
+        PORT_CRITICAL_ENTER();
+        newSm = esSMemAllocI(
             smpSize + stateQSize);
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
     }
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     (void)memClass;
     {
-        ES_CRITICAL_DECL();
+        PORT_CRITICAL_DECL;
 
-        ES_CRITICAL_ENTER(
+        PORT_CRITICAL_ENTER(
             OPT_KERNEL_INTERRUPT_PRIO_MAX);
         newSm = esDmemAllocI(
             smpSize + stateQSize);
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
     }
 #else
     newSm = (* memClass->alloc)(smpSize + stateQSize);
-    *((const C_ROM struct esMemClass **)newSm) = memClass;
+    *((const PORT_C_ROM struct memClass **)newSm) = memClass;
 #endif
     smInit(
         (esSm_T *)newSm,
@@ -486,16 +508,15 @@ void esSmDestroy(
     /* Greska! Staticni objekat */
 #elif (OPT_MM_DISTRIBUTION == ES_MM_DYNAMIC_ONLY)
     {
-        ES_CRITICAL_DECL();
+        PORT_CRITICAL_DECL;
 
-        ES_CRITICAL_ENTER(
-            OPT_KERNEL_INTERRUPT_PRIO_MAX);
+        PORT_CRITICAL_ENTER();
         esDmemDeAllocI(
             sm);
-        ES_CRITICAL_EXIT();
+        PORT_CRITICAL_EXIT();
     }
 #else
-    ((const C_ROM struct esMemClass *)sm)->deAlloc(sm);
+    ((const PORT_C_ROM struct memClass *)sm)->deAlloc(sm);
 #endif
 }
 

@@ -46,7 +46,8 @@
 #define KERNEL_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/core.h"
+
+#include "eds/core.h"
 
 /*===============================================================  MACRO's  ==*/
 
@@ -191,35 +192,7 @@ void esKernelStart(
 esKernelState_T esKernelStatus(
     void);
 
-/** @} *//*-------------------------------------------------------------------*/
-
-/**@brief       An assertion has failed. This function should inform the user
- *              about failed assertion.
- * @param       fnName
- *              Function name: is pointer to the function name string where the
- *              assertion has failed. Macro will automatically fill in the
- *              function name.
- * @param       errNum
- *              Error number: is predefined number of error that just occured.
- * @param       errExpr
- *              Error Expression: is a pointer to the string containing the
- *              expression that failed to evaluate to `TRUE`.
- * @pre         1) `NULL != fnName`
- * @pre         2) `NULL != errNum`
- * @pre         3) `NULL != errExpr`
- * @note        1) The definition of this function must be written by the user.
- * @note        2) This function is called only if @ref CFG_HALAPI_VALIDATION
- *              option is active.
- * @details     Function will just print the information which was given by
- *              the macros. After the function informs the user it **must** go
- *              into infinite loop or HALT the processor.
- */
-C_NORETURN extern void userAssert(
-    const char *    fnName,
-    const char *    errNum,
-    const char *    errExpr);
-
-/*--------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-----------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif

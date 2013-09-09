@@ -53,19 +53,19 @@ typedef struct evtQueue evtQueue_T;
 
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
-static C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
+static PORT_C_INLINE_ALWAYS bool_T evtQIsEmptyI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsEmpty_(&evtQ->queue));
 }
 
-static C_INLINE_ALWAYS bool_T evtQIsFullI_(
+static PORT_C_INLINE_ALWAYS bool_T evtQIsFullI_(
     evtQueue_T *    evtQ) {
 
     return (esQpIsFull_(&evtQ->queue));
 }
 
-static C_INLINE_ALWAYS esEvt_T * evtQGetI_(
+static PORT_C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     evtQueue_T *    evtQ) {
 
     esEvt_T * evt;
@@ -80,7 +80,7 @@ static C_INLINE_ALWAYS esEvt_T * evtQGetI_(
     return (evt);
 }
 
-static C_INLINE_ALWAYS void evtQPutAheadI_(
+static PORT_C_INLINE_ALWAYS void evtQPutAheadI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
 
@@ -96,7 +96,7 @@ static C_INLINE_ALWAYS void evtQPutAheadI_(
 #endif
 }
 
-static C_INLINE_ALWAYS void evtQPutI_(
+static PORT_C_INLINE_ALWAYS void evtQPutI_(
     evtQueue_T *    evtQ,
     esEvt_T *       evt) {
 

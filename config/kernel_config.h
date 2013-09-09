@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,19 +20,19 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author  	Nenad Radulovic
  * @brief       Konfiguracija eSolid Kernel-a
  * @defgroup    kernel_cfg Kernel configuration
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
 
 #ifndef KERNEL_CONFIG_H_
 #define KERNEL_CONFIG_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
+/*===============================================================  DEFINES  ==*/
 
 #define ES_MM_DYNAMIC_ONLY              0
 #define ES_MM_STATIC_ONLY               -1
@@ -43,15 +43,16 @@
 #define ES_KERNEL_API_SM                1
 #define ES_KERNEL_API_FULL              2
 
-/* Ovde se pisu podesavanja projekta ------------------------------------------------------------*/
+/* Ovde se pisu podesavanja projekta -----------------------------------------*/
 
 # define OPT_EVT_USE_GENERATOR
 # define OPT_KERNEL_EPA_PRIO_MAX        9U
 
-/*=================================================================================  SETTINGS  ==*/
-/*-------------------------------------------------------------------------------------------*//**
+/*==============================================================  SETTINGS  ==*/
+
+/*------------------------------------------------------------------------*//**
  * @name        Debagiranje Kernel-a
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Debug podrska Kernel-a
@@ -127,10 +128,9 @@
 # define OPT_KERNEL_DBG_MM
 #endif
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Podesavanje Kernel-a
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Nivo kernel interfejsa koji se koristi
@@ -179,10 +179,9 @@
 # define OPT_KERNEL_INTERRUPT_PRIO_MAX  ES_PRIO_REALTIME
 #endif
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Podesavanje Memory Management (MM) modula
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Managed RAM size.
@@ -225,10 +224,9 @@
 # define OPT_MM_DISTRIBUTION            ES_MM_DYNAMIC_ONLY
 #endif
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Podesavanje State Machine Processor (SMP) modula
- * @{ *//*---------------------------------------------------------------------------------------*/
+ * @{ *//*--------------------------------------------------------------------*/
 
 /**
  * @brief       Omogucavanje vise tipova automata
@@ -243,123 +241,9 @@
 # define OPT_SMP_SM_TYPES               ES_SMP_FSM_ONLY
 #endif
 
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Podesavanje Event Management (EVT) modula
- * @{ *//*---------------------------------------------------------------------------------------*/
+/** @} *//*-------------------------------------------------------------------*/
 
-/**
- * @brief       Koristi se atribut o velicini dogadjaja
- * @details     Moguce vrednosti:
- *                  - nedefinisano - ne koristi se atribut o velicini
- *                  - definisano   - koristi se atribut o velicini
- *
- *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_SIZE_T.
- * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
- *              velicini.
- */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_SIZE
-#endif
-
-/**
- * @brief       Koristi se pokazivac na proizvodjaca dogadjaja.
- * @details     Moguce vrednosti:
- *                  - nedefinisano - pokazivac na objekat se ne koristi
- *                  - definisano   - pokazivac na objekat se koristi
- *
- * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
- *              generatoru.
- */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_GENERATOR
-#endif
-
-/**
- * @brief       Koristi se vremenski marker dogadjaja.
- * @details     Moguce vrednosti:
- *              - nedefinisano - vrem. marker se ne koristi
- *              - definisano   - vrem. marker se koristi
- *
- *              Podesavanje tipa se vrsi pomocu @ref OPT_EVT_TIMESTAMP_T.
- * @note        Podrazumevano podesavanje: Dogadjaji ne koriste atribut o
- *              vremenskom markeru.
- */
-#if defined(__DOXYGEN__)
-# define OPT_EVT_USE_TIMESTAMP
-#endif
-
-/**
- * @brief       Tip promenljive za identifikator dogadjaja.
- * @details     Tip podatka treba da dovoljne velicine moze da predstavi sve
- *              dogadjaje u sistemu. Na primer, ako u sistemu postoje manje od
- *              255 identifikatora dogadjaja onda ovaj tip moze najmanje biti
- *              uint8_t tipa. Ukoliko sistem poseduje vise od 255 razlicitih
- *              dogadjaja onda ovaj tip treba da bude najmanje uint16_t. Naravno,
- *              treba voditi racuna o zauzecu strukture koja opisuje dogadjaj i
- *              njenom poravnjanju (alignement) u memoriji, gde se moze javiti
- *              potreba za vecim tipom od minimalnog.
- * @note        Podrazumevano podesavanje: uint_fast8_t
- */
-#if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
-# define OPT_EVT_ID_T                   uint_fast8_t
-#endif
-
-/**
- * @brief       Tip podataka za cuvanje velicine prosirenog dogadjaja.
- * @note        Podrazumevano podesavanje: size_t
- */
-#if !defined(OPT_EVT_SIZE_T) || defined(__DOXYGEN__)
-# define OPT_EVT_SIZE_T                 size_t
-#endif
-
-/**
- * @brief       Tip za cuvanje vremenskih atributa dogadjaja.
- * @note        Podrazumevano podesavanje: uint32_t
- */
-#if !defined(OPT_EVT_TIMESTAMP_T) || defined(__DOXYGEN__)
-# define OPT_EVT_TIMESTAMP_T            uint32_t
-#endif
-
-/**
- * @brief       Atribut za strukture dogadaja
- * @details     Prilikom slanja dogadjaja drugim sistemima javlja se problem
- *              pakovanja podataka unutar strukture dogadjaja.
- *              Ovom promenljivom se moze definisati koja direktiva ce se
- *              koristiti za strukture dogadjaja (poravnjanje, pakovanje).
- * @note        Podrazumevano podesavanje: /
- */
-#if !defined(OPT_EVT_STRUCT_ATTRIB) || defined(__DOXYGEN__)
-# define OPT_EVT_STRUCT_ATTRIB
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------------------------*//**
- * @name        Tipovi podataka koje korisnik definise
- * @{ *//*---------------------------------------------------------------------------------------*/
-
-/**
- * @brief       Tip podataka za identifikator dogadjaja
- */
-typedef OPT_EVT_ID_T                    esEvtId_T;
-
-/**
- * @brief       Tip podataka za vremenski marker dogadjaja
- */
-#if defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-typedef OPT_EVT_TIMESTAMP_T             esEvtTimestamp_T;
-#endif
-
-/**
- * @brief       Tip podataka za atribut velicine dogadjaja
- */
-#if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-typedef OPT_EVT_SIZE_T                  esEvtSize_T;
-#endif
-
-/** @} *//*--------------------------------------------------------------------------------------*/
-
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
 #if (OPT_MM_MANAGED_SIZE != 0U)
 # if (OPT_MM_HEAP_SIZE > OPT_MM_MANAGED_SIZE)
@@ -367,7 +251,7 @@ typedef OPT_EVT_SIZE_T                  esEvtSize_T;
 # endif
 #endif
 
-/** @endcond *//** @} *//*************************************************************************
+/** @endcond *//** @} *//******************************************************
  * END of kernel_cfg.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* KERNEL_CONFIG_H_ */

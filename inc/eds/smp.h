@@ -33,7 +33,9 @@
 #define SMP_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/evt.h"
+
+#include "eds/evt.h"
+#include "eds/mem.h"
 
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
@@ -220,7 +222,7 @@ typedef struct esSm {
 /**
  * @brief       Pokazivac na klasu memorijskog alokatora
  */
-    const C_ROM struct esMemClass * memClass;
+    const PORT_C_ROM struct memClass * memClass;
 #endif
 
 /**
@@ -281,8 +283,8 @@ void esSmpInit(
  * @api
  */
 esSm_T * esSmCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esSmDef_T *     definition);
+    const esMemClass_T *  memClass,
+    const PORT_C_ROM esSmDef_T *     definition);
 
 /**
  * @brief       Unistava automat
@@ -320,8 +322,7 @@ esStatus_T esSmTopState(
     void *          sm,
     esEvt_T *       evt);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*--------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-----------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif
