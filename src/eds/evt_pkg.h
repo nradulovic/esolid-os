@@ -1,4 +1,4 @@
-/*************************************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -20,18 +20,18 @@
  *
  * web site:    http://blueskynet.dyndns-server.com
  * e-mail  :    blueskyniss@gmail.com
- *//******************************************************************************************//**
+ *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Privatni interfejs Event Object podmodula.
  * @addtogroup  evt_impl
- ****************************************************************************************//** @{ */
+ *********************************************************************//** @{ */
 
-#ifndef EVT_PKG_H_
+#if !defined(EVT_PKG_H_)
 #define EVT_PKG_H_
 
-/*============================================================================  INCLUDE FILES  ==*/
-/*==================================================================================  DEFINES  ==*/
+/*=========================================================  INCLUDE FILES  ==*/
+/*===============================================================  DEFINES  ==*/
 
 /**
  * @brief       Bit maska za brojac korisnika dogadjaja
@@ -49,51 +49,41 @@
  * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
  *              omogucena provera pokazivaca.
  */
-#define EVT_SIGNATURE                   (0xFEED)
+#define EVT_SIGNATURE                   ((portReg_T)0xDEADFEEDUL)
 
-/*==================================================================================  MACRO's  ==*/
-/*-------------------------------------------------------------------------  C++ extern begin  --*/
+/*===============================================================  MACRO's  ==*/
+/*------------------------------------------------------  C++ extern begin  --*/
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-/*===============================================================================  DATA TYPES  ==*/
-/*=========================================================================  GLOBAL VARIABLES  ==*/
-/*======================================================================  FUNCTION PROTOTYPES  ==*/
+/*============================================================  DATA TYPES  ==*/
+/*======================================================  GLOBAL VARIABLES  ==*/
+/*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /**
  * @brief       Povecava broj korisnika koji koriste dogadjaj
- * @param       evt                     Dogadjaj koji ce se koristiti
+ * @param       evt
+ *              Dogadjaj koji ce se koristiti
  */
-static C_INLINE void evtUsrAddI_(
-    esEvt_T         * evt) {
+static PORT_C_INLINE_ALWAYS void evtUsrAddI_(
+    esEvt_T *       evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic)) {                  /* Da li je dogadjaj dinamičan?                             */
-        uint_fast8_t tmpR;
-        uint_fast8_t tmpU;
-
-        tmpR = evt->dynamic & ~EVT_USERS_MASK;
-        tmpU = evt->dynamic & EVT_USERS_MASK;
-        ++tmpU;
-        evt->dynamic = tmpR | tmpU;
+    if (0U == (EVT_CONST_MASK & evt->attrib)) {                                 /* Da li je dogadjaj dinamičan?                             */
+        ++evt->attrib;
     }
 }
 
 /**
  * @brief       Smanjuje broj korisnika koji koriste dogadjaj
- * @param       evt                     Dogadjaj koji se koristio
+ * @param       evt
+ *              Dogadjaj koji se koristio
  */
-static C_INLINE void evtUsrRmI_(
-    esEvt_T         * evt) {
+static PORT_C_INLINE_ALWAYS void evtUsrRmI_(
+    esEvt_T *       evt) {
 
-    if ((uint_fast8_t)0U == (EVT_CONST_MASK & evt->dynamic)) {                  /* Da li je dogadjaj dinamičan?                             */
-        uint_fast8_t tmpR;
-        uint_fast8_t tmpU;
-
-        tmpR = evt->dynamic & ~EVT_USERS_MASK;
-        tmpU = evt->dynamic & EVT_USERS_MASK;
-        --tmpU;
-        evt->dynamic = tmpR | tmpU;
+    if (0U == (EVT_CONST_MASK & evt->attrib)) {                                 /* Da li je dogadjaj dinamičan?                             */
+        --evt->attrib;
     }
 }
 
@@ -102,9 +92,9 @@ static C_INLINE void evtUsrRmI_(
 }
 #endif
 
-/*===================================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
+/*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-/** @endcond *//** @} *//*************************************************************************
+/** @endcond *//** @} *//******************************************************
  * END of evt_pkg.h
- *************************************************************************************************/
+ ******************************************************************************/
 #endif /* EVT_PKG_H_ */
