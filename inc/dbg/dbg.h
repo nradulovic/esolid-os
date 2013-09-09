@@ -53,10 +53,10 @@
 #if (1U == CFG_DBG_ENABLE)
 # define DECL_MODULE_INFO(modName, modDesc, modAuth)                            \
     static const PORT_C_ROM struct dbgModInfo gModInfo_ = {                     \
-        .name = modName,                                                        \
-        .desc = modDesc,                                                        \
-        .auth = modAuth,                                                        \
-        .file = PORT_C_FILE                                                     \
+        modName,                                                                \
+        modDesc,                                                                \
+        modAuth,                                                                \
+        PORT_C_FILE                                                             \
     }
 #endif
 
@@ -78,9 +78,9 @@
     do {                                                                        \
         if (!(expr)) {                                                          \
             const PORT_C_ROM struct dbgCobj thisObj = {                         \
-                .mod  = &gModInfo_,                                             \
-                .fn   = PORT_C_FUNC,                                            \
-                .line = PORT_C_LINE                                             \
+                &gModInfo_,                                                     \
+                PORT_C_FUNC,                                                    \
+                PORT_C_LINE                                                     \
             };                                                                  \
             dbgAssert(&thisObj, #expr, msg);                                    \
         }                                                                       \
@@ -242,7 +242,7 @@ struct esDbgReport {
  */
 typedef struct esDbgReport esDbgReport_T;
 
-/**@} *//*----------------------------------------------------------------*//**
+/**@} *//*--------------------------------------------------------------------*/
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*===================================================  FUNCTION PROTOTYPES  ==*/
