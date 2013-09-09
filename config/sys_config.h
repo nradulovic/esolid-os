@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -267,6 +267,8 @@
  */
 # define OPT_MEM_DYN_T                  esDMemHandle_T
 
+# define OPT_MEM_DYN_HANDLE             &gDefDMemHandle
+
 /**
  * @brief       Dobavlja memorijski blok (prekid omogucen)
  */
@@ -297,7 +299,7 @@
  * @name        Odabir redova za cekanje
  * @{ *//*--------------------------------------------------------------------*/
 
-#if !defined(OPT_QUEUE_EXTERN) || defined(__DOXYGEN__)
+#if !defined(OPT_QUEUE_EXTERN)
 # define OPT_QUEUE_EXTERN               0U
 #endif
 
@@ -316,13 +318,14 @@
     evtQGetI_(queue)
 
 #endif
+
 /** @} *//*-------------------------------------------------------------------*/
 
 /**
  * @brief       Omogucavanje LOGer-a
  */
 #if defined(__DOXYGEN__)
-# define OPT_SYS_ENABLE_LOG
+# define CFG_LOG_ENABLE
 #endif
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/

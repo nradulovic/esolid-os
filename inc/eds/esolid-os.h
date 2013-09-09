@@ -32,7 +32,7 @@
 #define KERNEL_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/evt.h"
+#include "eds/evt.h"
 
 /*===============================================================  DEFINES  ==*/
 
@@ -74,9 +74,8 @@ typedef enum esKernelState {
     ES_KERNEL_RUNNING
 } esKernelState_T;
 
-/**
- * @brief       Listing kodova gresaka koje se generisu kada je LOG sistem
- *              ukljucen
+/**@brief       List of error codes
+ * @api
  */
 enum esStatusCodes {
     ES_NO_ERROR,
