@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -26,7 +26,7 @@
  * @brief       Implementacija kernel-a.
  * @addtogroup  kernel_impl
  *********************************************************************//** @{ */
-                                                                                                  
+
 /*=========================================================  INCLUDE FILES  ==*/
 #define KERNEL_PRIVATE_H_VAR
 #include "kernel_private.h"
@@ -88,7 +88,7 @@ void esKernelInit(
 #endif
 
 /*----------------------------------------------------------------------------*/
-C_NAKED void esKernelStart(
+PORT_C_NAKED void esKernelStart(
     void) {
 
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_KERNEL)) {

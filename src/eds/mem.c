@@ -84,6 +84,11 @@ typedef struct pMemBlock pMemBlock_T;
 DECL_MODULE_INFO("MEM", "Memory management", "Nenad Radulovic");
 
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+esSMemHandle_T gDefSMemHandle;
+esPMemHandle_T gDefPMemHandle;
+esDMemHandle_T gDefDMemHandle;
+
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/

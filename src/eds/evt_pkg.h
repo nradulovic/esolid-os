@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -27,32 +27,12 @@
  * @addtogroup  evt_impl
  *********************************************************************//** @{ */
 
-#ifndef EVT_PKG_H_
+#if !defined(EVT_PKG_H_)
 #define EVT_PKG_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
-#include "kernel/evt.h"
-#include "../config/log_config.h"
 
-/*===============================================================  DEFINES  ==*/
-
-/**
- * @brief       Bit maska za brojac korisnika dogadjaja
- * @details     Brojac korisnika je 8-bitni, što znači da maksimalan broj
- *              korisnika dogadjaja u jednom trenutku iznosi 255 EPA objekata.
- */
-#define EVT_USERS_MASK                  (0x3FU)
-
-/**
- * @brief       Konstanta za potpis dogadjaja
- * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
- *              koje prime dogadjaj bile sigurne da je dogadjaj kreiran
- *              funkcijom esEvtCreate() i da je i dalje validan. Dogadjaji koji
- *              se obrisu nemaju ovaj potpis.
- * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
- *              omogucena provera pokazivaca.
- */
-#define EVT_SIGNATURE                   0xFEEDUL
+#include "eds/evt.h"
 
 /*===============================================================  MACRO's  ==*/
 /*------------------------------------------------------  C++ extern begin  --*/

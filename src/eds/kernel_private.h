@@ -31,10 +31,10 @@
 #define KERNEL_PRIVATE_H_
 
 /*============================================================================  INCLUDE FILES  ==*/
-#include "kernel/kernel.h"
-#include "log/log.h"
-#include "../src/log/log_m.h"
-#include "../src/mem/mem_pkg.h"
+
+#include "eds/esolid-os.h"
+#include "eds/log.h"
+#include "log_m.h"
 #include "evt_pkg.h"
 #include "smp_pkg.h"
 #include "evtq_pkg.h"

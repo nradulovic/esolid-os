@@ -37,6 +37,9 @@
 #endif
 
 /*=========================================================  INCLUDE FILES  ==*/
+
+#include "cpu.h"
+
 /*===============================================================  DEFINES  ==*/
 /*===============================================================  MACRO's  ==*/
 /*------------------------------------------------------------------------*//**
@@ -47,9 +50,9 @@
 # define PRIO_INDX_GROUP                1
 #else
 # define PRIO_INDX                      HAL_UNATIVE_BITS
-# define PRIO_INDX_GROUP                (ES_DIV_ROUNDUP(OPT_KERNEL_EPA_PRIO_MAX, PRIO_INDX))
+# define PRIO_INDX_GROUP                (GP_DIV_ROUNDUP(OPT_KERNEL_EPA_PRIO_MAX, PRIO_INDX))
 #endif
-#define PRIO_INDX_PWR                   ES_UINT8_LOG2(PRIO_INDX)
+#define PRIO_INDX_PWR                   GP_UINT8_LOG2(PRIO_INDX)
 
 /** @} *//*-------------------------------------------------------------------*/
 /*------------------------------------------------------  C++ extern begin  --*/
@@ -73,7 +76,7 @@ struct rdyBitmap {
  *              tom slucaju, generisani kod je manji i efikasniji prilikom
  *              komutacije EPA objekata.
  */
-    volatile unative_T       bitGroup;
+    volatile portReg_T       bitGroup;
 #endif
 
 /**
@@ -81,7 +84,7 @@ struct rdyBitmap {
  * @details     Kad je pretragom bitGroup utvrdjeno da se ovde nalazi spreman
  *              EPA objekat, onda se pretraga nastavlja ovde.
  */
-    volatile unative_T       bit[PRIO_INDX_GROUP];
+    volatile portReg_T       bit[PRIO_INDX_GROUP];
 
 /**
  * @brief       Lista aktivnih EPA objekata;
@@ -141,7 +144,7 @@ void schedRdyUnRegI(
  *              objekata na izvrsenje.
  * @inline
  */
-static C_INLINE void schedRdyInsertI_(
+static PORT_C_INLINE void schedRdyInsertI_(
     uint_fast8_t    prio) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -162,7 +165,7 @@ static C_INLINE void schedRdyInsertI_(
  * @param       [in] prio               Prioritet EPA objekata
  * @inline
  */
-static C_INLINE void schedRdyRmI_(
+static PORT_C_INLINE void schedRdyRmI_(
     uint_fast8_t    prio) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -196,7 +199,7 @@ bool_T schedEpaIsRdyI(
  * @return      Vraca pokazivac na trenutno izvrsavan EPA objekat
  * @inline
  */
-static C_INLINE esEpa_T * schedEpaGetCurrent_(
+static PORT_C_INLINE esEpa_T * schedEpaGetCurrent_(
     void) {
 
     return (gRdyBitmap.current);

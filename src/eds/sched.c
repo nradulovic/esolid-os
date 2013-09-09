@@ -28,7 +28,7 @@
  * @brief       Implementacija scheduler modula.
  * @addtogroup  sched_impl
  *********************************************************************//** @{ */
-                                                                                                  
+
 /*=========================================================  INCLUDE FILES  ==*/
 #define SCHED_PKG_H_VAR
 #include "kernel_private.h"
@@ -38,10 +38,10 @@
 /*======================================================  LOCAL DATA TYPES  ==*/
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
-static C_INLINE bool_T schedRdyIsEmpty_(
+static PORT_C_INLINE bool_T schedRdyIsEmpty_(
     void);
 
-static C_INLINE esEpa_T * schedRdyGetEpaI_(
+static PORT_C_INLINE esEpa_T * schedRdyGetEpaI_(
     void);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
@@ -54,13 +54,13 @@ static C_INLINE esEpa_T * schedRdyGetEpaI_(
  *  @retval     TRUE - ne postoji EPA objekat koji ceka izvrsavanje,
  *  @retval     FALSE - postoji barem jedan EPA objekat koji ceka izvrsavanje.
  */
-static C_INLINE bool_T schedRdyIsEmpty_(
+static PORT_C_INLINE bool_T schedRdyIsEmpty_(
     void) {
 
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
     bool_T answer;
 
-    if ((unative_T)0U == gRdyBitmap.bit[0]) {
+    if ((portReg_T)0U == gRdyBitmap.bit[0]) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -70,7 +70,7 @@ static C_INLINE bool_T schedRdyIsEmpty_(
 #else
     bool_T answer;
 
-    if ((unative_T)0U == gRdyBitmap.bitGroup) {
+    if ((portReg_T)0U == gRdyBitmap.bitGroup) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -84,7 +84,7 @@ static C_INLINE bool_T schedRdyIsEmpty_(
  * @brief       Vraca pokazivac na sledeci EPA objekat sa najvecim prioritetom.
  * @return      EPA objekat sa najvecim prioritetom koji ceka na izvrsenje.
  */
-static C_INLINE esEpa_T * schedRdyGetEpaI_(
+static PORT_C_INLINE esEpa_T * schedRdyGetEpaI_(
     void) {
 
 #if (OPT_SYS_INTERRUPT_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
@@ -96,8 +96,8 @@ static C_INLINE esEpa_T * schedRdyGetEpaI_(
 
     return (epa);
 #else
-    unative_T indxGroup;
-    unative_T indx;
+    portReg_T indxGroup;
+    portReg_T indx;
     esEpa_T * epa;
 
     indxGroup = esCpuFindLastSet(gRdyBitmap.bitGroup);
@@ -145,7 +145,7 @@ bool_T schedEpaIsRdyI(
 #if (OPT_KERNEL_EPA_PRIO_MAX <= ES_CPU_UNATIVE_BITS)
     bool_T answer;
 
-    if (gRdyBitmap.bit[0] & ((unative_T)1U << prio)) {
+    if (gRdyBitmap.bit[0] & ((portReg_T)1U << prio)) {
         answer = TRUE;
     } else {
         answer = FALSE;
@@ -159,7 +159,7 @@ bool_T schedEpaIsRdyI(
     indx = prio & (~((unative_T)0U) >> (ES_CPU_UNATIVE_BITS - PRIO_INDX_PWR));
     indxGroup = prio >> PRIO_INDX_PWR;
 
-    if (gRdyBitmap.bit[indxGroup] & ((unative_T)1U << indx)) {
+    if (gRdyBitmap.bit[indxGroup] & ((portReg_T)1U << indx)) {
         answer = TRUE;
     } else {
         answer = FALSE;

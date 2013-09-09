@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -29,23 +29,40 @@
  *********************************************************************//** @{ */
 
 /*=========================================================  INCLUDE FILES  ==*/
+
 #include "evt_pkg.h"
 #include "cpu.h"
+#include "eds/dbg.h"
 
 #if (1U != OPT_QUEUE_EXTERN)
 # include "epa_pkg.h"
 # include "evtq_pkg.h"
 #endif
 
-/*=========================================================  LOCAL DEFINES  ==*/
+#if (0U == OPT_MEM_POOL_EXTERN)
+# include "eds/mem.h"
+#endif
+
 /*=========================================================  LOCAL MACRO's  ==*/
+
+/**
+ * @brief       Konstanta za potpis dogadjaja
+ * @details     Konstanta se koristi prilikom debag procesa kako bi funkcije
+ *              koje prime dogadjaj bile sigurne da je dogadjaj kreiran
+ *              funkcijom esEvtCreate() i da je i dalje validan. Dogadjaji koji
+ *              se obrisu nemaju ovaj potpis.
+ * @pre         Opcija @ref OPT_KERNEL_DBG_EVT mora da bude aktivna kako bi bila
+ *              omogucena provera pokazivaca.
+ */
+#define EVT_SIGNATURE                   ((portReg_T)0xDEADFEEDUL)
+
 /*======================================================  LOCAL DATA TYPES  ==*/
 
 struct evtDB {
     const PORT_C_ROM esEvtDBElem_T ** elem;
 
-#if (OPT_LOG_LEVEL <= LOG_DBG)
-    uint16_t        elements;
+#if (1U == CFG_DBG_API_VALIDATION)
+    uint16_t            elements;
 #endif
 };
 
@@ -59,9 +76,9 @@ struct evtDB {
  * @inline
  */
 static PORT_C_INLINE_ALWAYS void evtInit_(
-    esEvt_T *       evt,
-    size_t          size,
-    esEvtId_T       id);
+    esEvt_T *           evt,
+    size_t              size,
+    esEvtId_T           id);
 
 /**
  * @brief       DeInicijalizator funkcija dogadjaja
@@ -70,10 +87,11 @@ static PORT_C_INLINE_ALWAYS void evtInit_(
  * @inline
  */
 static PORT_C_INLINE_ALWAYS void evtDeInit_(
-    esEvt_T *       evt);
+    esEvt_T *           evt);
 
 /*=======================================================  LOCAL VARIABLES  ==*/
 
+DECL_MODULE_INFO("EVT", "Event management", "Nenad Radulovic");
 static struct evtDB gEvtDB;
 
 /*======================================================  GLOBAL VARIABLES  ==*/
@@ -88,41 +106,33 @@ static PORT_C_INLINE_ALWAYS void evtInit_(
     size_t          size,
     esEvtId_T       id) {
 
-#if (OPT_LOG_LEVEL <= LOG_DBG)
-    evt->signature = EVT_SIGNATURE;
-#endif
-
     evt->id = id;
     evt->attrib = 0U;                                                           /* Dogadjaj je dinamican, sa 0 korisnika.                   */
 
-#if (1U == OPT_EVT_USE_TIMESTAMP)
-# if defined(1U == OPT_EVT_TIMESTAMP_CALLBACK)
+#if (1U == CFG_EVT_USE_TIMESTAMP)
+# if (1U == OPT_EVT_TIMESTAMP_CALLBACK)
     evt->timestamp = appEvtTimestampGet();
+#else
 # endif
 #endif
-
-#if (1U == OPT_EVT_USE_GENERATOR)
+#if (1U == CFG_EVT_USE_GENERATOR)
 # if (1U == OPT_EVT_GENERATOR_CALLBACK)
     evt->generator = appEvtGeneratorGet();
 # endif
 #endif
-
 #if (1U == OPT_EVT_USE_SIZE)
     evt->size = (esEvtSize_T)size;
 #else
     (void)size;
 #endif
+    ES_DBG_API_OBLIGATION(evt->signature = EVT_SIGNATURE);
 }
 
 /*----------------------------------------------------------------------------*/
 static PORT_C_INLINE_ALWAYS void evtDeInit_(
     esEvt_T *       evt) {
 
-#if (OPT_LOG_LEVEL <= LOG_DBG)
-    evt->signature = (uint16_t)~EVT_SIGNATURE;                                  /* Postavljanje loseg potpisa                               */
-#else
-	(void)evt;
-#endif
+    ES_DBG_API_OBLIGATION(evt->signature = ~EVT_SIGNATURE);
 }
 
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
@@ -131,28 +141,37 @@ static PORT_C_INLINE_ALWAYS void evtDeInit_(
 /*----------------------------------------------------------------------------*/
 void esEvtDBRegister(
     const PORT_C_ROM esEvtDBElem_T * evtDB[],
-    uint16_t        elements) {
+    uint16_t            elements) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evtDB);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, elements);
 
     gEvtDB.elem = evtDB;
 
-#if (OPT_LOG_LEVEL <= LOG_DBG)
+#if (1U == CFG_DBG_API_VALIDATION)
     gEvtDB.elements = elements;                                                 /* Snimi broj elemenata kako bi ogranicili ulazni opseg id  */
-
-# if (1U == OPT_EVT_USE_MEM_POOL) && (0U == OPT_MEM_POOL_EXTERN)                /* Proveri da li pool moze da sadrzi dogadjaje              */
+#endif
+#if (1U == OPT_EVT_USE_MEM_POOL) && (0U == OPT_MEM_POOL_EXTERN)                /* Proveri da li pool moze da sadrzi dogadjaje              */
     {
         uint16_t cntr;
 
         for (cntr = 0U; cntr < elements; cntr++) {
-            ES_LOG_DBG_IF_INVALID(log, gEvtDB.elem[cntr] <= gEvtDB.elem[cntr]->pool.blockSize, "Pool size too small", 1U);
+            esMemStatus_T memStatus;
+
+            esPMemUpdateStatusI(
+                gEvtDB.elem[cntr]->pool,
+                &memStatus);
+            ES_DBG_ASSERT(ES_DBG_NOT_ENOUGH_MEM, gEvtDB.elem[cntr]->size <= memStatus.freeSpaceContiguous);
         }
     }
-# endif
 #endif
 }
 
 /*----------------------------------------------------------------------------*/
 size_t esEvtDBQuerySize(
     esEvtId_T       id) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, id < gEvtDB.elements);
 
     return (gEvtDB.elem[id]->size);
 }
@@ -163,7 +182,9 @@ const PORT_C_ROM char * esEvtDBQueryName(
 
     const PORT_C_ROM char * name;
 
-#if (1U == OPT_EVT_DB_USE_DESC_DATA)
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, id < gEvtDB.elements);
+
+#if (1U == CFG_EVT_DB_USE_DESC_DATA)
     name = gEvtDB.elem[id]->name;
 #else
     (void)id;
@@ -180,7 +201,9 @@ const PORT_C_ROM char * esEvtDBQueryType(
 
     const PORT_C_ROM char * type;
 
-#if (1U == OPT_EVT_DB_USE_DESC_DATA)
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, id < gEvtDB.elements);
+
+#if (1U == CFG_EVT_DB_USE_DESC_DATA)
     type = gEvtDB.elem[id]->type;
 #else
     (void)id;
@@ -197,7 +220,9 @@ const PORT_C_ROM char * esEvtDBQueryDesc(
 
     const PORT_C_ROM char * desc;
 
-#if (1U == OPT_EVT_DB_USE_DESC_DATA)
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, id < gEvtDB.elements);
+
+#if (1U == CFG_EVT_DB_USE_DESC_DATA)
     desc = gEvtDB.elem[id]->desc;
 
     if (NULL == desc) {
@@ -218,22 +243,18 @@ esEvt_T * esEvtCreate(
 
     esEvt_T * newEvt;
 
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, id < gEvtDB.elements);
+
 #if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
-    newEvt = OPT_MEM_DYN_ALLOC(
-        &gEvtDynStorage,
-        gEvtDB.elem[id]->size);                                                 /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = OPT_MEM_DYN_ALLOC(OPT_MEM_DYN_HANDLE, gEvtDB.elem[id]->size);      /* Dobavi potreban memorijski prostor za dogadjaj           */
 #elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
-    newEvt = OPT_MEM_POOL_ALLOC(
-        gEvtDB.elem[id]->pool);
+    newEvt = OPT_MEM_POOL_ALLOC(gEvtDB.elem[id]->pool);
 #else                                                                           /* Koriste se oba alokatora                                 */
 
     if (NULL != gEvtDB.elem[id]->pool) {                                        /* Ako je pokazivac != NULL onda je to pool alokator        */
-        newEvt = OPT_MEM_POOL_ALLOC(
-            gEvtDB.elem[id]->pool);
+        newEvt = OPT_MEM_POOL_ALLOC(gEvtDB.elem[id]->pool);
     } else {
-        newEvt = OPT_MEM_DYN_ALLOC(
-            &gEvtDynStorage,
-            gEvtDB.elem[id]->size);                                             /* Dobavi potreban memorijski prostor za dogadjaj           */
+        newEvt = OPT_MEM_DYN_ALLOC(OPT_MEM_DYN_HANDLE, gEvtDB.elem[id]->size);  /* Dobavi potreban memorijski prostor za dogadjaj           */
     }
 #endif
     evtInit_(
@@ -250,8 +271,10 @@ esEvt_T * esEvtCreateI(
 
     esEvt_T * newEvt;
 
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, id < gEvtDB.elements);
+
 #if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
-    newEvt = OPT_MEM_DYN_ALLOCI(&gEvtDynStorage, gEvtDB.elem[id]->size);        /* Dobavi potreban memorijski prostor za dogadjaj           */
+    newEvt = OPT_MEM_DYN_ALLOCI(OPT_MEM_DYN_HANDLE, gEvtDB.elem[id]->size);        /* Dobavi potreban memorijski prostor za dogadjaj           */
 #elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
     newEvt = OPT_MEM_POOL_ALLOCI(gEvtDB.elem[id]->pool);
 #else                                                                           /* Koriste se oba alokatora                                 */
@@ -259,7 +282,7 @@ esEvt_T * esEvtCreateI(
     if (NULL != gEvtDB.elem[id]->pool) {                                        /* Ako je pokazivac != NULL onda je to pool alokator        */
         newEvt = OPT_MEM_POOL_ALLOCI(gEvtDB.elem[id]->pool);
     } else {
-        newEvt = OPT_MEM_DYN_ALLOCI(&gEvtDynStorage, gEvtDB.elem[id]->size);    /* Dobavi potreban memorijski prostor za dogadjaj           */
+        newEvt = OPT_MEM_DYN_ALLOCI(OPT_MEM_DYN_HANDLE, gEvtDB.elem[id]->size); /* Dobavi potreban memorijski prostor za dogadjaj           */
     }
 #endif
     evtInit_(
@@ -271,29 +294,18 @@ esEvt_T * esEvtCreateI(
 }
 
 /*----------------------------------------------------------------------------*/
-void esEvtReserve(
-    esEvt_T *       evt) {
-
-    evt->attrib |= EVT_RESERVED_MASK;
-}
-
-/*----------------------------------------------------------------------------*/
-void esEvtUnReserve(
-    esEvt_T *       evt) {
-
-    evt->attrib &= ~EVT_RESERVED_MASK;
-}
-
-/*----------------------------------------------------------------------------*/
 void esEvtDestroy(
     esEvt_T *       evt) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
     if (0U == evt->attrib) {
         evtDeInit_(
             evt);
 
 #if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
-        OPT_MEM_DYN_DEALLOC(&gEvtDynStorage, evt);
+        OPT_MEM_DYN_DEALLOC(OPT_MEM_DYN_HANDLE, evt);
 #elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
         OPT_MEM_POOL_DEALLOC(&gEvtDB.elem[evt->id]->pool, evt);
 #else                                                                           /* Koriste se oba alokatora                                 */
@@ -301,7 +313,7 @@ void esEvtDestroy(
         if (NULL != gEvtDB.elem[evt->id]->pool) {
             OPT_MEM_POOL_DEALLOC(gEvtDB.elem[evt->id]->pool, evt);
         } else {
-            OPT_MEM_DYN_DEALLOC(&gEvtDynStorage, evt);
+            OPT_MEM_DYN_DEALLOC(OPT_MEM_DYN_HANDLE, evt);
         }
 #endif
     }
@@ -316,7 +328,7 @@ void esEvtDestroyI(
             evt);
 
 #if (1U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)                 /* Koristi se samo dinamicki alokator                       */
-        OPT_MEM_DYN_DEALLOCI(&gEvtDynStorage, evt);
+        OPT_MEM_DYN_DEALLOCI(OPT_MEM_DYN_HANDLE, evt);
 #elif (0U == OPT_EVT_USE_MEM_DYN) && (1U == OPT_EVT_USE_MEM_POOL)               /* Koristi se samo pool alokator                            */
         OPT_MEM_POOL_DEALLOCI(gEvtDB.elem[evt->id]->pool, evt);
 #else                                                                           /* Koriste se oba alokatora                                 */
@@ -324,16 +336,39 @@ void esEvtDestroyI(
         if (NULL != gEvtDB.elem[evt->id]->pool) {
             OPT_MEM_POOL_DEALLOCI(gEvtDB.elem[evt->id]->pool, evt);
         } else {
-            OPT_MEM_DYN_DEALLOCI(&gEvtDynStorage, evt);
+            OPT_MEM_DYN_DEALLOCI(OPT_MEM_DYN_HANDLE, evt);
         }
 #endif
     }
 }
 
 /*----------------------------------------------------------------------------*/
+void esEvtReserve(
+    esEvt_T *       evt) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
+
+    evt->attrib |= EVT_RESERVED_MASK;
+}
+
+/*----------------------------------------------------------------------------*/
+void esEvtUnReserve(
+    esEvt_T *       evt) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
+
+    evt->attrib &= ~EVT_RESERVED_MASK;
+}
+
+/*----------------------------------------------------------------------------*/
 void esEvtPost(
     esEpa_T *       epa,
     esEvt_T *       evt) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
     if (TRUE == OPT_QUEUE_PUT(epa, evt)) {
         OPT_CRITICAL_DECL();
@@ -352,6 +387,9 @@ void esEvtPost(
 void esEvtPostI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
+
+    ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
+    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
     if (TRUE == OPT_QUEUE_PUTI(epa, evt)) {
         evtUsrAddI_(

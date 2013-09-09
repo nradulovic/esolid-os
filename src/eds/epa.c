@@ -30,6 +30,7 @@
 /*=========================================================  INCLUDE FILES  ==*/
 #define EPA_PKG_H_VAR
 #include "kernel_private.h"
+#include "eds/common.h"
 
 /*=========================================================  LOCAL DEFINES  ==*/
 
@@ -49,7 +50,7 @@
 
 static C_INLINE void epaInit_(
     esEpa_T *       epa,
-    const C_ROM esEpaDef_T * definition);
+    const PORT_C_ROM esEpaDef_T * definition);
 
 static C_INLINE void epaDeInit_(
     esEpa_T *       epa);
@@ -71,10 +72,10 @@ static C_INLINE void epaDeInit_(
  */
 static C_INLINE void epaInit_(
     esEpa_T *       epa,
-    const C_ROM esEpaDef_T * definition) {
+    const PORT_C_ROM esEpaDef_T * definition) {
 
     ES_CRITICAL_DECL();
-    
+
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
         ES_LOG_DBG_IF_INVALID(&gKernelLog, definition->epaPrio <= OPT_KERNEL_EPA_PRIO_MAX, LOG_EPA_INIT, ES_ARG_OUT_OF_RANGE);
     }
@@ -223,7 +224,7 @@ void esEvtPostAhead(
     esEvt_T *       evt) {
 
     ES_CRITICAL_DECL();
-    
+
     ES_CRITICAL_ENTER(
         OPT_SYS_INTERRUPT_PRIO_MAX);
     esEvtPostAheadI(
@@ -236,7 +237,7 @@ void esEvtPostAhead(
 void esEvtPostAheadI(
     esEpa_T *       epa,
     esEvt_T *       evt) {
-    
+
     if (ES_LOG_IS_DBG(&gKernelLog, LOG_FILT_EPA)) {
         ES_LOG_DBG_IF_INVALID(&gKernelLog, (NULL != epa) && (NULL != evt), LOG_EPA_EVTPOSTA, ES_ARG_NULL);
         ES_LOG_DBG_IF_INVALID(&gKernelLog, EPA_SIGNATURE == epa->signature, LOG_EPA_EVTPOSTA, ES_ARG_NOT_VALID);
@@ -259,8 +260,8 @@ void esEvtPostAheadI(
 
 /*----------------------------------------------------------------------------*/
 esEpa_T * esEpaCreate(
-    const C_ROM esMemClass_T *  memClass,
-    const C_ROM esEpaDef_T *    definition) {
+    const PORT_C_ROM esMemClass_T *  memClass,
+    const PORT_C_ROM esEpaDef_T *    definition) {
 
     esEpa_T * newEpa;
     size_t coreSize;
@@ -275,14 +276,14 @@ esEpa_T * esEpaCreate(
                                                                                 /* na optimizacija za brzinu vrsi se zaokruzivanje velicina */
                                                                                 /* radi brzeg pristupa memoriji.                            */
     coreSize = sizeof(esEpa_T);
-    coreSize += ES_ALIGN_UP(
+    coreSize += GP_ALIGN_UP(
         definition->epaWorkspaceSize,
         ES_CPU_ATTRIB_ALIGNMENT);
-    stateQSize = ES_ALIGN_UP(
+    stateQSize = GP_ALIGN_UP(
         stateQReqSize(
             definition->smLevels),
         ES_CPU_ATTRIB_ALIGNMENT);
-    evtQSize = ES_ALIGN_UP(
+    evtQSize = GP_ALIGN_UP(
         evtQReqSize(
             definition->evtQueueLevels),
         ES_CPU_ATTRIB_ALIGNMENT);

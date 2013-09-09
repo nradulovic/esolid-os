@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  * This file is part of eSolid
  *
  * Copyright (C) 2011, 2012 - Nenad Radulovic
@@ -25,92 +25,85 @@
  * @author      Nenad Radulovic
  * @brief       Event object API
  * @addtogroup  evt_intf
- * @brief       Javni interfejs
+ * @brief       Event object API
  *********************************************************************//** @{ */
 
-#ifndef EVT_H_
+#if !defined(EVT_H_)
 #define EVT_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
+
 #include "compiler.h"
+#include "eds/dbg.h"
 #include "../config/sys_config.h"
 #include "../config/evt_config.h"
-
-#if (0U == OPT_MEM_POOL_EXTERN)
-# include "kernel/mem.h"
-#endif
 
 /*===============================================================  MACRO's  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Dogadjaj
- * @brief       Opis dogadjaja i njegovih atributa
+ * @name        Event object attributes
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Bit maska za definisanje rezervisanog dogadjaja.
- * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
- *              rezervisan i sistem ga nece razmatrati kao kandidata za brisanje.
- *              Brojac korisnika dogadjaja se i dalje azurira, tako da kada se
- *              dogadjaj oslobodii rezervacije on moze da bude obrisan ako nema
- *              korisnika.
+/**@brief       Bit mask which defines a reserved event
+ * @details     When the bits defined in this bit mask are set the given event
+ *              is marked as reserved. In this case EDS will not try to delete
+ *              the event even if there are no EPA units who are using it. When
+ *              the event is unmarked as reserved EDS will take it into
+ *              consideration to delete it. This bit mask can be used when
+ *              defining a static event in ROM address space.
+ * @api
  */
 #define EVT_RESERVED_MASK               ((uint_fast16_t)(1U << 14))
 
-/**
- * @brief       Bit maska za definisanje konstantnog dogadjaja.
- * @details     Ukoliko je ovaj bit postavljen na jedinicu, dati dogadjaj je
- *              konstantan (najčešće se nalazi u ROM memoriju) i ne moze biti
- *              izbrisan. Broj korisnika dogadjaja se ne azurira. Dati dogadjaj
- *              ne moze da postane dinamican.
+/**@brief       Bit mask which defines a constant event
+ * @details     When the bits defined in this bit mask are set the given event
+ *              is marked as constant. In this case EDS will never try to delete
+ *              it. Once the event is marked as constant it never can be deleted.
+ * @api
  */
 #define EVT_CONST_MASK                  ((uint_fast16_t)(1U << 15))
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Baza dogadjaja
- * @brief       Cuvanje podataka o svim dogadjajima u sistemu
- * @details     eSolid cuva podatke o svim dogadjajima u sistemu na jedinstvenom
- *              mestu. Neki podaci se koriste od strane eSolid-a, a veliki deo
- *              podataka se koriste za prikaz detalja o dogadjaju prilikom
- *              debagovanja sistema. Svi podaci su konstantni.
+/** @} *//*---------------------------------------------------------------*//**
+ * @name        Event database
+ * @brief       Event data storage
+ * @details     EDS will keep and manage all data about events in a given systen.
+ *              Some of the data is valuable to the internal functions of EDS,
+ *              but some data can be of use to the API user, too. All data kept
+ *              in this database is constant (does not change during execution)
+ *              and is stored in ROM address space.
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Kreira tabelu enumeratora
+/**@brief       Create enum table
  * @api
  */
 #define ES_EXPAND_EVT_ID(a, b, c, d)                                            \
     a,
 
-/**
- * @brief       Kreira bazu dogadjaja
+/**@brief       Create event database
  * @see         esEvtDBElem_T
  * @api
  */
-#if (1U == OPT_EVT_DB_USE_DESC_DATA) && (1U == OPT_EVT_USE_MEM_POOL)            /* Koriste se: deskriptivni podaci i pool alokator          */
+#if (1U == CFG_EVT_DB_USE_DESC_DATA) && (1U == OPT_EVT_USE_MEM_POOL)            /* Using descriptive data and pool memory                   */
 # define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
     [a] = {sizeof(b), c, #a, #b, #d},
-#elif (1U == OPT_EVT_DB_USE_DESC_DATA) && (0U == OPT_EVT_USE_MEM_POOL)          /* Koriste se samo deskriptivni podaci                      */
+#elif (1U == CFG_EVT_DB_USE_DESC_DATA) && (0U == OPT_EVT_USE_MEM_POOL)          /* Using only descriptive data                              */
 # define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
     [a] = {sizeof(b), #a, #b, #d},
-#elif (0U == OPT_EVT_DB_USE_DESC_DATA) && (1U == OPT_EVT_USE_MEM_POOL)          /* Koristi se samo pool alokator                            */
+#elif (0U == CFG_EVT_DB_USE_DESC_DATA) && (1U == OPT_EVT_USE_MEM_POOL)          /* Using only pool memory                                   */
 # define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
     [a] = {sizeof(b), c},
-#else                                                                           /* Ne koriste se deskriptivni podaci i ne koristi se pool   */
+#else                                                                           /* Not using descriptive data and pool memory               */
 # define ES_EXPAND_EVT_DATA(a, b, c, d)                                         \
     [a] = {sizeof(b)},
 #endif
 
-/**
- * @brief       Kreira C tipove za dogadjaje
+/**@brief       Create C variable types
  * @api
  */
 #define ES_EXPAND_EVT_TYPEDEF(a, b, c, d)                                       \
     typedef b a##_T;
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------  C++ extern begin  --*/
+/** @} *//*---------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -118,170 +111,106 @@ extern "C" {
 /*============================================================  DATA TYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Transport dogadjaja
- * @brief       Transport dogadjaja izmedju EPA objekata
+ * @name        Event transport
+ * @brief       Event transport between EPA objects
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Apstraktni tip pokazivaca na EPA objekat
- * @details     U zavisnosti od konfiguracije EPA objekat moze da bude prosta
- *              funkcija, automat ili automat enkapsuliran u RTOS process/task.
+/**@brief       Abstract type of EPA object
+ * @details     At this stage we do not know what an EPA object is (FSM, HSM or
+ *              a thread). We are using this type just as a placeholder for now.
  */
 typedef struct esEpa esEpa_T;
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Dogadjaj
+/** @} *//*---------------------------------------------------------------*//**
+ * @name        Event object
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Zaglavlje dogadjaja.
- * @details     Interni podaci dogadjaja su obavezni podaci u zaglavlju
- *              dogadjaja. Svi ostali podaci se mogu ukljuciti/iskljuciti po
- *              zelji.
- * @p			Ova struktura nudi sledece opisivanje dogadjaja:
- *              - @c generator - ko je generisao dogadjaj,
- *              - @c timestamp - vremenska oznaka kada se dogadjaj desio,
- *              - @c size - velicina dogadjaja,
- * @p			Svaka od navedenih clanova strukture se moze nezavisno
- *              ukljuciti/iskljuciti i tipovi clanova se mogu po zelji izabrati.
- * @p			Dinamicki atributi pokazuju da li je dogadjaj konstantan (nalazi
- *              se u ROM memoriji), da li je rezervisan i koliko korisnika dati
- *              dogadjaj ima.
+/**@brief       Event header structure
+ * @details     This structure defines mandatory event data. Other data fields
+ *              can be enabled/disabled using configuration provided in
+ *              evt_config.h file.
+ * @note        In use
  * @note        Ukoliko se vrsi razmena dogadjaja izmedju sistema sa razlicitim
  *              procesorima/okruzenjem mora se pokloniti posebna paznja
  *              poravnanju (align) podataka ove strukture. Radi podesavanja
- *              nacina pakovanja strukture koristi se @ref OPT_EVT_STRUCT_ATTRIB
+ *              nacina pakovanja strukture koristi se @ref CFG_EVT_STRUCT_ATTRIB
  *				opcija.
  * @api
  */
-struct OPT_EVT_STRUCT_ATTRIB esEvt {
+struct CFG_EVT_STRUCT_ATTRIB esEvt {
+    esEvtId_T      	    id;                                                     /**<@brief Event ID, see @ref OPT_EVT_ID_T                  */
+    uint16_t      	    attrib;                                                 /**<@brief Event dynamic attributes                         */
 
-#if (OPT_LOG_LEVEL <= LOG_DBG) || defined(__DOXYGEN__)
-/**
- * @brief       Potpis koji pokazuje da je ovo zaista dogadjaj.
- */
-    uint16_t        signature;
+#if (1U == CFG_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
+    esEvtTimestamp_T    timestamp;                                              /**<@brief Event create time-stamp, see
+                                                                                           @ref CFG_EVT_TIMESTAMP_T                         */
 #endif
-
-/**
- * @brief       Identifikator dogadjaja
- * @details     Podesavanje tipa se vrsi pomocu opcije @ref OPT_EVT_ID_T. Ovo
- *              polje je obavezno.
- */
-    esEvtId_T      	id;
-
-/**
- * @brief       Dinamicki atributi dogadjaja
- * @details     Dinamicki atributi dogadjaja pokazuju koliko korisnika ima dati
- *              dogadjaj i da li je rezervisan ili konstantan.
- * @see         EVT_RESERVED_MASK
- * @see         EVT_CONST_MASK
- */
-    uint16_t      	attrib;
-
-#if (1U == OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-/**
- * @brief       Vremenska oznaka kada se desio dogadjaj.
- * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_TIMESTAMP_T.
- *              Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
- *              @ref OPT_EVT_USE_TIMESTAMP.
- */
-    esEvtTimestamp_T timestamp;
+#if (1U == CFG_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+    esEpa_T *           generator;                                              /**<@brief Event generator address                          */
 #endif
-
-#if (1U == OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
-/**
- * @brief       Adresa generatora dogadjaja
- * @details     Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
- *              @ref OPT_EVT_USE_GENERATOR.
- */
-    esEpa_T *       generator;
-#endif
-
 #if (1U == OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-/**
- * @brief       Velicina podataka dogadjaja.
- * @details     Podesavanje tipa se vrsi pomocu: @ref OPT_EVT_SIZE_T.
- *              Ukljucivanje/iskljucivanje ovog podatka se vrsi opcijom
- *              @ref OPT_EVT_USE_SIZE.
- */
-    esEvtSize_T     size;
+    esEvtSize_T         size;                                                   /**<@brief Event size in bytes, see @ref CFG_EVT_SIZE_T     */
+#endif
+#if (1U == CFG_DBG_API_VALIDATION)
+    portReg_T           signature;                                              /**<@brief Structure signature, used during development only*/
 #endif
 };
 
-/**
- * @brief       Tip dogadjaja
+/**@brief       Event header type
  * @api
  */
 typedef struct esEvt esEvt_T;
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Baza dogadjaja
+/** @} *//*---------------------------------------------------------------*//**
+ * @name        Event database
  * @{ *//*--------------------------------------------------------------------*/
-/**
- * @brief       Struktura jednog elementa baze dogadjaja
- * @details     Ova struktura navodi koji se podaci pamte za svaki dogadjaj u
- *              bazi dogadjaja.
+
+/**@brief       Database element structure
+ * @api
  */
 struct esEvtDBElem {
-/** @brief      Velicina dogadjaja                                            */
-    size_t          size;
+    size_t              size;                                                   /**<@brief Event size in bytes                              */
 
 #if (1U == OPT_EVT_USE_MEM_POOL) || defined(__DOXYGEN__)
-/** @brief      Deskriptor Pool alokatora                                     */
-    OPT_MEM_POOL_T * pool;
+    OPT_MEM_POOL_T *    pool;                                                   /**<@brief Pool memory handle                               */
 #endif
-
-#if (1U == OPT_EVT_DB_USE_DESC_DATA) || defined(__DOXYGEN__)
-/** @brief      Ime dogadjaja                                                 */
-    const char *    name;
-
-/** @brief      Tip dogadjaja                                                 */
-    const char *    type;
-
-/** @brief      Kratak opis dogadjaja                                         */
-    const char *    desc;
+#if (1U == CFG_EVT_DB_USE_DESC_DATA) || defined(__DOXYGEN__)
+    const PORT_C_ROM char * name;                                               /**<@brief Event name                                       */
+    const PORT_C_ROM char * type;                                               /**<@brief Event type                                       */
+    const PORT_C_ROM char * desc;                                               /**<@brief Short event description                          */
 #endif
 };
 
-/**
- * @brief       Tip elementa baze dogadjaja
+/**@brief       Database element type
  * @api
  */
 typedef struct esEvtDBElem esEvtDBElem_T;
 
 /** @} *//*-------------------------------------------------------------------*/
+
 /*======================================================  GLOBAL VARIABLES  ==*/
 
-/**
- * @brief       Deskriptor dinamickog alokatora
- * @details     Ukoliko se koristi dinamicki alokator onda je potrebno kreirati
- *              instancu dinamickog alokatora. Dinamickom alokatoru se predaje
- *              ovaj deskriptor prilikom inicijalizacije.
- * @see         evtc_step_2
- */
 extern OPT_MEM_DYN_T gEvtDynStorage;
 
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
- * @name        Baza dogadjaja
+ * @name        Event database
  * @{ *//*--------------------------------------------------------------------*/
 
-/**
- * @brief       Vrsi registraciju baze dogadjaja
- * @param       evtDB                   Pokazivac na formiranu bazu dogadjaja
- * @param       elements                Broj elemenata (dogadjaja) u bazi
- * @details     Nakon sto se formira baza dogadjaja ona mora da se registruje.
- *              U jednom trenutku koristi se samo jedna baza dogadjaja i ona se
- *              mora nalaziti u ROM memoriji.
+/**@brief       Register a database
+ * @param       evtDB
+ *              Event database : pointer to formed database table.
+ * @param       elements
+ *              Elements : number of elements in database.
+ * @details     Before any use a database must be registered to system. Only one
+ *              database can be registerd at the time. Database must be stored
+ *              in ROM address space.
  * @api
  */
 void esEvtDBRegister(
     const PORT_C_ROM esEvtDBElem_T * evtDB[],
-    uint16_t        elements);
+    uint16_t            elements);
 
 /**
  * @brief       Dobavlja informaciju o velicini dogadjaja iz baze dogadjaja
@@ -292,7 +221,7 @@ void esEvtDBRegister(
  * @api
  */
 size_t esEvtDBQuerySize(
-    esEvtId_T       id);
+    esEvtId_T           id);
 
 /**
  * @brief       Dobavlja informaciju o imenu dogadjaja iz baze dogadjaja
@@ -303,7 +232,7 @@ size_t esEvtDBQuerySize(
  * @api
  */
 const PORT_C_ROM char * esEvtDBQueryName(
-    esEvtId_T       id);
+    esEvtId_T           id);
 
 /**
  * @brief       Dobavlja informaciju o tipu dogadjaja iz baze dogadjaja
@@ -314,7 +243,7 @@ const PORT_C_ROM char * esEvtDBQueryName(
  * @api
  */
 const PORT_C_ROM char * esEvtDBQueryType(
-    esEvtId_T       id);
+    esEvtId_T           id);
 
 /**
  * @brief       Dobavlja informaciju o opisu dogadjaja iz baze dogadjaja
@@ -327,8 +256,7 @@ const PORT_C_ROM char * esEvtDBQueryType(
 const PORT_C_ROM char * esEvtDBQueryDesc(
     esEvtId_T       id);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/** @} *//*---------------------------------------------------------------*//**
  * @name        Kreiranje/brisanje/rezervacija dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -421,8 +349,7 @@ void esEvtReserve(
 void esEvtUnReserve(
     esEvt_T *       evt);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/** @} *//*---------------------------------------------------------------*//**
  * @name        Transport dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -480,8 +407,7 @@ void esEvtPostAheadI(
     esEpa_T *       epa,
     esEvt_T *       evt);
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/** @} *//*---------------------------------------------------------------*//**
  * @name        Callback funkcije
  * @brief       Funkcije koje se pozivaju od strane EVT modula u odredjenim
  *              trenucima izvrsenja
@@ -489,7 +415,7 @@ void esEvtPostAheadI(
  *              treba da definise korisnik prema svojim potrebama.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if (1U == OPT_EVT_USE_GENERATOR) && (1U == OPT_EVT_GENERATOR_CALLBACK) ||      \
+#if (1U == CFG_EVT_USE_GENERATOR) && (1U == OPT_EVT_GENERATOR_CALLBACK) ||      \
     defined(__DOXYGEN__)
 /**
  * @brief       Dobavlja ko kreira dogadjaj
@@ -497,14 +423,14 @@ void esEvtPostAheadI(
  * @details     Funkcija se poziva u toku kreiranja dogadjaja. Ona treba da
  *              vrati pokazivac na objekat koji upravo kreira dogadjaj.
  * @pre         Funkcija se poziva samo ako su ukljucene opcije:
- *              - @ref OPT_EVT_USE_GENERATOR
+ *              - @ref CFG_EVT_USE_GENERATOR
  *              - @ref OPT_EVT_GENERATOR_CALLBACK
  */
 extern esEpa_T * appEvtGeneratorGet(
     void);
 #endif
 
-#if (1U == OPT_EVT_USE_TIMESTAMP) && (1U == OPT_EVT_TIMESTAMP_CALLBACK) ||      \
+#if (1U == CFG_EVT_USE_TIMESTAMP) && (1U == OPT_EVT_TIMESTAMP_CALLBACK) ||      \
     defined(__DOXYGEN__)
 /**
  * @brief       Dobavlja trenutni vremenski aspekt
@@ -515,15 +441,14 @@ extern esEpa_T * appEvtGeneratorGet(
  *              Tipicna primena ove funkcije bi bila da vrati trenutnu vrednost
  *              nekog tajmera koji je stalno aktivan, na primer, @c systick.
  * @pre         Funkcija se poziva samo ako su ukljucene opcije:
- *              - @ref OPT_EVT_USE_TIMESTAMP
+ *              - @ref CFG_EVT_USE_TIMESTAMP
  *              - @ref OPT_EVT_TIMESTAMP_CALLBACK
  */
 extern esEvtTimestamp_T appEvtTimestampGet(
     void);
 #endif
 
-/** @} *//*-------------------------------------------------------------------*/
-/*--------------------------------------------------------  C++ extern end  --*/
+/** @} *//*-----------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus
 }
 #endif

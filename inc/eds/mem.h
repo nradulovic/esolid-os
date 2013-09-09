@@ -154,6 +154,28 @@ typedef struct esDMemHandle esDMemHandle_T;
 /** @} *//*-------------------------------------------------------------------*/
 
 /*======================================================  GLOBAL VARIABLES  ==*/
+
+/*------------------------------------------------------------------------*//**
+ * @name        Default memory instance handles
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**@brief       Default static memory handle
+ * @api
+ */
+extern esSMemHandle_T gDefSMemHandle;
+
+/**@brief       Default pool memory handle
+ * @api
+ */
+extern esPMemHandle_T gDefPMemHandle;
+
+/**@brief       Default dynamic memory handle
+ * @api
+ */
+extern esDMemHandle_T gDefDMemHandle;
+
+/** @} *//*-------------------------------------------------------------------*/
+
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
