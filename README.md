@@ -1,5 +1,5 @@
-esolid-os
-=========
+esolid-eds
+==========
 
- Real-Time OS for embedded systems 
+ Real-Time Event-Driven System for embedded systems 
 
