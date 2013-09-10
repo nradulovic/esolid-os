@@ -1,4 +1,10 @@
+# Eclipse generated stuff
 .checkstyle
 .cproject
 .project
 .settings/
+Debug/
+Release/
+*~
+.*~
+

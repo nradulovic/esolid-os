@@ -1,0 +1,186 @@
+/*********************************************************************************************//**
+@file
+@brief          Tekst glavne stranice
+*//** @{ *//**
+@mainpage       eSolid - Event Based System (UNDER CONSTRUCTION)
+@section        intro_sec Introduction
+
+Conventional RTOS implies a certain programming paradigm, which leads to
+particularly brittle designs. Blocking is the main concept envolving into using
+RTOS. Blocking occurs any time you wait explicitly in-line for something to
+happen. All RTOSes provide an assortment of blocking mechanisms, such as various
+semaphores, event-flags, mailboxes, message queues, and so on. Every RTOS task,
+structured as an endless loop, must use at least one such blocking mechanism, or
+else it will take all the CPU cycles. Typically, however, tasks block in many
+places scattered throughout various functions called from the task routine (the
+endless loop). For example, a task can block and wait for a semaphore that
+indicates end of an ADC conversion. In other part of the code, the same task
+might wait for a timeout event flag, and so on.  
+
+Blocking is evil, because it appears to work initially, but quickly degenerates
+into a unmanageable mess. The problem is that while a task is blocked, the task
+is not doing any other work and is not responsive to other events. Such task
+cannot be easily extended to handle other events, not just because the system is
+unresponsive, but also due to the fact the the whole structure of the code past
+the blocking call is designed to handle only the event that it was explicitly
+waiting for.
+
+You might think that difficulty of adding new features (events and behaviors) to
+such designs is only important later, when the original software is maintained
+or reused for the next similar project, but, flexibility is vital from day one. 
+Any application of nontrivial complexity is developed over time by gradually
+adding new events and behaviors. The inflexibility prevents an application to
+grow that way, so the design degenerates in the process known as architectural
+decay. This in turn makes it often impossible to even finish the original
+application, let alone maintain it.
+
+The mechanisms of architectural decay of RTOS-based applications are manifold,
+but perhaps the worst is unnecessary proliferation of tasks. Designers, unable
+to add new events to unresponsive tasks are forced to create new tasks,
+regardless of coupling and cohesion. Often the new feature uses the same data as
+other feature in another tasks (we call such features cohesive). But placing the
+new feature in a different task requires very careful sharing of the common
+data. So mutexes and other such mechanisms must be applied. The designer ends up
+spending most of the time not on the feature at hand, but on managing subtle,
+hairy, unintended side-effects.
+
+For decades embedded engineers were taught to believe that the only two
+alternatives for structuring embedded software are a “superloop” (main+ISRs) or
+an RTOS. But this is of course not true. Other alternatives exist, specifically
+event-driven programming with modern state machines is a much better way. 
+
+@a embeddedSolid (eSolid) operativni sistem je spoj arhitektura pogonjene 
+dogadjajima (<c>Event Driven Architecture - EDA</c>) sa servisno orijentisano 
+arhitekturama (<c>Service Oriented Architecture - SOA</c>). Servisna 
+orijentacija je arhitekturni koncept koji propagira labavu spregu izmedju 
+servisa i klijenta. Klijent samo zna sta servis pruza i kako da ga pozove.
+
+eSolid operativni sistem  poboljsava produktivnost, jer programeri ne moraju 
+više da razmišljaju o nekoliko nivoa <c>if-then-else</c> zamršenog programskog 
+koda i ne trebaju da vode računa o semaforima, mutexima i drugim mehanizmima 
+koji se koriste u tradicionalnim real time operativnim sistemima. Umesto toga, 
+programeri mogu da razmisljaju na visem nivou abstrakcije i na taj način se 
+usredsrede na rešavanju postavljenih problema. 
+
+@section        main_howItBegan Kako je sve pocelo?
+
+U toku rada na aplikaciji od posebnog znacaja, koju razvijam sa prijateljem i 
+kolegama, javila se potreba za konkurentnim izvrsavanjem vise zadataka u nasem 
+sistemu. U tom trenutku nismo bili za ideju da se u sistem implementira jedan od 
+gotovih real time operativnih sistema jer su pocetna istrazivanja pokazala da bi 
+njihova implementacija oduzela poprilicnu kolicinu resursa sa kojima smo 
+raspolagali u vrlo ogranicenom mikrokontroleru po pitanju velicine RAM i FLASH 
+memorije. Zbog toga se pribeglo ideji da se koriste konacni automati za svaki 
+proces i na taj nacin ostvari privid konkurentnog izvrsavanja. Kako je vreme
+odmicalo ideje za implementaciju konacnih automata su se menjale dok se nismo 
+zadrzali na implementaciji automata koju koristi QP(TM) framework firme 
+<c>Quantum Leaps</c> (http://www.state-machine.com). QP framework se izdaje pod 
+GPLv2 licencom i inicijalna ideja eSolid projekta je da se QP framework 
+prilagodi potrebama nase aplikacije. Medjutim, kako je razvoj aplikacije 
+napredovao, zahtevi aplikacije su se progresivno povecali i dosli smo do 
+trenutka  kada QP framework nije mogao da zadovolji sve postavljene zahteve. 
+Tada su prekinute dalje aktivnosti prilagodjenja QP frameworka i krenulo se sa 
+istrazivanjem u cilju razvoja operativnog sistema koji bi u potpunosti 
+zadovoljio postavljene zahteve aplikacije.
+
+@section        main_EDA_system Sistem pogonjen dogadjajima
+
+Razvoj eSolid operativnog sistema je vodjen idejama i konceptima koji su 
+publikovani od strane: IBM-a (sistemi za procesiranje dogadjaja), konceptima 
+koje propagira <c>The Event Processing Technical Society</c> drustvo i raznih 
+autora. Iako su njihovi koncepti pre svega namenjeni za velike, distribuirane 
+sisteme, gde ne postoji deficit procesnih mogucnosti i memorijskih kapaciteta, 
+preuzeto je dosta ideja i termina iz njihovih publikacija.
+
+@section        main_events Dogadjaji
+
+@subsection     main_whatIsEvt Sta je dogadjaj?
+
+Dogadjaj je stvar od posebne vaznosti koja se desila ili se desava. Dogadjaj se 
+desava u potpunosti ili se uopste ne desava, a znacajan je zbog toga sto moze da 
+utice na neku akciju. Dogadjaj se desava kada neki pojam postaje istinit ili 
+kada se javi tranzicija entiteta u stvarnom svetu. Pojam dogadjaj se cesto 
+istovremeno koristi za opis specifikacije (definiciju) dogadjaja i 
+individualnu pojavu (instancu) dogadjaja.
+
+@subsection     main_whatIsInEvt Sta je u dogadjaju?
+
+Svaka instanca dogadjaja poseduje zaglavlje dogadjaja i telo dogadjaja.
+    - Zaglavlje sadrzi elemente koji opisuju instancu dogadjaja, kao sto su 
+    identifikator dogadjaja, tip dogadjaja, ime dogadjaja, vremenski marker 
+    nastanka dogadjaja, broj instance dogadjaja i generator dogadjaja. Zaglavlje 
+    je isto za sve dogadjaje koji se javljaju u sistemu. Ukoliko dogadjaj sadrzi 
+    samo zaglavlje, tada se takav dogadjaj zove @a signal. eSolid definise 
+    nekoliko razlicitih zaglavlja dogadjaja. Pogledati @ref evt_list.
+    - Telo dogadjaja opisuje sta se dogodilo. Telo dogadjaja mora da bude 
+    potpuno opisano tako da bilo koje trece lice koje zanima ovaj dogadjaj, 
+    takodje, moze da ga razume.
+
+@subsection     main_evt_lifecycle Zivotni ciklus dogadjaja
+
+Zivotni ciklus dogadjaja se sastoji od:
+    - kreiranje dogadjaja. Kreiranje dogadjaja obavljaju generatori ili 
+    proizvodjaci dogadjaja. Proizvodjac dogadjaja kreira dogadjaje koje predaje, 
+    putem kanala dogadjaja, bilo kojoj zainteresovanoj stranci. Postoje dva 
+    modela transporta dogadjaja, a to su "push" i "pull" modeli. Oni ce biti 
+    objasnjeni kasnije. Proizvodjaci dogadjaja mogu da budu:
+        - hardverski prekidi
+        - funkcije
+        - agenti za obradu dogadjaja
+    - transport dogadjaja. Transport dogadjaja obavlja operativni sistem. Pored 
+    transporta ujedno se moze obaviti i filtriranje dogadjaja.
+    - obrada dogadjaja. Dogadjaje obradjuju potrosaci. Kao rezultat obrade moze 
+    se kreirati nov dogadjaj ili obaviti neka akcija. Potrosaci dogadjaja mogu 
+    biti samo agenti za obradu dogadjaja.
+    - destrukcija ili recikliranje dogadjaja. Destrukciju dogadjaja obavlja sam
+    operativni sistem kada je detektovano da su svi agenti za obradu 
+    dogadjaja zavrsili sa njegovom obradom.
+
+@subsection     main_evt_proc_types Tipovi obrade dogadjaja
+
+Funkcije obrade dogadjaja se mogu svrstati u dve grupe:
+    - Jednostavna obrada dogadjaja (Simple Event Processing): dogadjaji koji ne 
+    predstavljaju ili oznacavaju niz drugih dogadjaja, ne filtriraju se i 
+    rutiraju se bez izmena.
+    - Slozena obrada dogadjaja (Complex Event Processing): detektuju se nekoliko 
+    obrazaca koji se koriste da se kreiraju novi kompleksni dogadjaji. Dakle, 
+    kompleksni dogadjaj je dogadjaj koji predstavlja ili oznacava drugi skup 
+    dogadjaja.
+
+@section        main_epe Agenti za obradu dogadjaja
+
+Agenti za obradu dogadjaja su opisani u odeljku @ref smp_doc.
+
+@section        main_sections Sastavni delovi eSolid jezgra (kernel)
+    
+Jezgro eSolid operativnog sistema se sastoji od sledecih delova:
+- @ref evt_doc@n
+objašnjenje tipova dogadjaja, njihovo definisanje i osnovne manipulacije nad 
+dogadjajima,
+- @ref smp_doc@n
+koncept izvrsne jedinice, tipovi izvrsne jedinice i njihovo pokretanje,
+- @ref core_doc@n
+koncept agenta za obradu dogadjaja, konkuretan rad razlicitih tipova agenta,
+- @ref mm_doc@n
+menadzment memorijskog prostora, ovaj modul koriste svi ostali moduli za
+potrebe rezervisanja memorije,
+- @ref epn_doc@n
+formiranje povezane mreže EPA objekata i transfer dogadjaja izmedju objekata,
+- @ref tem_doc@n
+menadzment i generisanje dogadjaja u tacno definisanim vremenskim trenucima,
+ 
+@image       html eSolid_small.png
+@ref struct
+
+@ref usage
+
+@ref lit
+
+@ref licence
+
+@author         Nenad Radulović
+
+Contact information:
+    - web site:  http://blueskynet.dyndns-server.com
+    - e-mail:    blueskyniss@gmail.com
+**//** @} *//*************************************************************************************/

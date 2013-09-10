@@ -1,0 +1,18 @@
+/**
+@file
+@brief          Uputstvo za koriscenje
+@page           usage Uputstvo za koriscenje
+@section        preconditions_sec Preduslovi
+
+@ref evt_usage
+
+@ref smp_usage
+
+@ref epn_usage
+
+@ref tem_usage
+
+@ref core_usage
+
+@ref mm_usage
+*/

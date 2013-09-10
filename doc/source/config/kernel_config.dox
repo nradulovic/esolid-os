@@ -1,9 +1,0 @@
-/**************************************************************************//**
-@file
-@addtogroup  kernel
-*//** @{ *//**
-@defgroup    kernel_cfg Kernel configuration
-@brief       Konfiguracija eSolid Kernel-a
-
-
-**//** @} *//******************************************************************/
