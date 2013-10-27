@@ -117,7 +117,7 @@ esEvt_T * esEvtCreate(
 
     PORT_CRITICAL_ENTER();
     newEvt = esDmemAllocI(
-        &gDefDMemHandle,
+        &DMemDefStorage,
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     PORT_CRITICAL_EXIT();
     evtInit_(
@@ -138,7 +138,7 @@ esEvt_T * esEvtCreateI(
     ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, sizeof(esEvt_T) <= size);
 
     newEvt = esDMemAllocI(
-        &gDefDMemHandle,
+        &DMemDefStorage,
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
@@ -191,7 +191,7 @@ void esEvtDestroyI(
         evtDeInit_(
             evt);
         esDMemDeAllocI(
-            &gDefDMemHandle,
+            &DMemDefStorage,
             evt);
     }
 }

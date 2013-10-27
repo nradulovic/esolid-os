@@ -50,7 +50,7 @@
  * @param       modAuth
  *              Module author : string
  */
-#if (1U == CFG_DBG_ENABLE)
+#if (1u == CFG_DBG_ENABLE)
 # define DECL_MODULE_INFO(modName, modDesc, modAuth)                            \
     static const PORT_C_ROM struct dbgModInfo gModInfo_ = {                     \
         modName,                                                                \
@@ -58,6 +58,9 @@
         modAuth,                                                                \
         PORT_C_FILE                                                             \
     }
+#else
+# define DECL_MODULE_INFO(modName, modDesc, modAuth)                            \
+    PORT_C_UNUSED DECL_MODULE_INFO(modName, modDesc, modAuth)
 #endif
 
 /**@} *//*----------------------------------------------------------------*//**
@@ -66,7 +69,7 @@
  *              @ref CFG_DBG_ENABLE.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if (1U == CFG_DBG_ENABLE)
+#if (1u == CFG_DBG_ENABLE)
 /**@brief       Generic assert macro.
  * @param       msg
  *              Message : enum esDbgMsg : enumerated debug message.
@@ -84,7 +87,7 @@
             };                                                                  \
             dbgAssert(&thisObj, #expr, msg);                                    \
         }                                                                       \
-    } while (0U)
+    } while (0)
 
 /**@brief       Assert macro that will always execute (no conditional).
  * @param       msg
@@ -100,8 +103,8 @@
             .fn   = PORT_C_FUNC,                                                \
             .line = PORT_C_LINE                                                 \
         };                                                                      \
-        dbgAssert(PORT_C_FUNC, text, msg);                                      \
-    } while (0U)
+        dbgAssert(&thisObj, text, msg);                                         \
+    } while (0)
 
 #else
 # define ES_DBG_ASSERT(msg, expr)                                               \
@@ -117,7 +120,7 @@
  *              @ref CFG_DBG_INTERNAL_CHECK.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if (1U == CFG_DBG_INTERNAL_CHECK)
+#if (1u == CFG_DBG_INTERNAL_CHECK) && (1u == CFG_DBG_ENABLE)
 
 /**@brief       Assert macro used for internal execution checking
  * @param       msg
@@ -139,7 +142,7 @@
  *              @ref CFG_DBG_API_VALIDATION.
  * @{ *//*--------------------------------------------------------------------*/
 
-#if (1U == CFG_DBG_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1u == CFG_DBG_API_VALIDATION) && (1u == CFG_DBG_ENABLE)
 
 /**@brief       Execute code to fulfill the contract
  * @param       expr
@@ -169,6 +172,7 @@
 # define ES_DBG_API_ENSURE(msg, expr)                                           \
     ES_DBG_ASSERT(msg, expr)
 
+# define ES_DBG_API_OBJ_VALIDATE
 #else
 # define ES_DBG_API_OBLIGATION(expr)                                            \
     (void)0

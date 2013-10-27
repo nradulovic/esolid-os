@@ -267,7 +267,7 @@
  */
 # define OPT_MEM_DYN_T                  esDMemHandle_T
 
-# define OPT_MEM_DYN_HANDLE             &gDefDMemHandle
+# define OPT_MEM_DYN_HANDLE             &DMemDefStorage
 
 /**
  * @brief       Dobavlja memorijski blok (prekid omogucen)

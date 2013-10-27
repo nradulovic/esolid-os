@@ -82,6 +82,10 @@
  */
 #define PORT_C_NORETURN                 __attribute__((noreturn))
 
+/**@brief       Declare a variable that may be unused
+ */
+#define PORT_C_UNUSED_VAR               __attribute__((unused))
+
 /**@brief       Declare a variable that will be stored in ROM address space
  */
 #define PORT_C_ROM
@@ -111,7 +115,7 @@
         tmp &= ~(mask);                                                         \
         tmp |= ((mask) & (val));                                                \
         (reg) = tmp;                                                            \
-    } while (0U)
+    } while (0)
 
 /** @} *//*---------------------------------------------  C++ extern begin  --*/
 #ifdef __cplusplus
@@ -128,8 +132,8 @@ extern "C" {
 /**@brief       Bool data type
  */
 typedef enum boolType {
-    TRUE = 1U,                                                                  /**< TRUE                                                   */
-    FALSE = 0U                                                                  /**< FALSE                                                  */
+    TRUE = 1u,                                                                  /**< TRUE                                                   *///!< TRUE
+    FALSE = 0u                                                                  /**< FALSE                                                  *///!< FALSE
 } bool_T;
 
 /** @} *//*-------------------------------------------------------------------*/

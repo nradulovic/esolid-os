@@ -37,19 +37,19 @@
 
 /**@brief       Signature for memory classes
  */
-#define MEM_CLASS_SIGNATURE             ((portReg_T)0xDEADBEECU)
+#define MEM_CLASS_SIGNATURE             ((portReg_T)0xdeadbeecu)
 
 /**@brief       Signature for static memory manager
  */
-#define SMEM_SIGNATURE                  ((portReg_T)0xDEADBEEDU)
+#define SMEM_SIGNATURE                  ((portReg_T)0xdeadbeedu)
 
 /**@brief       Signature for pool memory manager
  */
-#define PMEM_SIGNATURE                  ((portReg_T)0xDEADBEEEU)
+#define PMEM_SIGNATURE                  ((portReg_T)0xdeadbeeeu)
 
 /**@brief       Signature for dynamic memory manager
  */
-#define DMEM_SIGNATURE                  ((portReg_T)0xDEADBEEFU)
+#define DMEM_SIGNATURE                  ((portReg_T)0xdeadbeefu)
 
 /*======================================================  LOCAL DATA TYPES  ==*/
 
@@ -76,72 +76,18 @@ struct pMemBlock {
  */
 typedef struct pMemBlock pMemBlock_T;
 
-struct memMethods {
-    void * (* alloc)(void *, size_t);
-    void (* dealloc)(void *, void *);
-    void (* status)(void *, esMemStatus_T *);
-};
-
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
-
-static void unused_(
-    void *              handle,
-    void *              mem);
-
-static void * wrapPMemAlloc(void * handle, size_t size);
-
 /*=======================================================  LOCAL VARIABLES  ==*/
 
 DECL_MODULE_INFO("MEM", "Memory management", "Nenad Radulovic");
 
-static const PORT_C_ROM struct memMethods gSMemMethods = {
-    (void * (*)(void *, size_t))esSMemAlloc,
-    unused_,
-    (void (*)(void *, esMemStatus_T*))esSMemUpdateStatus
-};
-
-static const PORT_C_ROM struct memMethods gPMemMethods = {
-    wrapPMemAlloc,
-    (void (*)(void *, void *))esPMemDeAlloc,
-    (void (*)(void *, esMemStatus_T*))esPMemUpdateStatus
-};
-
-static const PORT_C_ROM struct memMethods gDMemMethods = {
-    (void * (*)(void *, size_t))esDMemAlloc,
-    (void (*)(void *, void *))esDMemDeAlloc,
-    (void (*)(void *, esMemStatus_T*))esDMemUpdateStatus
-};
-
 /*======================================================  GLOBAL VARIABLES  ==*/
 
-esSMemHandle_T gDefSMemHandle;
-esPMemHandle_T gDefPMemHandle;
-esDMemHandle_T gDefDMemHandle;
+esSMemHandle_T SMemDefStorage;
+esPMemHandle_T PMedDefStorage;
+esDMemHandle_T DMemDefStorage;
 
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
-
-static void unused_(
-    void *              handle,
-    void *              mem) {
-    (void)handle;
-    (void)mem;
-}
-
-static void * wrapPMemAlloc(
-    void *              handle,
-    size_t              size) {
-
-    esPMemHandle_T *    pMemHandle;
-    void *              mem;
-
-    pMemHandle = (esPMemHandle_T *)handle;
-
-    ES_DBG_API_REQUIRE(ES_DBG_NOT_ENOUGH_MEM, size <= pMemHandle->blockSize);
-    mem = esPMemAlloc(pMemHandle);
-
-    return (mem);
-}
-
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
@@ -153,7 +99,7 @@ void esSMemInit(
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != storage);
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != storageSize);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != storageSize);
     handle->begin = storage;
     handle->current = GP_ALIGN(storageSize, sizeof(portReg_T));
     handle->size = GP_ALIGN(storageSize, sizeof(portReg_T));
@@ -161,7 +107,7 @@ void esSMemInit(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_INIT(handle->guard);
 #else
-    OPT_GUARD_INIT(0U);
+    OPT_GUARD_INIT(0u);
 #endif
     ES_DBG_API_OBLIGATION(handle->signature = SMEM_SIGNATURE);
 }
@@ -175,7 +121,7 @@ void * esSMemAllocI(
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, SMEM_SIGNATURE == handle->signature);
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != size);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != size);
 
     size = GP_DIV_ROUNDUP(size, sizeof(portReg_T));
     handle->current -= size;
@@ -197,7 +143,7 @@ void * esSMemAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     mem = esSMemAllocI(
         handle,
@@ -205,7 +151,7 @@ void * esSMemAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
     return (mem);
 }
@@ -234,7 +180,7 @@ void esSMemUpdateStatus(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     esSMemUpdateStatusI(
         handle,
@@ -242,7 +188,7 @@ void esSMemUpdateStatus(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
 }
 
@@ -261,7 +207,7 @@ void esPMemInit(
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != array);
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != blockSize);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != blockSize);
     ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, blockSize <= arraySize);
 
     blocks = arraySize / blockSize;
@@ -270,7 +216,7 @@ void esPMemInit(
     handle->sentinel = (pMemBlock_T *)array;
     block = handle->sentinel;
 
-    for (blockCnt = 0U; blockCnt < blocks - 1U; blockCnt++) {
+    for (blockCnt = 0u; blockCnt < blocks - 1u; blockCnt++) {
         block->next = (struct pMemBlock *)((uint8_t *)block + handle->blockSize);
         block = block->next;
     }
@@ -279,7 +225,7 @@ void esPMemInit(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_INIT(handle->guard);
 #else
-    OPT_GUARD_INIT(0U);
+    OPT_GUARD_INIT(0u);
 #endif
     ES_DBG_API_OBLIGATION(handle->signature = PMEM_SIGNATURE);
 }
@@ -289,8 +235,8 @@ size_t esPMemCalcPoolSize(
     size_t              blocks,
     size_t              blockSize) {
 
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != blocks);
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != blockSize);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != blocks);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != blockSize);
 
     blockSize = GP_ALIGN_UP(blockSize, sizeof(portReg_T));
 
@@ -322,7 +268,7 @@ void * esPMemAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     mem = esPMemAllocI(
         handle);
@@ -330,7 +276,7 @@ void * esPMemAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
 
     return (mem);
@@ -362,7 +308,7 @@ void esPMemDeAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     esPMemDeAllocI(
         handle,
@@ -371,7 +317,7 @@ void esPMemDeAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
 }
 
@@ -387,7 +333,7 @@ void esPMemUpdateStatusI(
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, PMEM_SIGNATURE == handle->signature);
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != status);
 
-    freeTotal = 0U;
+    freeTotal = 0u;
     block = handle->sentinel;
 
     while (NULL != block) {
@@ -409,7 +355,7 @@ void esPMemUpdateStatus(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     esPMemUpdateStatusI(
         handle,
@@ -417,7 +363,7 @@ void esPMemUpdateStatus(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
 }
 
@@ -431,16 +377,16 @@ void esDMemInit(
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != storage);
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != storageSize);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != storageSize);
 
     storageSize = GP_ALIGN(storageSize, sizeof(portReg_T));
-    handle->sentinel = (dMemBlock_T *)((uint8_t *)storage + storageSize) - 1U;  /* Sentinel is the last element of the storage              */
+    handle->sentinel = (dMemBlock_T *)((uint8_t *)storage + storageSize) - 1u;  /* Sentinel is the last element of the storage              */
     begin = (dMemBlock_T *)storage;
     begin->phySize = storageSize - sizeof(dMemBlock_T);
     begin->phyPrev = handle->sentinel;
     begin->freeNext = handle->sentinel;
     begin->freePrev = handle->sentinel;
-    handle->sentinel->phySize = 0U;
+    handle->sentinel->phySize = 0u;
     handle->sentinel->phyPrev = begin;
     handle->sentinel->freeNext = begin;
     handle->sentinel->freePrev = begin;
@@ -448,7 +394,7 @@ void esDMemInit(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_INIT(handle->guard);
 #else
-    OPT_GUARD_INIT(0U);
+    OPT_GUARD_INIT(0u);
 #endif
     ES_DBG_API_OBLIGATION(handle->signature = DMEM_SIGNATURE);
 }
@@ -462,7 +408,7 @@ void * esDMemAllocI(
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != handle);
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, DMEM_SIGNATURE == handle->signature);
-    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0U != size);
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, 0u != size);
 
     size = GP_ALIGN_UP(size, sizeof(portReg_T)) + sizeof(dMemBlock_T);
     curr = handle->sentinel->freeNext;
@@ -483,13 +429,13 @@ void * esDMemAllocI(
                 tmp->freePrev->freeNext = tmp;
                 curr->freeNext = NULL;                                          /* Mark block as allocated                                  */
 
-                return ((void *)(curr + 1U));
+                return ((void *)(curr + 1u));
             } else {
                 curr->freeNext->freePrev = curr->freePrev;
                 curr->freePrev->freeNext = curr->freeNext;
                 curr->freeNext = NULL;                                          /* Mark block as allocated                                  */
 
-                return ((void *)(curr + 1U));
+                return ((void *)(curr + 1u));
             }
         }
         curr = curr->freeNext;
@@ -511,7 +457,7 @@ void * esDMemAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     mem = esDMemAllocI(
         handle,
@@ -520,7 +466,7 @@ void * esDMemAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
 
     return (mem);
@@ -538,7 +484,7 @@ void esDMemDeAllocI(
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, DMEM_SIGNATURE == handle->signature);
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != mem);
 
-    curr = (dMemBlock_T *)mem - 1U;
+    curr = (dMemBlock_T *)mem - 1u;
     tmp = (dMemBlock_T *)((uint8_t *)curr + curr->phySize);
 
     if ((NULL != curr->phyPrev->freeNext) && (NULL == tmp->freeNext)) {         /* Previous block is free                                   */
@@ -576,7 +522,7 @@ void esDMemDeAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     esDMemDeAllocI(
         handle,
@@ -585,7 +531,7 @@ void esDMemDeAlloc(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
 }
 
@@ -603,9 +549,9 @@ void esDMemUpdateStatusI(
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, DMEM_SIGNATURE == handle->signature);
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != status);
 
-    size = 0U;
-    freeTotal = 0U;
-    freeAvailable = 0U;
+    size = 0u;
+    freeTotal = 0u;
+    freeAvailable = 0u;
     curr = handle->sentinel->phyPrev;
 
     while (curr != handle->sentinel) {
@@ -638,7 +584,7 @@ void esDMemUpdateStatus(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_LOCK(handle->guard);
 #else
-    OPT_GUARD_LOCK(0U);
+    OPT_GUARD_LOCK(0u);
 #endif
     esDMemUpdateStatusI(
         handle,
@@ -646,61 +592,8 @@ void esDMemUpdateStatus(
 #if defined(OPT_GUARD_T)
     OPT_GUARD_UNLOCK(handle->guard);
 #else
-    OPT_GUARD_UNLOCK(0U);
+    OPT_GUARD_UNLOCK(0u);
 #endif
-}
-
-/*----------------------------------------------------------------------------*/
-void esSMemClassInit(
-    esMemClass_T *      class,
-    esSMemHandle_T *    handle) {
-
-    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, class->signature != MEM_CLASS_SIGNATURE);
-    class->handle = (void *)handle;
-    class->methods = &gSMemMethods;
-    ES_DBG_API_OBLIGATION(class->signature = MEM_CLASS_SIGNATURE);
-}
-
-/*----------------------------------------------------------------------------*/
-void esPMemClassInit(
-    esMemClass_T *      class,
-    esPMemHandle_T *    handle) {
-
-    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, class->signature != MEM_CLASS_SIGNATURE);
-    class->handle = (void *)handle;
-    class->methods = &gPMemMethods;
-    ES_DBG_API_OBLIGATION(class->signature = MEM_CLASS_SIGNATURE);
-}
-
-/*----------------------------------------------------------------------------*/
-void esDMemClassInit(
-    esMemClass_T *      class,
-    esDMemHandle_T *    handle) {
-
-    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, class->signature != MEM_CLASS_SIGNATURE);
-    class->handle = (void *)handle;
-    class->methods = &gDMemMethods;
-    ES_DBG_API_OBLIGATION(class->signature = MEM_CLASS_SIGNATURE);
-}
-/*----------------------------------------------------------------------------*/
-void esMemClassTerm(
-    esMemClass_T *  class) {
-
-    ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, class->signature == MEM_CLASS_SIGNATURE);
-    class->handle = NULL;
-    class->methods = NULL;
-    ES_DBG_API_OBLIGATION(class->signature = ~MEM_CLASS_SIGNATURE);
-}
-
-void * esMemClassAlloc(
-    esMemClass_T *      class,
-    size_t              size) {
-
-    void * mem;
-
-    mem = class->methods->alloc(class->handle, size);
-
-    return (mem);
 }
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/

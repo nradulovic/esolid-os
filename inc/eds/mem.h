@@ -172,17 +172,17 @@ typedef struct esMemClass esMemClass_T;
 /**@brief       Default static memory handle
  * @api
  */
-extern esSMemHandle_T gDefSMemHandle;
+extern esSMemHandle_T SMemDefStorage;
 
 /**@brief       Default pool memory handle
  * @api
  */
-extern esPMemHandle_T gDefPMemHandle;
+extern esPMemHandle_T PMedDefStorage;
 
 /**@brief       Default dynamic memory handle
  * @api
  */
-extern esDMemHandle_T gDefDMemHandle;
+extern esDMemHandle_T DMemDefStorage;
 
 /** @} *//*-------------------------------------------------------------------*/
 
@@ -478,18 +478,6 @@ void esDMemUpdateStatusI(
 void esDMemUpdateStatus(
     esDMemHandle_T *    handle,
     esMemStatus_T *     status);
-
-void esSMemClassInit(
-    esMemClass_T *      class,
-    esSMemHandle_T *    handle);
-
-void esPMemClassInit(
-    esMemClass_T *      class,
-    esPMemHandle_T *    handle);
-
-void esDMemClassInit(
-    esMemClass_T *      class,
-    esDMemHandle_T *    handle);
 
 /** @} *//*-----------------------------------------------  C++ extern end  --*/
 #ifdef __cplusplus

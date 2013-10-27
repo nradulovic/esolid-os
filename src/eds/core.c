@@ -572,7 +572,7 @@ esEpa_T * esEpaCreate(
         (void)memClass;
         PORT_CRITICAL_ENTER();
         newEpa = esDMemAllocI(
-            &gDefDMemHandle,
+            &DMemDefStorage,
             coreSize + smpQSize + evtQSize);
         PORT_CRITICAL_EXIT();
     }
@@ -615,7 +615,7 @@ void esEpaDestroy(
         epa);
     PORT_CRITICAL_ENTER();
     esDMemDeAllocI(
-        &gDefDMemHandle,
+        &DMemDefStorage,
         epa);
     PORT_CRITICAL_EXIT();
 #else
