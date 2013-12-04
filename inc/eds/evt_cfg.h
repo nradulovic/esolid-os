@@ -26,17 +26,19 @@
  * @file
  * @author  	Nenad Radulovic
  * @brief       Event Object Configuration
- * @defgroup    evt_cfg Event Object Configuration
+ * @addtogroup  evt
+ *********************************************************************//** @{ */
+/**@defgroup    evt_cfg Event Object Configuration
  * @brief       Konfiguracija
  * @details     Each configuration option or setting has its own default value
  *              when not defined by the application. When application needs to
  *              change a setting it just needs to define a configuration macro
  *              with another value and the default configuration macro will be
  *              overridden.
- *********************************************************************//** @{ */
+ * @{ *//*--------------------------------------------------------------------*/
 
-#ifndef EVT_CONFIG_H_
-#define EVT_CONFIG_H_
+#ifndef EVT_CFG_H__
+#define EVT_CFG_H__
 
 /*=========================================================  INCLUDE FILES  ==*/
 /*===============================================================  DEFINES  ==*/
@@ -82,12 +84,12 @@
  *              - 0 - ne koristi se atribut o velicini
  *              - 1 - koristi se atribut o velicini
  *
- *              Podesavanje tipa se vrsi pomocu @ref CFG_EVT_SIZE_T.
+ *              Podesavanje tipa se vrsi pomocu @ref CFG_EVT_SIZE_TYPE.
  * @note        Podrazumevano podesavanje: 0 (dogadjaji ne koriste atribut o
  *              velicini)
  */
-#if !defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-# define OPT_EVT_USE_SIZE               1U
+#if !defined(CFG_EVT_USE_SIZE)
+# define CFG_EVT_USE_SIZE               1
 #endif
 
 /**
@@ -99,8 +101,8 @@
  * @note        Podrazumevano podesavanje: 0 (dogadjaji ne koriste atribut o
  *              generatoru)
  */
-#if !defined(OPT_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
-# define CFG_EVT_USE_GENERATOR          1U
+#if !defined(OPT_EVT_USE_GENERATOR)
+# define CFG_EVT_USE_GENERATOR          1
 #endif
 
 /**
@@ -109,16 +111,16 @@
  *              - 0 - vrem. marker se ne koristi
  *              - 1 - vrem. marker se koristi
  *
- *              Podesavanje tipa se vrsi pomocu @ref CFG_EVT_TIMESTAMP_T.
+ *              Podesavanje tipa se vrsi pomocu @ref CFG_EVT_TIMESTAMP_TYPE.
  * @note        Podrazumevano podesavanje: 0 (dogadjaji ne koriste atribut o
  *              vremenskom markeru)
  */
-#if !defined(OPT_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-# define CFG_EVT_USE_TIMESTAMP          1U
+#if !defined(OPT_EVT_USE_TIMESTAMP)
+# define CFG_EVT_USE_TIMESTAMP          1
 #endif
 
 /**
- * @brief       Tip promenljive za identifikator dogadjaja.
+ * @brief       Specification of event identifier type size
  * @details     Tip podatka treba da dovoljne velicine moze da predstavi sve
  *              dogadjaje u sistemu. Na primer, ako u sistemu postoje manje od
  *              255 identifikatora dogadjaja onda ovaj tip moze najmanje biti
@@ -127,34 +129,45 @@
  *              treba voditi racuna o zauzecu strukture koja opisuje dogadjaj i
  *              njenom poravnjanju (alignement) u memoriji, gde se moze javiti
  *              potreba za vecim tipom od minimalnog.
- * @note        Podrazumevano podesavanje: uint32_t
+ *              Tipovi:
+ *              - 0 - 8 bit identifier
+ *              - 1 - 16 bit identifier
+ *              - 2 - 32 bit identifier
+ * @note        Default: 2 (32 bit identifier)
  */
-#if !defined(OPT_EVT_ID_T) || defined(__DOXYGEN__)
-# define OPT_EVT_ID_T                   uint16_t
+#if !defined(CFG_EVT_ID_TYPE)
+# define CFG_EVT_ID_TYPE                2
 #endif
 
 /**
  * @brief       Tip podataka za cuvanje velicine prosirenog dogadjaja.
- * @note        Podrazumevano podesavanje: size_t
+ * @details     - 0 - use standard `size_t` type variable
+ *              - 1 - force 8 bit size variable
+ *              - 2 - force 16 bit size variable
+ *              - 3 - force 32 bit size variable
+ * @note        Default: 0 (size_t)
  * @note        Ovo podesavanje ima znacaja samo ako je ukljucena opcija
- *              @ref OPT_EVT_USE_SIZE
+ *              @ref CFG_EVT_USE_SIZE.
+ *
  */
-#if !defined(CFG_EVT_SIZE_T) || defined(__DOXYGEN__)
-# define CFG_EVT_SIZE_T                 size_t
+#if !defined(CFG_EVT_SIZE_TYPE)
+# define CFG_EVT_SIZE_TYPE              0
 #endif
 
 /**
  * @brief       Tip za cuvanje vremenskih atributa dogadjaja.
- * @note        Podrazumevano podesavanje: uint32_t
+ * @details     - 0 - use 8 bit timestamp variable
+ *              - 1 - use 16 bit timestamp variable
+ *              - 2 - use 32 bit timestamp variable
+ * @note        Default: 2 (32 bit timestamp)
  * @note        Ovo podesavanje ima znacaja samo ako je ukljucena opcija
  *              @ref CFG_EVT_USE_TIMESTAMP
  */
-#if !defined(CFG_EVT_TIMESTAMP_T) || defined(__DOXYGEN__)
-# define CFG_EVT_TIMESTAMP_T            uint32_t
+#if !defined(CFG_EVT_TIMESTAMP_TYPE)
+# define CFG_EVT_TIMESTAMP_TYPE         2
 #endif
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Callback funkcije
  * @brief       Funkcije koje se pozivaju od strane EVT modula u odredjenim
  *              trenucima izvrsenja
@@ -177,7 +190,7 @@
  *              opcije.
  * @note        Podrazumevano podesavanje: 0 (ne koristi se callback funkcija)
  */
-#if !defined(OPT_EVT_GENERATOR_CALLBACK) || defined(__DOXYGEN__)
+#if !defined(OPT_EVT_GENERATOR_CALLBACK)
 # define OPT_EVT_GENERATOR_CALLBACK     1U
 #endif
 
@@ -195,81 +208,11 @@
  *              opcije.
  * @note        Podrazumevano podesavanje: 0 (ne koristi se callback funkcija)
  */
-#if !defined(OPT_EVT_TIMESTAMP_CALLBACK) || defined(__DOXYGEN__)
+#if !defined(OPT_EVT_TIMESTAMP_CALLBACK)
 # define OPT_EVT_TIMESTAMP_CALLBACK     1U
 #endif
 
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Odabir memorijskog alokatora za dogadjaje
- * @brief       Moguce je izabrati koji memorijski alokator se koristi prilikom
- *              kreiranja dogadjaja.
- * @details     Ukoliko je potrebno specificirati koji memorijski alokator se
- *              koristi mogu se koristiti dole navedene opcije. Moze se
- *              koristiti @c pool memorijski alokator i @c dinamicki memorijski
- *              alokator.
- *              Postoje sledeci slucajevi:
- *              - koristi se iskljucivo @c pool alokator: ukljucena je opcija
- *              @ref OPT_EVT_USE_MEM_POOL, a iskljucena je opcija
- *              @ref OPT_EVT_USE_MEM_DYN.
- *              - koristi se iskljucivo @c dinamicki alokator: iskljucena je
- *              opcija @ref OPT_EVT_USE_MEM_POOL, a ukljucena je opcija
- *              @ref OPT_EVT_USE_MEM_DYN.
- *              - koriste se oba alokatora: ukljucene su obe opcije.
- *
- * @note        Zabranjeno je da obe opcije budu iskljucene, jedan od navedena
- *              dva alokatora se mora koristiti.
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Ukljucivanje/iskljucivanje @c pool alokatora
- * @details     Moguce vrednosti:
- *              - 0 - ne koristi se @c pool alokator
- *              - 1 - koristi se @c pool alokator
- *
- * @note        Podrazumevano podesavanje: 0 (ne koristi se @c pool alokator)
- */
-#if !defined(OPT_EVT_USE_MEM_POOL) || defined(__DOXYGEN__)
-# define OPT_EVT_USE_MEM_POOL           1U
-#endif
-
-/**
- * @brief       Ukljucivanje/iskljucivanje @c dinamickog alokatora
- * @details     Moguce vrednosti:
- *              - 0 - ne koristi se @c dinamicki alokator
- *              - 1 - koristi se @c dinamicki alokator
- *
- * @note        Podrazumevano podesavanje: 1 (koristi se @c dinamicki alokator)
- */
-#if !defined(OPT_EVT_USE_MEM_DYN) || defined(__DOXYGEN__)
-# define OPT_EVT_USE_MEM_DYN            1U
-#endif
-
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
- * @name        Baza dogadjaja
- * @{ *//*--------------------------------------------------------------------*/
-
-/**
- * @brief       Ukljucivanje/iskljucivanje da li baza dogadjaja cuva podatke
- *              tipa znakovni niz
- * @details     U vecini slucajeva aplikacija ne zahteva da se cuvaju dodatni
- *              podaci o dogadjajima kao sto su imena, tip i opis dogadjaja.
- *              Ovom opcijom navedeni podaci se ukljucuju/iskljucuju.
- *
- *              Moguce vrednosti:
- *              - 0 - ne koriste se imena, tip i opis dogadjaja
- *              - 1 - koriste se imena, tip i opis dogadjaja
- *
- * @note        Podrazumevano podesavanje: 0 (ne koriste se imena, tip i opis
- *              dogadjaja)
- */
-#if !defined(CFG_EVT_DB_USE_DESC_DATA)
-# define CFG_EVT_DB_USE_DESC_DATA       1U
-#endif
-
-/** @} *//*-------------------------------------------------------------------*/
-/*------------------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Tipovi podataka u zaglavlju dogadjaja
  * @brief       Ovde su navedeni tipovi podataka koji se koriste u strukturi
  *              @ref esEvt_T
@@ -278,24 +221,17 @@
 /**
  * @brief       Tip podataka za identifikator dogadjaja
  * @details     Identifikator dogadjaja je jedinstveni broj tipa dogadjaja u
- *              sistemu. Opcijom @ref OPT_EVT_ID_T se vrsi odabir koliko bajtova
+ *              sistemu. Opcijom @ref CFG_EVT_ID_TYPE se vrsi odabir koliko bajtova
  *              se dodeljuje promenljivi koja cuva pomenuti jedinstveni broj.
  *              Ovaj tip podataka se koristi u strukturi @ref esEvt_T i kao
  *              argument funkcije za kreiranje dogadjaja.
  */
-typedef OPT_EVT_ID_T                    esEvtId_T;
-
-/**
- * @brief       Tip podataka za vremenski marker dogadjaja
- * @details     Ovaj tip podataka treba da cuva informaciju o vremenskom markeru
- *              nastanka dogadjaja. eSolid moze da automatski generise vremenski
- *              marker nastanka dogadjaja, ali korisnik mora da odluci sta ce da
- *              uradi sa tom informacijom.
- * @see         CFG_EVT_TIMESTAMP_T
- * @see         OPT_EVT_TIMESTAMP_CALLBACK
- */
-#if defined(CFG_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-typedef CFG_EVT_TIMESTAMP_T             esTime_T;
+#if   (0 == CFG_EVT_ID_TYPE)
+typedef uint8_t                         esEvtId_T;
+#elif (1 == CFG_EVT_ID_TYPE)
+typedef uint16_t                        esEvtId_T;
+#elif (2 == CFG_EVT_ID_TYPE)
+typedef uint32_t                        esEvtId_T;
 #endif
 
 /**
@@ -303,28 +239,93 @@ typedef CFG_EVT_TIMESTAMP_T             esTime_T;
  * @details     Ovaj tip podataka cuva informaciju o velicini dogadjaja. Koristi
  *              se u strukturi @ref esEvt_T i od strane funkcija koje kreiraju
  *              dogadjaj.
- * @see         CFG_EVT_SIZE_T
+ * @see         CFG_EVT_SIZE_TYPE
  */
-#if defined(OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-typedef CFG_EVT_SIZE_T                  esEvtSize_T;
+#if (1 == CFG_EVT_USE_SIZE)
+# if   (0 == CFG_EVT_SIZE_TYPE)
+typedef size_t                          esEvtSize_T;
+# elif (1 == CFG_EVT_SIZE_TYPE)
+typedef uint8_t                         esEvtSize_T;
+# elif (2 == CFG_EVT_SIZE_TYPE)
+typedef uint16_t                        esEvtSize_T;
+# elif (3 == CFG_EVT_SIZE_TYPE)
+typedef uint32_t                        esEvtSize_T;
+# endif
 #endif
 
-/** @} *//*-------------------------------------------------------------------*/
+/**
+ * @brief       Tip podataka za vremenski marker dogadjaja
+ * @details     Ovaj tip podataka treba da cuva informaciju o vremenskom markeru
+ *              nastanka dogadjaja. eSolid moze da automatski generise vremenski
+ *              marker nastanka dogadjaja, ali korisnik mora da odluci sta ce da
+ *              uradi sa tom informacijom.
+ * @see         CFG_EVT_TIMESTAMP_TYPE
+ * @see         OPT_EVT_TIMESTAMP_CALLBACK
+ */
+#if (1 == CFG_EVT_USE_TIMESTAMP)
+# if (0 == CFG_EVT_TIMESTAMP_TYPE)
+typedef uint8_t                         esEvtTime_T;
+# elif (1 == CFG_EVT_TIMESTAMP_TYPE)
+typedef uint16_t                        esEvtTime_T;
+# elif (2 == CFG_EVT_TIMESTAMP_TYPE)
+typedef uint32_t                        esEvtTime_T;
+# endif
+#endif
+
+/**@} *//*----------------------------------------------------------------*//**
+ * @name        Event storage settings
+ * @{ *//*--------------------------------------------------------------------*/
+
+/**@brief       Specifies the event storage method
+ * @details     eSolid provides several options for memory management like
+ *              memory pools and dynamic memory management.
+ *              - 0 - use pools and dynamic memory
+ *              - 1 - use only pool memory
+ *              - 2 - use only dynamic memory
+ *              - 3 - use external dynamic memory
+ *
+ *              When option `0` is chosen eSolid will try to use pools for
+ *              event storage. If an event can not be allocated in event pools
+ *              it will call dynamic memory allocators.
+ *              Default: 0 (use pools and dynamic memory)
+ */
+#if !defined(CFG_EVT_STORAGE)
+# define CFG_EVT_STORAGE                1
+#endif
+
+/**@brief       Specifies the number of event pool used
+ * @details     When pool memory is being used for storage this setting can be
+ *              used the maximum number of different pools being used.
+ */
+#if !defined(CFG_EVT_STORAGE_NPOOL)
+# define CFG_EVT_STORAGE_NPOOL          4
+#endif
+
+/**@} *//*--------------------------------------------------------------------*/
+
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
 
-#if (0U == OPT_EVT_USE_MEM_DYN) && (0U == OPT_EVT_USE_MEM_POOL)
-# error "eSolid: EVT: enable at least one memory allocator. See options: OPT_EVT_USE_MEM_DYN and OPT_EVT_USE_MEM_POOL"
+#if (2 < CFG_EVT_ID_TYPE)
+# error "eSolid: EVT: Event ID type is not properly set"
 #endif
 
-#if (1U == OPT_EVT_TIMESTAMP_CALLBACK) && (0U == CFG_EVT_USE_TIMESTAMP)
+#if (3 < CFG_EVT_SIZE_TYPE) && (1 == CFG_EVT_USE_SIZE)
+# error "eSolid: EVT: Event size type is not properly set"
+#endif
+
+#if (2 < CFG_EVT_TIMESTAMP_TYPE) && (1 == CFG_EVT_USE_TIMESTAMP),
+# error "eSolid: EVT: Event timestamp type is not properly set"
+#endif
+
+#if (1 == OPT_EVT_TIMESTAMP_CALLBACK) && (0 == CFG_EVT_USE_TIMESTAMP)
 # error "eSolid: EVT: Option OPT_EVT_TIMESTAMP_CALLBACK is enabled while option OPT_EVT_USE_TIMESTAMP is disabled. Enable option OPT_EVT_TIMESTAMP_CALLBACK only if you use timestamp."
 #endif
 
-#if (1U == OPT_EVT_GENERATOR_CALLBACK) && (0U == CFG_EVT_USE_GENERATOR)
+#if (1 == OPT_EVT_GENERATOR_CALLBACK) && (0 == CFG_EVT_USE_GENERATOR)
 # error "eSolid: EVT: Option OPT_EVT_GENERATOR_CALLBACK is enabled while option OPT_EVT_USE_GENERATOR is disabled. Enable option OPT_EVT_GENERATOR_CALLBACK only if you use generator."
 #endif
 
 /** @endcond *//** @} *//******************************************************
- * END of evt_config.h
- ******************************************************************************/
-#endif /* EVT_CONFIG_H_ */
+ * END of evt_cfg.h
+ *//** @} *//******************************************************************/
+#endif /* EVT_CFG_H__ */

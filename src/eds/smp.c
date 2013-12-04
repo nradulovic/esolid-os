@@ -95,14 +95,14 @@ static void hsmTranExit(
  */
 const PORT_C_ROM esEvt_T evtSignal[] = {
     {(esEvtId_T)SIG_EMPTY,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_RESERVED_Msk | EVT_CONST_Msk,
 #if (1U == CFG_EVT_USE_TIMESTAMP)
     0U,
 #endif
 #if defined(CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if (1U == OPT_EVT_USE_SIZE)
+#if (1U == CFG_EVT_USE_SIZE)
     0U,
 #endif
 #if (1U == CFG_DBG_API_VALIDATION)
@@ -113,18 +113,18 @@ const PORT_C_ROM esEvt_T evtSignal[] = {
     [SIG_ENTRY].dynamic = {
         .s = {
             .counter = 0U,
-            .attrib = EVT_CONST_MASK
+            .attrib = EVT_CONST_Msk
         }
     },
     {(esEvtId_T)SIG_ENTRY,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_RESERVED_Msk | EVT_CONST_Msk,
 #if (1U == CFG_EVT_USE_TIMESTAMP)
     0U,
 #endif
 #if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if (1U == OPT_EVT_USE_SIZE)
+#if (1U == CFG_EVT_USE_SIZE)
     0U,
 #endif
 #if (1U == CFG_DBG_API_VALIDATION)
@@ -135,18 +135,18 @@ const PORT_C_ROM esEvt_T evtSignal[] = {
     [SIG_EXIT].dynamic = {
         .s = {
             .counter = 0U,
-            .attrib = EVT_CONST_MASK
+            .attrib = EVT_CONST_Msk
         }
     },
     {(esEvtId_T)SIG_EXIT,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_RESERVED_Msk | EVT_CONST_Msk,
 #if (1U == CFG_EVT_USE_TIMESTAMP)
     0U,
 #endif
 #if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if (1U == OPT_EVT_USE_SIZE)
+#if (1U == CFG_EVT_USE_SIZE)
     0U,
 #endif
 #if (1U == CFG_DBG_API_VALIDATION)
@@ -157,18 +157,18 @@ const PORT_C_ROM esEvt_T evtSignal[] = {
     [SIG_INIT].dynamic = {
         .s = {
             .counter = 0U,
-            .attrib = EVT_CONST_MASK
+            .attrib = EVT_CONST_Msk
         }
     },
     {(esEvtId_T)SIG_INIT,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_RESERVED_Msk | EVT_CONST_Msk,
 #if (1U == CFG_EVT_USE_TIMESTAMP)
     0U,
 #endif
 #if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if (1U == OPT_EVT_USE_SIZE)
+#if (1U == CFG_EVT_USE_SIZE)
     0U,
 #endif
 #if (1U == CFG_DBG_API_VALIDATION)
@@ -179,18 +179,18 @@ const PORT_C_ROM esEvt_T evtSignal[] = {
     [SIG_SUPER].dynamic = {
         .s = {
             .counter = 0U,
-            .attrib = EVT_CONST_MASK
+            .attrib = EVT_CONST_Msk
         }
     },
     {(esEvtId_T)SIG_SUPER,
-    EVT_RESERVED_MASK | EVT_CONST_MASK,
+    EVT_RESERVED_Msk | EVT_CONST_Msk,
 #if (1U == CFG_EVT_USE_TIMESTAMP)
     0U,
 #endif
 #if (1U == CFG_EVT_USE_GENERATOR)
     NULL,
 #endif
-#if (1U == OPT_EVT_USE_SIZE)
+#if (1U == CFG_EVT_USE_SIZE)
     0U,
 #endif
 #if (1U == CFG_DBG_API_VALIDATION)

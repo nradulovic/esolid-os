@@ -1,43 +1,46 @@
-/******************************************************************************
- * This file is part of eSolid
+/*
+ * This file is part of eSolid.
  *
- * Copyright (C) 2011, 2012 - Nenad Radulovic
+ * Copyright (C) 2010 - 2013 Nenad Radulovic
  *
- * eSolid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * eSolid is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * eSolid is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with eSolid; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor,
- * Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with eSolid.  If not, see <http://www.gnu.org/licenses/>.
  *
- * web site:    http://blueskynet.dyndns-server.com
- * e-mail  :    blueskyniss@gmail.com
+ * web site:    http://github.com/nradulovic
+ * e-mail  :    nenad.b.radulovic@gmail.com
  *//***********************************************************************//**
  * @file
  * @author      Nenad Radulovic
  * @brief       Event object API
- * @addtogroup  evt_intf
- * @brief       Event object API
+ * @defgroup    evt Event object
+ * @brief       Event object
  *********************************************************************//** @{ */
+/**@defgroup    evt_intf Interface
+ * @brief       Event object interface
+ * @{ *//*--------------------------------------------------------------------*/
 
 #if !defined(EVT_H_)
 #define EVT_H_
 
 /*=========================================================  INCLUDE FILES  ==*/
 
+#include <stdint.h>
+
 #include "arch/compiler.h"
 #include "arch/cpu.h"
-#include "dbg/dbg.h"
-#include "../config/sys_cfg.h"
-#include "../config/evt_cfg.h"
+#include "base/dbg.h"
+#include "base/mem.h"
+#include "eds/evt_cfg.h"
 
 /*===============================================================  DEFINES  ==*/
 
@@ -54,7 +57,7 @@
  *              defining a static event in ROM address space.
  * @api
  */
-#define EVT_RESERVED_MASK               ((uint_fast16_t)(1U << 14))
+#define EVT_RESERVED_Msk                ((uint_fast16_t)(1u << 14))
 
 /**@brief       Bit mask which defines a constant event
  * @details     When the bits defined in this bit mask are set the given event
@@ -62,7 +65,7 @@
  *              it. Once the event is marked as constant it never can be deleted.
  * @api
  */
-#define EVT_CONST_MASK                  ((uint_fast16_t)(1U << 15))
+#define EVT_CONST_Msk                   ((uint_fast16_t)(1u << 15))
 
 /** @} *//*-------------------------------------------------------------------*/
 
@@ -115,20 +118,20 @@ typedef struct esEpa esEpa_T;
  * @api
  */
 CFG_EVT_STRUCT_ATTRIB struct esEvt {
-    esEvtId_T           id;                                                     /**<@brief Event ID, see @ref OPT_EVT_ID_T                  */
+    esEvtId_T           id;                                                     /**<@brief Event ID, see @ref CFG_EVT_ID_TYPE                  */
     uint16_t            attrib;                                                 /**<@brief Event dynamic attributes                         */
 
-#if (1U == CFG_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
-    esTime_T            timestamp;                                              /**<@brief Event create time-stamp, see
-                                                                                           @ref CFG_EVT_TIMESTAMP_T                         */
+#if (1 == CFG_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
+    esEvtTime_T            timestamp;                                              /**<@brief Event create time-stamp, see
+                                                                                           @ref CFG_EVT_TIMESTAMP_TYPE                         */
 #endif
-#if (1U == CFG_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1 == CFG_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
     esEpa_T *           generator;                                              /**<@brief Event generator address                          */
 #endif
-#if (1U == OPT_EVT_USE_SIZE) || defined(__DOXYGEN__)
-    esEvtSize_T         size;                                                   /**<@brief Event size in bytes, see @ref CFG_EVT_SIZE_T     */
+#if (1 == CFG_EVT_USE_SIZE) || defined(__DOXYGEN__)
+    esEvtSize_T         size;                                                   /**<@brief Event size in bytes, see @ref CFG_EVT_SIZE_TYPE     */
 #endif
-#if (1U == CFG_DBG_API_VALIDATION) || defined(__DOXYGEN__)
+#if (1 == CFG_DBG_API_VALIDATION) || defined(__DOXYGEN__)
     portReg_T           signature;                                              /**<@brief Structure signature, used during development only*/
 #endif
 };
@@ -142,6 +145,16 @@ typedef struct esEvt esEvt_T;
 /*===================================================  FUNCTION PROTOTYPES  ==*/
 
 /*------------------------------------------------------------------------*//**
+ * @name        Rad sa staticnim dogadjajima
+ * @{ *//*--------------------------------------------------------------------*/
+
+void esEvtPoolRegister(
+    esPMemHandle_T *    handle);
+
+void esEvtPoolUnregister(
+    esPMemHandle_T *    handle);
+
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Kreiranje/brisanje dogadjaja
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -168,8 +181,8 @@ typedef struct esEvt esEvt_T;
  * @api
  */
 esEvt_T * esEvtCreate(
-    size_t          size,
-    esEvtId_T       id);
+    size_t              size,
+    esEvtId_T           id);
 
 /**@brief       Kreira dogadjaj.
  * @param       size
@@ -185,8 +198,8 @@ esEvt_T * esEvtCreate(
  * @iclass
  */
 esEvt_T * esEvtCreateI(
-    size_t          size,
-    esEvtId_T       id);
+    size_t              size,
+    esEvtId_T           id);
 
 /**@brief       Unistava dogadjaj.
  * @param       evt
@@ -197,7 +210,7 @@ esEvt_T * esEvtCreateI(
  * @api
  */
 void esEvtDestroy(
-    esEvt_T *       evt);
+    esEvt_T *           evt);
 
 /**@brief       Unistava dogadjaj.
  * @param       evt
@@ -208,9 +221,9 @@ void esEvtDestroy(
  * @iclass
  */
 void esEvtDestroyI(
-    esEvt_T *       evt);
+    esEvt_T *           evt);
 
-/** @} *//*---------------------------------------------------------------*//**
+/**@} *//*----------------------------------------------------------------*//**
  * @name        Rad sa staticnim dogadjajima
  * @{ *//*--------------------------------------------------------------------*/
 
@@ -229,7 +242,7 @@ void esEvtDestroyI(
  * @api
  */
 void esEvtReserve(
-    esEvt_T *       evt);
+    esEvt_T *           evt);
 
 /**@brief       Oslobadja prethodno rezervisan dogadjaj.
  * @param       evt
@@ -237,13 +250,13 @@ void esEvtReserve(
  * @api
  */
 void esEvtUnReserve(
-    esEvt_T *       evt);
+    esEvt_T *           evt);
 
 /** @} *//*---------------------------------------------------------------*//**
  * @name        Korisnicke callback funkcije
  * @{ *//*--------------------------------------------------------------------*/
 
-#if (1U == CFG_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
+#if (1u == CFG_EVT_USE_TIMESTAMP) || defined(__DOXYGEN__)
 /**@brief       Korisnicka callback funkcija: generise timestamp prilikom slanja
  *              dogadjaja.
  * @return      timestamp informacija koja se ugradjuje u dogadjaj.
@@ -252,11 +265,11 @@ void esEvtUnReserve(
  * @see         @ref OPT_EVT_USE_TIMESTAMP
  * @see         @ref OPT_EVT_TIMESTAMP_T
  */
-extern esTime_T uTimestampGet(
+extern esEvtTime_T uTimestampGet(
     void);
 #endif
 
-#if (1U == CFG_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
+#if (1u == CFG_EVT_USE_GENERATOR) || defined(__DOXYGEN__)
 /**@brief       Korisnicka callback funkcija: generise pokazivac na generatora
  *              dogadjaja.
  * @return      Pokazivac ka generatoru dogadjaja.
@@ -275,7 +288,7 @@ extern esEpa_T * uGeneratorGet(
 #endif
 
 /*================================*//** @cond *//*==  CONFIGURATION ERRORS  ==*/
-/** @endcond *//** @} *//******************************************************
+/** @endcond *//** @} *//** @} *//*********************************************
  * END of evt.h
  ******************************************************************************/
 #endif /* EVT_H_ */

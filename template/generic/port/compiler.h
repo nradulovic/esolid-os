@@ -95,7 +95,7 @@
  *              lowest common multiple of the alignments of all of the members
  *              of the struct or union in question.
  */
-#define PORT_C_ALIGNED(expr)
+#define PORT_C_ALIGN(expr)
 
 /**@brief       A standardized way of properly setting the value of HW register
  * @param       reg

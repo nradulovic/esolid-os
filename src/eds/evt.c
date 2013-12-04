@@ -30,11 +30,19 @@
 /*=========================================================  INCLUDE FILES  ==*/
 
 #include "eds/evt.h"
-#include "eds/mem.h"
+#include "base/mem.h"
 #include "eds_private.h"
 
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
+
+#if (2 > CFG_EVT_STORAGE)
+struct evtPools {
+    esPMemHandle_T *    handle[CFG_EVT_STORAGE_NPOOL];
+    uint_fast8_t        npool;
+};
+#endif
+
 /*=============================================  LOCAL FUNCTION PROTOTYPES  ==*/
 
 /**
@@ -44,9 +52,6 @@
  * @param       id                      identifikator dogadjaja.
  * @inline
  */
-<<<<<<< HEAD:src/kernel/evt.c
-static C_INLINE_ALWAYS void evtInit_(
-=======
 static PORT_C_INLINE_ALWAYS void evtInit_(
     esEvt_T *           evt,
     size_t              size,
@@ -64,6 +69,10 @@ static PORT_C_INLINE_ALWAYS void evtDeInit_(
 /*=======================================================  LOCAL VARIABLES  ==*/
 
 DECL_MODULE_INFO("EVT", "Event management", "Nenad Radulovic");
+
+#if (2 > CFG_EVT_STORAGE)
+static struct evtPools EvtPools;
+#endif
 
 /*======================================================  GLOBAL VARIABLES  ==*/
 /*============================================  LOCAL FUNCTION DEFINITIONS  ==*/
@@ -90,7 +99,7 @@ static PORT_C_INLINE_ALWAYS void evtInit_(
     evt->generator = appEvtGeneratorGet();
 # endif
 #endif
-#if (1U == OPT_EVT_USE_SIZE)
+#if (1U == CFG_EVT_USE_SIZE)
     evt->size = (esEvtSize_T)size;
 #else
     (void)size;
@@ -109,18 +118,73 @@ static PORT_C_INLINE_ALWAYS void evtDeInit_(
 /*===================================  GLOBAL PRIVATE FUNCTION DEFINITIONS  ==*/
 /*====================================  GLOBAL PUBLIC FUNCTION DEFINITIONS  ==*/
 
-esEvt_T * esEvtCreate(
-    size_t          size,
-    esEvtId_T       id) {
+/*----------------------------------------------------------------------------*/
+void esEvtPoolRegister(
+    esPMemHandle_T *    handle) {
 
-    PORT_CRITICAL_DECL;
-    esEvt_T *       newEvt;
+#if (2 > CFG_EVT_STORAGE)
+    uint_fast8_t        cnt;
+    size_t              size;
+
+    ES_DBG_API_REQUIRE(ES_DBG_NOT_ENOUGH_MEM, CFG_EVT_STORAGE_NPOOL != EvtPools.npool);
+
+    size = ES_PMEM_ATTR_BLOCK_SIZE_GET(handle);
+    cnt  = EvtPools.npool;
+
+    while (0u < cnt) {
+        size_t          currSize;
+
+        EvtPools.handle[cnt] = EvtPools.handle[cnt - 1];
+        currSize = ES_PMEM_ATTR_BLOCK_SIZE_GET(EvtPools.handle[cnt]);
+
+        if (currSize <= size) {
+
+            break;
+        }
+        cnt--;
+    }
+    EvtPools.handle[cnt] = handle;
+    EvtPools.npool++;
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+void esEvtPoolUnregister(
+    esPMemHandle_T *    handle) {
+
+#if (2 > CFG_EVT_STORAGE)
+    uint_fast8_t        cnt;
+
+    cnt = EvtPools.npool;
+
+    while ((0u < cnt) && (handle != EvtPools.handle[cnt])) {
+        cnt--;
+    }
+    EvtPools.npool--;
+
+    ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, handle == EvtPools.handle[cnt]);
+
+    while (cnt < EvtPools.npool) {
+        EvtPools.handle[cnt] = EvtPools.handle[cnt + 1];
+        cnt++;
+    }
+    EvtPools.handle[EvtPools.npool - 1] = NULL;
+#endif
+}
+
+/*----------------------------------------------------------------------------*/
+esEvt_T * esEvtCreate(
+    size_t              size,
+    esEvtId_T           id) {
+
+    portReg_T           intrCtx;
+    esEvt_T *           newEvt;
 
     ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, sizeof(esEvt_T) <= size);
 
     PORT_CRITICAL_ENTER();
     newEvt = esDmemAllocI(
-        &gDefDMemHandle,
+        &DefDMemHandle,
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     PORT_CRITICAL_EXIT();
     evtInit_(
@@ -133,15 +197,15 @@ esEvt_T * esEvtCreate(
 
 /*----------------------------------------------------------------------------*/
 esEvt_T * esEvtCreateI(
-    size_t          size,
-    esEvtId_T       id) {
+    size_t              size,
+    esEvtId_T           id) {
 
-    esEvt_T *       newEvt;
+    esEvt_T *           newEvt;
 
     ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, sizeof(esEvt_T) <= size);
 
     newEvt = esDMemAllocI(
-        &gDefDMemHandle,
+        &DefDMemHandle,
         size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
     evtInit_(
         newEvt,
@@ -153,12 +217,12 @@ esEvt_T * esEvtCreateI(
 
 /*----------------------------------------------------------------------------*/
 void esEvtReserve(
-    esEvt_T *       evt) {
+    esEvt_T *           evt) {
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
-    evt->attrib |= EVT_RESERVED_MASK;
+    evt->attrib |= EVT_RESERVED_Msk;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -168,14 +232,14 @@ void esEvtUnReserve(
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
 
-    evt->attrib &= ~EVT_RESERVED_MASK;
+    evt->attrib &= ~EVT_RESERVED_Msk;
 }
 
 /*----------------------------------------------------------------------------*/
 void esEvtDestroy(
-    esEvt_T *       evt) {
+    esEvt_T *           evt) {
 
-    PORT_CRITICAL_DECL;
+    portReg_T           intrCtx;
 
     PORT_CRITICAL_ENTER();
     esEvtDestroyI(
@@ -185,7 +249,7 @@ void esEvtDestroy(
 
 /*----------------------------------------------------------------------------*/
 void esEvtDestroyI(
-    esEvt_T *       evt) {
+    esEvt_T *           evt) {
 
     ES_DBG_API_REQUIRE(ES_DBG_POINTER_NULL, NULL != evt);
     ES_DBG_API_REQUIRE(ES_DBG_OBJECT_NOT_VALID, EVT_SIGNATURE == evt->signature);
@@ -194,7 +258,7 @@ void esEvtDestroyI(
         evtDeInit_(
             evt);
         esDMemDeAllocI(
-            &gDefDMemHandle,
+            &DefDMemHandle,
             evt);
     }
 }

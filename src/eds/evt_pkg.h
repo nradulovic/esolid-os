@@ -69,7 +69,7 @@ extern "C" {
 static PORT_C_INLINE_ALWAYS void evtUsrAddI_(
     esEvt_T *       evt) {
 
-    if (0U == (EVT_CONST_MASK & evt->attrib)) {                                 /* Da li je dogadjaj dinamičan?                             */
+    if (0U == (EVT_CONST_Msk & evt->attrib)) {                                 /* Da li je dogadjaj dinamičan?                             */
         ++evt->attrib;
     }
 }
@@ -82,7 +82,7 @@ static PORT_C_INLINE_ALWAYS void evtUsrAddI_(
 static PORT_C_INLINE_ALWAYS void evtUsrRmI_(
     esEvt_T *       evt) {
 
-    if (0U == (EVT_CONST_MASK & evt->attrib)) {                                 /* Da li je dogadjaj dinamičan?                             */
+    if (0U == (EVT_CONST_Msk & evt->attrib)) {                                 /* Da li je dogadjaj dinamičan?                             */
         --evt->attrib;
     }
 }
