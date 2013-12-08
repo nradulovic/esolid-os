@@ -29,9 +29,13 @@
 
 /*=========================================================  INCLUDE FILES  ==*/
 
-#include "eds/evt.h"
+#include "evt_pkg.h"
 #include "base/mem.h"
-#include "eds_private.h"
+#include "base/critical.h"
+
+#if (3 == CFG_EVT_STORAGE)
+# include <stdlib.h>
+#endif
 
 /*=========================================================  LOCAL MACRO's  ==*/
 /*======================================================  LOCAL DATA TYPES  ==*/
@@ -123,12 +127,14 @@ void esEvtPoolRegister(
     esPMemHandle_T *    handle) {
 
 #if (2 > CFG_EVT_STORAGE)
+    portReg_T           intrCtx;
     uint_fast8_t        cnt;
     size_t              size;
 
     ES_DBG_API_REQUIRE(ES_DBG_NOT_ENOUGH_MEM, CFG_EVT_STORAGE_NPOOL != EvtPools.npool);
 
     size = ES_PMEM_ATTR_BLOCK_SIZE_GET(handle);
+    ES_CRITICAL_LOCK_ENTER(&intrCtx);
     cnt  = EvtPools.npool;
 
     while (0u < cnt) {
@@ -145,6 +151,7 @@ void esEvtPoolRegister(
     }
     EvtPools.handle[cnt] = handle;
     EvtPools.npool++;
+    ES_CRITICAL_LOCK_EXIT(intrCtx);
 #endif
 }
 
@@ -153,8 +160,10 @@ void esEvtPoolUnregister(
     esPMemHandle_T *    handle) {
 
 #if (2 > CFG_EVT_STORAGE)
+    portReg_T           intrCtx;
     uint_fast8_t        cnt;
 
+    ES_CRITICAL_LOCK_ENTER(&intrCtx);
     cnt = EvtPools.npool;
 
     while ((0u < cnt) && (handle != EvtPools.handle[cnt])) {
@@ -169,7 +178,28 @@ void esEvtPoolUnregister(
         cnt++;
     }
     EvtPools.handle[EvtPools.npool - 1] = NULL;
+    ES_CRITICAL_LOCK_EXIT(intrCtx);
 #endif
+}
+
+static PORT_C_INLINE esPMemHandle_T * poolFindI_(size_t size) {
+    uint_fast8_t        cnt;
+
+    cnt = 0u;
+
+    while (cnt < EvtPools.npool) {
+        size_t          currSize;
+
+        currSize = ES_PMEM_ATTR_BLOCK_SIZE_GET(EvtPools.handle[cnt]);
+
+        if (currSize >= size) {
+
+            return (EvtPools.handle[cnt]);
+        }
+        cnt++;
+    }
+
+    return (NULL);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -182,11 +212,45 @@ esEvt_T * esEvtCreate(
 
     ES_DBG_API_REQUIRE(ES_DBG_OUT_OF_RANGE, sizeof(esEvt_T) <= size);
 
-    PORT_CRITICAL_ENTER();
+    ES_CRITICAL_LOCK_ENTER(&intrCtx);
+#if   (0 == CFG_EVT_STORAGE)
+    {
+        esPMemHandle_T * pool;
+
+        pool = poolFindI_(
+            size);
+
+        if (NULL != pool) {
+            newEvt = esPMemAllocI(
+                pool);
+        } else {
+            newEvt = esDMemAllocI(
+                &DefDMemHandle,
+                size);
+        }
+    }
+#elif (1 == CFG_EVT_STORAGE)
+    {
+        esPMemHandle_T * pool;
+
+        pool = poolFindI_(
+            size);
+        newEvt = NULL;
+
+        if (NULL != pool) {
+            newEvt = esPMemAllocI(
+                pool);
+        }
+    }
+#elif (2 == CFG_EVT_STORAGE)
     newEvt = esDmemAllocI(
         &DefDMemHandle,
-        size);                                                                  /* Dobavi potreban memorijski prostor za dogadjaj           */
-    PORT_CRITICAL_EXIT();
+        size);
+#elif (3 == CFG_EVT_STORAGE)
+    newEvt = malloc(
+        size);
+#endif
+    ES_CRITICAL_LOCK_EXIT(intrCtx);
     evtInit_(
         newEvt,
         size,
@@ -241,10 +305,10 @@ void esEvtDestroy(
 
     portReg_T           intrCtx;
 
-    PORT_CRITICAL_ENTER();
+    ES_CRITICAL_LOCK_ENTER(&intrCtx);
     esEvtDestroyI(
         evt);
-    PORT_CRITICAL_EXIT();
+    ES_CRITICAL_LOCK_EXIT(intrCtx);
 }
 
 /*----------------------------------------------------------------------------*/

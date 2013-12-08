@@ -290,7 +290,7 @@ typedef uint32_t                        esEvtTime_T;
  *              Default: 0 (use pools and dynamic memory)
  */
 #if !defined(CFG_EVT_STORAGE)
-# define CFG_EVT_STORAGE                1
+# define CFG_EVT_STORAGE                0
 #endif
 
 /**@brief       Specifies the number of event pool used
